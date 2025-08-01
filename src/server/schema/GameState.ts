@@ -1,6 +1,6 @@
 import { Schema, type, MapSchema } from '@colyseus/schema';
 
-export class Player extends Schema {
+export class Combatant extends Schema {
     @type('string') id!: string;
     @type('number') x!: number;
     @type('number') y!: number;
@@ -9,13 +9,12 @@ export class Player extends Schema {
     @type('number') maxHealth!: number;
 }
 
-export class Cradle extends Schema {
-    @type('string') id!: string;
-    @type('number') x!: number;
-    @type('number') y!: number;
-    @type('string') team!: string;
-    @type('number') health!: number;
-    @type('number') maxHealth!: number;
+export class Player extends Combatant {
+    // Player-specific properties can be added here later
+}
+
+export class Cradle extends Combatant {
+    // Cradle-specific properties can be added here later
 }
 
 export class GameState extends Schema {

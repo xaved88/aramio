@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
-import { GameState, Player, Cradle } from '../../server/schema/GameState';
+import { GameState, Player } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../Config';
 
 export class GameScene extends Phaser.Scene {

@@ -1,6 +1,8 @@
 import { Room, Client } from '@colyseus/core';
-import { GameState, Player, Cradle } from '../schema/GameState';
+import { GameState, Player, Cradle, Combatant } from '../schema/GameState';
 import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { CombatantUtils } from '../game/combatants/CombatantUtils';
+import { GameEngine, GamePhase } from '../game/GameEngine';
 
 interface GameCommand {
     type: string;
@@ -12,11 +14,12 @@ export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
     private commands: GameCommand[] = [];
     private lastUpdateTime = 0;
+    private gameEngine!: GameEngine;
 
     onCreate(options: any) {
         const gameState = new GameState();
         gameState.gameTime = 0;
-        gameState.gamePhase = 'playing';
+        gameState.gamePhase = GamePhase.PLAYING;
         
         // Create blue cradle (bottom left)
         const blueCradle = new Cradle();
@@ -39,6 +42,9 @@ export class GameRoom extends Room<GameState> {
         gameState.redCradle = redCradle;
         
         this.setState(gameState);
+        
+        // Initialize game engine
+        this.gameEngine = new GameEngine(gameState);
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
@@ -82,7 +88,8 @@ export class GameRoom extends Room<GameState> {
     }
 
     private update() {
-        this.state.gameTime += SERVER_CONFIG.UPDATE_RATE_MS;
+        // Update game engine
+        this.gameEngine.update(SERVER_CONFIG.UPDATE_RATE_MS);
         
         // Process all commands
         this.processCommands();
