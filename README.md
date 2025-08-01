@@ -93,6 +93,10 @@ aramio/
 - ✅ Basic health system
 - ✅ Game state management
 - ✅ Hot reloading development
+- ✅ Turret system (defensive structures)
+- ✅ Player respawning system with visual timer
+- ✅ Combat system with attack radius indicators
+- ✅ Dynamic respawn duration (ready for leveling)
 
 ## 🚧 Roadmap
 
@@ -104,6 +108,9 @@ aramio/
 - [ ] Victory conditions
 - [ ] UI improvements
 - [ ] Sound effects and music
+- [ ] Leveling system (affects respawn times)
+- [ ] More defensive structures
+- [ ] Team coordination features
 
 ## 🔧 Configuration
 
@@ -154,4 +161,4 @@ npm run build:server
 
 ---
 
-**Last updated**: [Date] 
+**Last updated**: August 2nd, 2025 

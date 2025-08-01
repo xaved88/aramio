@@ -5,9 +5,10 @@
 This is an IO MOBA game - the idea is to boil down the core essence of a MOBA for quick and simple online matches that are still engaging and high-action! Matches will be about 5 minutes, it's single lane, and mouse only!
 
 ## Core Features
-- [ ] Real-time multiplayer gameplay
-- [ ] Browser-based (no downloads required)
-- [ ] Team-based combat
+- [x] Real-time multiplayer gameplay
+- [x] Browser-based (no downloads required)
+- [x] Team-based combat
+- [x] Basic combat system with respawning
 - [ ] Map with lanes and objectives
 - [ ] Item system
 - [ ] Experience and leveling
@@ -25,13 +26,29 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 2. Phase 2: Multiplayer - online hosting
 
 ## Current Status
-Completely fresh!
+**August 2nd, 2025** - Core multiplayer combat system implemented with:
+- Real-time player movement and combat
+- Team-based gameplay (Blue vs Red)
+- Turret defensive structures
+- Player respawning system with visual timer
+- Dynamic respawn duration system (ready for leveling)
+- Attack radius indicators and combat feedback
 
 ## Design Decisions
-*Document important architectural and design choices here*
+- **Server-authoritative**: All game logic runs on server, client only handles rendering
+- **Colyseus for multiplayer**: Real-time state synchronization with automatic client updates
+- **Phaser for game engine**: 2D game rendering with smooth animations and tweening
+- **TypeScript throughout**: Type-safe development for both client and server
+- **Config-driven design**: All game values centralized in config files for easy balancing
+- **Dynamic respawn system**: Player-specific respawn durations ready for leveling features
 
 ## Notes & Ideas
-*Use this space for ongoing thoughts, feature ideas, and development notes*
+- **Leveling system**: Players could gain experience from combat, reducing respawn times
+- **Turret upgrades**: Defensive structures could be enhanced with resources
+- **Team coordination**: Voice chat or ping system for team communication
+- **Map objectives**: Capture points, neutral monsters, or lane pushing mechanics
+- **Item system**: Equipment that affects combat stats and respawn times
+- **Sound design**: Audio feedback for combat, respawning, and team events
 
 ---
 
@@ -41,4 +58,4 @@ Completely fresh!
 - Document any external resources or inspiration
 - Keep track of what we've built and what's next
 
-Last updated: [Date] 
+Last updated: August 2nd, 2025 
