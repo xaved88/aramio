@@ -2,6 +2,7 @@
 
 ## Game Overview
 *Describe your MOBA game concept here - what makes it unique, target audience, core gameplay mechanics*
+This is an IO MOBA game - the idea is to boil down the core essence of a MOBA for quick and simple online matches that are still engaging and high-action! Matches will be about 5 minutes, it's single lane, and mouse only!
 
 ## Core Features
 - [ ] Real-time multiplayer gameplay

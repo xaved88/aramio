@@ -1,8 +1,17 @@
 import { Room, Client } from '@colyseus/core';
 import { GameState, Player } from '../schema/GameState';
+import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+
+interface GameCommand {
+    type: string;
+    data: any;
+    clientId: string;
+}
 
 export class GameRoom extends Room<GameState> {
-    maxClients = 10;
+    maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
+    private commands: GameCommand[] = [];
+    private lastUpdateTime = 0;
 
     onCreate(options: any) {
         const gameState = new GameState();
@@ -10,12 +19,15 @@ export class GameRoom extends Room<GameState> {
         gameState.gamePhase = 'playing';
         this.setState(gameState);
         
+        // Set up fixed update rate
+        this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
+        
         this.onMessage('move', (client, data) => {
-            const player = this.state.players.get(client.sessionId);
-            if (player) {
-                player.x = data.x;
-                player.y = data.y;
-            }
+            this.commands.push({
+                type: 'move',
+                data: data,
+                clientId: client.sessionId
+            });
         });
     }
 
@@ -38,5 +50,69 @@ export class GameRoom extends Room<GameState> {
 
     onDispose() {
         console.log('Room disposed');
+    }
+
+    private update() {
+        this.state.gameTime += SERVER_CONFIG.UPDATE_RATE_MS;
+        
+        // Process all commands
+        this.processCommands();
+        
+        // Clear commands for next frame
+        this.commands = [];
+    }
+
+    private processCommands() {
+        // Group commands by client and take the latest from each
+        const latestCommands = new Map<string, GameCommand>();
+        
+        this.commands.forEach(command => {
+            latestCommands.set(command.clientId, command);
+        });
+        
+        // Process each latest command
+        latestCommands.forEach(command => {
+            this.processCommand(command);
+        });
+    }
+
+    private processCommand(command: GameCommand) {
+        switch (command.type) {
+            case 'move':
+                this.handleMoveCommand(command);
+                break;
+            default:
+                console.log(`Unknown command type: ${command.type}`);
+        }
+    }
+
+    private handleMoveCommand(command: GameCommand) {
+        const player = this.state.players.get(command.clientId);
+        if (player && command.data.targetX !== undefined && command.data.targetY !== undefined) {
+            const targetX = command.data.targetX;
+            const targetY = command.data.targetY;
+            
+            // Calculate direction vector
+            const dx = targetX - player.x;
+            const dy = targetY - player.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // If we're close enough, don't move
+            if (distance < GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE) {
+                return;
+            }
+            
+            // Normalize direction and apply speed
+            const normalizedDx = dx / distance;
+            const normalizedDy = dy / distance;
+            
+            // Calculate new position
+            const newX = player.x + normalizedDx * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+            const newY = player.y + normalizedDy * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+            
+            // Clamp to game bounds
+            player.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
+            player.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
+        }
     }
 } 

@@ -4,8 +4,9 @@ import { monitor } from '@colyseus/monitor';
 import express from 'express';
 import cors from 'cors';
 import { GameRoom } from './rooms/GameRoom';
+import { SERVER_CONFIG } from '../Config';
 
-const port = Number(process.env.PORT || 2567);
+const port = Number(process.env.PORT || SERVER_CONFIG.PORT);
 const app = express();
 
 app.use(cors());

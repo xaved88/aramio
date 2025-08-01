@@ -1,20 +1,18 @@
 import Phaser from 'phaser';
-import { Client } from 'colyseus.js';
 import { GameScene } from './scenes/GameScene';
-
-const client = new Client('ws://localhost:2567');
+import { CLIENT_CONFIG } from '../Config';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 600,
-    height: 600,
+    width: CLIENT_CONFIG.GAME_CANVAS_WIDTH,
+    height: CLIENT_CONFIG.GAME_CANVAS_HEIGHT,
     parent: 'game-container',
     backgroundColor: '#2c3e50',
     scene: [GameScene],
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 },
+            gravity: { x: 0, y: 0 },
             debug: false
         }
     }
