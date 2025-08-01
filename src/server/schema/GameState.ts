@@ -1,4 +1,10 @@
-import { Schema, type, MapSchema } from '@colyseus/schema';
+import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
+
+export class AttackEvent extends Schema {
+    @type('string') sourceId!: string;
+    @type('string') targetId!: string;
+    @type('number') timestamp!: number;
+}
 
 export class Combatant extends Schema {
     @type('string') id!: string;
@@ -27,4 +33,5 @@ export class GameState extends Schema {
     @type(Cradle) redCradle!: Cradle;
     @type('number') gameTime!: number;
     @type('string') gamePhase!: string;
+    @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
 } 

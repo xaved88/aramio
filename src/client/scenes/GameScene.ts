@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
-import { GameState, Player, Cradle, Combatant } from '../../server/schema/GameState';
+import { GameState, Player, Cradle, Combatant, AttackEvent } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../Config';
 
 export class GameScene extends Phaser.Scene {
@@ -16,6 +16,7 @@ export class GameScene extends Phaser.Scene {
     private redCradleText: Phaser.GameObjects.Text | null = null;
     private blueCradleRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
     private redCradleRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
+    private processedAttackEvents: Set<string> = new Set();
 
     constructor() {
         super({ key: 'GameScene' });
@@ -35,6 +36,7 @@ export class GameScene extends Phaser.Scene {
             this.room.onStateChange((state: GameState) => {
                 this.updatePlayers(state);
                 this.updateCradles(state);
+                this.processAttackEvents(state);
             });
             
             this.room.onLeave((code: number) => {
@@ -59,6 +61,97 @@ export class GameScene extends Phaser.Scene {
             targetX: pointer.x, 
             targetY: pointer.y 
         });
+    }
+
+    private processAttackEvents(state: GameState) {
+        state.attackEvents.forEach(event => {
+            const eventKey = `${event.sourceId}-${event.targetId}-${event.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedAttackEvents.has(eventKey)) return;
+            
+            this.processedAttackEvents.add(eventKey);
+            
+            // Animate attack source (radius flash)
+            this.animateAttackSource(event.sourceId);
+            
+            // Animate attack target (color flash)
+            this.animateAttackTarget(event.targetId, state);
+        });
+    }
+
+    private animateAttackSource(combatantId: string) {
+        // Find the radius indicator for the source
+        let radiusIndicator = this.playerRadiusIndicators.get(combatantId);
+        
+        if (!radiusIndicator) {
+            // Check if it's a cradle
+            if (combatantId === 'blue-cradle') {
+                radiusIndicator = this.blueCradleRadiusIndicator || undefined;
+            } else if (combatantId === 'red-cradle') {
+                radiusIndicator = this.redCradleRadiusIndicator || undefined;
+            }
+        }
+        
+        if (radiusIndicator) {
+            // Flash the radius indicator
+            this.tweens.add({
+                targets: radiusIndicator,
+                alpha: 0,
+                duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_SOURCE_DURATION_MS,
+                yoyo: true,
+                ease: 'Linear'
+            });
+        }
+    }
+
+    private animateAttackTarget(combatantId: string, state: GameState) {
+        // Find the combatant and calculate damage percentage
+        let combatant: Combatant | null = null;
+        
+        // Check if it's a player
+        if (state.players.has(combatantId)) {
+            combatant = state.players.get(combatantId) || null;
+        } else if (combatantId === 'blue-cradle') {
+            combatant = state.blueCradle;
+        } else if (combatantId === 'red-cradle') {
+            combatant = state.redCradle;
+        }
+        
+        if (!combatant) return;
+        
+        const flashDuration = CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_DURATION_MS;
+        
+        // Find the graphics object to animate
+        let combatantGraphics = this.players.get(combatantId);
+        
+        if (!combatantGraphics) {
+            // Check if it's a cradle
+            if (combatantId === 'blue-cradle') {
+                combatantGraphics = this.blueCradle || undefined;
+            } else if (combatantId === 'red-cradle') {
+                combatantGraphics = this.redCradle || undefined;
+            }
+        }
+        
+        if (combatantGraphics) {
+            // Quick jump to flash alpha, then slow fade back
+            this.tweens.add({
+                targets: combatantGraphics,
+                alpha: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_ALPHA,
+                duration: 50, // Quick jump (50ms)
+                ease: 'Power2',
+                onComplete: () => {
+                    // Slow fade back to normal
+                    this.tweens.add({
+                        targets: combatantGraphics,
+                        alpha: 1,
+                        duration: flashDuration - 50, // Remaining time for slow fade
+                        ease: 'Power1'
+                    });
+                }
+            });
+        }
     }
 
     private updatePlayers(state: GameState) {

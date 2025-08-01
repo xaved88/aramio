@@ -1,4 +1,4 @@
-import { GameState, Player, Combatant } from '../schema/GameState';
+import { GameState, Player, Combatant, AttackEvent } from '../schema/GameState';
 import { CombatantUtils } from './combatants/CombatantUtils';
 
 export enum GamePhase {
@@ -21,6 +21,9 @@ export class GameEngine {
     update(deltaTime: number): void {
         this.gameState.gameTime += deltaTime;
         
+        // Clear old attack events (older than 1 second)
+        this.clearOldAttackEvents();
+        
         // Check for game end conditions
         this.checkGameEndConditions();
         
@@ -33,6 +36,25 @@ export class GameEngine {
                 this.updateFinishedPhase();
                 break;
         }
+    }
+
+    /**
+     * Clears attack events older than 1 second
+     */
+    private clearOldAttackEvents(): void {
+        const currentTime = this.gameState.gameTime;
+        const eventsToRemove: number[] = [];
+        
+        this.gameState.attackEvents.forEach((event, index) => {
+            if (currentTime - event.timestamp > 1000) { // 1 second
+                eventsToRemove.push(index);
+            }
+        });
+        
+        // Remove events in reverse order to maintain indices
+        eventsToRemove.reverse().forEach(index => {
+            this.gameState.attackEvents.splice(index, 1);
+        });
     }
 
     /**
@@ -85,6 +107,13 @@ export class GameEngine {
                     const target = enemiesInRange[0];
                     CombatantUtils.damageCombatant(target, attacker.attackStrength);
                     attacker.lastAttackTime = currentTime;
+                    
+                    // Create attack event
+                    const attackEvent = new AttackEvent();
+                    attackEvent.sourceId = attacker.id;
+                    attackEvent.targetId = target.id;
+                    attackEvent.timestamp = currentTime;
+                    this.gameState.attackEvents.push(attackEvent);
                     
                     console.log(`${attacker.id} attacked ${target.id} for ${attacker.attackStrength} damage`);
                 }

@@ -49,4 +49,9 @@ export const CLIENT_CONFIG = {
         BLUE: 0x3498db,
         RED: 0xe74c3c,
     },
+    ANIMATIONS: {
+        ATTACK_SOURCE_DURATION_MS: 50, // radius flash duration
+        ATTACK_TARGET_FLASH_DURATION_MS: 500, // target flash duration
+        ATTACK_TARGET_FLASH_ALPHA: 0.3, // alpha value when flashing
+    },
 } as const; 
