@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { GameState, Player, Cradle, Turret, Combatant, AttackEvent } from '../../server/schema/GameState';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -22,6 +22,7 @@ export class GameScene extends Phaser.Scene {
     private redTurretText: Phaser.GameObjects.Text | null = null;
     private blueTurretRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
     private redTurretRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
+    private playerRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private processedAttackEvents: Set<string> = new Set();
 
     constructor() {
@@ -194,6 +195,14 @@ export class GameScene extends Phaser.Scene {
                 this.playerRadiusIndicators.set(playerData.id, radiusIndicator);
             }
             
+            // Handle respawn ring
+            let respawnRing = this.playerRespawnRings.get(playerData.id);
+            if (!respawnRing) {
+                respawnRing = this.add.graphics();
+                respawnRing.setDepth(-2); // Put behind radius indicators
+                this.playerRespawnRings.set(playerData.id, respawnRing);
+            }
+            
             // Stop any existing tween for this player
             const existingTween = this.playerTweens.get(playerData.id);
             if (existingTween) {
@@ -202,7 +211,7 @@ export class GameScene extends Phaser.Scene {
             
             // Create smooth tween to new position
             const tween = this.tweens.add({
-                targets: [playerCircle, playerText, radiusIndicator],
+                targets: [playerCircle, playerText, radiusIndicator, respawnRing],
                 x: playerData.x,
                 y: playerData.y,
                 duration: CLIENT_CONFIG.INTERPOLATION_DURATION_MS,
@@ -224,6 +233,20 @@ export class GameScene extends Phaser.Scene {
             }
             playerCircle.fillStyle(color, 1);
             playerCircle.fillCircle(0, 0, CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS);
+            
+            // Update respawn ring
+            respawnRing.clear();
+            if (playerData.state === 'respawning') {
+                const respawnDuration = playerData.respawnDuration;
+                const timeElapsed = respawnDuration - (playerData.respawnTime - state.gameTime);
+                const respawnProgress = Math.max(0, Math.min(1, timeElapsed / respawnDuration));
+                const ringColor = playerData.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+                
+                respawnRing.lineStyle(CLIENT_CONFIG.RESPAWN_RING.THICKNESS, ringColor, CLIENT_CONFIG.RESPAWN_RING.ALPHA);
+                respawnRing.beginPath();
+                respawnRing.arc(0, 0, CLIENT_CONFIG.RESPAWN_RING.RADIUS, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
+                respawnRing.strokePath();
+            }
             
             // Update radius indicator
             radiusIndicator.clear();
@@ -254,6 +277,11 @@ export class GameScene extends Phaser.Scene {
                 if (radiusIndicator) {
                     radiusIndicator.destroy();
                     this.playerRadiusIndicators.delete(playerId);
+                }
+                const respawnRing = this.playerRespawnRings.get(playerId);
+                if (respawnRing) {
+                    respawnRing.destroy();
+                    this.playerRespawnRings.delete(playerId);
                 }
                 playerCircle.destroy();
                 this.players.delete(playerId);

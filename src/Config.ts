@@ -31,7 +31,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 50,
             ATTACK_STRENGTH: 10,
             ATTACK_SPEED: 1, // attacks per second
-            RESPAWN_TIME_MS: 6000, // 6 seconds
+            RESPAWN_TIME_MS: 6000,
         },
         CRADLE: {
             HEALTH: 1000,
@@ -66,5 +66,10 @@ export const CLIENT_CONFIG = {
         ATTACK_SOURCE_DURATION_MS: 50, // radius flash duration
         ATTACK_TARGET_FLASH_DURATION_MS: 500, // target flash duration
         ATTACK_TARGET_FLASH_ALPHA: 0.3, // alpha value when flashing
+    },
+    RESPAWN_RING: {
+        RADIUS: 25, // slightly larger than player radius
+        THICKNESS: 3,
+        ALPHA: 0.8,
     },
 } as const; 

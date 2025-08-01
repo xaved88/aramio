@@ -149,7 +149,7 @@ export class GameEngine {
      */
     private startPlayerRespawn(player: Player): void {
         player.state = 'respawning';
-        player.respawnTime = this.gameState.gameTime + GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
+        player.respawnTime = this.gameState.gameTime + player.respawnDuration;
         
         // Move player to spawn location
         if (player.team === 'blue') {

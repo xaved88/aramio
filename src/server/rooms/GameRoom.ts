@@ -114,6 +114,7 @@ export class GameRoom extends Room<GameState> {
         player.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
         player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
         player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
+        player.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
         player.lastAttackTime = 0;
         this.state.players.set(client.sessionId, player);
     }
