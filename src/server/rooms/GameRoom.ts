@@ -1,5 +1,5 @@
 import { Room, Client } from '@colyseus/core';
-import { GameState, Player } from '../schema/GameState';
+import { GameState, Player, Cradle } from '../schema/GameState';
 import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 
 interface GameCommand {
@@ -17,6 +17,27 @@ export class GameRoom extends Room<GameState> {
         const gameState = new GameState();
         gameState.gameTime = 0;
         gameState.gamePhase = 'playing';
+        
+        // Create blue cradle (bottom left)
+        const blueCradle = new Cradle();
+        blueCradle.id = 'blue-cradle';
+        blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
+        blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
+        blueCradle.team = 'blue';
+        blueCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
+        blueCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        gameState.blueCradle = blueCradle;
+        
+        // Create red cradle (top right)
+        const redCradle = new Cradle();
+        redCradle.id = 'red-cradle';
+        redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
+        redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
+        redCradle.team = 'red';
+        redCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
+        redCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        gameState.redCradle = redCradle;
+        
         this.setState(gameState);
         
         // Set up fixed update rate
@@ -35,9 +56,17 @@ export class GameRoom extends Room<GameState> {
         console.log(`${client.sessionId} joined`);
         const player = new Player();
         player.id = client.sessionId;
-        player.x = 300;
-        player.y = 300;
         player.team = this.state.players.size % 2 === 0 ? 'blue' : 'red';
+        
+        // Spawn player near their team's cradle
+        if (player.team === 'blue') {
+            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        } else {
+            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        }
+        
         player.health = 100;
         player.maxHealth = 100;
         this.state.players.set(client.sessionId, player);

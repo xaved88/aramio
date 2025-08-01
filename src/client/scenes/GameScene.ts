@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
-import { GameState, Player } from '../../server/schema/GameState';
+import { GameState, Player, Cradle } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../Config';
 
 export class GameScene extends Phaser.Scene {
@@ -8,6 +8,8 @@ export class GameScene extends Phaser.Scene {
     private room: any;
     private players: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private playerTweens: Map<string, Phaser.Tweens.Tween> = new Map();
+    private blueCradle: Phaser.GameObjects.Graphics | null = null;
+    private redCradle: Phaser.GameObjects.Graphics | null = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -26,6 +28,7 @@ export class GameScene extends Phaser.Scene {
             
             this.room.onStateChange((state: GameState) => {
                 this.updatePlayers(state);
+                this.updateCradles(state);
             });
             
             this.room.onLeave((code: number) => {
@@ -106,5 +109,39 @@ export class GameScene extends Phaser.Scene {
                 this.players.delete(playerId);
             }
         });
+    }
+
+    private updateCradles(state: GameState) {
+        // Update blue cradle
+        if (state.blueCradle) {
+            if (!this.blueCradle) {
+                this.blueCradle = this.add.graphics();
+            }
+            
+            this.blueCradle.clear();
+            this.blueCradle.fillStyle(CLIENT_CONFIG.TEAM_COLORS.BLUE, 1);
+            this.blueCradle.fillRect(
+                state.blueCradle.x - CLIENT_CONFIG.CRADLE_SIZE / 2,
+                state.blueCradle.y - CLIENT_CONFIG.CRADLE_SIZE / 2,
+                CLIENT_CONFIG.CRADLE_SIZE,
+                CLIENT_CONFIG.CRADLE_SIZE
+            );
+        }
+        
+        // Update red cradle
+        if (state.redCradle) {
+            if (!this.redCradle) {
+                this.redCradle = this.add.graphics();
+            }
+            
+            this.redCradle.clear();
+            this.redCradle.fillStyle(CLIENT_CONFIG.TEAM_COLORS.RED, 1);
+            this.redCradle.fillRect(
+                state.redCradle.x - CLIENT_CONFIG.CRADLE_SIZE / 2,
+                state.redCradle.y - CLIENT_CONFIG.CRADLE_SIZE / 2,
+                CLIENT_CONFIG.CRADLE_SIZE,
+                CLIENT_CONFIG.CRADLE_SIZE
+            );
+        }
     }
 } 

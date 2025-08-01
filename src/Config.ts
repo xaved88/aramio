@@ -15,6 +15,13 @@ export const GAMEPLAY_CONFIG = {
         MAX_X: 580,
         MAX_Y: 580,
     },
+    CRADLE_HEALTH: 1000,
+    CRADLE_MAX_HEALTH: 1000,
+    CRADLE_POSITIONS: {
+        BLUE: { x: 50, y: 550 }, // bottom left
+        RED: { x: 550, y: 50 },  // top right
+    },
+    PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
 } as const;
 
 // Client Configuration
@@ -22,7 +29,8 @@ export const CLIENT_CONFIG = {
     INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
     GAME_CANVAS_WIDTH: 600,
     GAME_CANVAS_HEIGHT: 600,
-    PLAYER_CIRCLE_RADIUS: 20,
+    PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
+    CRADLE_SIZE: 25, // 25x25 square
     TEAM_COLORS: {
         BLUE: 0x3498db,
         RED: 0xe74c3c,
