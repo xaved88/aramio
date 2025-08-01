@@ -31,6 +31,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 50,
             ATTACK_STRENGTH: 10,
             ATTACK_SPEED: 1, // attacks per second
+            RESPAWN_TIME_MS: 6000, // 6 seconds
         },
         CRADLE: {
             HEALTH: 1000,
@@ -58,6 +59,8 @@ export const CLIENT_CONFIG = {
     TEAM_COLORS: {
         BLUE: 0x3498db,
         RED: 0xe74c3c,
+        BLUE_RESPAWNING: 0x85c1e9, // much lighter blue
+        RED_RESPAWNING: 0xf5b7b1, // much lighter red
     },
     ANIMATIONS: {
         ATTACK_SOURCE_DURATION_MS: 50, // radius flash duration

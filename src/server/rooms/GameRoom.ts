@@ -165,6 +165,10 @@ export class GameRoom extends Room<GameState> {
     private handleMoveCommand(command: GameCommand) {
         const player = this.state.players.get(command.clientId);
         if (player && command.data.targetX !== undefined && command.data.targetY !== undefined) {
+            // Prevent respawning players from moving
+            if (player.state === 'respawning') {
+                return;
+            }
             const targetX = command.data.targetX;
             const targetY = command.data.targetY;
             

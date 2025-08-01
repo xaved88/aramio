@@ -1,5 +1,6 @@
 import { GameState, Player, Combatant, AttackEvent } from '../schema/GameState';
 import { CombatantUtils } from './combatants/CombatantUtils';
+import { GAMEPLAY_CONFIG } from '../../Config';
 
 export enum GamePhase {
     WAITING = 'waiting',
@@ -90,6 +91,9 @@ export class GameEngine {
         allCombatants.forEach(attacker => {
             if (!CombatantUtils.isCombatantAlive(attacker)) return;
             
+            // Skip respawning players
+            if (attacker instanceof Player && attacker.state === 'respawning') return;
+            
             // Check if attacker can attack (based on attack speed)
             const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
             const attackCooldown = 1000 / attacker.attackSpeed; // Convert to milliseconds
@@ -122,21 +126,51 @@ export class GameEngine {
     }
 
     /**
-     * Removes dead combatants from the game
+     * Handles player respawning and removes dead combatants
      */
     private removeDeadCombatants(): void {
-        // Remove dead players
-        const deadPlayers: string[] = [];
+        const currentTime = this.gameState.gameTime;
+        
+        // Handle player respawning
         this.gameState.players.forEach((player, playerId) => {
-            if (!CombatantUtils.isCombatantAlive(player)) {
-                deadPlayers.push(playerId);
+            if (!CombatantUtils.isCombatantAlive(player) && player.state === 'alive') {
+                // Player just died, start respawn process
+                this.startPlayerRespawn(player);
+            } else if (player.state === 'respawning' && currentTime >= player.respawnTime) {
+                // Respawn timer completed
+                this.completePlayerRespawn(player);
             }
         });
+    }
+
+    /**
+     * Starts the respawn process for a player
+     * @param player The player to respawn
+     */
+    private startPlayerRespawn(player: Player): void {
+        player.state = 'respawning';
+        player.respawnTime = this.gameState.gameTime + GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
         
-        deadPlayers.forEach(playerId => {
-            this.gameState.players.delete(playerId);
-            console.log(`Player ${playerId} died and was removed`);
-        });
+        // Move player to spawn location
+        if (player.team === 'blue') {
+            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        } else {
+            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        }
+        
+        console.log(`Player ${player.id} started respawning`);
+    }
+
+    /**
+     * Completes the respawn process for a player
+     * @param player The player to complete respawn for
+     */
+    private completePlayerRespawn(player: Player): void {
+        player.state = 'alive';
+        player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
+        console.log(`Player ${player.id} respawned`);
     }
 
     /**

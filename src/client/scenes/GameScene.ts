@@ -216,14 +216,21 @@ export class GameScene extends Phaser.Scene {
             
             // Update the circle's visual appearance
             playerCircle.clear();
-            const color = playerData.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            let color;
+            if (playerData.state === 'respawning') {
+                color = playerData.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            } else {
+                color = playerData.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            }
             playerCircle.fillStyle(color, 1);
             playerCircle.fillCircle(0, 0, CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS);
             
             // Update radius indicator
             radiusIndicator.clear();
-            radiusIndicator.lineStyle(1, 0x000000, 0.3); // Thin black line with alpha
-            radiusIndicator.strokeCircle(0, 0, playerData.attackRadius);
+            if (playerData.state !== 'respawning') {
+                radiusIndicator.lineStyle(1, 0x000000, 0.3); // Thin black line with alpha
+                radiusIndicator.strokeCircle(0, 0, playerData.attackRadius);
+            }
             
             // Update health text
             const healthPercent = Math.round((playerData.health / playerData.maxHealth) * 100);

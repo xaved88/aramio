@@ -20,7 +20,8 @@ export class Combatant extends Schema {
 }
 
 export class Player extends Combatant {
-    // Player-specific properties can be added here later
+    @type('string') state = 'alive'; // 'alive' or 'respawning'
+    @type('number') respawnTime = 0; // timestamp when respawn completes
 }
 
 export class Cradle extends Combatant {
