@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
-import { GameState, Player, Cradle, Combatant, AttackEvent } from '../../server/schema/GameState';
+import { GameState, Player, Cradle, Turret, Combatant, AttackEvent } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../Config';
 
 export class GameScene extends Phaser.Scene {
@@ -16,6 +16,12 @@ export class GameScene extends Phaser.Scene {
     private redCradleText: Phaser.GameObjects.Text | null = null;
     private blueCradleRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
     private redCradleRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
+    private blueTurret: Phaser.GameObjects.Graphics | null = null;
+    private redTurret: Phaser.GameObjects.Graphics | null = null;
+    private blueTurretText: Phaser.GameObjects.Text | null = null;
+    private redTurretText: Phaser.GameObjects.Text | null = null;
+    private blueTurretRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
+    private redTurretRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
     private processedAttackEvents: Set<string> = new Set();
 
     constructor() {
@@ -36,6 +42,7 @@ export class GameScene extends Phaser.Scene {
             this.room.onStateChange((state: GameState) => {
                 this.updatePlayers(state);
                 this.updateCradles(state);
+                this.updateTurrets(state);
                 this.processAttackEvents(state);
             });
             
@@ -90,6 +97,10 @@ export class GameScene extends Phaser.Scene {
                 radiusIndicator = this.blueCradleRadiusIndicator || undefined;
             } else if (combatantId === 'red-cradle') {
                 radiusIndicator = this.redCradleRadiusIndicator || undefined;
+            } else if (combatantId === 'blue-turret') {
+                radiusIndicator = this.blueTurretRadiusIndicator || undefined;
+            } else if (combatantId === 'red-turret') {
+                radiusIndicator = this.redTurretRadiusIndicator || undefined;
             }
         }
         
@@ -314,6 +325,104 @@ export class GameScene extends Phaser.Scene {
             const healthPercent = Math.round((state.redCradle.health / state.redCradle.maxHealth) * 100);
             this.redCradleText.setText(`${healthPercent}%`);
             this.redCradleText.setPosition(state.redCradle.x, state.redCradle.y);
+        }
+    }
+
+    private updateTurrets(state: GameState) {
+        // Update blue turret
+        if (state.blueTurret) {
+            if (!this.blueTurret) {
+                this.blueTurret = this.add.graphics();
+            }
+            if (!this.blueTurretText) {
+                this.blueTurretText = this.add.text(0, 0, '', {
+                    fontSize: '12px',
+                    color: '#000000'
+                }).setOrigin(0.5);
+            }
+            if (!this.blueTurretRadiusIndicator) {
+                this.blueTurretRadiusIndicator = this.add.graphics();
+                this.blueTurretRadiusIndicator.setDepth(-1);
+            }
+            
+            // Check if turret is alive
+            if (state.blueTurret.health > 0) {
+                this.blueTurret.setVisible(true);
+                this.blueTurretText.setVisible(true);
+                this.blueTurretRadiusIndicator.setVisible(true);
+                
+                this.blueTurret.clear();
+                this.blueTurret.fillStyle(CLIENT_CONFIG.TEAM_COLORS.BLUE, 1);
+                this.blueTurret.fillRect(
+                    state.blueTurret.x - CLIENT_CONFIG.TURRET_SIZE.width / 2,
+                    state.blueTurret.y - CLIENT_CONFIG.TURRET_SIZE.height / 2,
+                    CLIENT_CONFIG.TURRET_SIZE.width,
+                    CLIENT_CONFIG.TURRET_SIZE.height
+                );
+                
+                // Update radius indicator
+                this.blueTurretRadiusIndicator.clear();
+                this.blueTurretRadiusIndicator.lineStyle(1, 0x000000, 0.3);
+                this.blueTurretRadiusIndicator.strokeCircle(state.blueTurret.x, state.blueTurret.y, state.blueTurret.attackRadius);
+                
+                // Update health text
+                const healthPercent = Math.round((state.blueTurret.health / state.blueTurret.maxHealth) * 100);
+                this.blueTurretText.setText(`${healthPercent}%`);
+                this.blueTurretText.setPosition(state.blueTurret.x, state.blueTurret.y);
+            } else {
+                // Hide destroyed turret
+                this.blueTurret.setVisible(false);
+                this.blueTurretText.setVisible(false);
+                this.blueTurretRadiusIndicator.setVisible(false);
+            }
+        }
+        
+        // Update red turret
+        if (state.redTurret) {
+            if (!this.redTurret) {
+                this.redTurret = this.add.graphics();
+            }
+            if (!this.redTurretText) {
+                this.redTurretText = this.add.text(0, 0, '', {
+                    fontSize: '12px',
+                    color: '#000000'
+                }).setOrigin(0.5);
+            }
+            if (!this.redTurretRadiusIndicator) {
+                this.redTurretRadiusIndicator = this.add.graphics();
+                this.redTurretRadiusIndicator.setDepth(-1);
+            }
+            
+            // Check if turret is alive
+            if (state.redTurret.health > 0) {
+                this.redTurret.setVisible(true);
+                this.redTurretText.setVisible(true);
+                this.redTurretRadiusIndicator.setVisible(true);
+                
+                this.redTurret.clear();
+                this.redTurret.fillStyle(CLIENT_CONFIG.TEAM_COLORS.RED, 1);
+                this.redTurret.fillRect(
+                    state.redTurret.x - CLIENT_CONFIG.TURRET_SIZE.width / 2,
+                    state.redTurret.y - CLIENT_CONFIG.TURRET_SIZE.height / 2,
+                    CLIENT_CONFIG.TURRET_SIZE.width,
+                    CLIENT_CONFIG.TURRET_SIZE.height
+                );
+                
+                // Update radius indicator
+                this.redTurretRadiusIndicator.clear();
+                this.redTurretRadiusIndicator.lineStyle(1, 0x000000, 0.3);
+                this.redTurretRadiusIndicator.strokeCircle(state.redTurret.x, state.redTurret.y, state.redTurret.attackRadius);
+                
+                // Update health text
+                const healthPercent = Math.round((state.redTurret.health / state.redTurret.maxHealth) * 100);
+                this.redTurretText.setText(`${healthPercent}%`);
+                this.redTurretText.setPosition(state.redTurret.x, state.redTurret.y);
+            } else {
+                // Hide destroyed turret
+                this.redTurret.setVisible(false);
+                this.redTurretText.setVisible(false);
+                this.redTurretRadiusIndicator.setVisible(false);
+            }
         }
     }
 } 

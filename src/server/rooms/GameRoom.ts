@@ -1,5 +1,5 @@
 import { Room, Client } from '@colyseus/core';
-import { GameState, Player, Cradle, Combatant } from '../schema/GameState';
+import { GameState, Player, Cradle, Turret, Combatant } from '../schema/GameState';
 import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { CombatantUtils } from '../game/combatants/CombatantUtils';
 import { GameEngine, GamePhase } from '../game/GameEngine';
@@ -48,6 +48,34 @@ export class GameRoom extends Room<GameState> {
         redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
         redCradle.lastAttackTime = 0;
         gameState.redCradle = redCradle;
+        
+        // Create blue turret
+        const blueTurret = new Turret();
+        blueTurret.id = 'blue-turret';
+        blueTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.x;
+        blueTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.y;
+        blueTurret.team = 'blue';
+        blueTurret.health = GAMEPLAY_CONFIG.TURRET_HEALTH;
+        blueTurret.maxHealth = GAMEPLAY_CONFIG.TURRET_MAX_HEALTH;
+        blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
+        blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
+        blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+        blueTurret.lastAttackTime = 0;
+        gameState.blueTurret = blueTurret;
+        
+        // Create red turret
+        const redTurret = new Turret();
+        redTurret.id = 'red-turret';
+        redTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.x;
+        redTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.y;
+        redTurret.team = 'red';
+        redTurret.health = GAMEPLAY_CONFIG.TURRET_HEALTH;
+        redTurret.maxHealth = GAMEPLAY_CONFIG.TURRET_MAX_HEALTH;
+        redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
+        redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
+        redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+        redTurret.lastAttackTime = 0;
+        gameState.redTurret = redTurret;
         
         this.setState(gameState);
         

@@ -157,7 +157,7 @@ export class GameEngine {
     }
 
     /**
-     * Gets all combatants in the game (players + cradles)
+     * Gets all combatants in the game (players + cradles + turrets)
      */
     getAllCombatants(): Combatant[] {
         const combatants: Combatant[] = [];
@@ -170,6 +170,10 @@ export class GameEngine {
         // Add cradles
         combatants.push(this.gameState.blueCradle);
         combatants.push(this.gameState.redCradle);
+        
+        // Add turrets
+        combatants.push(this.gameState.blueTurret);
+        combatants.push(this.gameState.redTurret);
         
         return combatants;
     }

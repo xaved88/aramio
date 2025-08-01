@@ -27,11 +27,17 @@ export class Cradle extends Combatant {
     // Cradle-specific properties can be added here later
 }
 
+export class Turret extends Combatant {
+    // Turret-specific properties can be added here later
+}
+
 export class GameState extends Schema {
-    @type({ map: Player }) players = new MapSchema<Player>();
+    @type('number') gameTime = 0;
+    @type('string') gamePhase = 'playing';
+    @type({ map: Player }) players = new MapSchema<Player>()
     @type(Cradle) blueCradle!: Cradle;
     @type(Cradle) redCradle!: Cradle;
-    @type('number') gameTime!: number;
-    @type('string') gamePhase!: string;
+    @type(Turret) blueTurret!: Turret;
+    @type(Turret) redTurret!: Turret;
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
 } 
