@@ -72,4 +72,15 @@ export const CLIENT_CONFIG = {
         THICKNESS: 3,
         ALPHA: 0.8,
     },
+    HUD: {
+        HEALTH_BAR: {
+            X: 20,
+            Y: 20,
+            WIDTH: 200,
+            HEIGHT: 20,
+            BACKGROUND_COLOR: 0x333333,
+            HEALTH_COLOR: 0x2ecc71, // green
+            TEXT_COLOR: '#ffffff',
+        },
+    },
 } as const; 

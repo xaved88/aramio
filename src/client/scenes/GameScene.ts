@@ -24,6 +24,9 @@ export class GameScene extends Phaser.Scene {
     private redTurretRadiusIndicator: Phaser.GameObjects.Graphics | null = null;
     private playerRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private processedAttackEvents: Set<string> = new Set();
+    private hudHealthBar: Phaser.GameObjects.Graphics | null = null;
+    private hudHealthBarBackground: Phaser.GameObjects.Graphics | null = null;
+    private hudHealthText: Phaser.GameObjects.Text | null = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -45,11 +48,14 @@ export class GameScene extends Phaser.Scene {
                 this.updateCradles(state);
                 this.updateTurrets(state);
                 this.processAttackEvents(state);
+                this.updateHUD(state);
             });
             
             this.room.onLeave((code: number) => {
                 console.log('Left room with code:', code);
             });
+            
+            this.createHUD();
             
         } catch (error) {
             console.error('Failed to connect:', error);
@@ -459,5 +465,54 @@ export class GameScene extends Phaser.Scene {
                 this.redTurretRadiusIndicator.setVisible(false);
             }
         }
+    }
+
+    private createHUD() {
+        const hudConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        
+        // Create health bar background
+        this.hudHealthBarBackground = this.add.graphics();
+        this.hudHealthBarBackground.fillStyle(hudConfig.BACKGROUND_COLOR, 0.8);
+        this.hudHealthBarBackground.fillRect(
+            hudConfig.X, 
+            hudConfig.Y, 
+            hudConfig.WIDTH, 
+            hudConfig.HEIGHT
+        );
+        
+        // Create health bar
+        this.hudHealthBar = this.add.graphics();
+        
+        // Create health text
+        this.hudHealthText = this.add.text(hudConfig.X + hudConfig.WIDTH / 2, hudConfig.Y + hudConfig.HEIGHT / 2, '100%', {
+            fontSize: '12px',
+            color: hudConfig.TEXT_COLOR
+        }).setOrigin(0.5);
+    }
+
+    private updateHUD(state: GameState) {
+        if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText) return;
+        
+        // Find the current player (assuming first player for now)
+        // In a real implementation, you'd track the client's player ID
+        const currentPlayer = state.players.values().next().value;
+        if (!currentPlayer) return;
+        
+        const hudConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        const healthPercent = currentPlayer.health / currentPlayer.maxHealth;
+        
+        // Update health bar
+        this.hudHealthBar.clear();
+        this.hudHealthBar.fillStyle(hudConfig.HEALTH_COLOR, 1);
+        this.hudHealthBar.fillRect(
+            hudConfig.X, 
+            hudConfig.Y, 
+            hudConfig.WIDTH * healthPercent, 
+            hudConfig.HEIGHT
+        );
+        
+        // Update health text
+        const healthPercentText = Math.round(healthPercent * 100);
+        this.hudHealthText.setText(`${healthPercentText}%`);
     }
 } 
