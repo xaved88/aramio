@@ -7,7 +7,7 @@ export class GameRoom extends Room<GameState> {
     onCreate(options: any) {
         const gameState = new GameState();
         gameState.gameTime = 0;
-        gameState.gamePhase = 'waiting';
+        gameState.gamePhase = 'playing';
         this.setState(gameState);
         
         this.onMessage('move', (client, data) => {
@@ -23,8 +23,8 @@ export class GameRoom extends Room<GameState> {
         console.log(`${client.sessionId} joined`);
         const player = new Player();
         player.id = client.sessionId;
-        player.x = Math.random() * 800;
-        player.y = Math.random() * 600;
+        player.x = 300;
+        player.y = 300;
         player.team = this.state.players.size % 2 === 0 ? 'blue' : 'red';
         player.health = 100;
         player.maxHealth = 100;
