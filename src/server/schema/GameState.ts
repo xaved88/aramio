@@ -7,6 +7,10 @@ export class Combatant extends Schema {
     @type('string') team!: string;
     @type('number') health!: number;
     @type('number') maxHealth!: number;
+    @type('number') attackRadius!: number;
+    @type('number') attackStrength!: number;
+    @type('number') attackSpeed!: number; // attacks per second
+    @type('number') lastAttackTime!: number;
 }
 
 export class Player extends Combatant {

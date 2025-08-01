@@ -29,6 +29,10 @@ export class GameRoom extends Room<GameState> {
         blueCradle.team = 'blue';
         blueCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
         blueCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        blueCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
+        blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
+        blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+        blueCradle.lastAttackTime = 0;
         gameState.blueCradle = blueCradle;
         
         // Create red cradle (top right)
@@ -39,6 +43,10 @@ export class GameRoom extends Room<GameState> {
         redCradle.team = 'red';
         redCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
         redCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        redCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
+        redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
+        redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+        redCradle.lastAttackTime = 0;
         gameState.redCradle = redCradle;
         
         this.setState(gameState);
@@ -73,8 +81,12 @@ export class GameRoom extends Room<GameState> {
             player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
         }
         
-        player.health = 100;
-        player.maxHealth = 100;
+        player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
+        player.maxHealth = GAMEPLAY_CONFIG.COMBAT.PLAYER.MAX_HEALTH;
+        player.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
+        player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
+        player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
+        player.lastAttackTime = 0;
         this.state.players.set(client.sessionId, player);
     }
 

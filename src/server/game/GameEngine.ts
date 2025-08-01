@@ -51,8 +51,63 @@ export class GameEngine {
      * Updates logic specific to the playing phase
      */
     private updatePlayingPhase(): void {
-        // Add playing phase specific logic here
-        // e.g., minion spawning, objective updates, etc.
+        // Process combat
+        this.processCombat();
+        
+        // Remove dead combatants
+        this.removeDeadCombatants();
+    }
+
+    /**
+     * Processes combat between all combatants
+     */
+    private processCombat(): void {
+        const allCombatants = this.getAllCombatants();
+        const currentTime = this.gameState.gameTime;
+        
+        allCombatants.forEach(attacker => {
+            if (!CombatantUtils.isCombatantAlive(attacker)) return;
+            
+            // Check if attacker can attack (based on attack speed)
+            const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
+            const attackCooldown = 1000 / attacker.attackSpeed; // Convert to milliseconds
+            
+            if (timeSinceLastAttack >= attackCooldown) {
+                // Find enemies in range
+                const enemiesInRange = allCombatants.filter(target => {
+                    if (!CombatantUtils.isCombatantAlive(target)) return false;
+                    if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
+                    return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
+                });
+                
+                // Attack the first enemy in range
+                if (enemiesInRange.length > 0) {
+                    const target = enemiesInRange[0];
+                    CombatantUtils.damageCombatant(target, attacker.attackStrength);
+                    attacker.lastAttackTime = currentTime;
+                    
+                    console.log(`${attacker.id} attacked ${target.id} for ${attacker.attackStrength} damage`);
+                }
+            }
+        });
+    }
+
+    /**
+     * Removes dead combatants from the game
+     */
+    private removeDeadCombatants(): void {
+        // Remove dead players
+        const deadPlayers: string[] = [];
+        this.gameState.players.forEach((player, playerId) => {
+            if (!CombatantUtils.isCombatantAlive(player)) {
+                deadPlayers.push(playerId);
+            }
+        });
+        
+        deadPlayers.forEach(playerId => {
+            this.gameState.players.delete(playerId);
+            console.log(`Player ${playerId} died and was removed`);
+        });
     }
 
     /**

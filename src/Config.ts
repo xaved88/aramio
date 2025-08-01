@@ -22,6 +22,20 @@ export const GAMEPLAY_CONFIG = {
         RED: { x: 550, y: 50 },  // top right
     },
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
+    COMBAT: {
+        PLAYER: {
+            HEALTH: 100,
+            MAX_HEALTH: 100,
+            ATTACK_RADIUS: 50,
+            ATTACK_STRENGTH: 10,
+            ATTACK_SPEED: 1, // attacks per second
+        },
+        CRADLE: {
+            ATTACK_RADIUS: 30,
+            ATTACK_STRENGTH: 40,
+            ATTACK_SPEED: 0.3, // attacks per second
+        },
+    },
 } as const;
 
 // Client Configuration
