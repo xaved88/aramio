@@ -27,8 +27,8 @@ export class GameRoom extends Room<GameState> {
         blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
         blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
         blueCradle.team = 'blue';
-        blueCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
-        blueCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        blueCradle.health = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
+        blueCradle.maxHealth = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
         blueCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
         blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
         blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
@@ -41,8 +41,8 @@ export class GameRoom extends Room<GameState> {
         redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
         redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
         redCradle.team = 'red';
-        redCradle.health = GAMEPLAY_CONFIG.CRADLE_HEALTH;
-        redCradle.maxHealth = GAMEPLAY_CONFIG.CRADLE_MAX_HEALTH;
+        redCradle.health = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
+        redCradle.maxHealth = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
         redCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
         redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
         redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
@@ -55,8 +55,8 @@ export class GameRoom extends Room<GameState> {
         blueTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.x;
         blueTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.y;
         blueTurret.team = 'blue';
-        blueTurret.health = GAMEPLAY_CONFIG.TURRET_HEALTH;
-        blueTurret.maxHealth = GAMEPLAY_CONFIG.TURRET_MAX_HEALTH;
+        blueTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        blueTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
         blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
         blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
         blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
@@ -69,8 +69,8 @@ export class GameRoom extends Room<GameState> {
         redTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.x;
         redTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.y;
         redTurret.team = 'red';
-        redTurret.health = GAMEPLAY_CONFIG.TURRET_HEALTH;
-        redTurret.maxHealth = GAMEPLAY_CONFIG.TURRET_MAX_HEALTH;
+        redTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        redTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
         redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
         redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
         redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
@@ -110,7 +110,7 @@ export class GameRoom extends Room<GameState> {
         }
         
         player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
-        player.maxHealth = GAMEPLAY_CONFIG.COMBAT.PLAYER.MAX_HEALTH;
+        player.maxHealth = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
         player.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
         player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
         player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;

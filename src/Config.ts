@@ -15,10 +15,7 @@ export const GAMEPLAY_CONFIG = {
         MAX_X: 580,
         MAX_Y: 580,
     },
-    CRADLE_HEALTH: 1000,
-    CRADLE_MAX_HEALTH: 1000,
-    TURRET_HEALTH: 100,
-    TURRET_MAX_HEALTH: 100,
+
     CRADLE_POSITIONS: {
         BLUE: { x: 50, y: 550 }, // bottom left
         RED: { x: 550, y: 50 },  // top right
@@ -31,17 +28,18 @@ export const GAMEPLAY_CONFIG = {
     COMBAT: {
         PLAYER: {
             HEALTH: 100,
-            MAX_HEALTH: 100,
             ATTACK_RADIUS: 50,
             ATTACK_STRENGTH: 10,
             ATTACK_SPEED: 1, // attacks per second
         },
         CRADLE: {
+            HEALTH: 1000,
             ATTACK_RADIUS: 30,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 0.3, // attacks per second
         },
         TURRET: {
+            HEALTH: 100,
             ATTACK_RADIUS: 35,
             ATTACK_STRENGTH: 20,
             ATTACK_SPEED: 0.5, // attacks per second
