@@ -27,6 +27,10 @@ export class GameScene extends Phaser.Scene {
     private hudHealthBar: Phaser.GameObjects.Graphics | null = null;
     private hudHealthBarBackground: Phaser.GameObjects.Graphics | null = null;
     private hudHealthText: Phaser.GameObjects.Text | null = null;
+    private hudExperienceBar: Phaser.GameObjects.Graphics | null = null;
+    private hudExperienceBarBackground: Phaser.GameObjects.Graphics | null = null;
+    private hudExperienceText: Phaser.GameObjects.Text | null = null;
+    private hudLevelText: Phaser.GameObjects.Text | null = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -468,51 +472,98 @@ export class GameScene extends Phaser.Scene {
     }
 
     private createHUD() {
-        const hudConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
         
         // Create health bar background
         this.hudHealthBarBackground = this.add.graphics();
-        this.hudHealthBarBackground.fillStyle(hudConfig.BACKGROUND_COLOR, 0.8);
+        this.hudHealthBarBackground.fillStyle(healthConfig.BACKGROUND_COLOR, 0.8);
         this.hudHealthBarBackground.fillRect(
-            hudConfig.X, 
-            hudConfig.Y, 
-            hudConfig.WIDTH, 
-            hudConfig.HEIGHT
+            healthConfig.X, 
+            healthConfig.Y, 
+            healthConfig.WIDTH, 
+            healthConfig.HEIGHT
         );
         
         // Create health bar
         this.hudHealthBar = this.add.graphics();
         
         // Create health text
-        this.hudHealthText = this.add.text(hudConfig.X + hudConfig.WIDTH / 2, hudConfig.Y + hudConfig.HEIGHT / 2, '100%', {
+        this.hudHealthText = this.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100%', {
             fontSize: '12px',
-            color: hudConfig.TEXT_COLOR
+            color: healthConfig.TEXT_COLOR
         }).setOrigin(0.5);
+        
+        // Create experience bar background
+        this.hudExperienceBarBackground = this.add.graphics();
+        this.hudExperienceBarBackground.fillStyle(expConfig.BACKGROUND_COLOR, 0.8);
+        this.hudExperienceBarBackground.fillRect(
+            expConfig.X, 
+            expConfig.Y, 
+            expConfig.WIDTH, 
+            expConfig.HEIGHT
+        );
+        
+        // Create experience bar
+        this.hudExperienceBar = this.add.graphics();
+        
+        // Create experience text
+        this.hudExperienceText = this.add.text(expConfig.X + expConfig.WIDTH / 2, expConfig.Y + expConfig.HEIGHT / 2, '0/10 XP', {
+            fontSize: '10px',
+            color: expConfig.TEXT_COLOR
+        }).setOrigin(0.5);
+        
+        // Create level text
+        this.hudLevelText = this.add.text(healthConfig.X + healthConfig.WIDTH + 10, healthConfig.Y + healthConfig.HEIGHT / 2, 'Lv.1', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0, 0.5);
     }
 
     private updateHUD(state: GameState) {
-        if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText) return;
+        if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
+            !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || !this.hudLevelText) return;
         
         // Find the current player (assuming first player for now)
         // In a real implementation, you'd track the client's player ID
         const currentPlayer = state.players.values().next().value;
         if (!currentPlayer) return;
         
-        const hudConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
+        const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
         const healthPercent = currentPlayer.health / currentPlayer.maxHealth;
         
         // Update health bar
         this.hudHealthBar.clear();
-        this.hudHealthBar.fillStyle(hudConfig.HEALTH_COLOR, 1);
+        this.hudHealthBar.fillStyle(healthConfig.HEALTH_COLOR, 1);
         this.hudHealthBar.fillRect(
-            hudConfig.X, 
-            hudConfig.Y, 
-            hudConfig.WIDTH * healthPercent, 
-            hudConfig.HEIGHT
+            healthConfig.X, 
+            healthConfig.Y, 
+            healthConfig.WIDTH * healthPercent, 
+            healthConfig.HEIGHT
         );
         
         // Update health text
         const healthPercentText = Math.round(healthPercent * 100);
         this.hudHealthText.setText(`${healthPercentText}%`);
+        
+        // Update experience bar
+        const experienceNeeded = currentPlayer.level * 10; // level * 10
+        const experiencePercent = currentPlayer.experience / experienceNeeded;
+        
+        this.hudExperienceBar.clear();
+        this.hudExperienceBar.fillStyle(expConfig.EXPERIENCE_COLOR, 1);
+        this.hudExperienceBar.fillRect(
+            expConfig.X, 
+            expConfig.Y, 
+            expConfig.WIDTH * experiencePercent, 
+            expConfig.HEIGHT
+        );
+        
+        // Update experience text
+        this.hudExperienceText.setText(`${currentPlayer.experience}/${experienceNeeded} XP`);
+        
+        // Update level text
+        this.hudLevelText.setText(`Lv.${currentPlayer.level}`);
     }
 } 

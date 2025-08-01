@@ -141,6 +141,19 @@ export class GameEngine {
                 this.completePlayerRespawn(player);
             }
         });
+        
+        // Handle turret destruction and grant experience
+        if (!CombatantUtils.isCombatantAlive(this.gameState.blueTurret) && this.gameState.blueTurret.health === 0) {
+            this.grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, 'blue');
+            this.gameState.blueTurret.health = -1; // Mark as processed
+        }
+        
+        if (!CombatantUtils.isCombatantAlive(this.gameState.redTurret) && this.gameState.redTurret.health === 0) {
+            this.grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, 'red');
+            this.gameState.redTurret.health = -1; // Mark as processed
+            // TODO -> refactor this to be combatant deaths in general and not hard-coded to towers and types
+            // TODO -> make this happen immediately on destruction and not with the weird -1 flag. May require some refatoring.
+        }
     }
 
     /**
@@ -171,6 +184,69 @@ export class GameEngine {
         player.state = 'alive';
         player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
         console.log(`Player ${player.id} respawned`);
+    }
+
+    /**
+     * Grants experience to all players on the opposing team
+     * @param amount Amount of experience to grant
+     * @param enemyTeam The team that was defeated
+     */
+    private grantExperienceToTeam(amount: number, enemyTeam: string): void {
+        const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
+        
+        this.gameState.players.forEach((player) => {
+            if (player.team === opposingTeam) {
+                this.grantExperience(player, amount);
+            }
+        });
+    }
+
+    /**
+     * Grants experience to a player and handles leveling up
+     * @param player The player to grant experience to
+     * @param amount Amount of experience to grant
+     */
+    private grantExperience(player: Player, amount: number): void {
+        player.experience += amount;
+        console.log(`Player ${player.id} gained ${amount} experience (total: ${player.experience})`);
+        
+        // Check for level up
+        this.checkLevelUp(player);
+    }
+
+    /**
+     * Checks if a player should level up and handles the level up process
+     * @param player The player to check
+     */
+    private checkLevelUp(player: Player): void {
+        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        
+        if (player.experience >= experienceNeeded) {
+            this.levelUpPlayer(player);
+        }
+    }
+
+    /**
+     * Levels up a player and boosts their stats
+     * @param player The player to level up
+     */
+    private levelUpPlayer(player: Player): void {
+        const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
+        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        
+        // Level up
+        player.level++;
+        player.experience -= experienceNeeded;
+        
+        // Boost stats by 15%
+        player.maxHealth = Math.round(player.maxHealth * boostMultiplier);
+        player.health = player.maxHealth; // Restore health on level up
+        player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
+        player.attackRadius = Math.round(player.attackRadius * boostMultiplier);
+        player.attackSpeed = player.attackSpeed * boostMultiplier;
+        player.respawnDuration = Math.round(player.respawnDuration * (1 - GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Reduce respawn time
+        
+        console.log(`Player ${player.id} leveled up to level ${player.level}!`);
     }
 
     /**

@@ -46,6 +46,11 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_SPEED: 0.5, // attacks per second
         },
     },
+    EXPERIENCE: {
+        TOWER_DESTROYED: 20,
+        LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
+        STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
+    },
 } as const;
 
 // Client Configuration
@@ -80,6 +85,15 @@ export const CLIENT_CONFIG = {
             HEIGHT: 20,
             BACKGROUND_COLOR: 0x333333,
             HEALTH_COLOR: 0x2ecc71, // green
+            TEXT_COLOR: '#ffffff',
+        },
+        EXPERIENCE_BAR: {
+            X: 20,
+            Y: 50,
+            WIDTH: 200,
+            HEIGHT: 15,
+            BACKGROUND_COLOR: 0x333333,
+            EXPERIENCE_COLOR: 0xf1c40f, // yellow
             TEXT_COLOR: '#ffffff',
         },
     },

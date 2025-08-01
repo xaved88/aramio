@@ -115,6 +115,8 @@ export class GameRoom extends Room<GameState> {
         player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
         player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
         player.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
+        player.experience = 0;
+        player.level = 1;
         player.lastAttackTime = 0;
         this.state.players.set(client.sessionId, player);
     }

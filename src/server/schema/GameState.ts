@@ -23,6 +23,8 @@ export class Player extends Combatant {
     @type('string') state = 'alive'; // 'alive' or 'respawning'
     @type('number') respawnTime = 0; // timestamp when respawn completes
     @type('number') respawnDuration = 6000; // respawn duration in ms
+    @type('number') experience = 0;
+    @type('number') level = 1;
 }
 
 export class Cradle extends Combatant {
