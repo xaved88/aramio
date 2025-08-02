@@ -5,15 +5,14 @@ import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { COMBATANT_TYPES, isPlayerCombatant, type Combatant, type PlayerCombatant, type AttackEvent } from '../../shared/types/CombatantTypes';
 import { type SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
+import { EntityManager } from '../entity/EntityManager';
+import { AnimationManager } from '../animation/AnimationManager';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
     private room: any;
-    private combatantGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private combatantTweens: Map<string, Phaser.Tweens.Tween> = new Map();
-    private combatantTexts: Map<string, Phaser.GameObjects.Text> = new Map();
-    private combatantRadiusIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private playerRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private entityManager!: EntityManager;
+    private animationManager!: AnimationManager;
     private processedAttackEvents: Set<string> = new Set();
     private hudHealthBar: Phaser.GameObjects.Graphics | null = null;
     private hudHealthBarBackground: Phaser.GameObjects.Graphics | null = null;
@@ -34,13 +33,17 @@ export class GameScene extends Phaser.Scene {
     async create() {
         this.client = new Client('ws://localhost:2567');
         
+        // Initialize managers
+        this.entityManager = new EntityManager(this);
+        this.animationManager = new AnimationManager(this);
+        
         try {
             this.room = await this.client.joinOrCreate('game');
             console.log('Connected to server');
             
             this.room.onStateChange((colyseusState: GameState) => {
                 const sharedState = convertToSharedGameState(colyseusState);
-                this.updateCombatants(sharedState);
+                this.updateCombatantEntities(sharedState);
                 this.processAttackEvents(sharedState);
                 this.updateHUD(sharedState);
             });
@@ -71,6 +74,11 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
+    private updateCombatantEntities(state: SharedGameState) {
+        // Delegate combatant entity updates to the EntityManager
+        this.entityManager.updateCombatantEntities(state);
+    }
+
     private processAttackEvents(state: SharedGameState) {
         state.attackEvents.forEach(event => {
             const eventKey = `${event.sourceId}-${event.targetId}-${event.timestamp}`;
@@ -89,17 +97,10 @@ export class GameScene extends Phaser.Scene {
     }
 
     private animateAttackSource(combatantId: string) {
-        const radiusIndicator = this.combatantRadiusIndicators.get(combatantId);
+        const radiusIndicator = this.entityManager.getEntityRadiusIndicator(combatantId);
         
         if (radiusIndicator) {
-            // Flash the radius indicator
-            this.tweens.add({
-                targets: radiusIndicator,
-                alpha: 0,
-                duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_SOURCE_DURATION_MS,
-                yoyo: true,
-                ease: 'Linear'
-            });
+            this.animationManager.animateAttackSource(combatantId, radiusIndicator);
         }
     }
 
@@ -107,206 +108,10 @@ export class GameScene extends Phaser.Scene {
         const combatant = state.combatants.get(combatantId);
         if (!combatant) return;
         
-        const flashDuration = CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_DURATION_MS;
-        const combatantGraphics = this.combatantGraphics.get(combatantId);
+        const combatantGraphics = this.entityManager.getEntityGraphics(combatantId);
         
         if (combatantGraphics) {
-            // Quick jump to flash alpha, then slow fade back
-            this.tweens.add({
-                targets: combatantGraphics,
-                alpha: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_ALPHA,
-                duration: 50, // Quick jump (50ms)
-                ease: 'Power2',
-                onComplete: () => {
-                    // Slow fade back to normal
-                    this.tweens.add({
-                        targets: combatantGraphics,
-                        alpha: 1,
-                        duration: flashDuration - 50, // Remaining time for slow fade
-                        ease: 'Power1'
-                    });
-                }
-            });
-        }
-    }
-
-    private updateCombatants(state: SharedGameState) {
-        // Update existing combatants and create new ones
-        state.combatants.forEach((combatantData: Combatant) => {
-            let combatantGraphics = this.combatantGraphics.get(combatantData.id);
-            let combatantText = this.combatantTexts.get(combatantData.id);
-            let radiusIndicator = this.combatantRadiusIndicators.get(combatantData.id);
-            
-            if (!combatantGraphics) {
-                // Create new combatant graphics
-                combatantGraphics = this.add.graphics();
-                this.combatantGraphics.set(combatantData.id, combatantGraphics);
-            }
-            
-            if (!combatantText) {
-                // Create new text
-                combatantText = this.add.text(0, 0, '', {
-                    fontSize: '12px',
-                    color: '#000000'
-                }).setOrigin(0.5);
-                this.combatantTexts.set(combatantData.id, combatantText);
-            }
-            
-            if (!radiusIndicator) {
-                // Create new radius indicator
-                radiusIndicator = this.add.graphics();
-                radiusIndicator.setDepth(-1); // Put behind other elements
-                this.combatantRadiusIndicators.set(combatantData.id, radiusIndicator);
-            }
-            
-            // Handle respawn ring for players
-            let respawnRing = this.playerRespawnRings.get(combatantData.id);
-            if (combatantData.type === COMBATANT_TYPES.PLAYER) {
-                if (!respawnRing) {
-                    respawnRing = this.add.graphics();
-                    respawnRing.setDepth(-2); // Put behind radius indicators
-                    this.playerRespawnRings.set(combatantData.id, respawnRing);
-                }
-            }
-            
-            // Stop any existing tween for this combatant
-            const existingTween = this.combatantTweens.get(combatantData.id);
-            if (existingTween) {
-                existingTween.stop();
-            }
-            
-            // Create smooth tween to new position
-            const tweenTargets = [combatantGraphics, combatantText, radiusIndicator];
-            if (respawnRing) tweenTargets.push(respawnRing);
-            
-            const tween = this.tweens.add({
-                targets: tweenTargets,
-                x: combatantData.x,
-                y: combatantData.y,
-                duration: CLIENT_CONFIG.INTERPOLATION_DURATION_MS,
-                ease: 'Linear',
-                onComplete: () => {
-                    this.combatantTweens.delete(combatantData.id);
-                }
-            });
-            
-            this.combatantTweens.set(combatantData.id, tween);
-            
-            // Update the combatant's visual appearance based on type
-            this.renderCombatant(combatantData, combatantGraphics, radiusIndicator, respawnRing, state);
-            
-            // Update health text
-            const healthPercent = Math.round((combatantData.health / combatantData.maxHealth) * 100);
-            combatantText.setText(`${healthPercent}%`);
-        });
-        
-        // Remove combatants that no longer exist
-        this.combatantGraphics.forEach((combatantGraphics, combatantId) => {
-            if (!state.combatants.has(combatantId)) {
-                const tween = this.combatantTweens.get(combatantId);
-                if (tween) {
-                    tween.stop();
-                    this.combatantTweens.delete(combatantId);
-                }
-                const combatantText = this.combatantTexts.get(combatantId);
-                if (combatantText) {
-                    combatantText.destroy();
-                    this.combatantTexts.delete(combatantId);
-                }
-                const radiusIndicator = this.combatantRadiusIndicators.get(combatantId);
-                if (radiusIndicator) {
-                    radiusIndicator.destroy();
-                    this.combatantRadiusIndicators.delete(combatantId);
-                }
-                const respawnRing = this.playerRespawnRings.get(combatantId);
-                if (respawnRing) {
-                    respawnRing.destroy();
-                    this.playerRespawnRings.delete(combatantId);
-                }
-                combatantGraphics.destroy();
-                this.combatantGraphics.delete(combatantId);
-            }
-        });
-    }
-
-    private renderCombatant(
-        combatant: Combatant, 
-        graphics: Phaser.GameObjects.Graphics, 
-        radiusIndicator: Phaser.GameObjects.Graphics,
-        respawnRing: Phaser.GameObjects.Graphics | undefined,
-        state: SharedGameState
-    ) {
-        graphics.clear();
-        
-        // Determine color based on team and state
-        let color;
-        if (combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant) && combatant.state === 'respawning') {
-            color = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
-        } else {
-            color = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
-        }
-        
-        // Render based on type
-        switch (combatant.type) {
-            case COMBATANT_TYPES.PLAYER:
-                graphics.fillStyle(color, 1);
-                graphics.fillCircle(0, 0, CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS);
-                break;
-            case COMBATANT_TYPES.CRADLE:
-                graphics.fillStyle(color, 1);
-                graphics.fillRect(
-                    -CLIENT_CONFIG.CRADLE_SIZE / 2,
-                    -CLIENT_CONFIG.CRADLE_SIZE / 2,
-                    CLIENT_CONFIG.CRADLE_SIZE,
-                    CLIENT_CONFIG.CRADLE_SIZE
-                );
-                break;
-            case COMBATANT_TYPES.TURRET:
-                if (combatant.health > 0) {
-                    graphics.fillStyle(color, 1);
-                    graphics.fillRect(
-                        -CLIENT_CONFIG.TURRET_SIZE.width / 2,
-                        -CLIENT_CONFIG.TURRET_SIZE.height / 2,
-                        CLIENT_CONFIG.TURRET_SIZE.width,
-                        CLIENT_CONFIG.TURRET_SIZE.height
-                    );
-                    graphics.setVisible(true);
-                } else {
-                    graphics.setVisible(false);
-                }
-                break;
-        }
-        
-        // Update respawn ring for players
-        if (respawnRing && combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
-            respawnRing.clear();
-            if (combatant.state === 'respawning') {
-                const respawnDuration = combatant.respawnDuration;
-                const timeElapsed = respawnDuration - (combatant.respawnTime - state.gameTime);
-                const respawnProgress = Math.max(0, Math.min(1, timeElapsed / respawnDuration));
-                const ringColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
-                
-                respawnRing.lineStyle(CLIENT_CONFIG.RESPAWN_RING.THICKNESS, ringColor, CLIENT_CONFIG.RESPAWN_RING.ALPHA);
-                respawnRing.beginPath();
-                respawnRing.arc(0, 0, CLIENT_CONFIG.RESPAWN_RING.RADIUS, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
-                respawnRing.strokePath();
-            }
-        }
-        
-        // Update radius indicator
-        radiusIndicator.clear();
-        if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.PLAYER || !isPlayerCombatant(combatant) || combatant.state !== 'respawning')) {
-            radiusIndicator.lineStyle(1, 0x000000, 0.3); // Thin black line with alpha
-            radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
-        }
-        
-        // Handle turret visibility for text and radius indicator
-        if (combatant.type === COMBATANT_TYPES.TURRET) {
-            const combatantText = this.combatantTexts.get(combatant.id);
-            if (combatantText) {
-                combatantText.setVisible(combatant.health > 0);
-            }
-            radiusIndicator.setVisible(combatant.health > 0);
+            this.animationManager.animateAttackTarget(combatantId, combatantGraphics);
         }
     }
 
@@ -404,5 +209,17 @@ export class GameScene extends Phaser.Scene {
         
         // Update level text
         this.hudLevelText.setText(`Lv.${currentPlayer.level}`);
+    }
+
+    /**
+     * Clean up when scene is destroyed
+     */
+    destroy() {
+        if (this.entityManager) {
+            this.entityManager.destroy();
+        }
+        if (this.animationManager) {
+            this.animationManager.destroy();
+        }
     }
 } 
