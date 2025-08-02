@@ -166,7 +166,10 @@ function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameSta
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.PLAYER && combatant.team === opposingTeam) {
             const player = combatant as Player;
-            grantExperience(player, amount);
+            // Only grant experience to alive players, not respawning ones
+            if (player.state === 'alive') {
+                grantExperience(player, amount);
+            }
         }
     });
 }
