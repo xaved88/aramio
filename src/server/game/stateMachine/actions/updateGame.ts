@@ -27,6 +27,9 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     // Process combat
     processCombat(state);
     
+    // Check and spawn minion waves
+    MinionManager.checkAndSpawnWave(state);
+    
     // Move minions
     MinionManager.moveMinions(state);
     

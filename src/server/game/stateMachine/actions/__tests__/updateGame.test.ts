@@ -344,4 +344,74 @@ describe('handleUpdateGame', () => {
             expect(result.newState.gamePhase).toBe('playing');
         });
     });
+
+    describe('minion wave spawning', () => {
+        let blueCradle: Combatant;
+        let redCradle: Combatant;
+
+        beforeEach(() => {
+            // Create blue cradle
+            blueCradle = new Combatant();
+            blueCradle.id = 'blue-cradle';
+            blueCradle.type = COMBATANT_TYPES.CRADLE;
+            blueCradle.team = 'blue';
+            blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
+            blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
+            blueCradle.health = 1000;
+            blueCradle.maxHealth = 1000;
+            blueCradle.attackRadius = 30;
+            blueCradle.attackStrength = 40;
+            blueCradle.attackSpeed = 0.3;
+            blueCradle.lastAttackTime = 0;
+            
+            // Create red cradle
+            redCradle = new Combatant();
+            redCradle.id = 'red-cradle';
+            redCradle.type = COMBATANT_TYPES.CRADLE;
+            redCradle.team = 'red';
+            redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
+            redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
+            redCradle.health = 1000;
+            redCradle.maxHealth = 1000;
+            redCradle.attackRadius = 30;
+            redCradle.attackStrength = 40;
+            redCradle.attackSpeed = 0.3;
+            redCradle.lastAttackTime = 0;
+            
+            gameState.combatants.set(blueCradle.id, blueCradle);
+            gameState.combatants.set(redCradle.id, redCradle);
+        });
+
+        it('should not spawn waves before first wave delay', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS - 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            result = handleUpdateGame(gameState, action);
+            
+            expect(result.newState.combatants.size).toBe(initialMinionCount);
+            expect(result.newState.currentWave).toBe(0);
+        });
+
+        it('should spawn first wave after delay', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            result = handleUpdateGame(gameState, action);
+            
+            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            expect(result.newState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+            expect(result.newState.currentWave).toBe(1);
+        });
+
+        it('should spawn multiple waves over time', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + GAMEPLAY_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS * 2 + 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            result = handleUpdateGame(gameState, action);
+            
+            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2 * 3; // 3 waves
+            expect(result.newState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+            expect(result.newState.currentWave).toBe(3);
+        });
+    });
 }); 

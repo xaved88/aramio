@@ -1,7 +1,7 @@
 import { MinionManager } from '../MinionManager';
 import { GameState, Minion, Combatant } from '../../../schema/GameState';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
-import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, MINION_TYPES } from '../../../../shared/types/CombatantTypes';
 
 describe('MinionManager', () => {
     let gameState: GameState;
@@ -191,6 +191,143 @@ describe('MinionManager', () => {
             
             expect(blueMinion.x).toBe(originalX);
             expect(blueMinion.y).toBe(originalY);
+        });
+    });
+
+    describe('spawnMinionWave', () => {
+        it('should spawn correct number of minions for each team', () => {
+            const initialMinionCount = gameState.combatants.size;
+            
+            MinionManager.spawnMinionWave(gameState);
+            
+            // Should spawn 2 warriors + 2 archers for each team = 8 total new minions
+            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+        });
+
+        it('should spawn minions near their respective cradles', () => {
+            // Clear existing minions to test only new spawns
+            const existingMinions = Array.from(gameState.combatants.values()).filter(c => c.type === COMBATANT_TYPES.MINION);
+            existingMinions.forEach(minion => gameState.combatants.delete(minion.id));
+            
+            MinionManager.spawnMinionWave(gameState);
+            
+            const blueMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'blue'
+            );
+            const redMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'red'
+            );
+            
+            // Check blue minions are near blue cradle
+            blueMinions.forEach(minion => {
+                const distance = Math.sqrt(
+                    Math.pow(minion.x - GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x, 2) +
+                    Math.pow(minion.y - GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y, 2)
+                );
+                expect(distance).toBeLessThanOrEqual(GAMEPLAY_CONFIG.MINION_SPAWNING.SPAWN_RADIUS);
+            });
+            
+            // Check red minions are near red cradle
+            redMinions.forEach(minion => {
+                const distance = Math.sqrt(
+                    Math.pow(minion.x - GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x, 2) +
+                    Math.pow(minion.y - GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y, 2)
+                );
+                expect(distance).toBeLessThanOrEqual(GAMEPLAY_CONFIG.MINION_SPAWNING.SPAWN_RADIUS);
+            });
+        });
+
+        it('should spawn both warrior and archer minions', () => {
+            // Clear existing minions to test only new spawns
+            const existingMinions = Array.from(gameState.combatants.values()).filter(c => c.type === COMBATANT_TYPES.MINION);
+            existingMinions.forEach(minion => gameState.combatants.delete(minion.id));
+            
+            MinionManager.spawnMinionWave(gameState);
+            
+            const blueMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'blue'
+            ) as Minion[];
+            const redMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'red'
+            ) as Minion[];
+            
+            const blueWarriors = blueMinions.filter(m => m.minionType === MINION_TYPES.WARRIOR);
+            const blueArchers = blueMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
+            const redWarriors = redMinions.filter(m => m.minionType === MINION_TYPES.WARRIOR);
+            const redArchers = redMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
+            
+            expect(blueWarriors.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
+            expect(blueArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(redWarriors.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
+            expect(redArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+        });
+
+        it('should spawn minions with correct stats based on type', () => {
+            MinionManager.spawnMinionWave(gameState);
+            
+            const blueMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'blue'
+            ) as Minion[];
+            
+            const warrior = blueMinions.find(m => m.minionType === MINION_TYPES.WARRIOR);
+            const archer = blueMinions.find(m => m.minionType === MINION_TYPES.ARCHER);
+            
+            expect(warrior?.health).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.HEALTH);
+            expect(warrior?.attackRadius).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS);
+            expect(warrior?.attackStrength).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH);
+            expect(warrior?.attackSpeed).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_SPEED);
+            
+            expect(archer?.health).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.HEALTH);
+            expect(archer?.attackRadius).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_RADIUS);
+            expect(archer?.attackStrength).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_STRENGTH);
+            expect(archer?.attackSpeed).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_SPEED);
+        });
+    });
+
+    describe('checkAndSpawnWave', () => {
+        it('should not spawn waves before first wave delay', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS - 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            expect(gameState.combatants.size).toBe(initialMinionCount);
+            expect(gameState.currentWave).toBe(0);
+        });
+
+        it('should spawn first wave after delay', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+            expect(gameState.currentWave).toBe(1);
+        });
+
+        it('should spawn multiple waves over time', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + GAMEPLAY_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS * 2 + 100;
+            const initialMinionCount = gameState.combatants.size;
+            
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2 * 3; // 3 waves
+            expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+            expect(gameState.currentWave).toBe(3);
+        });
+
+        it('should not spawn duplicate waves', () => {
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            gameState.currentWave = 1; // Already spawned first wave
+            
+            const initialMinionCount = gameState.combatants.size;
+            
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            expect(gameState.combatants.size).toBe(initialMinionCount);
+            expect(gameState.currentWave).toBe(1);
         });
     });
 }); 

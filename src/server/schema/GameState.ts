@@ -36,6 +36,7 @@ export class Minion extends Combatant {
 export class GameState extends Schema {
     @type('number') gameTime = 0;
     @type('string') gamePhase = 'playing';
+    @type('number') currentWave = 0;
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
 } 

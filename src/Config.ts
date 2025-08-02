@@ -8,7 +8,7 @@ export const SERVER_CONFIG = {
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
     PLAYER_MOVE_SPEED: 6, // pixels per frame
-    MINION_MOVE_SPEED: 4, // pixels per frame - slower than players
+    MINION_MOVE_SPEED: 3, // pixels per frame - slower than players
     PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUNDS: {
         MIN_X: 20,
@@ -66,6 +66,13 @@ export const GAMEPLAY_CONFIG = {
         MINION_KILLED: 2,
         LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
         STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
+    },
+    MINION_SPAWNING: {
+        WARRIORS_PER_WAVE: 2,
+        ARCHERS_PER_WAVE: 2,
+        FIRST_WAVE_DELAY_MS: 3000, // 3 seconds
+        WAVE_INTERVAL_MS: 10000, // 10 seconds
+        SPAWN_RADIUS: 30, // radius around cradle to spawn minions
     },
 } as const;
 
