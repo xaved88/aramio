@@ -14,6 +14,12 @@ export const MINION_TYPES = {
 
 export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 
+export interface Ability {
+    type: string;
+    cooldown: number;
+    lastUsedTime: number;
+}
+
 export interface BaseCombatant {
     id: string;
     type: CombatantType;
@@ -35,6 +41,7 @@ export interface PlayerCombatant extends BaseCombatant {
     respawnDuration: number;
     experience: number;
     level: number;
+    ability: Ability;
 }
 
 export interface CradleCombatant extends BaseCombatant {

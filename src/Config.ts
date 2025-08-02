@@ -3,6 +3,13 @@ export const SERVER_CONFIG = {
     PORT: 2567,
     UPDATE_RATE_MS: 50,
     MAX_CLIENTS_PER_ROOM: 10,
+    ROOM: {
+        GAME_RESTART_DELAY_MS: 5000, // 5 seconds delay before restart
+        TEAM_ASSIGNMENT: {
+            EVEN_PLAYER_COUNT_TEAM: 'blue',
+            ODD_PLAYER_COUNT_TEAM: 'red',
+        },
+    },
 } as const;
 
 // Gameplay Configuration
@@ -33,6 +40,10 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_STRENGTH: 100,
             ATTACK_SPEED: 1, // attacks per second
             RESPAWN_TIME_MS: 6000,
+            ABILITY: {
+                TYPE: 'projectile',
+                COOLDOWN_MS: 5000, // 5 seconds
+            },
         },
         CRADLE: {
             HEALTH: 10,

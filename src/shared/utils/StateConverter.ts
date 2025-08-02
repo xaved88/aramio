@@ -54,7 +54,12 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combata
                 respawnTime: player.respawnTime,
                 respawnDuration: player.respawnDuration,
                 experience: player.experience,
-                level: player.level
+                level: player.level,
+                ability: {
+                    type: player.ability.type,
+                    cooldown: player.ability.cooldown,
+                    lastUsedTime: player.ability.lastUsedTime
+                }
             } as PlayerCombatant;
             
         case COMBATANT_TYPES.CRADLE:

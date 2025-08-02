@@ -1,4 +1,4 @@
-import { GameState, Player } from '../../../schema/GameState';
+import { GameState, Player, Ability } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -30,6 +30,12 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     player.lastAttackTime = 0;
     player.state = 'alive';
     player.respawnTime = 0;
+    
+    // Initialize ability
+    player.ability = new Ability();
+    player.ability.type = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.TYPE;
+    player.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.COOLDOWN_MS;
+    player.ability.lastUsedTime = 0; // Start with 0, first use will be available
     
     state.combatants.set(player.id, player);
     

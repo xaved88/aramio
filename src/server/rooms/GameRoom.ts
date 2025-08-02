@@ -56,6 +56,14 @@ export class GameRoom extends Room<GameState> {
                 clientId: client.sessionId
             });
         });
+        
+        this.onMessage('useAbility', (client, data) => {
+            this.commands.push({
+                type: 'useAbility',
+                data: data,
+                clientId: client.sessionId
+            });
+        });
     }
 
     onJoin(client: Client, options: any) {
@@ -64,7 +72,9 @@ export class GameRoom extends Room<GameState> {
         // Determine team based on current player count
         const currentPlayerCount = Array.from(this.state.combatants.values())
             .filter(c => c.type === 'player').length;
-        const team = currentPlayerCount % 2 === 0 ? 'blue' : 'red';
+        const team = currentPlayerCount % 2 === 0 
+            ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
+            : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
         
         // Spawn player through the game engine
         this.gameEngine.spawnPlayer(client.sessionId, team);
@@ -91,15 +101,7 @@ export class GameRoom extends Room<GameState> {
         const currentTime = Date.now();
         const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
         this.lastUpdateTime = currentTime;
-        
-        const totalHP = getTotalCombatantHealth(this.state);
         const result = this.gameEngine.update(deltaTime);
-        const afterHp = getTotalCombatantHealth(this.state);
-
-        if(afterHp != totalHP) {
-            console.log("Server State Changed:", gameStateToString(this.state))
-        }
-
         // Handle game over events
         if (result && result.events) {
             this.handleGameEvents(result.events);
@@ -113,15 +115,25 @@ export class GameRoom extends Room<GameState> {
     }
 
     private processCommands() {
-        // Group commands by client and take the latest from each
-        const latestCommands = new Map<string, GameCommand>();
+        // Group move commands by client and take the latest from each
+        const latestMoveCommands = new Map<string, GameCommand>();
+        const otherCommands: GameCommand[] = [];
         
         this.commands.forEach(command => {
-            latestCommands.set(command.clientId, command);
+            if (command.type === 'move') {
+                latestMoveCommands.set(command.clientId, command);
+            } else {
+                otherCommands.push(command);
+            }
         });
         
-        // Process each latest command
-        latestCommands.forEach(command => {
+        // Process latest move commands
+        latestMoveCommands.forEach(command => {
+            this.processCommand(command);
+        });
+        
+        // Process all other commands
+        otherCommands.forEach(command => {
             this.processCommand(command);
         });
     }
@@ -130,6 +142,9 @@ export class GameRoom extends Room<GameState> {
         switch (command.type) {
             case 'move':
                 this.handleMoveCommand(command);
+                break;
+            case 'useAbility':
+                this.handleUseAbilityCommand(command);
                 break;
             default:
                 console.log(`Unknown command type: ${command.type}`);
@@ -142,6 +157,11 @@ export class GameRoom extends Room<GameState> {
         }
     }
 
+    private handleUseAbilityCommand(command: GameCommand) {
+        if (command.data.x !== undefined && command.data.y !== undefined) {
+            this.gameEngine.useAbility(command.clientId, command.data.x, command.data.y);
+        }
+    }
 
 
     private handleGameEvents(events: any[]): void {
@@ -166,7 +186,7 @@ export class GameRoom extends Room<GameState> {
         
         this.restartTimer = setTimeout(() => {
             this.restartGame();
-        }, 5000); // 5 seconds delay
+        }, SERVER_CONFIG.ROOM.GAME_RESTART_DELAY_MS);
     }
 
     private restartGame(): void {

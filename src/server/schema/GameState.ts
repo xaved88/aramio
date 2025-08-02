@@ -7,6 +7,12 @@ export class AttackEvent extends Schema {
     @type('number') timestamp!: number;
 }
 
+export class Ability extends Schema {
+    @type('string') type!: string;
+    @type('number') cooldown!: number; // cooldown duration in ms
+    @type('number') lastUsedTime!: number; // timestamp when ability was last used
+}
+
 export class Combatant extends Schema {
     @type('string') id!: string;
     @type('string') type!: CombatantType;
@@ -27,6 +33,7 @@ export class Player extends Combatant {
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
+    @type(Ability) ability!: Ability;
 }
 
 export class Minion extends Combatant {

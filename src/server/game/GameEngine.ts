@@ -92,6 +92,37 @@ export class GameEngine {
     }
 
     /**
+     * Uses a player's ability at the specified coordinates
+     * @param playerId The player's ID
+     * @param x X coordinate where ability was used
+     * @param y Y coordinate where ability was used
+     */
+    useAbility(playerId: string, x: number, y: number): void {
+        const player = this.state.combatants.get(playerId) as any;
+        if (!player || player.type !== 'player') {
+            console.log(`Ability use failed: Player ${playerId} not found or not a player`);
+            return;
+        }
+
+        const currentTime = Date.now();
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
+        if (player.ability.lastUsedTime === 0) {
+            console.log('Ability used (first time)');
+            player.ability.lastUsedTime = currentTime;
+            return;
+        }
+        
+        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
+        if (timeSinceLastUse < player.ability.cooldown) {
+            return; // Ability is on cooldown
+        }
+
+        console.log('Ability used');
+        player.ability.lastUsedTime = currentTime;
+    }
+
+    /**
      * Ends the game with a winner
      * @param winningTeam The team that won
      */

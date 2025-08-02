@@ -48,6 +48,7 @@ export class GameScene extends Phaser.Scene {
             console.log(`Client session ID: ${this.playerSessionId}`);
             
             this.setupRoomHandlers();
+            this.setupInputHandlers();
             
             this.uiManager.createHUD();
             
@@ -126,15 +127,7 @@ export class GameScene extends Phaser.Scene {
 
     private setupRoomHandlers() {
         this.room.onStateChange((colyseusState: GameState) => {
-            console.log(`State change received with ${colyseusState.combatants.size} combatants`);
             this.lastState = colyseusState      
-            const newHp = getTotalCombatantHealth(this.lastState);
-
-            if(this.totalHP != newHp) {
-                console.log("State Changed:", gameStateToString(this.lastState))
-                console.log(this.lastState)                
-                this.totalHP = newHp
-            }
             
             const sharedState = convertToSharedGameState(colyseusState);
             
@@ -162,6 +155,17 @@ export class GameScene extends Phaser.Scene {
             this.playerTeam = player.team;
             console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
         }
+    }
+
+    private setupInputHandlers(): void {
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            if (this.room) {
+                this.room.send('useAbility', {
+                    x: pointer.x,
+                    y: pointer.y
+                });
+            }
+        });
     }
 
     /**
