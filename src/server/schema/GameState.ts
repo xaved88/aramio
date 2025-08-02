@@ -1,6 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { GAMEPLAY_CONFIG } from '../../Config';
-import { CombatantType } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType } from '../../shared/types/CombatantTypes';
 
 export class AttackEvent extends Schema {
     @type('string') sourceId!: string;
@@ -28,6 +27,10 @@ export class Player extends Combatant {
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
+}
+
+export class Minion extends Combatant {
+    @type('string') minionType!: MinionType;
 }
 
 export class GameState extends Schema {

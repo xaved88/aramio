@@ -1,6 +1,6 @@
-import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Player as ColyseusPlayer } from '../../server/schema/GameState';
+import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Player as ColyseusPlayer, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState } from '../types/GameStateTypes';
-import { Combatant, PlayerCombatant, CradleCombatant, TurretCombatant, AttackEvent, COMBATANT_TYPES } from '../types/CombatantTypes';
+import { Combatant, PlayerCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<string, Combatant>();
@@ -65,6 +65,14 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combata
                 ...baseCombatant,
                 type: COMBATANT_TYPES.TURRET
             } as TurretCombatant;
+            
+        case COMBATANT_TYPES.MINION:
+            const minion = colyseusCombatant as ColyseusMinion;
+            return {
+                ...baseCombatant,
+                type: COMBATANT_TYPES.MINION,
+                minionType: minion.minionType
+            } as MinionCombatant;
             
         default:
             throw new Error(`Unknown combatant type: ${colyseusCombatant.type}`);

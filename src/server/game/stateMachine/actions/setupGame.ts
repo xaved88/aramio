@@ -1,7 +1,7 @@
-import { GameState, Combatant } from '../../../schema/GameState';
+import { GameState, Combatant, Minion } from '../../../schema/GameState';
 import { SetupGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
-import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, MINION_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export function handleSetupGame(state: GameState, action: SetupGameAction): StateMachineResult {
     // Clear existing state
@@ -69,6 +69,22 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
     redTurret.lastAttackTime = 0;
     state.combatants.set(redTurret.id, redTurret);
+    
+    // Create red warrior minion in center
+    const redWarrior = new Minion();
+    redWarrior.id = 'red-warrior-1';
+    redWarrior.type = COMBATANT_TYPES.MINION;
+    redWarrior.minionType = MINION_TYPES.WARRIOR;
+    redWarrior.x = 300; // center of map
+    redWarrior.y = 300;
+    redWarrior.team = 'red';
+    redWarrior.health = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.HEALTH;
+    redWarrior.maxHealth = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.HEALTH;
+    redWarrior.attackRadius = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS;
+    redWarrior.attackStrength = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH;
+    redWarrior.attackSpeed = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_SPEED;
+    redWarrior.lastAttackTime = 0;
+    state.combatants.set(redWarrior.id, redWarrior);
     
     return { newState: state };
 } 

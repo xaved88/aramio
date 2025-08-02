@@ -1,10 +1,18 @@
 export const COMBATANT_TYPES = {
     PLAYER: 'player',
     CRADLE: 'cradle',
-    TURRET: 'turret'
+    TURRET: 'turret',
+    MINION: 'minion'
 } as const;
 
 export type CombatantType = typeof COMBATANT_TYPES[keyof typeof COMBATANT_TYPES];
+
+export const MINION_TYPES = {
+    WARRIOR: 'warrior',
+    ARCHER: 'archer'
+} as const;
+
+export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 
 export interface BaseCombatant {
     id: string;
@@ -37,7 +45,12 @@ export interface TurretCombatant extends BaseCombatant {
     type: typeof COMBATANT_TYPES.TURRET;
 }
 
-export type Combatant = PlayerCombatant | CradleCombatant | TurretCombatant;
+export interface MinionCombatant extends BaseCombatant {
+    type: typeof COMBATANT_TYPES.MINION;
+    minionType: MinionType;
+}
+
+export type Combatant = PlayerCombatant | CradleCombatant | TurretCombatant | MinionCombatant;
 
 export interface AttackEvent {
     sourceId: string;
@@ -55,4 +68,8 @@ export function isCradleCombatant(combatant: Combatant): combatant is CradleComb
 
 export function isTurretCombatant(combatant: Combatant): combatant is TurretCombatant {
     return combatant.type === COMBATANT_TYPES.TURRET;
+}
+
+export function isMinionCombatant(combatant: Combatant): combatant is MinionCombatant {
+    return combatant.type === COMBATANT_TYPES.MINION;
 } 

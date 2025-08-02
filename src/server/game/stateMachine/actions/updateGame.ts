@@ -3,6 +3,7 @@ import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
+import { MinionManager } from '../../combatants/MinionManager';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
     // Update game time directly on the state
@@ -25,6 +26,9 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     
     // Process combat
     processCombat(state);
+    
+    // Move minions
+    MinionManager.moveMinions(state);
     
     // Handle respawning and dead combatants
     handleDeadCombatants(state);
@@ -111,6 +115,22 @@ function handleDeadCombatants(state: GameState): void {
     
     // Remove destroyed turrets
     turretsToRemove.forEach(id => {
+        state.combatants.delete(id);
+    });
+    
+    // Handle minion death and grant experience
+    const minionsToRemove: string[] = [];
+    state.combatants.forEach((combatant, id) => {
+        if (combatant.type === COMBATANT_TYPES.MINION) {
+            if (!CombatantUtils.isCombatantAlive(combatant)) {
+                grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state);
+                minionsToRemove.push(id);
+            }
+        }
+    });
+    
+    // Remove dead minions
+    minionsToRemove.forEach(id => {
         state.combatants.delete(id);
     });
 }

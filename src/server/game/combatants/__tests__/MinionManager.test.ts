@@ -1,0 +1,196 @@
+import { MinionManager } from '../MinionManager';
+import { GameState, Minion, Combatant } from '../../../schema/GameState';
+import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+
+describe('MinionManager', () => {
+    let gameState: GameState;
+    let blueMinion: Minion;
+    let redMinion: Minion;
+    let blueCradle: Combatant;
+    let redCradle: Combatant;
+    let bluePlayer: Combatant;
+
+    beforeEach(() => {
+        gameState = new GameState();
+        
+        // Create blue minion
+        blueMinion = new Minion();
+        blueMinion.id = 'blue-minion-1';
+        blueMinion.type = COMBATANT_TYPES.MINION;
+        blueMinion.team = 'blue';
+        blueMinion.x = 100;
+        blueMinion.y = 100;
+        blueMinion.health = 8;
+        blueMinion.maxHealth = 8;
+        blueMinion.attackRadius = 40;
+        blueMinion.attackStrength = 15;
+        blueMinion.attackSpeed = 0.8;
+        blueMinion.lastAttackTime = 0;
+        blueMinion.minionType = 'warrior';
+        
+        // Create red minion
+        redMinion = new Minion();
+        redMinion.id = 'red-minion-1';
+        redMinion.type = COMBATANT_TYPES.MINION;
+        redMinion.team = 'red';
+        redMinion.x = 500;
+        redMinion.y = 500;
+        redMinion.health = 8;
+        redMinion.maxHealth = 8;
+        redMinion.attackRadius = 40;
+        redMinion.attackStrength = 15;
+        redMinion.attackSpeed = 0.8;
+        redMinion.lastAttackTime = 0;
+        redMinion.minionType = 'warrior';
+        
+        // Create blue cradle
+        blueCradle = new Combatant();
+        blueCradle.id = 'blue-cradle';
+        blueCradle.type = COMBATANT_TYPES.CRADLE;
+        blueCradle.team = 'blue';
+        blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
+        blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
+        blueCradle.health = 1000;
+        blueCradle.maxHealth = 1000;
+        blueCradle.attackRadius = 30;
+        blueCradle.attackStrength = 40;
+        blueCradle.attackSpeed = 0.3;
+        blueCradle.lastAttackTime = 0;
+        
+        // Create red cradle
+        redCradle = new Combatant();
+        redCradle.id = 'red-cradle';
+        redCradle.type = COMBATANT_TYPES.CRADLE;
+        redCradle.team = 'red';
+        redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
+        redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
+        redCradle.health = 1000;
+        redCradle.maxHealth = 1000;
+        redCradle.attackRadius = 30;
+        redCradle.attackStrength = 40;
+        redCradle.attackSpeed = 0.3;
+        redCradle.lastAttackTime = 0;
+        
+        // Create blue player
+        bluePlayer = new Combatant();
+        bluePlayer.id = 'blue-player';
+        bluePlayer.type = COMBATANT_TYPES.PLAYER;
+        bluePlayer.team = 'blue';
+        bluePlayer.x = 150;
+        bluePlayer.y = 150;
+        bluePlayer.health = 10;
+        bluePlayer.maxHealth = 10;
+        bluePlayer.attackRadius = 50;
+        bluePlayer.attackStrength = 100;
+        bluePlayer.attackSpeed = 1;
+        bluePlayer.lastAttackTime = 0;
+        
+        // Add all combatants to game state
+        gameState.combatants.set(blueMinion.id, blueMinion);
+        gameState.combatants.set(redMinion.id, redMinion);
+        gameState.combatants.set(blueCradle.id, blueCradle);
+        gameState.combatants.set(redCradle.id, redCradle);
+        gameState.combatants.set(bluePlayer.id, bluePlayer);
+    });
+
+    describe('moveMinions', () => {
+        it('should not move dead minions', () => {
+            blueMinion.health = 0;
+            const originalX = blueMinion.x;
+            const originalY = blueMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            expect(blueMinion.x).toBe(originalX);
+            expect(blueMinion.y).toBe(originalY);
+        });
+
+        it('should not move minions when enemies are in attack range', () => {
+            // Place red player within blue minion's attack range
+            const redPlayer = new Combatant();
+            redPlayer.id = 'red-player';
+            redPlayer.type = COMBATANT_TYPES.PLAYER;
+            redPlayer.team = 'red';
+            redPlayer.x = blueMinion.x + 20; // Within 40 radius
+            redPlayer.y = blueMinion.y + 20;
+            redPlayer.health = 10;
+            redPlayer.maxHealth = 10;
+            redPlayer.attackRadius = 50;
+            redPlayer.attackStrength = 100;
+            redPlayer.attackSpeed = 1;
+            redPlayer.lastAttackTime = 0;
+            
+            gameState.combatants.set(redPlayer.id, redPlayer);
+            
+            const originalX = blueMinion.x;
+            const originalY = blueMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            expect(blueMinion.x).toBe(originalX);
+            expect(blueMinion.y).toBe(originalY);
+        });
+
+        it('should move minions towards enemy cradle when no enemies in range', () => {
+            const originalX = blueMinion.x;
+            const originalY = blueMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            // Should move towards red cradle (top right)
+            expect(blueMinion.x).toBeGreaterThan(originalX);
+            expect(blueMinion.y).toBeLessThan(originalY);
+        });
+
+        it('should move red minions towards blue cradle', () => {
+            const originalX = redMinion.x;
+            const originalY = redMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            // Should move towards blue cradle (bottom left)
+            expect(redMinion.x).toBeLessThan(originalX);
+            expect(redMinion.y).toBeGreaterThan(originalY);
+        });
+
+        it('should not move minions when enemy cradle is destroyed', () => {
+            redCradle.health = 0; // Destroy red cradle
+            
+            const originalX = blueMinion.x;
+            const originalY = blueMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            expect(blueMinion.x).toBe(originalX);
+            expect(blueMinion.y).toBe(originalY);
+        });
+
+        it('should respect game bounds when moving', () => {
+            // Place blue minion at edge of bounds
+            blueMinion.x = GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X;
+            blueMinion.y = GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            expect(blueMinion.x).toBeGreaterThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X);
+            expect(blueMinion.y).toBeGreaterThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y);
+            expect(blueMinion.x).toBeLessThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X);
+            expect(blueMinion.y).toBeLessThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y);
+        });
+
+        it('should not move when close to target', () => {
+            // Place blue minion very close to red cradle
+            blueMinion.x = redCradle.x + GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE - 1;
+            blueMinion.y = redCradle.y + GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE - 1;
+            
+            const originalX = blueMinion.x;
+            const originalY = blueMinion.y;
+            
+            MinionManager.moveMinions(gameState);
+            
+            expect(blueMinion.x).toBe(originalX);
+            expect(blueMinion.y).toBe(originalY);
+        });
+    });
+}); 

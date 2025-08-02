@@ -8,6 +8,7 @@ export const SERVER_CONFIG = {
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
     PLAYER_MOVE_SPEED: 6, // pixels per frame
+    MINION_MOVE_SPEED: 4, // pixels per frame - slower than players
     PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUNDS: {
         MIN_X: 20,
@@ -45,9 +46,24 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_STRENGTH: 20,
             ATTACK_SPEED: 0.5, // attacks per second
         },
+        MINION: {
+            WARRIOR: {
+                HEALTH: 8,
+                ATTACK_RADIUS: 40,
+                ATTACK_STRENGTH: 15,
+                ATTACK_SPEED: 0.8, // attacks per second
+            },
+            ARCHER: {
+                HEALTH: 6,
+                ATTACK_RADIUS: 60,
+                ATTACK_STRENGTH: 12,
+                ATTACK_SPEED: 1.2, // attacks per second
+            },
+        },
     },
     EXPERIENCE: {
         TOWER_DESTROYED: 20,
+        MINION_KILLED: 2,
         LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
         STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
     },
@@ -62,6 +78,7 @@ export const CLIENT_CONFIG = {
     PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 20, height: 30 }, // tall rectangle
+    MINION_SIZE: 12, // size for minion shapes
     TEAM_COLORS: {
         BLUE: 0x3498db,
         RED: 0xe74c3c,

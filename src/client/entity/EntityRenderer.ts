@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isPlayerCombatant, PlayerCombatant } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isPlayerCombatant, PlayerCombatant, MINION_TYPES, isMinionCombatant, MinionCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 
@@ -69,6 +69,9 @@ export class EntityRenderer {
             case COMBATANT_TYPES.TURRET:
                 this.renderTurretGraphics(graphics, color, combatant);
                 break;
+            case COMBATANT_TYPES.MINION:
+                this.renderMinionGraphics(graphics, color, combatant);
+                break;
         }
     }
 
@@ -105,6 +108,40 @@ export class EntityRenderer {
                 CLIENT_CONFIG.TURRET_SIZE.width,
                 CLIENT_CONFIG.TURRET_SIZE.height
             );
+            graphics.setVisible(true);
+        } else {
+            graphics.setVisible(false);
+        }
+    }
+
+    /**
+     * Renders minion graphics (diamond for warrior, triangle for archer)
+     */
+    private renderMinionGraphics(graphics: Phaser.GameObjects.Graphics, color: number, combatant: Combatant): void {
+        if (!isMinionCombatant(combatant)) return;
+        
+        if (combatant.health > 0) {
+            graphics.fillStyle(color, 1);
+            const size = CLIENT_CONFIG.MINION_SIZE;
+            
+            if (combatant.minionType === MINION_TYPES.WARRIOR) {
+                // Diamond shape for warrior
+                graphics.beginPath();
+                graphics.moveTo(0, -size);
+                graphics.lineTo(size, 0);
+                graphics.lineTo(0, size);
+                graphics.lineTo(-size, 0);
+                graphics.closePath();
+                graphics.fillPath();
+            } else if (combatant.minionType === MINION_TYPES.ARCHER) {
+                // Triangle shape for archer
+                graphics.beginPath();
+                graphics.moveTo(0, -size);
+                graphics.lineTo(size, size);
+                graphics.lineTo(-size, size);
+                graphics.closePath();
+                graphics.fillPath();
+            }
             graphics.setVisible(true);
         } else {
             graphics.setVisible(false);
