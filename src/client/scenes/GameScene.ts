@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { GameState } from '../../server/schema/GameState';
+import { CLIENT_CONFIG } from '../../Config';
 import { type SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
+import { hexToColorString } from '../utils/ColorUtils';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -51,8 +53,8 @@ export class GameScene extends Phaser.Scene {
         } catch (error) {
             console.error('Failed to connect:', error);
             this.add.text(300, 300, 'Failed to connect to server', {
-                fontSize: '16px',
-                color: '#ff0000'
+                fontSize: CLIENT_CONFIG.UI.FONTS.ERROR,
+                color: hexToColorString(CLIENT_CONFIG.UI.COLORS.ERROR)
             }).setOrigin(0.5);
         }
     }

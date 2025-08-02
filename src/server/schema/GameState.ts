@@ -1,4 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
+import { GAMEPLAY_CONFIG } from '../../Config';
 import { CombatantType } from '../../shared/types/CombatantTypes';
 
 export class AttackEvent extends Schema {
@@ -24,7 +25,7 @@ export class Combatant extends Schema {
 export class Player extends Combatant {
     @type('string') state = 'alive'; // 'alive' or 'respawning'
     @type('number') respawnTime = 0; // timestamp when respawn completes
-    @type('number') respawnDuration = 6000; // respawn duration in ms
+    @type('number') respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS; // respawn duration in ms
     @type('number') experience = 0;
     @type('number') level = 1;
 }

@@ -135,7 +135,7 @@ export class EntityRenderer {
     private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics): void {
         radiusIndicator.clear();
         if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.PLAYER || !isPlayerCombatant(combatant) || combatant.state !== 'respawning')) {
-            radiusIndicator.lineStyle(1, 0x000000, 0.3); // Thin black line with alpha
+            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA);
             radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
         }
     }

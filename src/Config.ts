@@ -56,6 +56,7 @@ export const GAMEPLAY_CONFIG = {
 // Client Configuration
 export const CLIENT_CONFIG = {
     INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
+    ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
     GAME_CANVAS_WIDTH: 600,
     GAME_CANVAS_HEIGHT: 600,
     PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
@@ -71,11 +72,17 @@ export const CLIENT_CONFIG = {
         ATTACK_SOURCE_DURATION_MS: 50, // radius flash duration
         ATTACK_TARGET_FLASH_DURATION_MS: 500, // target flash duration
         ATTACK_TARGET_FLASH_ALPHA: 0.3, // alpha value when flashing
+        ATTACK_TARGET_QUICK_JUMP_DURATION_MS: 50, // quick jump duration for attack flash
     },
     RESPAWN_RING: {
         RADIUS: 25, // slightly larger than player radius
         THICKNESS: 3,
         ALPHA: 0.8,
+    },
+    RADIUS_INDICATOR: {
+        LINE_THICKNESS: 1,
+        LINE_COLOR: 0x000000, // black
+        LINE_ALPHA: 0.3,
     },
     HUD: {
         HEALTH_BAR: {
@@ -85,7 +92,8 @@ export const CLIENT_CONFIG = {
             HEIGHT: 20,
             BACKGROUND_COLOR: 0x333333,
             HEALTH_COLOR: 0x2ecc71, // green
-            TEXT_COLOR: '#ffffff',
+            TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
         },
         EXPERIENCE_BAR: {
             X: 20,
@@ -94,7 +102,28 @@ export const CLIENT_CONFIG = {
             HEIGHT: 15,
             BACKGROUND_COLOR: 0x333333,
             EXPERIENCE_COLOR: 0xf1c40f, // yellow
-            TEXT_COLOR: '#ffffff',
+            TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
+        },
+        LEVEL_TEXT: {
+            FONT_SIZE: '14px',
+            COLOR: 0xffffff,
+        },
+    },
+    UI: {
+        FONTS: {
+            SMALL: '10px',
+            MEDIUM: '12px',
+            LARGE: '14px',
+            ERROR: '16px',
+        },
+        COLORS: {
+            TEXT_PRIMARY: 0xffffff,
+            TEXT_SECONDARY: 0x000000,
+            ERROR: 0xff0000,
+        },
+        BACKGROUND: {
+            GAME_CANVAS: 0x2c3e50,
         },
     },
 } as const; 

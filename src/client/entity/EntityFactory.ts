@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { CLIENT_CONFIG } from '../../Config';
+import { hexToColorString } from '../utils/ColorUtils';
 
 /**
  * EntityFactory creates the appropriate graphics objects for different entity types
@@ -22,8 +24,8 @@ export class EntityFactory {
      */
     createEntityText(): Phaser.GameObjects.Text {
         const text = this.scene.add.text(0, 0, '', {
-            fontSize: '12px',
-            color: '#000000'
+            fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_SECONDARY)
         }).setOrigin(0.5);
         return text;
     }

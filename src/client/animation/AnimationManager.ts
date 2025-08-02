@@ -35,14 +35,14 @@ export class AnimationManager {
         this.scene.tweens.add({
             targets: graphics,
             alpha: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_ALPHA,
-            duration: 50, // Quick jump (50ms)
+            duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 // Slow fade back to normal
                 this.scene.tweens.add({
                     targets: graphics,
                     alpha: 1,
-                    duration: flashDuration - 50, // Remaining time for slow fade
+                    duration: flashDuration - CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS, // Remaining time for slow fade
                     ease: 'Power1'
                 });
             }

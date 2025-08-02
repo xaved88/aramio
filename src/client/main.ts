@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
-import { GameScene } from './scenes/GameScene';
 import { CLIENT_CONFIG } from '../Config';
+import { GameScene } from './scenes/GameScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: CLIENT_CONFIG.GAME_CANVAS_WIDTH,
     height: CLIENT_CONFIG.GAME_CANVAS_HEIGHT,
     parent: 'game-container',
-    backgroundColor: '#2c3e50',
+    backgroundColor: CLIENT_CONFIG.UI.BACKGROUND.GAME_CANVAS,
     scene: [GameScene],
     physics: {
         default: 'arcade',

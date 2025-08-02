@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PlayerCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../Config';
+import { hexToColorString } from '../utils/ColorUtils';
 
 /**
  * HUDRenderer handles all HUD rendering logic
@@ -29,7 +30,7 @@ export class HUDRenderer {
         
         // Create health bar background
         const healthBarBackground = this.scene.add.graphics();
-        healthBarBackground.fillStyle(healthConfig.BACKGROUND_COLOR, 0.8);
+        healthBarBackground.fillStyle(healthConfig.BACKGROUND_COLOR, CLIENT_CONFIG.HUD.HEALTH_BAR.BACKGROUND_ALPHA);
         healthBarBackground.fillRect(
             healthConfig.X, 
             healthConfig.Y, 
@@ -42,13 +43,13 @@ export class HUDRenderer {
         
         // Create health text
         const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100%', {
-            fontSize: '12px',
-            color: healthConfig.TEXT_COLOR
+            fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
+            color: hexToColorString(healthConfig.TEXT_COLOR)
         }).setOrigin(0.5);
         
         // Create experience bar background
         const experienceBarBackground = this.scene.add.graphics();
-        experienceBarBackground.fillStyle(expConfig.BACKGROUND_COLOR, 0.8);
+        experienceBarBackground.fillStyle(expConfig.BACKGROUND_COLOR, CLIENT_CONFIG.HUD.EXPERIENCE_BAR.BACKGROUND_ALPHA);
         experienceBarBackground.fillRect(
             expConfig.X, 
             expConfig.Y, 
@@ -61,14 +62,14 @@ export class HUDRenderer {
         
         // Create experience text
         const experienceText = this.scene.add.text(expConfig.X + expConfig.WIDTH / 2, expConfig.Y + expConfig.HEIGHT / 2, '0/10 XP', {
-            fontSize: '10px',
-            color: expConfig.TEXT_COLOR
+            fontSize: CLIENT_CONFIG.UI.FONTS.SMALL,
+            color: hexToColorString(expConfig.TEXT_COLOR)
         }).setOrigin(0.5);
         
         // Create level text
         const levelText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH + 10, healthConfig.Y + healthConfig.HEIGHT / 2, 'Lv.1', {
-            fontSize: '14px',
-            color: '#ffffff'
+            fontSize: CLIENT_CONFIG.HUD.LEVEL_TEXT.FONT_SIZE,
+            color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR)
         }).setOrigin(0, 0.5);
 
         return {

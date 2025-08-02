@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isPlayerCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
+import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
 
@@ -176,7 +177,7 @@ export class EntityManager {
             targets: targets,
             x: targetX,
             y: targetY,
-            duration: 100, // Fixed duration for now
+            duration: CLIENT_CONFIG.ENTITY_MOVEMENT_DURATION_MS,
             ease: 'Linear',
             onComplete: () => {
                 // Cleanup handled by the tween itself
