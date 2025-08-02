@@ -39,7 +39,7 @@ export class EntityManager {
     updateCombatantEntities(state: SharedGameState): void {
         // Update existing combatants and create new ones
         state.combatants.forEach((combatantData: Combatant) => {
-            this.updateCombatantEntity(combatantData);
+            this.updateCombatantEntity(combatantData, state);
         });
         
         // Remove combatants that no longer exist
@@ -49,7 +49,7 @@ export class EntityManager {
     /**
      * Updates a single combatant entity, creating it if it doesn't exist
      */
-    private updateCombatantEntity(combatantData: Combatant): void {
+    private updateCombatantEntity(combatantData: Combatant, state: SharedGameState): void {
         const entityId = combatantData.id;
         
         // Get or create entity graphics
@@ -98,7 +98,8 @@ export class EntityManager {
             entityGraphics,
             entityText,
             radiusIndicator,
-            respawnRing
+            respawnRing,
+            state
         );
     }
 
