@@ -40,6 +40,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_STRENGTH: 10,
             ATTACK_SPEED: 1, // attacks per second
             RESPAWN_TIME_MS: 6000,
+            SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
             ABILITY: {
                 TYPE: 'projectile',
                 COOLDOWN_MS: 1000, // 5 seconds
@@ -52,25 +53,29 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 0.3, // attacks per second
+            SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
             HEALTH: 300,
             ATTACK_RADIUS: 70,
             ATTACK_STRENGTH: 20,
             ATTACK_SPEED: 0.5, // attacks per second
+            SIZE: 20, // collision radius (average of width/height)
         },
         MINION: {
             WARRIOR: {
-                HEALTH: 28,
+                HEALTH: 8,
                 ATTACK_RADIUS: 20,
                 ATTACK_STRENGTH: 15,
                 ATTACK_SPEED: 0.8, // attacks per second
+                SIZE: 12, // collision radius (matches MINION_SIZE)
             },
             ARCHER: {
-                HEALTH: 15,
+                HEALTH: 6,
                 ATTACK_RADIUS: 60,
                 ATTACK_STRENGTH: 6,
                 ATTACK_SPEED: 1.2, // attacks per second
+                SIZE: 12, // collision radius (matches MINION_SIZE)
             },
         },
     },

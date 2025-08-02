@@ -22,6 +22,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
     blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+    blueCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     blueCradle.lastAttackTime = 0;
     state.combatants.set(blueCradle.id, blueCradle);
     
@@ -37,6 +38,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
     redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+    redCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     redCradle.lastAttackTime = 0;
     state.combatants.set(redCradle.id, redCradle);
     
@@ -52,6 +54,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
     blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+    blueTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     blueTurret.lastAttackTime = 0;
     state.combatants.set(blueTurret.id, blueTurret);
     
@@ -67,6 +70,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
     redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+    redTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     redTurret.lastAttackTime = 0;
     state.combatants.set(redTurret.id, redTurret);
     

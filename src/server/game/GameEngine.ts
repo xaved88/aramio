@@ -194,8 +194,9 @@ export class GameEngine {
                 const dy = projectile.y - combatant.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Check if projectile hits the combatant and is closer than previous closest
-                if (distance < combatant.attackRadius && distance < closestDistance) {
+                // Check if projectile hits the combatant's collision radius (unit size + projectile radius)
+                const collisionRadius = combatant.size + CLIENT_CONFIG.PROJECTILE.RADIUS;
+                if (distance < collisionRadius && distance < closestDistance) {
                     closestCombatant = combatant;
                     closestDistance = distance;
                 }

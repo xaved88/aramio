@@ -507,19 +507,10 @@ describe('handleUpdateGame', () => {
             const initialNearHealth = nearEnemy.health;
             const initialFarHealth = farEnemy.health;
             
-            console.log('Before attack - Near enemy health:', initialNearHealth, 'Far enemy health:', initialFarHealth);
-            console.log('Attacker lastAttackTime:', attacker.lastAttackTime, 'Game time:', gameState.gameTime);
-            
             result = handleUpdateGame(gameState, action);
             
             const finalNearHealth = result.newState.combatants.get('near-enemy')?.health;
             const finalFarHealth = result.newState.combatants.get('far-enemy')?.health;
-            
-            console.log('After attack - Near enemy health:', finalNearHealth, 'Far enemy health:', finalFarHealth);
-            console.log('Attack events:', result.newState.attackEvents.length);
-            result.newState.attackEvents.forEach((event, index) => {
-                console.log(`Attack event ${index}:`, event.sourceId, '->', event.targetId);
-            });
             
             // Should only attack the nearest enemy (nearEnemy)
             // Since attack strength is 100 and health is 10, the enemy dies (health becomes 0)

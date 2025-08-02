@@ -58,7 +58,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combata
         attackRadius: colyseusCombatant.attackRadius,
         attackStrength: colyseusCombatant.attackStrength,
         attackSpeed: colyseusCombatant.attackSpeed,
-        lastAttackTime: colyseusCombatant.lastAttackTime
+        lastAttackTime: colyseusCombatant.lastAttackTime,
+        size: colyseusCombatant.size
     };
     
     switch (colyseusCombatant.type) {

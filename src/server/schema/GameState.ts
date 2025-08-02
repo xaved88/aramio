@@ -38,6 +38,7 @@ export class Combatant extends Schema {
     @type('number') attackStrength!: number;
     @type('number') attackSpeed!: number; // attacks per second
     @type('number') lastAttackTime!: number;
+    @type('number') size!: number; // collision radius
 }
 
 export class Player extends Combatant {

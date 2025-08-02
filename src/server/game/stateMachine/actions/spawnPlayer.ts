@@ -25,6 +25,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
     player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
     player.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
+    player.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
     player.experience = 0;
     player.level = 1;
     player.lastAttackTime = 0;
