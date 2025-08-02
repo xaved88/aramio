@@ -1,6 +1,7 @@
-import { GameState, Player, Combatant, AttackEvent } from '../schema/GameState';
+import { GameState, Combatant, AttackEvent, Player } from '../schema/GameState';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { GAMEPLAY_CONFIG } from '../../Config';
+import { COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 
 export enum GamePhase {
     WAITING = 'waiting',
@@ -63,9 +64,12 @@ export class GameEngine {
      */
     private checkGameEndConditions(): void {
         // Check if either cradle is destroyed
-        if (!CombatantUtils.isCombatantAlive(this.gameState.blueCradle)) {
+        const blueCradle = this.getCombatantsByType(COMBATANT_TYPES.CRADLE).find(c => c.team === 'blue');
+        const redCradle = this.getCombatantsByType(COMBATANT_TYPES.CRADLE).find(c => c.team === 'red');
+        
+        if (blueCradle && !CombatantUtils.isCombatantAlive(blueCradle)) {
             this.endGame('red');
-        } else if (!CombatantUtils.isCombatantAlive(this.gameState.redCradle)) {
+        } else if (redCradle && !CombatantUtils.isCombatantAlive(redCradle)) {
             this.endGame('blue');
         }
     }
@@ -92,7 +96,7 @@ export class GameEngine {
             if (!CombatantUtils.isCombatantAlive(attacker)) return;
             
             // Skip respawning players
-            if (attacker instanceof Player && attacker.state === 'respawning') return;
+            if (attacker.type === COMBATANT_TYPES.PLAYER && (attacker as Player).state === 'respawning') return;
             
             // Check if attacker can attack (based on attack speed)
             const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
@@ -132,28 +136,23 @@ export class GameEngine {
         const currentTime = this.gameState.gameTime;
         
         // Handle player respawning
-        this.gameState.players.forEach((player, playerId) => {
-            if (!CombatantUtils.isCombatantAlive(player) && player.state === 'alive') {
+        this.getCombatantsByType(COMBATANT_TYPES.PLAYER).forEach(player => {
+            if (!CombatantUtils.isCombatantAlive(player) && (player as Player).state === 'alive') {
                 // Player just died, start respawn process
-                this.startPlayerRespawn(player);
-            } else if (player.state === 'respawning' && currentTime >= player.respawnTime) {
+                this.startPlayerRespawn(player as Player);
+            } else if ((player as Player).state === 'respawning' && currentTime >= (player as Player).respawnTime) {
                 // Respawn timer completed
-                this.completePlayerRespawn(player);
+                this.completePlayerRespawn(player as Player);
             }
         });
         
         // Handle turret destruction and grant experience
-        if (!CombatantUtils.isCombatantAlive(this.gameState.blueTurret) && this.gameState.blueTurret.health === 0) {
-            this.grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, 'blue');
-            this.gameState.blueTurret.health = -1; // Mark as processed
-        }
-        
-        if (!CombatantUtils.isCombatantAlive(this.gameState.redTurret) && this.gameState.redTurret.health === 0) {
-            this.grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, 'red');
-            this.gameState.redTurret.health = -1; // Mark as processed
-            // TODO -> refactor this to be combatant deaths in general and not hard-coded to towers and types
-            // TODO -> make this happen immediately on destruction and not with the weird -1 flag. May require some refatoring.
-        }
+        this.getCombatantsByType(COMBATANT_TYPES.TURRET).forEach(turret => {
+            if (!CombatantUtils.isCombatantAlive(turret) && turret.health === 0) {
+                this.grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, turret.team);
+                turret.health = -1; // Mark as processed
+            }
+        });
     }
 
     /**
@@ -194,9 +193,9 @@ export class GameEngine {
     private grantExperienceToTeam(amount: number, enemyTeam: string): void {
         const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
         
-        this.gameState.players.forEach((player) => {
+        this.getCombatantsByType(COMBATANT_TYPES.PLAYER).forEach((player) => {
             if (player.team === opposingTeam) {
-                this.grantExperience(player, amount);
+                this.grantExperience(player as Player, amount);
             }
         });
     }
@@ -267,25 +266,22 @@ export class GameEngine {
     }
 
     /**
-     * Gets all combatants in the game (players + cradles + turrets)
+     * Gets all combatants in the game
      */
     getAllCombatants(): Combatant[] {
         const combatants: Combatant[] = [];
-        
-        // Add all players
-        this.gameState.players.forEach((player: Player) => {
-            combatants.push(player);
+        this.gameState.combatants.forEach((combatant: Combatant) => {
+            combatants.push(combatant);
         });
-        
-        // Add cradles
-        combatants.push(this.gameState.blueCradle);
-        combatants.push(this.gameState.redCradle);
-        
-        // Add turrets
-        combatants.push(this.gameState.blueTurret);
-        combatants.push(this.gameState.redTurret);
-        
         return combatants;
+    }
+
+    /**
+     * Gets all combatants of a specific type
+     * @param type The type to filter by ('player', 'cradle', 'turret', etc.)
+     */
+    getCombatantsByType(type: string): Combatant[] {
+        return this.getAllCombatants().filter(combatant => combatant.type === type);
     }
 
     /**

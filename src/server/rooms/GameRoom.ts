@@ -1,8 +1,9 @@
 import { Room, Client } from '@colyseus/core';
-import { GameState, Player, Cradle, Turret, Combatant } from '../schema/GameState';
+import { GameState, Combatant, Player } from '../schema/GameState';
 import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { CombatantUtils } from '../game/combatants/CombatantUtils';
 import { GameEngine, GamePhase } from '../game/GameEngine';
+import { COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 
 interface GameCommand {
     type: string;
@@ -22,8 +23,9 @@ export class GameRoom extends Room<GameState> {
         gameState.gamePhase = GamePhase.PLAYING;
         
         // Create blue cradle (bottom left)
-        const blueCradle = new Cradle();
+        const blueCradle = new Combatant();
         blueCradle.id = 'blue-cradle';
+        blueCradle.type = COMBATANT_TYPES.CRADLE;
         blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
         blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
         blueCradle.team = 'blue';
@@ -33,11 +35,12 @@ export class GameRoom extends Room<GameState> {
         blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
         blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
         blueCradle.lastAttackTime = 0;
-        gameState.blueCradle = blueCradle;
+        gameState.combatants.set(blueCradle.id, blueCradle);
         
         // Create red cradle (top right)
-        const redCradle = new Cradle();
+        const redCradle = new Combatant();
         redCradle.id = 'red-cradle';
+        redCradle.type = COMBATANT_TYPES.CRADLE;
         redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
         redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
         redCradle.team = 'red';
@@ -47,11 +50,12 @@ export class GameRoom extends Room<GameState> {
         redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
         redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
         redCradle.lastAttackTime = 0;
-        gameState.redCradle = redCradle;
+        gameState.combatants.set(redCradle.id, redCradle);
         
         // Create blue turret
-        const blueTurret = new Turret();
+        const blueTurret = new Combatant();
         blueTurret.id = 'blue-turret';
+        blueTurret.type = COMBATANT_TYPES.TURRET;
         blueTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.x;
         blueTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.y;
         blueTurret.team = 'blue';
@@ -61,11 +65,12 @@ export class GameRoom extends Room<GameState> {
         blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
         blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
         blueTurret.lastAttackTime = 0;
-        gameState.blueTurret = blueTurret;
+        gameState.combatants.set(blueTurret.id, blueTurret);
         
         // Create red turret
-        const redTurret = new Turret();
+        const redTurret = new Combatant();
         redTurret.id = 'red-turret';
+        redTurret.type = COMBATANT_TYPES.TURRET;
         redTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.x;
         redTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.y;
         redTurret.team = 'red';
@@ -75,7 +80,7 @@ export class GameRoom extends Room<GameState> {
         redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
         redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
         redTurret.lastAttackTime = 0;
-        gameState.redTurret = redTurret;
+        gameState.combatants.set(redTurret.id, redTurret);
         
         this.setState(gameState);
         
@@ -98,7 +103,8 @@ export class GameRoom extends Room<GameState> {
         console.log(`${client.sessionId} joined`);
         const player = new Player();
         player.id = client.sessionId;
-        player.team = this.state.players.size % 2 === 0 ? 'blue' : 'red';
+        player.type = COMBATANT_TYPES.PLAYER;
+        player.team = this.state.combatants.size % 2 === 0 ? 'blue' : 'red';
         
         // Spawn player near their team's cradle
         if (player.team === 'blue') {
@@ -118,12 +124,12 @@ export class GameRoom extends Room<GameState> {
         player.experience = 0;
         player.level = 1;
         player.lastAttackTime = 0;
-        this.state.players.set(client.sessionId, player);
+        this.state.combatants.set(client.sessionId, player);
     }
 
     onLeave(client: Client, consented: boolean) {
         console.log(`${client.sessionId} left`);
-        this.state.players.delete(client.sessionId);
+        this.state.combatants.delete(client.sessionId);
     }
 
     onDispose() {
@@ -166,10 +172,10 @@ export class GameRoom extends Room<GameState> {
     }
 
     private handleMoveCommand(command: GameCommand) {
-        const player = this.state.players.get(command.clientId);
-        if (player && command.data.targetX !== undefined && command.data.targetY !== undefined) {
+        const player = this.state.combatants.get(command.clientId);
+        if (player && player.type === COMBATANT_TYPES.PLAYER && command.data.targetX !== undefined && command.data.targetY !== undefined) {
             // Prevent respawning players from moving
-            if (player.state === 'respawning') {
+            if ((player as Player).state === 'respawning') {
                 return;
             }
             const targetX = command.data.targetX;

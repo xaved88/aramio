@@ -1,4 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
+import { CombatantType } from '../../shared/types/CombatantTypes';
 
 export class AttackEvent extends Schema {
     @type('string') sourceId!: string;
@@ -8,6 +9,7 @@ export class AttackEvent extends Schema {
 
 export class Combatant extends Schema {
     @type('string') id!: string;
+    @type('string') type!: CombatantType;
     @type('number') x!: number;
     @type('number') y!: number;
     @type('string') team!: string;
@@ -27,21 +29,9 @@ export class Player extends Combatant {
     @type('number') level = 1;
 }
 
-export class Cradle extends Combatant {
-    // Cradle-specific properties can be added here later
-}
-
-export class Turret extends Combatant {
-    // Turret-specific properties can be added here later
-}
-
 export class GameState extends Schema {
     @type('number') gameTime = 0;
     @type('string') gamePhase = 'playing';
-    @type({ map: Player }) players = new MapSchema<Player>()
-    @type(Cradle) blueCradle!: Cradle;
-    @type(Cradle) redCradle!: Cradle;
-    @type(Turret) blueTurret!: Turret;
-    @type(Turret) redTurret!: Turret;
+    @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
 } 
