@@ -1,0 +1,45 @@
+name: Deploy to Vultr
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      force_redeploy:
+        description: 'Force redeploy (even if no changes)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm test
+      
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to Vultr
+      run: |
+        chmod +x scripts/deploy.sh
+        VULTR_SSH_KEY="${{ secrets.VULTR_SSH_KEY }}" ./scripts/deploy.sh 
