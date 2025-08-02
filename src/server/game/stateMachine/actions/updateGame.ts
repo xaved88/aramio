@@ -157,7 +157,7 @@ function startPlayerRespawn(player: Player, state: GameState): void {
 
 function completePlayerRespawn(player: Player): void {
     player.state = 'alive';
-    player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
+    player.health = player.maxHealth; // Restore to max health, not base health
 }
 
 function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameState): void {
