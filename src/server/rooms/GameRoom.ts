@@ -15,12 +15,27 @@ export class GameRoom extends Room<GameState> {
     private commands: GameCommand[] = [];
     private lastUpdateTime = 0;
     private gameEngine!: GameEngine;
+    private restartTimer: NodeJS.Timeout | null = null;
 
     onCreate(options: any) {
+        this.initializeGame();
+    }
+
+    private initializeGame() {
+        console.log('Initializing game...');
+        
+        // Clear any existing restart timer
+        if (this.restartTimer) {
+            clearTimeout(this.restartTimer);
+            this.restartTimer = null;
+        }
+        
         // Initialize empty game state
         const gameState = new GameState();
         gameState.gameTime = 0;
         gameState.gamePhase = 'playing';
+        gameState.winningTeam = '';
+        gameState.gameEndTime = 0;
         
         this.setState(gameState);
         
@@ -29,6 +44,7 @@ export class GameRoom extends Room<GameState> {
         this.gameEngine.setupGame();
 
         console.log("Game Initialized:", gameStateToString(this.state))
+        console.log(`Room created with ${this.state.combatants.size} initial combatants`);
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
@@ -66,17 +82,27 @@ export class GameRoom extends Room<GameState> {
     }
 
     private update() {
+        // Don't update if the game is finished
+        if (this.state.gamePhase === 'finished') {
+            return;
+        }
+        
         // Update game engine with time delta
         const currentTime = Date.now();
         const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
         this.lastUpdateTime = currentTime;
         
         const totalHP = getTotalCombatantHealth(this.state);
-        this.gameEngine.update(deltaTime);
+        const result = this.gameEngine.update(deltaTime);
         const afterHp = getTotalCombatantHealth(this.state);
 
         if(afterHp != totalHP) {
             console.log("Server State Changed:", gameStateToString(this.state))
+        }
+
+        // Handle game over events
+        if (result && result.events) {
+            this.handleGameEvents(result.events);
         }
 
         // Process all commands
@@ -115,5 +141,54 @@ export class GameRoom extends Room<GameState> {
             this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
         }
     }
+
+
+
+    private handleGameEvents(events: any[]): void {
+        events.forEach(event => {
+            switch (event.type) {
+                case 'GAME_OVER':
+                    this.handleGameOver(event.payload);
+                    break;
+                default:
+                    console.log('Unknown game event type:', event.type);
+            }
+        });
+    }
+
+    private handleGameOver(payload: any): void {
+        console.log(`Game over! Winning team: ${payload.winningTeam}`);
+        
+        // Set a timer to restart the game after a few seconds
+        if (this.restartTimer) {
+            clearTimeout(this.restartTimer);
+        }
+        
+        this.restartTimer = setTimeout(() => {
+            this.restartGame();
+        }, 5000); // 5 seconds delay
+    }
+
+    private restartGame(): void {
+        console.log('Restarting game...');
+        
+        // Clear restart timer
+        if (this.restartTimer) {
+            clearTimeout(this.restartTimer);
+            this.restartTimer = null;
+        }
+        
+        // Disconnect all clients so they reconnect and spawn new players
+        console.log(`Disconnecting ${this.clients.length} clients for restart`);
+        this.clients.forEach(client => {
+            console.log(`Disconnecting client: ${client.sessionId}`);
+            client.leave();
+        });
+        
+        // The room will be automatically disposed when all clients leave
+        // A new room will be created when clients reconnect
+    }
+
+
 
 } 

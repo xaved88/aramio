@@ -328,6 +328,8 @@ describe('handleUpdateGame', () => {
             result = handleUpdateGame(gameState, action);
             
             expect(result.newState.gamePhase).toBe('finished');
+            expect(result.newState.winningTeam).toBe('red');
+            expect(result.newState.gameEndTime).toBe(gameState.gameTime);
         });
 
         it('should end game when red cradle is destroyed', () => {
@@ -336,6 +338,8 @@ describe('handleUpdateGame', () => {
             result = handleUpdateGame(gameState, action);
             
             expect(result.newState.gamePhase).toBe('finished');
+            expect(result.newState.winningTeam).toBe('blue');
+            expect(result.newState.gameEndTime).toBe(gameState.gameTime);
         });
 
         it('should not end game when both cradles are alive', () => {

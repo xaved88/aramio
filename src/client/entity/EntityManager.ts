@@ -208,4 +208,19 @@ export class EntityManager {
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
     }
+
+    /**
+     * Clears all entities without destroying the manager
+     */
+    clearAllEntities(): void {
+        this.entityGraphics.forEach(graphics => graphics.destroy());
+        this.entityTexts.forEach(text => text.destroy());
+        this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
+        this.entityRespawnRings.forEach(ring => ring.destroy());
+        
+        this.entityGraphics.clear();
+        this.entityTexts.clear();
+        this.entityRadiusIndicators.clear();
+        this.entityRespawnRings.clear();
+    }
 } 

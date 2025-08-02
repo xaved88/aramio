@@ -67,4 +67,12 @@ export class AnimationManager {
         this.entityTweens.forEach(tween => tween.stop());
         this.entityTweens.clear();
     }
+
+    /**
+     * Clears all animations without destroying the manager
+     */
+    clearAllAnimations(): void {
+        this.entityTweens.forEach(tween => tween.stop());
+        this.entityTweens.clear();
+    }
 } 

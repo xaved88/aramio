@@ -21,6 +21,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
+        currentWave: colyseusState.currentWave,
+        winningTeam: colyseusState.winningTeam,
+        gameEndTime: colyseusState.gameEndTime,
         combatants: sharedCombatants,
         attackEvents: sharedAttackEvents
     };

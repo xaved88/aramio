@@ -1,6 +1,6 @@
 import { GameState } from '../schema/GameState';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
-import { GameActionTypes } from './stateMachine/types';
+import { GameActionTypes, StateMachineResult } from './stateMachine/types';
 
 export class GameEngine {
     private state: GameState;
@@ -34,11 +34,18 @@ export class GameEngine {
      * Updates the game with a time delta
      * @param deltaTime Time since last update in milliseconds
      */
-    update(deltaTime: number): void {
-        this.processAction({
+    update(deltaTime: number): StateMachineResult {
+        const result = GameStateMachine.processAction(this.state, {
             type: 'UPDATE_GAME',
             payload: { deltaTime }
         });
+        
+        // Handle any events returned by the state machine
+        if (result.events) {
+            this.handleEvents(result.events);
+        }
+        
+        return result;
     }
 
     /**
@@ -95,15 +102,25 @@ export class GameEngine {
         });
     }
 
+
+
     /**
      * Handles events returned by the state machine
      * @param events Array of events to handle
      */
     private handleEvents(events: any[]): void {
-        // For now, we don't have any events to handle
-        // This could be used for things like notifications, achievements, etc.
         events.forEach(event => {
-            console.log('Game event:', event);
+            switch (event.type) {
+                case 'SETUP_GAME':
+                    this.setupGame();
+                    break;
+                case 'GAME_OVER':
+                    // This event will be handled by the room
+                    console.log(`Game over event triggered with winning team: ${event.payload.winningTeam}`);
+                    break;
+                default:
+                    console.log('Unknown event type:', event.type);
+            }
         });
     }
 } 

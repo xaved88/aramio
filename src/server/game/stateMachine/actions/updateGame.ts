@@ -37,7 +37,10 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     handleDeadCombatants(state);
     
     // Check for game end conditions
-    checkGameEndConditions(state);
+    const gameEndResult = checkGameEndConditions(state);
+    if (gameEndResult) {
+        return gameEndResult;
+    }
     
     return { newState: state };
 }
@@ -195,14 +198,28 @@ function levelUpPlayer(player: Player): void {
     player.respawnDuration = Math.round(player.respawnDuration * (1 - GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Reduce respawn time
 }
 
-function checkGameEndConditions(state: GameState): void {
+function checkGameEndConditions(state: GameState): StateMachineResult | null {
     // Check if either cradle is destroyed
     const blueCradle = Array.from(state.combatants.values()).find(c => c.type === COMBATANT_TYPES.CRADLE && c.team === 'blue');
     const redCradle = Array.from(state.combatants.values()).find(c => c.type === COMBATANT_TYPES.CRADLE && c.team === 'red');
     
     if (blueCradle && !CombatantUtils.isCombatantAlive(blueCradle)) {
         state.gamePhase = 'finished';
+        state.winningTeam = 'red';
+        state.gameEndTime = state.gameTime;
+        return {
+            newState: state,
+            events: [{ type: 'GAME_OVER', payload: { winningTeam: 'red' } }]
+        };
     } else if (redCradle && !CombatantUtils.isCombatantAlive(redCradle)) {
         state.gamePhase = 'finished';
+        state.winningTeam = 'blue';
+        state.gameEndTime = state.gameTime;
+        return {
+            newState: state,
+            events: [{ type: 'GAME_OVER', payload: { winningTeam: 'blue' } }]
+        };
     }
+    
+    return null;
 } 

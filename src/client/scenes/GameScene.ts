@@ -20,6 +20,8 @@ export class GameScene extends Phaser.Scene {
     private lastState: GameState|null = null
     private stateLogTimer: number = 0;
     private totalHP: number = 0;
+    private playerTeam: string | null = null;
+    private playerSessionId: string | null = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -41,25 +43,11 @@ export class GameScene extends Phaser.Scene {
             this.room = await this.client.joinOrCreate('game');
             console.log('Connected to server');
             
-            this.room.onStateChange((colyseusState: GameState) => {
-                this.lastState = colyseusState      
-                const newHp = getTotalCombatantHealth(this.lastState);
-
-                if(this.totalHP != newHp) {
-                    console.log("State Changed:", gameStateToString(this.lastState))
-                    console.log(this.lastState)                
-                    this.totalHP = newHp
-                }
-                
-                const sharedState = convertToSharedGameState(colyseusState);
-                this.updateCombatantEntities(sharedState);
-                this.processAttackEvents(sharedState);
-                this.updateHUD(sharedState);
-            });
+            // Store the session ID for this client
+            this.playerSessionId = this.room.sessionId;
+            console.log(`Client session ID: ${this.playerSessionId}`);
             
-            this.room.onLeave((code: number) => {
-                console.log('Left room with code:', code);
-            });
+            this.setupRoomHandlers();
             
             this.uiManager.createHUD();
             
@@ -126,7 +114,54 @@ export class GameScene extends Phaser.Scene {
 
     private updateHUD(state: SharedGameState) {
         // Delegate HUD updates to the UIManager
-        this.uiManager.updateHUD(state);
+        this.uiManager.updateHUD(state, this.playerTeam);
+    }
+
+    private restartGame(): void {
+        // This method is no longer needed since restart is handled by the server
+        console.log('Restart triggered by server');
+    }
+
+
+
+    private setupRoomHandlers() {
+        this.room.onStateChange((colyseusState: GameState) => {
+            console.log(`State change received with ${colyseusState.combatants.size} combatants`);
+            this.lastState = colyseusState      
+            const newHp = getTotalCombatantHealth(this.lastState);
+
+            if(this.totalHP != newHp) {
+                console.log("State Changed:", gameStateToString(this.lastState))
+                console.log(this.lastState)                
+                this.totalHP = newHp
+            }
+            
+            const sharedState = convertToSharedGameState(colyseusState);
+            
+            // Track the player's team when they spawn
+            this.updatePlayerTeam(sharedState);
+            
+            this.updateCombatantEntities(sharedState);
+            this.processAttackEvents(sharedState);
+            this.updateHUD(sharedState);
+        });
+        
+        this.room.onLeave((code: number) => {
+            console.log('Left room with code:', code);
+            // When disconnected, restart the entire scene for a fresh game
+            this.scene.restart();
+        });
+    }
+
+    private updatePlayerTeam(state: SharedGameState): void {
+        // Find the player that belongs to this client by session ID
+        if (!this.playerSessionId || this.playerTeam) return;
+        
+        const player = state.combatants.get(this.playerSessionId);
+        if (player && player.type === 'player') {
+            this.playerTeam = player.team;
+            console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
+        }
     }
 
     /**

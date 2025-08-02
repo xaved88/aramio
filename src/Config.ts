@@ -35,7 +35,7 @@ export const GAMEPLAY_CONFIG = {
             RESPAWN_TIME_MS: 6000,
         },
         CRADLE: {
-            HEALTH: 1000,
+            HEALTH: 10,
             ATTACK_RADIUS: 30,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 0.3, // attacks per second
@@ -73,6 +73,12 @@ export const GAMEPLAY_CONFIG = {
         FIRST_WAVE_DELAY_MS: 3000, // 3 seconds
         WAVE_INTERVAL_MS: 10000, // 10 seconds
         SPAWN_RADIUS: 30, // radius around cradle to spawn minions
+    },
+    VICTORY_SCREEN: {
+        FADE_IN_DURATION_MS: 1000, // 1 second fade in
+        DISPLAY_DURATION_MS: 3000, // 3 seconds display
+        FADE_OUT_DURATION_MS: 1000, // 1 second fade out
+        BACKGROUND_ALPHA: 0.5, // 50% alpha black background
     },
 } as const;
 
@@ -140,11 +146,14 @@ export const CLIENT_CONFIG = {
             MEDIUM: '12px',
             LARGE: '14px',
             ERROR: '16px',
+            VICTORY: '48px',
         },
         COLORS: {
             TEXT_PRIMARY: 0xffffff,
             TEXT_SECONDARY: 0x000000,
             ERROR: 0xff0000,
+            VICTORY: 0x2ecc71, // green
+            DEFEAT: 0xe74c3c, // red
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,

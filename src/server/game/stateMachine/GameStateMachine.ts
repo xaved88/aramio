@@ -7,6 +7,7 @@ import { handleMovePlayer } from './actions/movePlayer';
 import { handleUpdateGame } from './actions/updateGame';
 import { handleEndGame } from './actions/endGame';
 
+
 /**
  * Pure state machine that processes game actions and returns new states
  */
@@ -37,6 +38,8 @@ export class GameStateMachine {
                 
             case 'END_GAME':
                 return handleEndGame(currentState, action);
+                
+
                 
             default:
                 // Return unchanged state for unknown actions

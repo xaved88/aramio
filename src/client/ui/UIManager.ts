@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COMBATANT_TYPES, isPlayerCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { HUDRenderer } from './HUDRenderer';
+import { VictoryScreen } from './VictoryScreen';
 
 /**
  * UIManager handles all UI elements including HUD, menus, and interface components.
@@ -10,6 +11,8 @@ import { HUDRenderer } from './HUDRenderer';
 export class UIManager {
     private scene: Phaser.Scene;
     private hudRenderer: HUDRenderer;
+    private victoryScreen: VictoryScreen;
+
     
     // HUD elements
     private hudHealthBar: Phaser.GameObjects.Graphics | null = null;
@@ -23,7 +26,14 @@ export class UIManager {
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         this.hudRenderer = new HUDRenderer(scene);
+        this.victoryScreen = new VictoryScreen(scene);
+        this.victoryScreen.setRestartCallback(() => {
+            // Restart is now handled by the server, so we don't need to do anything here
+            console.log('Victory screen restart callback - restart handled by server');
+        });
     }
+
+
 
     /**
      * Creates all HUD elements
@@ -43,7 +53,7 @@ export class UIManager {
     /**
      * Updates the HUD based on the current game state
      */
-    updateHUD(state: SharedGameState): void {
+    updateHUD(state: SharedGameState, playerTeam: string | null = null): void {
         if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
             !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || !this.hudLevelText) return;
         
@@ -64,6 +74,13 @@ export class UIManager {
                 levelText: this.hudLevelText
             }
         );
+        
+        // Check for game end and show victory screen
+        if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
+            // Use the player's team if available, otherwise fall back to the current player's team
+            const team = playerTeam || currentPlayer.team;
+            this.victoryScreen.showVictory(state.winningTeam, team);
+        }
     }
 
     /**
@@ -77,6 +94,8 @@ export class UIManager {
         if (this.hudExperienceBarBackground) this.hudExperienceBarBackground.destroy();
         if (this.hudExperienceText) this.hudExperienceText.destroy();
         if (this.hudLevelText) this.hudLevelText.destroy();
+        
+        this.victoryScreen.destroy();
         
         this.hudHealthBar = null;
         this.hudHealthBarBackground = null;
