@@ -22,6 +22,7 @@ export class EntityRenderer {
         text: Phaser.GameObjects.Text,
         radiusIndicator: Phaser.GameObjects.Graphics,
         respawnRing: Phaser.GameObjects.Graphics | undefined,
+        abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         state?: SharedGameState
     ): void {
         // Render the main entity graphics
@@ -30,6 +31,11 @@ export class EntityRenderer {
         // Render respawn ring for players
         if (respawnRing && combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
             this.renderRespawnRing(combatant, respawnRing, state);
+        }
+        
+        // Render ability ready indicator for players
+        if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
+            this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
         }
         
         // Render radius indicator
@@ -163,6 +169,27 @@ export class EntityRenderer {
             respawnRing.beginPath();
             respawnRing.arc(0, 0, CLIENT_CONFIG.RESPAWN_RING.RADIUS, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
             respawnRing.strokePath();
+        }
+    }
+
+    /**
+     * Renders the ability ready indicator for players only
+     */
+    private renderAbilityReadyIndicator(player: PlayerCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics): void {
+        abilityReadyIndicator.clear();
+        
+        // Check if ability is ready
+        const currentTime = Date.now();
+        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
+        const isAbilityReady = timeSinceLastUse >= player.ability.cooldown;
+        
+        if (isAbilityReady && player.state === 'alive') {
+            abilityReadyIndicator.lineStyle(
+                CLIENT_CONFIG.ABILITY_READY_INDICATOR.THICKNESS, 
+                CLIENT_CONFIG.ABILITY_READY_INDICATOR.COLOR, 
+                CLIENT_CONFIG.ABILITY_READY_INDICATOR.ALPHA
+            );
+            abilityReadyIndicator.strokeCircle(0, 0, CLIENT_CONFIG.ABILITY_READY_INDICATOR.RADIUS);
         }
     }
 

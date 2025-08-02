@@ -47,4 +47,13 @@ export class EntityFactory {
         ring.setDepth(-2); // Put behind radius indicators
         return ring;
     }
+
+    /**
+     * Creates the ability ready indicator for players
+     */
+    createAbilityReadyIndicator(): Phaser.GameObjects.Graphics {
+        const indicator = this.scene.add.graphics();
+        indicator.setDepth(1); // Put in front of other elements
+        return indicator;
+    }
 } 

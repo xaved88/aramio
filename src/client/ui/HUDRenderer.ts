@@ -24,9 +24,12 @@ export class HUDRenderer {
         experienceBarBackground: Phaser.GameObjects.Graphics;
         experienceText: Phaser.GameObjects.Text;
         levelText: Phaser.GameObjects.Text;
+        abilityBar: Phaser.GameObjects.Graphics;
+        abilityBarBackground: Phaser.GameObjects.Graphics;
     } {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
+        const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
         
         // Create health bar background
         const healthBarBackground = this.scene.add.graphics();
@@ -72,6 +75,19 @@ export class HUDRenderer {
             color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR)
         }).setOrigin(0, 0.5);
 
+        // Create ability bar background
+        const abilityBarBackground = this.scene.add.graphics();
+        abilityBarBackground.fillStyle(abilityConfig.BACKGROUND_COLOR, abilityConfig.BACKGROUND_ALPHA);
+        abilityBarBackground.fillRect(
+            abilityConfig.X,
+            abilityConfig.Y,
+            abilityConfig.WIDTH,
+            abilityConfig.HEIGHT
+        );
+
+        // Create ability bar
+        const abilityBar = this.scene.add.graphics();
+
         return {
             healthBar,
             healthBarBackground,
@@ -79,7 +95,9 @@ export class HUDRenderer {
             experienceBar,
             experienceBarBackground,
             experienceText,
-            levelText
+            levelText,
+            abilityBar,
+            abilityBarBackground
         };
     }
 
@@ -96,10 +114,13 @@ export class HUDRenderer {
             experienceBarBackground: Phaser.GameObjects.Graphics;
             experienceText: Phaser.GameObjects.Text;
             levelText: Phaser.GameObjects.Text;
+            abilityBar: Phaser.GameObjects.Graphics;
+            abilityBarBackground: Phaser.GameObjects.Graphics;
         }
     ): void {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
+        const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
         const healthPercent = player.health / player.maxHealth;
         
         // Update health bar
@@ -134,5 +155,49 @@ export class HUDRenderer {
         
         // Update level text
         hudElements.levelText.setText(`Lv.${player.level}`);
+
+        // Update ability bar
+        const currentTime = Date.now();
+        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
+        const isAbilityReady = timeSinceLastUse >= player.ability.cooldown;
+        
+        hudElements.abilityBar.clear();
+        
+        if (isAbilityReady) {
+            // Ability is ready - fill bar with lighter color
+            hudElements.abilityBar.fillStyle(abilityConfig.READY_COLOR, 1);
+            hudElements.abilityBar.fillRect(
+                abilityConfig.X,
+                abilityConfig.Y,
+                abilityConfig.WIDTH,
+                abilityConfig.HEIGHT
+            );
+            
+            // Make health text bold when ability is ready
+            hudElements.healthText.setStyle({ 
+                fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
+                color: hexToColorString(healthConfig.TEXT_COLOR),
+                fontStyle: 'bold'
+            });
+        } else {
+            // Ability is on cooldown - fill bar based on progress
+            const cooldownProgress = Math.min(timeSinceLastUse / player.ability.cooldown, 1);
+            const fillHeight = abilityConfig.HEIGHT * cooldownProgress;
+            
+            hudElements.abilityBar.fillStyle(abilityConfig.COOLDOWN_COLOR, 1);
+            hudElements.abilityBar.fillRect(
+                abilityConfig.X,
+                abilityConfig.Y + abilityConfig.HEIGHT - fillHeight, // Fill from bottom up
+                abilityConfig.WIDTH,
+                fillHeight
+            );
+            
+            // Reset health text to normal when ability is on cooldown
+            hudElements.healthText.setStyle({ 
+                fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
+                color: hexToColorString(healthConfig.TEXT_COLOR),
+                fontStyle: 'normal'
+            });
+        }
     }
 } 

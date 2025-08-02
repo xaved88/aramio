@@ -26,6 +26,7 @@ export class EntityManager {
     private entityTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     private entityRadiusIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -74,16 +75,22 @@ export class EntityManager {
         
         // Handle respawn ring for players
         let respawnRing = this.entityRespawnRings.get(entityId);
+        let abilityReadyIndicator = this.entityAbilityReadyIndicators.get(entityId);
         if (combatantData.type === COMBATANT_TYPES.PLAYER) {
             if (!respawnRing) {
                 respawnRing = this.entityFactory.createRespawnRing();
                 this.entityRespawnRings.set(entityId, respawnRing);
+            }
+            if (!abilityReadyIndicator) {
+                abilityReadyIndicator = this.entityFactory.createAbilityReadyIndicator();
+                this.entityAbilityReadyIndicators.set(entityId, abilityReadyIndicator);
             }
         }
         
         // Create smooth movement animation
         const targets = [entityGraphics, entityText, radiusIndicator];
         if (respawnRing) targets.push(respawnRing);
+        if (abilityReadyIndicator) targets.push(abilityReadyIndicator);
         
         this.animateEntityMovement(
             entityId,
@@ -99,6 +106,7 @@ export class EntityManager {
             entityText,
             radiusIndicator,
             respawnRing,
+            abilityReadyIndicator,
             state
         );
     }
@@ -144,6 +152,12 @@ export class EntityManager {
         if (respawnRing) {
             respawnRing.destroy();
             this.entityRespawnRings.delete(entityId);
+        }
+        
+        const abilityReadyIndicator = this.entityAbilityReadyIndicators.get(entityId);
+        if (abilityReadyIndicator) {
+            abilityReadyIndicator.destroy();
+            this.entityAbilityReadyIndicators.delete(entityId);
         }
     }
 
@@ -202,11 +216,13 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
+        this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
+        this.entityAbilityReadyIndicators.clear();
     }
 
     /**
@@ -217,10 +233,12 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
+        this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
+        this.entityAbilityReadyIndicators.clear();
     }
 } 

@@ -120,6 +120,12 @@ export const CLIENT_CONFIG = {
         THICKNESS: 3,
         ALPHA: 0.8,
     },
+    ABILITY_READY_INDICATOR: {
+        RADIUS: 17, // slightly larger than player radius
+        THICKNESS: 2,
+        ALPHA: 0.8,
+        COLOR: 0xd2b4de, // lighter purple to match ability bar
+    },
     RADIUS_INDICATOR: {
         LINE_THICKNESS: 1,
         LINE_COLOR: 0x000000, // black
@@ -144,6 +150,16 @@ export const CLIENT_CONFIG = {
             BACKGROUND_COLOR: 0x333333,
             EXPERIENCE_COLOR: 0xf1c40f, // yellow
             TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
+        },
+        ABILITY_BAR: {
+            X: 5,
+            Y: 20,
+            WIDTH: 10,
+            HEIGHT: 45, // height of health + exp bars
+            BACKGROUND_COLOR: 0x333333,
+            COOLDOWN_COLOR: 0x9b59b6, // purple
+            READY_COLOR: 0xd2b4de, // lighter purple
             BACKGROUND_ALPHA: 0.8,
         },
         LEVEL_TEXT: {

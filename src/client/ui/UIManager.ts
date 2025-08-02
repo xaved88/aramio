@@ -22,6 +22,8 @@ export class UIManager {
     private hudExperienceBarBackground: Phaser.GameObjects.Graphics | null = null;
     private hudExperienceText: Phaser.GameObjects.Text | null = null;
     private hudLevelText: Phaser.GameObjects.Text | null = null;
+    private hudAbilityBar: Phaser.GameObjects.Graphics | null = null;
+    private hudAbilityBarBackground: Phaser.GameObjects.Graphics | null = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -48,6 +50,8 @@ export class UIManager {
         this.hudExperienceBarBackground = hudElements.experienceBarBackground;
         this.hudExperienceText = hudElements.experienceText;
         this.hudLevelText = hudElements.levelText;
+        this.hudAbilityBar = hudElements.abilityBar;
+        this.hudAbilityBarBackground = hudElements.abilityBarBackground;
     }
 
     /**
@@ -55,7 +59,8 @@ export class UIManager {
      */
     updateHUD(state: SharedGameState, playerTeam: string | null = null): void {
         if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
-            !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || !this.hudLevelText) return;
+            !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || 
+            !this.hudLevelText || !this.hudAbilityBar || !this.hudAbilityBarBackground) return;
         
         // Find the current player (assuming first player for now)
         // In a real implementation, you'd track the client's player ID
@@ -71,7 +76,9 @@ export class UIManager {
                 experienceBar: this.hudExperienceBar,
                 experienceBarBackground: this.hudExperienceBarBackground,
                 experienceText: this.hudExperienceText,
-                levelText: this.hudLevelText
+                levelText: this.hudLevelText,
+                abilityBar: this.hudAbilityBar,
+                abilityBarBackground: this.hudAbilityBarBackground
             }
         );
         
@@ -94,6 +101,8 @@ export class UIManager {
         if (this.hudExperienceBarBackground) this.hudExperienceBarBackground.destroy();
         if (this.hudExperienceText) this.hudExperienceText.destroy();
         if (this.hudLevelText) this.hudLevelText.destroy();
+        if (this.hudAbilityBar) this.hudAbilityBar.destroy();
+        if (this.hudAbilityBarBackground) this.hudAbilityBarBackground.destroy();
         
         this.victoryScreen.destroy();
         
@@ -104,5 +113,7 @@ export class UIManager {
         this.hudExperienceBarBackground = null;
         this.hudExperienceText = null;
         this.hudLevelText = null;
+        this.hudAbilityBar = null;
+        this.hudAbilityBarBackground = null;
     }
 } 
