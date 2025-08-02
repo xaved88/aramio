@@ -418,4 +418,138 @@ describe('handleUpdateGame', () => {
             expect(result.newState.currentWave).toBe(3);
         });
     });
+
+    describe('nearest enemy targeting', () => {
+        let attacker: Player;
+        let nearEnemy: Player;
+        let farEnemy: Player;
+
+        beforeEach(() => {
+            // Create an attacker
+            attacker = new Player();
+            attacker.id = 'attacker';
+            attacker.type = COMBATANT_TYPES.PLAYER;
+            attacker.team = 'blue';
+            attacker.x = 100;
+            attacker.y = 100;
+            attacker.health = 10;
+            attacker.maxHealth = 10;
+            attacker.attackRadius = 50;
+            attacker.attackStrength = 100;
+            attacker.attackSpeed = 1;
+            attacker.lastAttackTime = 0;
+            attacker.state = 'alive';
+            attacker.respawnTime = 0;
+            attacker.respawnDuration = 6000;
+            attacker.experience = 0;
+            attacker.level = 1;
+            attacker.ability = new (require('../../../../schema/GameState').Ability)();
+            attacker.ability.type = 'projectile';
+            attacker.ability.cooldown = 5000;
+            attacker.ability.lastUsedTime = 0;
+            attacker.ability.strength = 50;
+            
+            // Create a near enemy (closer to attacker)
+            nearEnemy = new Player();
+            nearEnemy.id = 'near-enemy';
+            nearEnemy.type = COMBATANT_TYPES.PLAYER;
+            nearEnemy.team = 'red';
+            nearEnemy.x = 120; // 20 units away
+            nearEnemy.y = 100;
+            nearEnemy.health = 10;
+            nearEnemy.maxHealth = 10;
+            nearEnemy.attackRadius = 50;
+            nearEnemy.attackStrength = 100;
+            nearEnemy.attackSpeed = 1;
+            nearEnemy.lastAttackTime = 0;
+            nearEnemy.state = 'alive';
+            nearEnemy.respawnTime = 0;
+            nearEnemy.respawnDuration = 6000;
+            nearEnemy.experience = 0;
+            nearEnemy.level = 1;
+            nearEnemy.ability = new (require('../../../../schema/GameState').Ability)();
+            nearEnemy.ability.type = 'projectile';
+            nearEnemy.ability.cooldown = 5000;
+            nearEnemy.ability.lastUsedTime = 0;
+            nearEnemy.ability.strength = 50;
+            
+            // Create a far enemy (further from attacker)
+            farEnemy = new Player();
+            farEnemy.id = 'far-enemy';
+            farEnemy.type = COMBATANT_TYPES.PLAYER;
+            farEnemy.team = 'red';
+            farEnemy.x = 140; // 40 units away
+            farEnemy.y = 100;
+            farEnemy.health = 10;
+            farEnemy.maxHealth = 10;
+            farEnemy.attackRadius = 50;
+            farEnemy.attackStrength = 100;
+            farEnemy.attackSpeed = 1;
+            farEnemy.lastAttackTime = 0;
+            farEnemy.state = 'alive';
+            farEnemy.respawnTime = 0;
+            farEnemy.respawnDuration = 6000;
+            farEnemy.experience = 0;
+            farEnemy.level = 1;
+            farEnemy.ability = new (require('../../../../schema/GameState').Ability)();
+            farEnemy.ability.type = 'projectile';
+            farEnemy.ability.cooldown = 5000;
+            farEnemy.ability.lastUsedTime = 0;
+            farEnemy.ability.strength = 50;
+            
+            gameState.combatants.set(attacker.id, attacker);
+            gameState.combatants.set(nearEnemy.id, nearEnemy);
+            gameState.combatants.set(farEnemy.id, farEnemy);
+        });
+
+        it('should attack the nearest enemy when multiple enemies are in range', () => {
+            // Both enemies are in range (attack radius is 50, near enemy is 20 units away, far enemy is 40 units away)
+            const initialNearHealth = nearEnemy.health;
+            const initialFarHealth = farEnemy.health;
+            
+            console.log('Before attack - Near enemy health:', initialNearHealth, 'Far enemy health:', initialFarHealth);
+            console.log('Attacker lastAttackTime:', attacker.lastAttackTime, 'Game time:', gameState.gameTime);
+            
+            result = handleUpdateGame(gameState, action);
+            
+            const finalNearHealth = result.newState.combatants.get('near-enemy')?.health;
+            const finalFarHealth = result.newState.combatants.get('far-enemy')?.health;
+            
+            console.log('After attack - Near enemy health:', finalNearHealth, 'Far enemy health:', finalFarHealth);
+            console.log('Attack events:', result.newState.attackEvents.length);
+            result.newState.attackEvents.forEach((event, index) => {
+                console.log(`Attack event ${index}:`, event.sourceId, '->', event.targetId);
+            });
+            
+            // Should only attack the nearest enemy (nearEnemy)
+            // Since attack strength is 100 and health is 10, the enemy dies (health becomes 0)
+            expect(finalNearHealth).toBe(0); // Enemy died from 100 damage
+            expect(finalFarHealth).toBe(initialFarHealth); // Should not be damaged
+            
+            // Should create an attack event targeting the nearest enemy
+            const attackEvents = result.newState.attackEvents;
+            expect(attackEvents.length).toBeGreaterThan(0);
+            // Check that at least one attack event is from our attacker to the near enemy
+            const attackerToNearEvent = attackEvents.find(event => 
+                event.sourceId === 'attacker' && event.targetId === 'near-enemy'
+            );
+            expect(attackerToNearEvent).toBeDefined();
+        });
+
+        it('should not attack when no enemies are in range', () => {
+            // Move enemies out of range
+            nearEnemy.x = 200; // 100 units away
+            farEnemy.x = 300; // 200 units away
+            
+            const initialNearHealth = nearEnemy.health;
+            const initialFarHealth = farEnemy.health;
+            
+            result = handleUpdateGame(gameState, action);
+            
+            // Should not attack any enemies
+            expect(result.newState.combatants.get('near-enemy')?.health).toBe(initialNearHealth);
+            expect(result.newState.combatants.get('far-enemy')?.health).toBe(initialFarHealth);
+            expect(result.newState.attackEvents.length).toBe(0);
+        });
+    });
 }); 

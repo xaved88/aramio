@@ -67,16 +67,27 @@ function processCombat(state: GameState): void {
                 return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
             });
             
-            // Attack the first enemy in range
+            // Find the nearest enemy in range
             if (enemiesInRange.length > 0) {
-                const target = enemiesInRange[0];
-                CombatantUtils.damageCombatant(target, attacker.attackStrength);
+                let nearestEnemy = enemiesInRange[0];
+                let nearestDistance = CombatantUtils.getDistance(attacker, nearestEnemy);
+                
+                enemiesInRange.forEach(enemy => {
+                    const distance = CombatantUtils.getDistance(attacker, enemy);
+                    if (distance < nearestDistance) {
+                        nearestEnemy = enemy;
+                        nearestDistance = distance;
+                    }
+                });
+                
+                // Attack the nearest enemy
+                CombatantUtils.damageCombatant(nearestEnemy, attacker.attackStrength);
                 attacker.lastAttackTime = currentTime;
                 
                 // Create attack event
                 const attackEvent = new AttackEvent();
                 attackEvent.sourceId = attacker.id;
-                attackEvent.targetId = target.id;
+                attackEvent.targetId = nearestEnemy.id;
                 attackEvent.timestamp = currentTime;
                 state.attackEvents.push(attackEvent);
             }
