@@ -35,9 +35,9 @@ export const GAMEPLAY_CONFIG = {
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
     COMBAT: {
         PLAYER: {
-            HEALTH: 10,
+            HEALTH: 55,
             ATTACK_RADIUS: 50,
-            ATTACK_STRENGTH: 100,
+            ATTACK_STRENGTH: 10,
             ATTACK_SPEED: 1, // attacks per second
             RESPAWN_TIME_MS: 6000,
             ABILITY: {
@@ -48,28 +48,28 @@ export const GAMEPLAY_CONFIG = {
             },
         },
         CRADLE: {
-            HEALTH: 10,
-            ATTACK_RADIUS: 30,
+            HEALTH: 1000,
+            ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 0.3, // attacks per second
         },
         TURRET: {
-            HEALTH: 100,
-            ATTACK_RADIUS: 35,
+            HEALTH: 300,
+            ATTACK_RADIUS: 70,
             ATTACK_STRENGTH: 20,
             ATTACK_SPEED: 0.5, // attacks per second
         },
         MINION: {
             WARRIOR: {
-                HEALTH: 8,
-                ATTACK_RADIUS: 40,
+                HEALTH: 28,
+                ATTACK_RADIUS: 20,
                 ATTACK_STRENGTH: 15,
                 ATTACK_SPEED: 0.8, // attacks per second
             },
             ARCHER: {
-                HEALTH: 6,
+                HEALTH: 15,
                 ATTACK_RADIUS: 60,
-                ATTACK_STRENGTH: 12,
+                ATTACK_STRENGTH: 6,
                 ATTACK_SPEED: 1.2, // attacks per second
             },
         },
