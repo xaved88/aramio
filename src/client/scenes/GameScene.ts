@@ -32,7 +32,18 @@ export class GameScene extends Phaser.Scene {
     }
 
     async create() {
-        this.client = new Client('ws://localhost:2567');
+        // In development, connect to the Colyseus server on port 2567
+        // In production, connect to the same host (since server serves both)
+        let serverUrl: string;
+        if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+            // Development: Vite dev server on 3000, but Colyseus server on 2567
+            serverUrl = 'ws://localhost:2567';
+        } else {
+            // Production: same host and port
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            serverUrl = `${protocol}//${window.location.host}`;
+        }
+        this.client = new Client(serverUrl);
         
         // Initialize managers
         this.entityManager = new EntityManager(this);
