@@ -3,17 +3,16 @@ import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
-import { deepCopyGameState } from '../utils/stateCopyUtils';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
-    const newState = deepCopyGameState(state);
-    newState.gameTime = state.gameTime + action.payload.deltaTime;
+    // Update game time directly on the state
+    state.gameTime = state.gameTime + action.payload.deltaTime;
     
     // Clear old attack events (older than 1 second)
-    const currentTime = newState.gameTime;
+    const currentTime = state.gameTime;
     const eventsToRemove: number[] = [];
     
-    newState.attackEvents.forEach((event, index) => {
+    state.attackEvents.forEach((event, index) => {
         if (currentTime - event.timestamp > 1000) { // 1 second
             eventsToRemove.push(index);
         }
@@ -21,19 +20,19 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     
     // Remove events in reverse order to maintain indices
     eventsToRemove.reverse().forEach(index => {
-        newState.attackEvents.splice(index, 1);
+        state.attackEvents.splice(index, 1);
     });
     
     // Process combat
-    processCombat(newState);
+    processCombat(state);
     
     // Handle respawning and dead combatants
-    handleDeadCombatants(newState);
+    handleDeadCombatants(state);
     
     // Check for game end conditions
-    checkGameEndConditions(newState);
+    checkGameEndConditions(state);
     
-    return { newState };
+    return { newState: state };
 }
 
 function processCombat(state: GameState): void {
@@ -100,13 +99,19 @@ function handleDeadCombatants(state: GameState): void {
     });
     
     // Handle turret destruction and grant experience
+    const turretsToRemove: string[] = [];
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
-            if (!CombatantUtils.isCombatantAlive(combatant) && combatant.health === 0) {
+            if (!CombatantUtils.isCombatantAlive(combatant)) {
                 grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state);
-                combatant.health = -1; // Mark as processed
+                turretsToRemove.push(id);
             }
         }
+    });
+    
+    // Remove destroyed turrets
+    turretsToRemove.forEach(id => {
+        state.combatants.delete(id);
     });
 }
 

@@ -3,26 +3,26 @@ import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 
 export class GameEngine {
-    private currentState: GameState;
+    private state: GameState;
 
-    constructor(initialState: GameState) {
-        this.currentState = initialState;
+    constructor(state: GameState) {
+        this.state = state;
     }
 
     /**
      * Gets the current game state
      */
     getState(): GameState {
-        return this.currentState;
+        return this.state;
     }
 
     /**
-     * Processes an action and updates the internal state
+     * Processes an action and updates the state directly
      * @param action The action to process
      */
     processAction(action: GameActionTypes): void {
-        const result = GameStateMachine.processAction(this.currentState, action);
-        this.currentState = result.newState;
+        const result = GameStateMachine.processAction(this.state, action);
+        // The state machine now returns the same state reference, so no need to reassign
         
         // Handle any events returned by the state machine
         if (result.events) {

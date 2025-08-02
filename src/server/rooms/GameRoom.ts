@@ -24,12 +24,11 @@ export class GameRoom extends Room<GameState> {
         
         this.setState(gameState);
         
-        // Initialize game engine and setup the game
-        this.gameEngine = new GameEngine(gameState);
+        // Initialize game engine with the same state reference
+        this.gameEngine = new GameEngine(this.state);
         this.gameEngine.setupGame();
-        
-        // Update the room state with the setup game state
-        this.setState(this.gameEngine.getState());
+
+        console.log("Game Initialized:", gameStateToString(this.state))
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
@@ -53,9 +52,6 @@ export class GameRoom extends Room<GameState> {
         
         // Spawn player through the game engine
         this.gameEngine.spawnPlayer(client.sessionId, team);
-        
-        // Update the room state
-        this.setState(this.gameEngine.getState());
     }
 
     onLeave(client: Client, consented: boolean) {
@@ -63,9 +59,6 @@ export class GameRoom extends Room<GameState> {
         
         // Remove player through the game engine
         this.gameEngine.removePlayer(client.sessionId);
-        
-        // Update the room state
-        this.setState(this.gameEngine.getState());
     }
 
     onDispose() {
@@ -78,12 +71,12 @@ export class GameRoom extends Room<GameState> {
         const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
         this.lastUpdateTime = currentTime;
         
-        const totalHP = getTotalCombatantHealth(this.gameEngine.getState());
+        const totalHP = getTotalCombatantHealth(this.state);
         this.gameEngine.update(deltaTime);
-        const afterHp = getTotalCombatantHealth(this.gameEngine.getState());
+        const afterHp = getTotalCombatantHealth(this.state);
 
         if(afterHp != totalHP) {
-            console.log("Server State Changed:", gameStateToString(this.gameEngine.getState()))
+            console.log("Server State Changed:", gameStateToString(this.state))
         }
 
         // Process all commands
@@ -91,9 +84,6 @@ export class GameRoom extends Room<GameState> {
         
         // Clear commands for next frame
         this.commands = [];
-        
-        // Update the room state
-        this.setState(this.gameEngine.getState());
     }
 
     private processCommands() {

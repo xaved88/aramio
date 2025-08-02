@@ -2,19 +2,16 @@ import { GameState, Player } from '../../../schema/GameState';
 import { MovePlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { deepCopyGameState } from '../utils/stateCopyUtils';
 
 export function handleMovePlayer(state: GameState, action: MovePlayerAction): StateMachineResult {
-    const newState = deepCopyGameState(state);
-    
     // Update player position
-    const player = newState.combatants.get(action.payload.playerId);
+    const player = state.combatants.get(action.payload.playerId);
     if (player && player.type === COMBATANT_TYPES.PLAYER) {
         const playerObj = player as Player;
         
         // Prevent respawning players from moving
         if (playerObj.state === 'respawning') {
-            return { newState };
+            return { newState: state };
         }
         
         const targetX = action.payload.targetX;
@@ -27,7 +24,7 @@ export function handleMovePlayer(state: GameState, action: MovePlayerAction): St
         
         // If we're close enough, don't move
         if (distance < GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE) {
-            return { newState };
+            return { newState: state };
         }
         
         // Normalize direction and apply speed
@@ -43,5 +40,5 @@ export function handleMovePlayer(state: GameState, action: MovePlayerAction): St
         player.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
     }
     
-    return { newState };
+    return { newState: state };
 } 

@@ -376,7 +376,7 @@ describe('GameStateMachine', () => {
             // Verify that our manual changes are preserved, accounting for turret destruction
             // Player starts with 50, gets 20 from turret destruction, levels up (consumes 30), so 40 remaining
             expect(newPlayer?.experience).toBe(40);
-            expect(newRedTurret?.health).toBe(-1); // Turret was processed and marked as destroyed
+            expect(newRedTurret).toBeUndefined(); // Turret was destroyed and removed
         });
     });
 

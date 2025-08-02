@@ -1,5 +1,6 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Player as ColyseusPlayer } from '../../server/schema/GameState';
-import { SharedGameState, Combatant, PlayerCombatant, CradleCombatant, TurretCombatant, AttackEvent, COMBATANT_TYPES } from '../types/CombatantTypes';
+import { SharedGameState } from '../types/GameStateTypes';
+import { Combatant, PlayerCombatant, CradleCombatant, TurretCombatant, AttackEvent, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<string, Combatant>();

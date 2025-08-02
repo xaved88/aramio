@@ -4,9 +4,11 @@ import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export function handleSetupGame(state: GameState, action: SetupGameAction): StateMachineResult {
-    const newState = new GameState();
-    newState.gameTime = 0;
-    newState.gamePhase = 'playing';
+    // Clear existing state
+    state.combatants.clear();
+    state.attackEvents.clear();
+    state.gameTime = 0;
+    state.gamePhase = 'playing';
     
     // Create blue cradle (bottom left)
     const blueCradle = new Combatant();
@@ -21,7 +23,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
     blueCradle.lastAttackTime = 0;
-    newState.combatants.set(blueCradle.id, blueCradle);
+    state.combatants.set(blueCradle.id, blueCradle);
     
     // Create red cradle (top right)
     const redCradle = new Combatant();
@@ -36,7 +38,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
     redCradle.lastAttackTime = 0;
-    newState.combatants.set(redCradle.id, redCradle);
+    state.combatants.set(redCradle.id, redCradle);
     
     // Create blue turret
     const blueTurret = new Combatant();
@@ -51,7 +53,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
     blueTurret.lastAttackTime = 0;
-    newState.combatants.set(blueTurret.id, blueTurret);
+    state.combatants.set(blueTurret.id, blueTurret);
     
     // Create red turret
     const redTurret = new Combatant();
@@ -66,7 +68,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
     redTurret.lastAttackTime = 0;
-    newState.combatants.set(redTurret.id, redTurret);
+    state.combatants.set(redTurret.id, redTurret);
     
-    return { newState };
+    return { newState: state };
 } 

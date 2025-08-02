@@ -2,11 +2,8 @@ import { GameState, Player } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { deepCopyGameState } from '../utils/stateCopyUtils';
 
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): StateMachineResult {
-    const newState = deepCopyGameState(state);
-    
     // Create new player
     const player = new Player();
     player.id = action.payload.playerId;
@@ -34,7 +31,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     player.state = 'alive';
     player.respawnTime = 0;
     
-    newState.combatants.set(player.id, player);
+    state.combatants.set(player.id, player);
     
-    return { newState };
+    return { newState: state };
 } 

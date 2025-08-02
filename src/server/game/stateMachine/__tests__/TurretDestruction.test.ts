@@ -47,8 +47,8 @@ describe('TurretDestruction', () => {
             const updatedPlayer = newState.combatants.get('player1') as Player;
             const updatedTurret = newState.combatants.get('red-turret');
 
-            // Turret should be destroyed
-            expect(updatedTurret?.health).toBe(-1); // Marked as processed
+            // Turret should be destroyed and removed from combatants
+            expect(updatedTurret).toBeUndefined();
 
             // Player should have gained experience and leveled up
             // 20 experience granted, 10 needed for level 1, so 10 remaining
