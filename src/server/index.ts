@@ -3,6 +3,7 @@ import { WebSocketTransport } from '@colyseus/ws-transport';
 import { monitor } from '@colyseus/monitor';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { GameRoom } from './rooms/GameRoom';
 import { SERVER_CONFIG } from '../Config';
 
@@ -11,6 +12,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the Vite build output
+app.use(express.static(path.join(__dirname, '../../dist')));
 
 const server = new Server({
     transport: new WebSocketTransport({
@@ -21,5 +25,10 @@ const server = new Server({
 server.define('game', GameRoom);
 
 app.use('/colyseus', monitor());
+
+// Fallback to index.html for SPA routing
+app.get('*', (_req, res) => {
+    res.sendFile(path.join(__dirname, '../../dist/index.html'));
+});
 
 console.log(`Server running on port ${port}`); 
