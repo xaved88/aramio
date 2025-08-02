@@ -1,0 +1,47 @@
+import { GameState, Player } from '../../../schema/GameState';
+import { MovePlayerAction, StateMachineResult } from '../types';
+import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { deepCopyGameState } from '../utils/stateCopyUtils';
+
+export function handleMovePlayer(state: GameState, action: MovePlayerAction): StateMachineResult {
+    const newState = deepCopyGameState(state);
+    
+    // Update player position
+    const player = newState.combatants.get(action.payload.playerId);
+    if (player && player.type === COMBATANT_TYPES.PLAYER) {
+        const playerObj = player as Player;
+        
+        // Prevent respawning players from moving
+        if (playerObj.state === 'respawning') {
+            return { newState };
+        }
+        
+        const targetX = action.payload.targetX;
+        const targetY = action.payload.targetY;
+        
+        // Calculate direction vector
+        const dx = targetX - player.x;
+        const dy = targetY - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // If we're close enough, don't move
+        if (distance < GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE) {
+            return { newState };
+        }
+        
+        // Normalize direction and apply speed
+        const normalizedDx = dx / distance;
+        const normalizedDy = dy / distance;
+        
+        // Calculate new position
+        const newX = player.x + normalizedDx * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+        const newY = player.y + normalizedDy * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+        
+        // Clamp to game bounds
+        player.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
+        player.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
+    }
+    
+    return { newState };
+} 

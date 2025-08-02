@@ -1,9 +1,7 @@
 import { Room, Client } from '@colyseus/core';
-import { GameState, Combatant, Player } from '../schema/GameState';
-import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
-import { CombatantUtils } from '../game/combatants/CombatantUtils';
-import { GameEngine, GamePhase } from '../game/GameEngine';
-import { COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
+import { GameState } from '../schema/GameState';
+import { SERVER_CONFIG } from '../../Config';
+import { GameEngine } from '../game/GameEngine';
 
 interface GameCommand {
     type: string;
@@ -18,74 +16,19 @@ export class GameRoom extends Room<GameState> {
     private gameEngine!: GameEngine;
 
     onCreate(options: any) {
+        // Initialize empty game state
         const gameState = new GameState();
         gameState.gameTime = 0;
-        gameState.gamePhase = GamePhase.PLAYING;
-        
-        // Create blue cradle (bottom left)
-        const blueCradle = new Combatant();
-        blueCradle.id = 'blue-cradle';
-        blueCradle.type = COMBATANT_TYPES.CRADLE;
-        blueCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
-        blueCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
-        blueCradle.team = 'blue';
-        blueCradle.health = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
-        blueCradle.maxHealth = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
-        blueCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
-        blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
-        blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
-        blueCradle.lastAttackTime = 0;
-        gameState.combatants.set(blueCradle.id, blueCradle);
-        
-        // Create red cradle (top right)
-        const redCradle = new Combatant();
-        redCradle.id = 'red-cradle';
-        redCradle.type = COMBATANT_TYPES.CRADLE;
-        redCradle.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
-        redCradle.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
-        redCradle.team = 'red';
-        redCradle.health = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
-        redCradle.maxHealth = GAMEPLAY_CONFIG.COMBAT.CRADLE.HEALTH;
-        redCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
-        redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
-        redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
-        redCradle.lastAttackTime = 0;
-        gameState.combatants.set(redCradle.id, redCradle);
-        
-        // Create blue turret
-        const blueTurret = new Combatant();
-        blueTurret.id = 'blue-turret';
-        blueTurret.type = COMBATANT_TYPES.TURRET;
-        blueTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.x;
-        blueTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.y;
-        blueTurret.team = 'blue';
-        blueTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-        blueTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-        blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
-        blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
-        blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
-        blueTurret.lastAttackTime = 0;
-        gameState.combatants.set(blueTurret.id, blueTurret);
-        
-        // Create red turret
-        const redTurret = new Combatant();
-        redTurret.id = 'red-turret';
-        redTurret.type = COMBATANT_TYPES.TURRET;
-        redTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.x;
-        redTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.y;
-        redTurret.team = 'red';
-        redTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-        redTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-        redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
-        redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
-        redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
-        redTurret.lastAttackTime = 0;
-        gameState.combatants.set(redTurret.id, redTurret);
+        gameState.gamePhase = 'playing';
         
         this.setState(gameState);
         
-        // Initialize game engine
+        // Initialize game engine and setup the game
         this.gameEngine = new GameEngine(gameState);
+        this.gameEngine.setupGame();
+        
+        // Update the room state with the setup game state
+        this.setState(this.gameEngine.getState());
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
@@ -101,35 +44,27 @@ export class GameRoom extends Room<GameState> {
 
     onJoin(client: Client, options: any) {
         console.log(`${client.sessionId} joined`);
-        const player = new Player();
-        player.id = client.sessionId;
-        player.type = COMBATANT_TYPES.PLAYER;
-        player.team = this.state.combatants.size % 2 === 0 ? 'blue' : 'red';
         
-        // Spawn player near their team's cradle
-        if (player.team === 'blue') {
-            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        } else {
-            player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-            player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        }
+        // Determine team based on current player count
+        const currentPlayerCount = Array.from(this.state.combatants.values())
+            .filter(c => c.type === 'player').length;
+        const team = currentPlayerCount % 2 === 0 ? 'blue' : 'red';
         
-        player.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
-        player.maxHealth = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
-        player.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
-        player.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
-        player.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
-        player.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
-        player.experience = 0;
-        player.level = 1;
-        player.lastAttackTime = 0;
-        this.state.combatants.set(client.sessionId, player);
+        // Spawn player through the game engine
+        this.gameEngine.spawnPlayer(client.sessionId, team);
+        
+        // Update the room state
+        this.setState(this.gameEngine.getState());
     }
 
     onLeave(client: Client, consented: boolean) {
         console.log(`${client.sessionId} left`);
-        this.state.combatants.delete(client.sessionId);
+        
+        // Remove player through the game engine
+        this.gameEngine.removePlayer(client.sessionId);
+        
+        // Update the room state
+        this.setState(this.gameEngine.getState());
     }
 
     onDispose() {
@@ -137,14 +72,21 @@ export class GameRoom extends Room<GameState> {
     }
 
     private update() {
-        // Update game engine
-        this.gameEngine.update(SERVER_CONFIG.UPDATE_RATE_MS);
+        // Update game engine with time delta
+        const currentTime = Date.now();
+        const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
+        this.lastUpdateTime = currentTime;
+        
+        this.gameEngine.update(deltaTime);
         
         // Process all commands
         this.processCommands();
         
         // Clear commands for next frame
         this.commands = [];
+        
+        // Update the room state
+        this.setState(this.gameEngine.getState());
     }
 
     private processCommands() {
@@ -172,36 +114,8 @@ export class GameRoom extends Room<GameState> {
     }
 
     private handleMoveCommand(command: GameCommand) {
-        const player = this.state.combatants.get(command.clientId);
-        if (player && player.type === COMBATANT_TYPES.PLAYER && command.data.targetX !== undefined && command.data.targetY !== undefined) {
-            // Prevent respawning players from moving
-            if ((player as Player).state === 'respawning') {
-                return;
-            }
-            const targetX = command.data.targetX;
-            const targetY = command.data.targetY;
-            
-            // Calculate direction vector
-            const dx = targetX - player.x;
-            const dy = targetY - player.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // If we're close enough, don't move
-            if (distance < GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE) {
-                return;
-            }
-            
-            // Normalize direction and apply speed
-            const normalizedDx = dx / distance;
-            const normalizedDy = dy / distance;
-            
-            // Calculate new position
-            const newX = player.x + normalizedDx * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
-            const newY = player.y + normalizedDy * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
-            
-            // Clamp to game bounds
-            player.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
-            player.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
+        if (command.data.targetX !== undefined && command.data.targetY !== undefined) {
+            this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
         }
     }
 } 
