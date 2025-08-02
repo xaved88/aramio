@@ -36,6 +36,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     player.ability.type = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.TYPE;
     player.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.COOLDOWN_MS;
     player.ability.lastUsedTime = 0; // Start with 0, first use will be available
+    player.ability.strength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.STRENGTH;
     
     state.combatants.set(player.id, player);
     

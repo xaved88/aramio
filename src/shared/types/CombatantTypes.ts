@@ -18,6 +18,7 @@ export interface Ability {
     type: string;
     cooldown: number;
     lastUsedTime: number;
+    strength: number;
 }
 
 export interface BaseCombatant {

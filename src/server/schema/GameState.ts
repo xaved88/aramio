@@ -11,6 +11,7 @@ export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
     @type('number') lastUsedTime!: number; // timestamp when ability was last used
+    @type('number') strength!: number; // damage dealt by ability
 }
 
 export class Projectile extends Schema {

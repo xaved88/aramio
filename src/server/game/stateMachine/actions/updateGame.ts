@@ -186,19 +186,25 @@ function grantExperience(player: Player, amount: number): void {
 
 function levelUpPlayer(player: Player): void {
     const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
+    const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
     
     // Level up
     player.level++;
     player.experience -= experienceNeeded;
     
-    // Boost stats by 15%
+    // Boost stats by the configured amount
     player.maxHealth = Math.round(player.maxHealth * boostMultiplier);
     player.health = player.maxHealth; // Restore health on level up
     player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
     player.attackRadius = Math.round(player.attackRadius * boostMultiplier);
     player.attackSpeed = player.attackSpeed * boostMultiplier;
-    player.respawnDuration = Math.round(player.respawnDuration * (1 - GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Reduce respawn time
+
+    // Make respawn duration longer as a punishment for higher level deaths.
+    player.respawnDuration = Math.round(player.respawnDuration * (1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
+    
+    // Boost ability strength by different configurable percentage
+    player.ability.strength = Math.round(player.ability.strength * abilityBoostMultiplier);
 }
 
 function checkGameEndConditions(state: GameState): StateMachineResult | null {

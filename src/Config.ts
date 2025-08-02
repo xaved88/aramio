@@ -79,6 +79,7 @@ export const GAMEPLAY_CONFIG = {
         MINION_KILLED: 2,
         LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
         STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
+        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30, // 30% increase per level for ability strength
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,

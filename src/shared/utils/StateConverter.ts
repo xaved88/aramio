@@ -75,7 +75,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combata
                 ability: {
                     type: player.ability.type,
                     cooldown: player.ability.cooldown,
-                    lastUsedTime: player.ability.lastUsedTime
+                    lastUsedTime: player.ability.lastUsedTime,
+                    strength: player.ability.strength
                 }
             } as PlayerCombatant;
             
