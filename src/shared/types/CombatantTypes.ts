@@ -65,6 +65,18 @@ export interface AttackEvent {
     timestamp: number;
 }
 
+export interface Projectile {
+    id: string;
+    ownerId: string;
+    x: number;
+    y: number;
+    directionX: number;
+    directionY: number;
+    speed: number;
+    strength: number;
+    team: string;
+}
+
 export function isPlayerCombatant(combatant: Combatant): combatant is PlayerCombatant {
     return combatant.type === COMBATANT_TYPES.PLAYER;
 }

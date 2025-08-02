@@ -27,6 +27,7 @@ export class EntityManager {
     private entityRadiusIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -43,8 +44,14 @@ export class EntityManager {
             this.updateCombatantEntity(combatantData, state);
         });
         
+        // Update projectiles
+        this.updateProjectileEntities(state);
+        
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
+        
+        // Remove projectiles that no longer exist
+        this.cleanupRemovedProjectiles(state);
     }
 
     /**
@@ -60,16 +67,22 @@ export class EntityManager {
         
         if (!entityGraphics) {
             entityGraphics = this.entityFactory.createEntityGraphics();
+            // Set initial position immediately to avoid spawning at (0,0)
+            entityGraphics.setPosition(combatantData.x, combatantData.y);
             this.entityGraphics.set(entityId, entityGraphics);
         }
         
         if (!entityText) {
             entityText = this.entityFactory.createEntityText();
+            // Set initial position immediately to avoid spawning at (0,0)
+            entityText.setPosition(combatantData.x, combatantData.y);
             this.entityTexts.set(entityId, entityText);
         }
         
         if (!radiusIndicator) {
             radiusIndicator = this.entityFactory.createRadiusIndicator();
+            // Set initial position immediately to avoid spawning at (0,0)
+            radiusIndicator.setPosition(combatantData.x, combatantData.y);
             this.entityRadiusIndicators.set(entityId, radiusIndicator);
         }
         
@@ -79,10 +92,14 @@ export class EntityManager {
         if (combatantData.type === COMBATANT_TYPES.PLAYER) {
             if (!respawnRing) {
                 respawnRing = this.entityFactory.createRespawnRing();
+                // Set initial position immediately to avoid spawning at (0,0)
+                respawnRing.setPosition(combatantData.x, combatantData.y);
                 this.entityRespawnRings.set(entityId, respawnRing);
             }
             if (!abilityReadyIndicator) {
                 abilityReadyIndicator = this.entityFactory.createAbilityReadyIndicator();
+                // Set initial position immediately to avoid spawning at (0,0)
+                abilityReadyIndicator.setPosition(combatantData.x, combatantData.y);
                 this.entityAbilityReadyIndicators.set(entityId, abilityReadyIndicator);
             }
         }
@@ -109,6 +126,69 @@ export class EntityManager {
             abilityReadyIndicator,
             state
         );
+    }
+
+    /**
+     * Updates projectile entities
+     */
+    private updateProjectileEntities(state: SharedGameState): void {
+        state.projectiles.forEach((projectileData: any) => {
+            this.updateProjectileEntity(projectileData);
+        });
+    }
+
+    /**
+     * Updates a single projectile entity, creating it if it doesn't exist
+     */
+    private updateProjectileEntity(projectileData: any): void {
+        const entityId = projectileData.id;
+        
+        // Get or create projectile graphics
+        let projectileGraphics = this.projectileGraphics.get(entityId);
+        
+        if (!projectileGraphics) {
+            projectileGraphics = this.entityFactory.createEntityGraphics();
+            // Set initial position immediately to avoid spawning at (0,0)
+            projectileGraphics.setPosition(projectileData.x, projectileData.y);
+            this.projectileGraphics.set(entityId, projectileGraphics);
+        }
+        
+        // Create smooth movement animation
+        this.animateEntityMovement(
+            entityId,
+            [projectileGraphics],
+            projectileData.x,
+            projectileData.y
+        );
+        
+        // Render the projectile
+        this.entityRenderer.renderProjectile(projectileData, projectileGraphics);
+    }
+
+    /**
+     * Removes projectiles that no longer exist in the game state
+     */
+    private cleanupRemovedProjectiles(state: SharedGameState): void {
+        this.projectileGraphics.forEach((projectileGraphics, entityId) => {
+            if (!state.projectiles.has(entityId)) {
+                this.destroyProjectileEntity(entityId);
+            }
+        });
+    }
+
+    /**
+     * Destroys a projectile entity
+     */
+    private destroyProjectileEntity(entityId: string): void {
+        // Stop any animations
+        this.stopEntityAnimations(entityId);
+        
+        // Destroy graphics
+        const projectileGraphics = this.projectileGraphics.get(entityId);
+        if (projectileGraphics) {
+            projectileGraphics.destroy();
+            this.projectileGraphics.delete(entityId);
+        }
     }
 
     /**
@@ -217,12 +297,14 @@ export class EntityManager {
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
+        this.projectileGraphics.forEach(graphics => graphics.destroy());
         
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
+        this.projectileGraphics.clear();
     }
 
     /**
@@ -234,11 +316,13 @@ export class EntityManager {
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
+        this.projectileGraphics.forEach(graphics => graphics.destroy());
         
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
+        this.projectileGraphics.clear();
     }
 } 

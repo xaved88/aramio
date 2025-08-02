@@ -14,8 +14,8 @@ export const SERVER_CONFIG = {
 
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
-    PLAYER_MOVE_SPEED: 6, // pixels per frame
-    MINION_MOVE_SPEED: 3, // pixels per frame - slower than players
+    PLAYER_MOVE_SPEED: 5, // pixels per frame
+    MINION_MOVE_SPEED: 2.5, // pixels per frame - slower than players
     PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUNDS: {
         MIN_X: 20,
@@ -42,7 +42,9 @@ export const GAMEPLAY_CONFIG = {
             RESPAWN_TIME_MS: 6000,
             ABILITY: {
                 TYPE: 'projectile',
-                COOLDOWN_MS: 5000, // 5 seconds
+                COOLDOWN_MS: 1000, // 5 seconds
+                STRENGTH: 3, // damage dealt by projectile
+                SPEED: 200, // pixels per second
             },
         },
         CRADLE: {
@@ -103,6 +105,10 @@ export const CLIENT_CONFIG = {
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 20, height: 30 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
+    PROJECTILE: {
+        RADIUS: 5,
+        COLOR: 0x8B4513, // brown color
+    },
     TEAM_COLORS: {
         BLUE: 0x3498db,
         RED: 0xe74c3c,

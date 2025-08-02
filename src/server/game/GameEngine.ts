@@ -1,6 +1,8 @@
 import { GameState } from '../schema/GameState';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes, StateMachineResult } from './stateMachine/types';
+import { GAMEPLAY_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../Config';
 
 export class GameEngine {
     private state: GameState;
@@ -44,6 +46,9 @@ export class GameEngine {
         if (result.events) {
             this.handleEvents(result.events);
         }
+        
+        // Update projectiles
+        this.updateProjectiles(deltaTime);
         
         return result;
     }
@@ -110,16 +115,108 @@ export class GameEngine {
         if (player.ability.lastUsedTime === 0) {
             console.log('Ability used (first time)');
             player.ability.lastUsedTime = currentTime;
+            this.createProjectile(playerId, x, y);
             return;
         }
         
         const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
+        
+        console.log(`Ability check: timeSinceLastUse=${timeSinceLastUse}, cooldown=${player.ability.cooldown}`);
+        
         if (timeSinceLastUse < player.ability.cooldown) {
+            console.log(`No`);
             return; // Ability is on cooldown
         }
 
         console.log('Ability used');
         player.ability.lastUsedTime = currentTime;
+        this.createProjectile(playerId, x, y);
+    }
+
+    private createProjectile(playerId: string, targetX: number, targetY: number): void {
+        const player = this.state.combatants.get(playerId) as any;
+        if (!player) return;
+
+        console.log(`Creating projectile: player at (${player.x}, ${player.y}), target at (${targetX}, ${targetY})`);
+
+        // Calculate direction from player to target
+        const dx = targetX - player.x;
+        const dy = targetY - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) return; // Can't shoot at self
+        
+        // Normalize direction
+        const directionX = dx / distance;
+        const directionY = dy / distance;
+        
+        // Create projectile
+        const projectile = new (require('../schema/GameState').Projectile)();
+        projectile.id = `projectile_${Date.now()}_${Math.random()}`;
+        projectile.ownerId = playerId;
+        projectile.x = player.x;
+        projectile.y = player.y;
+        projectile.directionX = directionX;
+        projectile.directionY = directionY;
+        projectile.speed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.SPEED;
+        projectile.strength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.STRENGTH;
+        projectile.team = player.team;
+        
+        this.state.projectiles.set(projectile.id, projectile);
+        console.log(`Projectile created: ${projectile.id} from (${projectile.x}, ${projectile.y}) to (${targetX}, ${targetY})`);
+    }
+
+    private updateProjectiles(deltaTime: number): void {
+        const projectilesToRemove: string[] = [];
+        
+        this.state.projectiles.forEach((projectile: any) => {
+            // Move projectile
+            const distance = (projectile.speed * deltaTime) / 1000; // Convert to pixels
+            projectile.x += projectile.directionX * distance;
+            projectile.y += projectile.directionY * distance;
+            
+            // Check bounds
+            if (projectile.x < 0 || projectile.x > CLIENT_CONFIG.GAME_CANVAS_WIDTH || 
+                projectile.y < 0 || projectile.y > CLIENT_CONFIG.GAME_CANVAS_HEIGHT) {
+                projectilesToRemove.push(projectile.id);
+                return;
+            }
+            
+            // Check collision with combatants - find the closest enemy
+            let closestCombatant: any = null;
+            let closestDistance = Infinity;
+            
+            this.state.combatants.forEach((combatant: any) => {
+                if (combatant.team === projectile.team) return; // Don't hit allies
+                if (combatant.health <= 0) return; // Don't hit dead entities
+                
+                const dx = projectile.x - combatant.x;
+                const dy = projectile.y - combatant.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Check if projectile hits the combatant and is closer than previous closest
+                if (distance < combatant.attackRadius && distance < closestDistance) {
+                    closestCombatant = combatant;
+                    closestDistance = distance;
+                }
+            });
+            
+            // If we found a target, hit it and remove the projectile
+            if (closestCombatant) {
+                projectilesToRemove.push(projectile.id);
+                
+                // Only damage units (players and minions), not structures
+                if (closestCombatant.type === 'player' || closestCombatant.type === 'minion') {
+                    closestCombatant.health = Math.max(0, closestCombatant.health - projectile.strength);
+                    console.log(`Projectile ${projectile.id} hit ${closestCombatant.id} for ${projectile.strength} damage`);
+                }
+            }
+        });
+        
+        // Remove projectiles that hit something or went out of bounds
+        projectilesToRemove.forEach(projectileId => {
+            this.state.projectiles.delete(projectileId);
+        });
     }
 
     /**

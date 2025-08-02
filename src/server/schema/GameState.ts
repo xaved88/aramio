@@ -13,6 +13,18 @@ export class Ability extends Schema {
     @type('number') lastUsedTime!: number; // timestamp when ability was last used
 }
 
+export class Projectile extends Schema {
+    @type('string') id!: string;
+    @type('string') ownerId!: string; // who fired the projectile
+    @type('number') x!: number;
+    @type('number') y!: number;
+    @type('number') directionX!: number; // normalized direction vector
+    @type('number') directionY!: number;
+    @type('number') speed!: number; // pixels per second
+    @type('number') strength!: number; // damage dealt
+    @type('string') team!: string; // team of the owner
+}
+
 export class Combatant extends Schema {
     @type('string') id!: string;
     @type('string') type!: CombatantType;
@@ -48,4 +60,5 @@ export class GameState extends Schema {
     @type('number') gameEndTime = 0;
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
+    @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
 } 

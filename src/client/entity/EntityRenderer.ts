@@ -82,6 +82,15 @@ export class EntityRenderer {
     }
 
     /**
+     * Renders projectile graphics
+     */
+    renderProjectile(projectile: any, graphics: Phaser.GameObjects.Graphics): void {
+        graphics.clear();
+        graphics.fillStyle(CLIENT_CONFIG.PROJECTILE.COLOR, 1);
+        graphics.fillCircle(0, 0, CLIENT_CONFIG.PROJECTILE.RADIUS);
+    }
+
+    /**
      * Renders player graphics (circle)
      */
     private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, color: number): void {

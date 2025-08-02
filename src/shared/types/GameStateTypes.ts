@@ -1,4 +1,4 @@
-import { Combatant, AttackEvent } from './CombatantTypes';
+import { Combatant, AttackEvent, Projectile } from './CombatantTypes';
 
 export interface SharedGameState {
     gameTime: number;
@@ -8,4 +8,5 @@ export interface SharedGameState {
     gameEndTime: number;
     combatants: Map<string, Combatant>;
     attackEvents: AttackEvent[];
+    projectiles: Map<string, Projectile>;
 } 
