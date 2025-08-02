@@ -41,8 +41,8 @@ export class EntityRenderer {
         // Render radius indicator
         this.renderRadiusIndicator(combatant, radiusIndicator);
         
-        // Update health text
-        this.updateHealthText(combatant, text);
+        // Update text display (level for players, nothing for others)
+        this.updateTextDisplay(combatant, text);
         
         // Handle turret visibility
         if (combatant.type === COMBATANT_TYPES.TURRET) {
@@ -56,27 +56,32 @@ export class EntityRenderer {
     private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
         graphics.clear();
         
-        // Determine color based on team and state
-        let color;
+        // Calculate health percentage
+        const healthPercentage = combatant.health / combatant.maxHealth;
+        
+        // Determine colors based on team and state
+        let primaryColor, respawnColor;
         if (combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant) && combatant.state === 'respawning') {
-            color = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            respawnColor = primaryColor; // Use same color when respawning
         } else {
-            color = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            respawnColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
         }
         
         // Render based on type
         switch (combatant.type) {
             case COMBATANT_TYPES.PLAYER:
-                this.renderPlayerGraphics(graphics, color);
+                this.renderPlayerGraphics(graphics, primaryColor, respawnColor, healthPercentage);
                 break;
             case COMBATANT_TYPES.CRADLE:
-                this.renderCradleGraphics(graphics, color);
+                this.renderCradleGraphics(graphics, primaryColor, respawnColor, healthPercentage);
                 break;
             case COMBATANT_TYPES.TURRET:
-                this.renderTurretGraphics(graphics, color, combatant);
+                this.renderTurretGraphics(graphics, primaryColor, respawnColor, healthPercentage, combatant);
                 break;
             case COMBATANT_TYPES.MINION:
-                this.renderMinionGraphics(graphics, color, combatant);
+                this.renderMinionGraphics(graphics, primaryColor, respawnColor, healthPercentage, combatant);
                 break;
         }
     }
@@ -93,36 +98,66 @@ export class EntityRenderer {
     /**
      * Renders player graphics (circle)
      */
-    private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, color: number): void {
-        graphics.fillStyle(color, 1);
-        graphics.fillCircle(0, 0, CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS);
+    private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
+        const radius = CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS;
+        
+        // Draw the main circle with primary color
+        graphics.fillStyle(primaryColor, 1);
+        graphics.fillCircle(0, 0, radius);
+        
+        // Draw the damaged portion (missing health) with respawn color
+        if (healthPercentage < 1) {
+            graphics.fillStyle(respawnColor, 1);
+            // Draw a circle segment for the damaged portion
+            const damagedAngle = 2 * Math.PI * (1 - healthPercentage);
+            graphics.beginPath();
+            graphics.arc(0, 0, radius, -Math.PI/2, -Math.PI/2 + damagedAngle);
+            graphics.lineTo(0, 0);
+            graphics.closePath();
+            graphics.fillPath();
+        }
     }
 
     /**
      * Renders cradle graphics (square)
      */
-    private renderCradleGraphics(graphics: Phaser.GameObjects.Graphics, color: number): void {
-        graphics.fillStyle(color, 1);
-        graphics.fillRect(
-            -CLIENT_CONFIG.CRADLE_SIZE / 2,
-            -CLIENT_CONFIG.CRADLE_SIZE / 2,
-            CLIENT_CONFIG.CRADLE_SIZE,
-            CLIENT_CONFIG.CRADLE_SIZE
-        );
+    private renderCradleGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
+        const size = CLIENT_CONFIG.CRADLE_SIZE;
+        const halfSize = size / 2;
+        
+        // Draw the main square with primary color
+        graphics.fillStyle(primaryColor, 1);
+        graphics.fillRect(-halfSize, -halfSize, size, size);
+        
+        // Draw the damaged portion (missing health) with respawn color
+        if (healthPercentage < 1) {
+            graphics.fillStyle(respawnColor, 1);
+            const damagedHeight = size * (1 - healthPercentage);
+            graphics.fillRect(-halfSize, -halfSize, size, damagedHeight);
+        }
     }
 
     /**
      * Renders turret graphics (rectangle)
      */
-    private renderTurretGraphics(graphics: Phaser.GameObjects.Graphics, color: number, combatant: Combatant): void {
+    private renderTurretGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, combatant: Combatant): void {
         if (combatant.health > 0) {
-            graphics.fillStyle(color, 1);
-            graphics.fillRect(
-                -CLIENT_CONFIG.TURRET_SIZE.width / 2,
-                -CLIENT_CONFIG.TURRET_SIZE.height / 2,
-                CLIENT_CONFIG.TURRET_SIZE.width,
-                CLIENT_CONFIG.TURRET_SIZE.height
-            );
+            const width = CLIENT_CONFIG.TURRET_SIZE.width;
+            const height = CLIENT_CONFIG.TURRET_SIZE.height;
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            
+            // Draw the main rectangle with primary color
+            graphics.fillStyle(primaryColor, 1);
+            graphics.fillRect(-halfWidth, -halfHeight, width, height);
+            
+            // Draw the damaged portion (missing health) with respawn color
+            if (healthPercentage < 1) {
+                graphics.fillStyle(respawnColor, 1);
+                const damagedHeight = height * (1 - healthPercentage);
+                graphics.fillRect(-halfWidth, -halfHeight, width, damagedHeight);
+            }
+            
             graphics.setVisible(true);
         } else {
             graphics.setVisible(false);
@@ -132,15 +167,17 @@ export class EntityRenderer {
     /**
      * Renders minion graphics (diamond for warrior, triangle for archer)
      */
-    private renderMinionGraphics(graphics: Phaser.GameObjects.Graphics, color: number, combatant: Combatant): void {
+    private renderMinionGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, combatant: Combatant): void {
         if (!isMinionCombatant(combatant)) return;
         
         if (combatant.health > 0) {
-            graphics.fillStyle(color, 1);
             const size = CLIENT_CONFIG.MINION_SIZE;
             
+            // Draw the main shape with primary color
+            graphics.fillStyle(primaryColor, 1);
+            
             if (combatant.minionType === MINION_TYPES.WARRIOR) {
-                // Diamond shape for warrior
+                // Diamond shape
                 graphics.beginPath();
                 graphics.moveTo(0, -size);
                 graphics.lineTo(size, 0);
@@ -148,15 +185,43 @@ export class EntityRenderer {
                 graphics.lineTo(-size, 0);
                 graphics.closePath();
                 graphics.fillPath();
+                
+                // Draw the damaged portion for diamond
+                if (healthPercentage < 1) {
+                    graphics.fillStyle(respawnColor, 1);
+                    const damagedHeight = size * 2 * (1 - healthPercentage);
+                    // Create a diamond-shaped damaged portion
+                    graphics.beginPath();
+                    graphics.moveTo(0, -size + damagedHeight);
+                    graphics.lineTo(size * (1 - (1 - healthPercentage)), 0);
+                    graphics.lineTo(0, size);
+                    graphics.lineTo(-size * (1 - (1 - healthPercentage)), 0);
+                    graphics.closePath();
+                    graphics.fillPath();
+                }
             } else if (combatant.minionType === MINION_TYPES.ARCHER) {
-                // Triangle shape for archer
+                // Triangle shape
                 graphics.beginPath();
                 graphics.moveTo(0, -size);
                 graphics.lineTo(size, size);
                 graphics.lineTo(-size, size);
                 graphics.closePath();
                 graphics.fillPath();
+                
+                // Draw the damaged portion for triangle
+                if (healthPercentage < 1) {
+                    graphics.fillStyle(respawnColor, 1);
+                    const damagedHeight = size * 2 * (1 - healthPercentage);
+                    // Create a triangle-shaped damaged portion
+                    graphics.beginPath();
+                    graphics.moveTo(0, -size + damagedHeight);
+                    graphics.lineTo(size * (1 - (1 - healthPercentage)), size);
+                    graphics.lineTo(-size * (1 - (1 - healthPercentage)), size);
+                    graphics.closePath();
+                    graphics.fillPath();
+                }
             }
+            
             graphics.setVisible(true);
         } else {
             graphics.setVisible(false);
@@ -214,11 +279,61 @@ export class EntityRenderer {
     }
 
     /**
-     * Updates the health text for an entity
+     * Updates the text display (level for players, nothing for others)
      */
-    private updateHealthText(combatant: Combatant, text: Phaser.GameObjects.Text): void {
-        const healthPercent = Math.round((combatant.health / combatant.maxHealth) * 100);
-        text.setText(`${healthPercent}%`);
+    private updateTextDisplay(combatant: Combatant, text: Phaser.GameObjects.Text): void {
+        if (combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
+            const level = combatant.level;
+            const romanNumeral = this.toRomanNumeral(level);
+            text.setText(romanNumeral);
+            
+            // Set bold text with much darker team color, matching victory text style
+            const darkerColor = combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a; // Much darker shades
+            text.setStyle({ 
+                fontSize: '16px', 
+                fontStyle: 'bold',
+                fontWeight: '900', // Extra bold
+                color: `#${darkerColor.toString(16).padStart(6, '0')}`,
+                stroke: '#000000',
+                strokeThickness: 1,
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    fill: true
+                }
+            });
+        } else {
+            text.setText(''); // Clear text for non-players
+        }
+    }
+
+    /**
+     * Converts a number to Roman numeral
+     */
+    private toRomanNumeral(num: number): string {
+        const romanNumerals = [
+            { value: 50, numeral: 'L' },
+            { value: 40, numeral: 'XL' },
+            { value: 10, numeral: 'X' },
+            { value: 9, numeral: 'IX' },
+            { value: 5, numeral: 'V' },
+            { value: 4, numeral: 'IV' },
+            { value: 1, numeral: 'I' }
+        ];
+        
+        let result = '';
+        let remaining = num;
+        
+        for (const { value, numeral } of romanNumerals) {
+            while (remaining >= value) {
+                result += numeral;
+                remaining -= value;
+            }
+        }
+        
+        return result;
     }
 
     /**
@@ -228,4 +343,4 @@ export class EntityRenderer {
         text.setVisible(combatant.health > 0);
         radiusIndicator.setVisible(combatant.health > 0);
     }
-} 
+}

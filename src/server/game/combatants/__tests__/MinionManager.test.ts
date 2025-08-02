@@ -264,6 +264,10 @@ describe('MinionManager', () => {
         });
 
         it('should spawn minions with correct stats based on type', () => {
+            // Clear existing minions to test only new spawns
+            const existingMinions = Array.from(gameState.combatants.values()).filter(c => c.type === COMBATANT_TYPES.MINION);
+            existingMinions.forEach(minion => gameState.combatants.delete(minion.id));
+            
             MinionManager.spawnMinionWave(gameState);
             
             const blueMinions = Array.from(gameState.combatants.values()).filter(c => 
