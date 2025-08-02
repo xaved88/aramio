@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from the Vite build output
-app.use(express.static(path.join(__dirname, '../../dist')));
+app.use(express.static(path.join(__dirname, '../../dist/client')));
 
 const server = new Server({
     transport: new WebSocketTransport({
@@ -28,7 +28,7 @@ app.use('/colyseus', monitor());
 
 // Fallback to index.html for SPA routing
 app.get('*', (_req, res) => {
-    res.sendFile(path.join(__dirname, '../../dist/index.html'));
+    res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
 
 console.log(`Server running on port ${port}`); 
