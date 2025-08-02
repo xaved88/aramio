@@ -27,9 +27,9 @@ export const GAMEPLAY_CONFIG = {
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
     COMBAT: {
         PLAYER: {
-            HEALTH: 100,
+            HEALTH: 10,
             ATTACK_RADIUS: 50,
-            ATTACK_STRENGTH: 10,
+            ATTACK_STRENGTH: 100,
             ATTACK_SPEED: 1, // attacks per second
             RESPAWN_TIME_MS: 6000,
         },

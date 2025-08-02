@@ -7,7 +7,16 @@ import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
  * @returns A new combatant instance with all properties copied
  */
 export function deepCopyCombatant(combatant: Combatant): Combatant {
-    const newCombatant = new Combatant();
+    let newCombatant: Combatant;
+    
+    // Create the correct type of combatant
+    if (combatant.type === COMBATANT_TYPES.PLAYER) {
+        newCombatant = new Player();
+    } else {
+        newCombatant = new Combatant();
+    }
+    
+    // Copy base properties
     newCombatant.id = combatant.id;
     newCombatant.type = combatant.type;
     newCombatant.x = combatant.x;

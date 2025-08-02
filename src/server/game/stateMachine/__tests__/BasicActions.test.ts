@@ -60,8 +60,8 @@ describe('GameStateMachine', () => {
             expect(player).toBeDefined();
             expect(player?.type).toBe(COMBATANT_TYPES.PLAYER);
             expect(player?.team).toBe('blue');
-            expect(player?.health).toBe(100); // Default player health
-            expect(player?.maxHealth).toBe(100);
+            expect(player?.health).toBe(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH); // Default player health
+            expect(player?.maxHealth).toBe(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
             expect(player?.level).toBe(1);
             expect(player?.experience).toBe(0);
             expect(player?.state).toBe('alive');

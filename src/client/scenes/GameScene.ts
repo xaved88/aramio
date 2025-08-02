@@ -8,6 +8,7 @@ import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
 import { hexToColorString } from '../utils/ColorUtils';
+import { gameStateToString, getTotalCombatantHealth } from '../../shared/utils/DebugUtils';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -16,6 +17,9 @@ export class GameScene extends Phaser.Scene {
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
     private processedAttackEvents: Set<string> = new Set();
+    private lastState: GameState|null = null
+    private stateLogTimer: number = 0;
+    private totalHP: number = 0;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -38,6 +42,15 @@ export class GameScene extends Phaser.Scene {
             console.log('Connected to server');
             
             this.room.onStateChange((colyseusState: GameState) => {
+                this.lastState = colyseusState      
+                const newHp = getTotalCombatantHealth(this.lastState);
+
+                if(this.totalHP != newHp) {
+                    console.log("State Changed:", gameStateToString(this.lastState))
+                    console.log(this.lastState)                
+                    this.totalHP = newHp
+                }
+                
                 const sharedState = convertToSharedGameState(colyseusState);
                 this.updateCombatantEntities(sharedState);
                 this.processAttackEvents(sharedState);

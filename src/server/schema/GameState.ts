@@ -23,11 +23,11 @@ export class Combatant extends Schema {
 }
 
 export class Player extends Combatant {
-    @type('string') state = 'alive'; // 'alive' or 'respawning'
-    @type('number') respawnTime = 0; // timestamp when respawn completes
+    @type('string') state!: string; // 'alive' or 'respawning'
+    @type('number') respawnTime!: number; // timestamp when respawn completes
     @type('number') respawnDuration!: number; // respawn duration in ms
-    @type('number') experience = 0;
-    @type('number') level = 1;
+    @type('number') experience!: number;
+    @type('number') level!: number;
 }
 
 export class GameState extends Schema {

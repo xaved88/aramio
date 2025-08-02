@@ -2,6 +2,7 @@ import { Room, Client } from '@colyseus/core';
 import { GameState } from '../schema/GameState';
 import { SERVER_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
+import { getTotalCombatantHealth, gameStateToString } from '../../shared/utils/DebugUtils';
 
 interface GameCommand {
     type: string;
@@ -77,8 +78,14 @@ export class GameRoom extends Room<GameState> {
         const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
         this.lastUpdateTime = currentTime;
         
+        const totalHP = getTotalCombatantHealth(this.gameEngine.getState());
         this.gameEngine.update(deltaTime);
-        
+        const afterHp = getTotalCombatantHealth(this.gameEngine.getState());
+
+        if(afterHp != totalHP) {
+            console.log("Server State Changed:", gameStateToString(this.gameEngine.getState()))
+        }
+
         // Process all commands
         this.processCommands();
         
@@ -118,4 +125,5 @@ export class GameRoom extends Room<GameState> {
             this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
         }
     }
+
 } 
