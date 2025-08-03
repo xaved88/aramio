@@ -14,7 +14,7 @@ export const SERVER_CONFIG = {
 
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
-    PLAYER_MOVE_SPEED: 5, // pixels per frame
+    PLAYER_MOVE_SPEED: 3.5, // pixels per frame
     MINION_MOVE_SPEED: 2.5, // pixels per frame - slower than players
     PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUNDS: {
@@ -35,31 +35,31 @@ export const GAMEPLAY_CONFIG = {
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
     COMBAT: {
         PLAYER: {
-            HEALTH: 55,
-            ATTACK_RADIUS: 50,
-            ATTACK_STRENGTH: 10,
+            HEALTH: 50,
+            ATTACK_RADIUS: 35,
+            ATTACK_STRENGTH: 5,
             ATTACK_SPEED: 1, // attacks per second
             RESPAWN_TIME_MS: 6000,
             SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
             ABILITY: {
                 TYPE: 'projectile',
                 COOLDOWN_MS: 1000,
-                STRENGTH: 3, // damage dealt by projectile
+                STRENGTH: 5, // damage dealt by projectile
                 SPEED: 200, // pixels per second
             },
         },
         CRADLE: {
-            HEALTH: 1000,
+            HEALTH: 2000,
             ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 0.3, // attacks per second
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
-            HEALTH: 300,
+            HEALTH: 500,
             ATTACK_RADIUS: 70,
             ATTACK_STRENGTH: 25,
-            ATTACK_SPEED: 1, // attacks per second
+            ATTACK_SPEED: 2, // attacks per second
             SIZE: 20, // collision radius (average of width/height)
         },
         MINION: {
@@ -80,12 +80,12 @@ export const GAMEPLAY_CONFIG = {
         },
     },
     EXPERIENCE: {
-        TOWER_DESTROYED: 20,
+        LEVEL_UP_MULTIPLIER: 10, // experience needed per level
+        STAT_BOOST_PERCENTAGE: 0.15,
+        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30,
         MINION_KILLED: 2,
-        HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * 4
-        LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
-        STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
-        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30, // 30% increase per level for ability strength
+        HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
+        TOWER_DESTROYED: 20,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
     },
     MINION_SPAWNING: {
