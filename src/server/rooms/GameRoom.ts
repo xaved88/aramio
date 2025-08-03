@@ -201,15 +201,15 @@ export class GameRoom extends Room<GameState> {
     private spawnBots() {
         // Spawn 5 blue bots at different positions around the blue cradle
         const blueSpawnPositions = [
-            { x: 50, y: 550 },   // At cradle
-            { x: 30, y: 530 },   // Bottom left of cradle
-            { x: 70, y: 530 },   // Bottom right of cradle
-            { x: 30, y: 570 },   // Top left of cradle
-            { x: 70, y: 570 }    // Top right of cradle
+            { x: 50, y: 515 },   // Above cradle
+            { x: 30, y: 530 },   // Top left of cradle
+            { x: 70, y: 530 },   // Top right of cradle
+            { x: 30, y: 570 },   // Bottom left of cradle
+            { x: 70, y: 570 }    // Bottom right of cradle
         ];
-        
+
         const redSpawnPositions = [
-            { x: 550, y: 50 },   // At cradle
+            { x: 550, y: 15 },   // Above cradle
             { x: 530, y: 30 },   // Top left of cradle
             { x: 570, y: 30 },   // Top right of cradle
             { x: 530, y: 70 },   // Bottom left of cradle

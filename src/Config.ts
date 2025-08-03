@@ -43,7 +43,7 @@ export const GAMEPLAY_CONFIG = {
             SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
             ABILITY: {
                 TYPE: 'projectile',
-                COOLDOWN_MS: 1000, // 5 seconds
+                COOLDOWN_MS: 1000,
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 200, // pixels per second
             },
@@ -58,22 +58,22 @@ export const GAMEPLAY_CONFIG = {
         TURRET: {
             HEALTH: 300,
             ATTACK_RADIUS: 70,
-            ATTACK_STRENGTH: 20,
-            ATTACK_SPEED: 0.5, // attacks per second
+            ATTACK_STRENGTH: 25,
+            ATTACK_SPEED: 1, // attacks per second
             SIZE: 20, // collision radius (average of width/height)
         },
         MINION: {
             WARRIOR: {
-                HEALTH: 8,
+                HEALTH: 50,
                 ATTACK_RADIUS: 20,
-                ATTACK_STRENGTH: 15,
+                ATTACK_STRENGTH: 10,
                 ATTACK_SPEED: 0.8, // attacks per second
                 SIZE: 12, // collision radius (matches MINION_SIZE)
             },
             ARCHER: {
-                HEALTH: 6,
+                HEALTH: 25,
                 ATTACK_RADIUS: 60,
-                ATTACK_STRENGTH: 6,
+                ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1.2, // attacks per second
                 SIZE: 12, // collision radius (matches MINION_SIZE)
             },
@@ -90,10 +90,10 @@ export const GAMEPLAY_CONFIG = {
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,
-        ARCHERS_PER_WAVE: 2,
-        FIRST_WAVE_DELAY_MS: 3000, // 3 seconds
-        WAVE_INTERVAL_MS: 10000, // 10 seconds
-        SPAWN_RADIUS: 30, // radius around cradle to spawn minions
+        ARCHERS_PER_WAVE: 3,
+        FIRST_WAVE_DELAY_MS: 2000,
+        WAVE_INTERVAL_MS: 12000,
+        SPAWN_RADIUS: 50, // radius around cradle to spawn minions
     },
     VICTORY_SCREEN: {
         FADE_IN_DURATION_MS: 1000, // 1 second fade in
@@ -200,4 +200,4 @@ export const CLIENT_CONFIG = {
             GAME_CANVAS: 0x2c3e50,
         },
     },
-} as const; 
+} as const;
