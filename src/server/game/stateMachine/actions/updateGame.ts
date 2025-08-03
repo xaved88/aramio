@@ -257,9 +257,16 @@ function levelUpPlayer(player: Hero): void {
     player.level++;
     player.experience -= experienceNeeded;
     
+    // Store old max health to calculate health increase
+    const oldMaxHealth = player.maxHealth;
+    
     // Boost stats by the configured amount
     player.maxHealth = Math.round(player.maxHealth * boostMultiplier);
-    player.health = player.maxHealth; // Restore health on level up
+    
+    // Increase current health by the same amount max health increased, but don't heal to full
+    const healthIncrease = player.maxHealth - oldMaxHealth;
+    player.health = Math.min(player.health + healthIncrease, player.maxHealth);
+    
     player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
     player.attackRadius = Math.round(player.attackRadius * boostMultiplier);
     player.attackSpeed = player.attackSpeed * boostMultiplier;
