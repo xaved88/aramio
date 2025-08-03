@@ -85,6 +85,7 @@ export const GAMEPLAY_CONFIG = {
         LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
         STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30, // 30% increase per level for ability strength
+        MINION_KILL_RADIUS: 175, // radius within which heroes must be to get minion XP
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,

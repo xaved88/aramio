@@ -139,7 +139,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.MINION) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeamForUnitKill(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state);
+                grantExperienceToTeamForUnitKill(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state, combatant);
                 minionsToRemove.push(id);
             }
         }
@@ -221,15 +221,18 @@ function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state
     });
 }
 
-function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState): void {
+function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: any): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
             const hero = combatant as Hero;
-            // Only grant experience to alive players, not respawning ones
+            // Only grant experience to alive players within range of the dying unit
             if (hero.state === 'alive') {
-                grantExperience(hero, amount);
+                const distance = CombatantUtils.getDistance(hero, dyingUnit);
+                if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILL_RADIUS) {
+                    grantExperience(hero, amount);
+                }
             }
         }
     });

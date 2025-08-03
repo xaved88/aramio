@@ -294,6 +294,81 @@ describe('TurretDestruction', () => {
             expect(updatedPlayer?.experience).toBe(18);
         });
 
+        it('should only grant minion XP to heroes within range', () => {
+            // Setup game with two players on blue team
+            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player1', team: 'blue' }
+            });
+            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player2', team: 'blue' }
+            });
+            
+            // Find both heroes
+            let hero1: Hero | undefined;
+            let hero2: Hero | undefined;
+            spawnResult2.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    hero1 = combatant as Hero;
+                }
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player2') {
+                    hero2 = combatant as Hero;
+                }
+            });
+            
+            // Position hero1 close to where minions will be (within 175 radius)
+            // Position hero2 far from where minions will be (outside 175 radius)
+            if (hero1 && hero2) {
+                // Place hero1 near the center of the map where minions might be
+                hero1.x = 300;
+                hero1.y = 300;
+                
+                // Place hero2 far away (more than 175 pixels)
+                hero2.x = 100;
+                hero2.y = 100;
+            }
+            
+            // Record initial experience
+            const initialExp1 = hero1?.experience || 0;
+            const initialExp2 = hero2?.experience || 0;
+            
+            // Find a minion and position it near hero1
+            const minions = Array.from(spawnResult2.newState.combatants.values())
+                .filter(combatant => combatant.type === COMBATANT_TYPES.MINION);
+            
+            if (minions.length > 0 && hero1) {
+                const minion = minions[0];
+                // Position minion within 175 radius of hero1
+                minion.x = hero1.x + 100; // 100 pixels away (within 175)
+                minion.y = hero1.y;
+                minion.health = 0; // Kill the minion
+                
+                // Update game to process minion death
+                const result = GameStateMachine.processAction(spawnResult2.newState, {
+                    type: 'UPDATE_GAME',
+                    payload: { deltaTime: 100 }
+                });
+                
+                // Find updated heroes
+                let updatedHero1: Hero | undefined;
+                let updatedHero2: Hero | undefined;
+                result.newState.combatants.forEach((combatant) => {
+                    if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                        updatedHero1 = combatant as Hero;
+                    }
+                    if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player2') {
+                        updatedHero2 = combatant as Hero;
+                    }
+                });
+                
+                // Only hero1 should get XP (within range), hero2 should not (out of range)
+                expect(updatedHero1?.experience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                expect(updatedHero2?.experience).toBe(initialExp2); // Should not get XP
+            }
+        });
+
         it('should grant turret XP to dead players but not minion XP', () => {
             // Setup game with two players on blue team
             const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
