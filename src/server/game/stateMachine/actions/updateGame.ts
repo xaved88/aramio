@@ -1,6 +1,6 @@
 import { GameState, Hero } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG, SERVER_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { AttackEvent } from '../../../schema/GameState';
@@ -33,6 +33,9 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     
     // Move minions
     MinionManager.moveMinions(state);
+    
+    // Handle collisions
+    handleCollisions(state);
     
     // Handle respawning and dead combatants
     handleDeadCombatants(state);
@@ -92,6 +95,70 @@ function processCombat(state: GameState): void {
             }
         }
     });
+}
+
+function handleCollisions(state: GameState): void {
+    const allCombatants = Array.from(state.combatants.values());
+    
+    // Check each pair of combatants for collisions
+    for (let i = 0; i < allCombatants.length; i++) {
+        for (let j = i + 1; j < allCombatants.length; j++) {
+            const combatant1 = allCombatants[i];
+            const combatant2 = allCombatants[j];
+            
+            // Skip if either combatant is dead
+            if (!CombatantUtils.isCombatantAlive(combatant1) || !CombatantUtils.isCombatantAlive(combatant2)) {
+                continue;
+            }
+
+            // Calculate distance between centers
+            const distance = CombatantUtils.getDistance(combatant1, combatant2);
+            const collisionThreshold = combatant1.size + combatant2.size;
+            
+            // Check if they're colliding
+            if (distance < collisionThreshold) {
+                resolveCollision(combatant1, combatant2, distance, collisionThreshold);
+            }
+        }
+    }
+}
+function resolveCollision(combatant1: any, combatant2: any, distance: number, collisionThreshold: number): void {
+    const isStructure1 = combatant1.type === COMBATANT_TYPES.CRADLE || combatant1.type === COMBATANT_TYPES.TURRET;
+    const isStructure2 = combatant2.type === COMBATANT_TYPES.CRADLE || combatant2.type === COMBATANT_TYPES.TURRET;
+    
+    // If both are structures, ignore collision
+    if (isStructure1 && isStructure2) {
+        return;
+    }
+    
+    // Calculate how much they're overlapping
+    const overlap = collisionThreshold - distance;
+    
+    // Calculate direction vector from combatant1 to combatant2
+    const dx = combatant2.x - combatant1.x;
+    const dy = combatant2.y - combatant1.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    
+    // Normalize direction vector
+    const dirX = dx / length;
+    const dirY = dy / length;
+    
+    if (isStructure1 && !isStructure2) {
+        // Structure vs unit: move unit away the full distance
+        combatant2.x += dirX * overlap;
+        combatant2.y += dirY * overlap;
+    } else if (!isStructure1 && isStructure2) {
+        // Unit vs structure: move unit away the full distance
+        combatant1.x -= dirX * overlap;
+        combatant1.y -= dirY * overlap;
+    } else {
+        // Unit vs unit: move both away by half the distance each
+        const halfOverlap = overlap / 2;
+        combatant1.x -= dirX * halfOverlap;
+        combatant1.y -= dirY * halfOverlap;
+        combatant2.x += dirX * halfOverlap;
+        combatant2.y += dirY * halfOverlap;
+    }
 }
 
 function handleDeadCombatants(state: GameState): void {
