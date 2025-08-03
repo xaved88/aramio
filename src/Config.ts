@@ -134,8 +134,11 @@ export const CLIENT_CONFIG = {
     TURRET_SIZE: { width: 20, height: 30 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
     PROJECTILE: {
-        RADIUS: 5,
-        COLOR: 0x8B4513, // brown color
+        RADIUS: 6,
+        BLUE_COLOR: 0x2980b9, // darker blue team color
+        RED_COLOR: 0xc0392b,  // darker red team color
+        BORDER_COLOR: 0x000000, // black border color
+        BORDER_WIDTH: 1,
     },
     TEAM_COLORS: {
         BLUE: 0x3498db,

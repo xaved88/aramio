@@ -95,8 +95,48 @@ export class EntityRenderer {
      */
     renderProjectile(projectile: any, graphics: Phaser.GameObjects.Graphics): void {
         graphics.clear();
-        graphics.fillStyle(CLIENT_CONFIG.PROJECTILE.COLOR, 1);
-        graphics.fillCircle(0, 0, CLIENT_CONFIG.PROJECTILE.RADIUS);
+        
+        // Use team-specific color for projectiles
+        const projectileColor = projectile.team === 'blue' 
+            ? CLIENT_CONFIG.PROJECTILE.BLUE_COLOR 
+            : CLIENT_CONFIG.PROJECTILE.RED_COLOR;
+        
+        const radius = CLIENT_CONFIG.PROJECTILE.RADIUS;
+        const spikes = 8; // Number of spikes
+        const innerRadius = radius * 0.4; // Inner radius for the star shape
+        const outerRadius = radius; // Outer radius for the spikes
+        
+        // Draw border first
+        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius);
+        
+        // Draw filled star
+        graphics.fillStyle(projectileColor, 1);
+        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius, true);
+    }
+    
+    /**
+     * Draws a star shape
+     */
+    private drawStar(graphics: Phaser.GameObjects.Graphics, x: number, y: number, spikes: number, innerRadius: number, outerRadius: number, fill: boolean = false): void {
+        const step = Math.PI / spikes;
+        
+        graphics.beginPath();
+        graphics.moveTo(x + outerRadius * Math.cos(0), y + outerRadius * Math.sin(0));
+        
+        for (let i = 0; i < spikes * 2; i++) {
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const angle = i * step;
+            graphics.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+        }
+        
+        graphics.closePath();
+        
+        if (fill) {
+            graphics.fillPath();
+        } else {
+            graphics.strokePath();
+        }
     }
 
     /**
