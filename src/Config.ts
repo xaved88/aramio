@@ -66,14 +66,14 @@ export const GAMEPLAY_CONFIG = {
         MINION: {
             WARRIOR: {
                 HEALTH: 50,
-                ATTACK_RADIUS: 20,
+                ATTACK_RADIUS: 25,
                 ATTACK_STRENGTH: 10,
                 ATTACK_SPEED: 0.8, // attacks per second
                 SIZE: 12, // collision radius (matches MINION_SIZE)
             },
             ARCHER: {
                 HEALTH: 25,
-                ATTACK_RADIUS: 60,
+                ATTACK_RADIUS: 70,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1.2, // attacks per second
                 SIZE: 12, // collision radius (matches MINION_SIZE)
