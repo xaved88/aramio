@@ -2,6 +2,7 @@ import { Room, Client } from '@colyseus/core';
 import { GameState } from '../schema/GameState';
 import { SERVER_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
+import { BotManager } from '../game/bots/BotManager';
 import { getTotalCombatantHealth, gameStateToString } from '../../shared/utils/DebugUtils';
 
 interface GameCommand {
@@ -15,6 +16,7 @@ export class GameRoom extends Room<GameState> {
     private commands: GameCommand[] = [];
     private lastUpdateTime = 0;
     private gameEngine!: GameEngine;
+    private botManager!: BotManager;
     private restartTimer: NodeJS.Timeout | null = null;
 
     onCreate(options: any) {
@@ -43,6 +45,12 @@ export class GameRoom extends Room<GameState> {
         this.gameEngine = new GameEngine(this.state);
         this.gameEngine.setupGame();
 
+        // Initialize bot manager
+        this.botManager = new BotManager();
+
+        // Spawn bots
+        this.spawnBots();
+
         console.log("Game Initialized:", gameStateToString(this.state))
         console.log(`Room created with ${this.state.combatants.size} initial combatants`);
         
@@ -69,10 +77,10 @@ export class GameRoom extends Room<GameState> {
     onJoin(client: Client, options: any) {
         console.log(`${client.sessionId} joined`);
         
-        // Determine team based on current hero count
-        const currentHeroCount = Array.from(this.state.combatants.values())
-            .filter(c => c.type === 'hero').length;
-        const team = currentHeroCount % 2 === 0 
+        // Determine team based on current player hero count (excluding bots)
+        const currentPlayerHeroCount = Array.from(this.state.combatants.values())
+            .filter(c => c.type === 'hero' && !(c as any).controller.startsWith('bot-')).length;
+        const team = currentPlayerHeroCount % 2 === 0 
             ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
             : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
         
@@ -106,6 +114,10 @@ export class GameRoom extends Room<GameState> {
         if (result && result.events) {
             this.handleGameEvents(result.events);
         }
+
+        // Process bot commands
+        const botCommands = this.botManager.processBots(this.state);
+        this.commands.push(...botCommands);
 
         // Process all commands
         this.processCommands();
@@ -161,6 +173,14 @@ export class GameRoom extends Room<GameState> {
         if (command.data.x !== undefined && command.data.y !== undefined) {
             this.gameEngine.useAbility(command.clientId, command.data.x, command.data.y);
         }
+    }
+
+    private spawnBots() {
+        // Spawn blue bot
+        this.gameEngine.spawnPlayer('bot-simpleton', 'blue');
+        
+        // Spawn red bot
+        this.gameEngine.spawnPlayer('bot-simpleton', 'red');
     }
 
 
