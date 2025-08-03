@@ -96,49 +96,53 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders player graphics (circle)
+     * Renders player graphics (circle) with draining glass effect
      */
     private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
         const radius = CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS;
         
-        // Draw the main circle with primary color
-        graphics.fillStyle(primaryColor, 1);
-        graphics.fillCircle(0, 0, radius);
-        
-        // Draw the damaged portion (missing health) with respawn color
         if (healthPercentage < 1) {
+            // Draw the larger, lighter circle representing missing health
             graphics.fillStyle(respawnColor, 1);
-            // Draw a circle segment for the damaged portion
-            const damagedAngle = 2 * Math.PI * (1 - healthPercentage);
-            graphics.beginPath();
-            graphics.arc(0, 0, radius, -Math.PI/2, -Math.PI/2 + damagedAngle);
-            graphics.lineTo(0, 0);
-            graphics.closePath();
-            graphics.fillPath();
+            graphics.fillCircle(0, 0, radius);
+            
+            // Draw the smaller, darker circle representing remaining health
+            const remainingRadius = radius * Math.sqrt(healthPercentage);
+            graphics.fillStyle(primaryColor, 1);
+            graphics.fillCircle(0, 0, remainingRadius);
+        } else {
+            // At full health, just draw the main circle
+            graphics.fillStyle(primaryColor, 1);
+            graphics.fillCircle(0, 0, radius);
         }
     }
 
     /**
-     * Renders cradle graphics (square)
+     * Renders cradle graphics (square) with draining glass effect
      */
     private renderCradleGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
         const size = CLIENT_CONFIG.CRADLE_SIZE;
         const halfSize = size / 2;
         
-        // Draw the main square with primary color
-        graphics.fillStyle(primaryColor, 1);
-        graphics.fillRect(-halfSize, -halfSize, size, size);
-        
-        // Draw the damaged portion (missing health) with respawn color
         if (healthPercentage < 1) {
+            // Draw the larger, lighter square representing missing health
             graphics.fillStyle(respawnColor, 1);
-            const damagedHeight = size * (1 - healthPercentage);
-            graphics.fillRect(-halfSize, -halfSize, size, damagedHeight);
+            graphics.fillRect(-halfSize, -halfSize, size, size);
+            
+            // Draw the smaller, darker square representing remaining health
+            const remainingSize = size * Math.sqrt(healthPercentage);
+            const remainingHalfSize = remainingSize / 2;
+            graphics.fillStyle(primaryColor, 1);
+            graphics.fillRect(-remainingHalfSize, -remainingHalfSize, remainingSize, remainingSize);
+        } else {
+            // At full health, just draw the main square
+            graphics.fillStyle(primaryColor, 1);
+            graphics.fillRect(-halfSize, -halfSize, size, size);
         }
     }
 
     /**
-     * Renders turret graphics (rectangle)
+     * Renders turret graphics (rectangle) with draining glass effect
      */
     private renderTurretGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, combatant: Combatant): void {
         if (combatant.health > 0) {
@@ -147,15 +151,22 @@ export class EntityRenderer {
             const halfWidth = width / 2;
             const halfHeight = height / 2;
             
-            // Draw the main rectangle with primary color
-            graphics.fillStyle(primaryColor, 1);
-            graphics.fillRect(-halfWidth, -halfHeight, width, height);
-            
-            // Draw the damaged portion (missing health) with respawn color
             if (healthPercentage < 1) {
+                // Draw the larger, lighter rectangle representing missing health
                 graphics.fillStyle(respawnColor, 1);
-                const damagedHeight = height * (1 - healthPercentage);
-                graphics.fillRect(-halfWidth, -halfHeight, width, damagedHeight);
+                graphics.fillRect(-halfWidth, -halfHeight, width, height);
+                
+                // Draw the smaller, darker rectangle representing remaining health
+                const remainingWidth = width * Math.sqrt(healthPercentage);
+                const remainingHeight = height * Math.sqrt(healthPercentage);
+                const remainingHalfWidth = remainingWidth / 2;
+                const remainingHalfHeight = remainingHeight / 2;
+                graphics.fillStyle(primaryColor, 1);
+                graphics.fillRect(-remainingHalfWidth, -remainingHalfHeight, remainingWidth, remainingHeight);
+            } else {
+                // At full health, just draw the main rectangle
+                graphics.fillStyle(primaryColor, 1);
+                graphics.fillRect(-halfWidth, -halfHeight, width, height);
             }
             
             graphics.setVisible(true);
@@ -165,7 +176,7 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders minion graphics (diamond for warrior, triangle for archer)
+     * Renders minion graphics (diamond for warrior, triangle for archer) with draining glass effect
      */
     private renderMinionGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, combatant: Combatant): void {
         if (!isMinionCombatant(combatant)) return;
@@ -173,50 +184,68 @@ export class EntityRenderer {
         if (combatant.health > 0) {
             const size = CLIENT_CONFIG.MINION_SIZE;
             
-            // Draw the main shape with primary color
-            graphics.fillStyle(primaryColor, 1);
-            
             if (combatant.minionType === MINION_TYPES.WARRIOR) {
                 // Diamond shape
-                graphics.beginPath();
-                graphics.moveTo(0, -size);
-                graphics.lineTo(size, 0);
-                graphics.lineTo(0, size);
-                graphics.lineTo(-size, 0);
-                graphics.closePath();
-                graphics.fillPath();
-                
-                // Draw the damaged portion for diamond
                 if (healthPercentage < 1) {
+                    // Draw the larger, lighter diamond representing missing health
                     graphics.fillStyle(respawnColor, 1);
-                    const damagedHeight = size * 2 * (1 - healthPercentage);
-                    // Create a diamond-shaped damaged portion
                     graphics.beginPath();
-                    graphics.moveTo(0, -size + damagedHeight);
-                    graphics.lineTo(size * (1 - (1 - healthPercentage)), 0);
+                    graphics.moveTo(0, -size);
+                    graphics.lineTo(size, 0);
                     graphics.lineTo(0, size);
-                    graphics.lineTo(-size * (1 - (1 - healthPercentage)), 0);
+                    graphics.lineTo(-size, 0);
+                    graphics.closePath();
+                    graphics.fillPath();
+                    
+                    // Draw the smaller, darker diamond representing remaining health
+                    const remainingSize = size * Math.sqrt(healthPercentage);
+                    graphics.fillStyle(primaryColor, 1);
+                    graphics.beginPath();
+                    graphics.moveTo(0, -remainingSize);
+                    graphics.lineTo(remainingSize, 0);
+                    graphics.lineTo(0, remainingSize);
+                    graphics.lineTo(-remainingSize, 0);
+                    graphics.closePath();
+                    graphics.fillPath();
+                } else {
+                    // At full health, just draw the main diamond
+                    graphics.fillStyle(primaryColor, 1);
+                    graphics.beginPath();
+                    graphics.moveTo(0, -size);
+                    graphics.lineTo(size, 0);
+                    graphics.lineTo(0, size);
+                    graphics.lineTo(-size, 0);
                     graphics.closePath();
                     graphics.fillPath();
                 }
             } else if (combatant.minionType === MINION_TYPES.ARCHER) {
                 // Triangle shape
-                graphics.beginPath();
-                graphics.moveTo(0, -size);
-                graphics.lineTo(size, size);
-                graphics.lineTo(-size, size);
-                graphics.closePath();
-                graphics.fillPath();
-                
-                // Draw the damaged portion for triangle
                 if (healthPercentage < 1) {
+                    // Draw the larger, lighter triangle representing missing health
                     graphics.fillStyle(respawnColor, 1);
-                    const damagedHeight = size * 2 * (1 - healthPercentage);
-                    // Create a triangle-shaped damaged portion
                     graphics.beginPath();
-                    graphics.moveTo(0, -size + damagedHeight);
-                    graphics.lineTo(size * (1 - (1 - healthPercentage)), size);
-                    graphics.lineTo(-size * (1 - (1 - healthPercentage)), size);
+                    graphics.moveTo(0, -size);
+                    graphics.lineTo(size, size);
+                    graphics.lineTo(-size, size);
+                    graphics.closePath();
+                    graphics.fillPath();
+                    
+                    // Draw the smaller, darker triangle representing remaining health
+                    const remainingSize = size * Math.sqrt(healthPercentage);
+                    graphics.fillStyle(primaryColor, 1);
+                    graphics.beginPath();
+                    graphics.moveTo(0, -remainingSize);
+                    graphics.lineTo(remainingSize, remainingSize);
+                    graphics.lineTo(-remainingSize, remainingSize);
+                    graphics.closePath();
+                    graphics.fillPath();
+                } else {
+                    // At full health, just draw the main triangle
+                    graphics.fillStyle(primaryColor, 1);
+                    graphics.beginPath();
+                    graphics.moveTo(0, -size);
+                    graphics.lineTo(size, size);
+                    graphics.lineTo(-size, size);
                     graphics.closePath();
                     graphics.fillPath();
                 }
