@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
-import { SharedGameState } from '../../shared/types/GameStateTypes';
+import { SharedGameState, XPEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
@@ -29,6 +29,8 @@ export class EntityManager {
     private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private xpTexts: Map<string, Phaser.GameObjects.Text> = new Map();
+    private processedXPEvents: Set<string> = new Set();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -51,6 +53,9 @@ export class EntityManager {
         
         // Update projectiles
         this.updateProjectileEntities(state);
+        
+        // Process XP events
+        this.processXPEvents(state);
         
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
@@ -185,6 +190,50 @@ export class EntityManager {
         
         // Render the projectile
         this.entityRenderer.renderProjectile(projectileData, projectileGraphics);
+    }
+
+    /**
+     * Processes XP events and creates XP text animations
+     */
+    private processXPEvents(state: SharedGameState): void {
+        state.xpEvents.forEach(xpEvent => {
+            const eventKey = `${xpEvent.playerId}-${xpEvent.amount}-${xpEvent.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedXPEvents.has(eventKey)) return;
+            
+            // Find the player who earned XP and check if it's the current player
+            const player = state.combatants.get(xpEvent.playerId);
+            if (player && player.type === 'hero' && this.playerSessionId && player.controller === this.playerSessionId) {
+                this.createXPText(xpEvent);
+            }
+            
+            // Mark as processed
+            this.processedXPEvents.add(eventKey);
+        });
+    }
+
+    /**
+     * Creates XP text animation at the specified position
+     */
+    private createXPText(xpEvent: XPEvent): void {
+        const xpText = this.scene.add.text(xpEvent.x, xpEvent.y, `+${Math.round(xpEvent.amount)}XP`, {
+            fontSize: '16px',
+            color: '#ffffff', // White color for XP
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
+        
+        // Animate the text floating up and fading out
+        this.scene.tweens.add({
+            targets: xpText,
+            y: xpText.y - 30,
+            alpha: 0,
+            duration: 2000,
+            ease: 'Power2',
+            onComplete: () => {
+                xpText.destroy();
+            }
+        });
     }
 
     /**

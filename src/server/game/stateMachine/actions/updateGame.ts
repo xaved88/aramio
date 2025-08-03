@@ -1,4 +1,4 @@
-import { GameState, Hero } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -23,6 +23,20 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     // Remove events in reverse order to maintain indices
     eventsToRemove.reverse().forEach(index => {
         state.attackEvents.splice(index, 1);
+    });
+    
+    // Clear old XP events (older than 2 seconds)
+    const xpEventsToRemove: number[] = [];
+    
+    state.xpEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 2000) { // 2 seconds
+            xpEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove XP events in reverse order to maintain indices
+    xpEventsToRemove.reverse().forEach(index => {
+        state.xpEvents.splice(index, 1);
     });
     
     // Process combat
@@ -202,7 +216,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeamForTurret(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state);
+                grantExperienceToTeamForTurret(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state, combatant.x, combatant.y);
                 turretsToRemove.push(id);
             }
         }
@@ -270,20 +284,20 @@ function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameSta
             const hero = combatant as Hero;
             // Only grant experience to alive players, not respawning ones
             if (hero.state === 'alive') {
-                grantExperience(hero, amount);
+                grantExperience(hero, amount, state);
             }
         }
     });
 }
 
-function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState): void {
+function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
             const hero = combatant as Hero;
             // Grant experience to all players on opposing team, even when dead/respawning
-            grantExperience(hero, amount);
+            grantExperience(hero, amount, state, turretX, turretY);
         }
     });
 }
@@ -298,15 +312,26 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
             if (hero.state === 'alive') {
                 const distance = CombatantUtils.getDistance(hero, dyingUnit);
                 if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.UNIT_KILL_RADIUS) {
-                    grantExperience(hero, amount);
+                    grantExperience(hero, amount, state, dyingUnit.x, dyingUnit.y);
                 }
             }
         }
     });
 }
 
-function grantExperience(player: Hero, amount: number): void {
+function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number): void {
     player.experience += amount;
+    
+    // Create XP event if position is provided
+    if (xpX !== undefined && xpY !== undefined) {
+        const xpEvent = new XPEvent();
+        xpEvent.playerId = player.id;
+        xpEvent.amount = amount;
+        xpEvent.x = xpX;
+        xpEvent.y = xpY;
+        xpEvent.timestamp = state.gameTime;
+        state.xpEvents.push(xpEvent);
+    }
     
     // Check for level up immediately when experience is granted
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;

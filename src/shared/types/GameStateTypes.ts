@@ -1,5 +1,13 @@
 import { Combatant, AttackEvent, Projectile } from './CombatantTypes';
 
+export interface XPEvent {
+    playerId: string;
+    amount: number;
+    x: number;
+    y: number;
+    timestamp: number;
+}
+
 export interface SharedGameState {
     gameTime: number;
     gamePhase: string;
@@ -8,5 +16,6 @@ export interface SharedGameState {
     gameEndTime: number;
     combatants: Map<string, Combatant>;
     attackEvents: AttackEvent[];
+    xpEvents: XPEvent[];
     projectiles: Map<string, Projectile>;
 } 

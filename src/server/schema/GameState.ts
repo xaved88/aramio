@@ -7,6 +7,14 @@ export class AttackEvent extends Schema {
     @type('number') timestamp!: number;
 }
 
+export class XPEvent extends Schema {
+    @type('string') playerId!: string; // ID of the player who earned XP
+    @type('number') amount!: number; // Amount of XP earned
+    @type('number') x!: number; // X position where XP was earned
+    @type('number') y!: number; // Y position where XP was earned
+    @type('number') timestamp!: number; // When the XP was earned
+}
+
 export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
@@ -63,5 +71,6 @@ export class GameState extends Schema {
     @type('number') gameEndTime = 0;
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
+    @type([XPEvent]) xpEvents = new ArraySchema<XPEvent>();
     @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
 } 

@@ -1,5 +1,5 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
-import { SharedGameState } from '../types/GameStateTypes';
+import { SharedGameState, XPEvent } from '../types/GameStateTypes';
 import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
@@ -34,6 +34,15 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    // Convert XP events
+    const sharedXPEvents: XPEvent[] = colyseusState.xpEvents.map(event => ({
+        playerId: event.playerId,
+        amount: event.amount,
+        x: event.x,
+        y: event.y,
+        timestamp: event.timestamp
+    }));
+    
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
@@ -42,6 +51,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         gameEndTime: colyseusState.gameEndTime,
         combatants: sharedCombatants,
         attackEvents: sharedAttackEvents,
+        xpEvents: sharedXPEvents,
         projectiles: sharedProjectiles
     };
 }
