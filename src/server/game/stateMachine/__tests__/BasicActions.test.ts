@@ -509,8 +509,10 @@ describe('GameStateMachine', () => {
             const newRedTurret = newState.combatants.get('red-turret');
             
             // Verify that our manual changes are preserved, accounting for turret destruction
-            // Player starts with 50, gets 20 from turret destruction, levels up (consumes 30), so 40 remaining
-            expect(newPlayer?.experience).toBe(40);
+            // Player starts with 50, gets 20 from turret destruction (total 70)
+            // Level 1->2: consumes 15 XP, leaving 55
+            // Level 2->3: consumes 30 XP, leaving 25
+            expect(newPlayer?.experience).toBe(25);
             expect(newRedTurret).toBeUndefined(); // Turret was destroyed and removed
         });
     });

@@ -289,9 +289,9 @@ describe('TurretDestruction', () => {
             });
 
             // Player should be level 2 with remaining experience
-            // 8 + 20 = 28 experience, 10 for level 2, so 18 remaining
+            // 8 + 20 = 28 experience, 15 needed for level 2, so 13 remaining
             expect(updatedPlayer?.level).toBe(2);
-            expect(updatedPlayer?.experience).toBe(18);
+            expect(updatedPlayer?.experience).toBe(13);
         });
 
         it('should only grant minion XP to heroes within range', () => {
