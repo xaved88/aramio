@@ -155,13 +155,38 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     player.state = 'respawning';
     player.respawnTime = state.gameTime + player.respawnDuration;
     
-    // Move player to spawn location
+    // Get all heroes on the same team, sorted by ID
+    const teamHeroes = Array.from(state.combatants.values())
+        .filter(combatant => combatant.type === COMBATANT_TYPES.HERO && combatant.team === player.team)
+        .map(hero => hero.id)
+        .sort();
+    
+    // Find the hero's position in the sorted list
+    const heroIndex = teamHeroes.indexOf(player.id);
+    
+    // Move player to spawn location based on their position in the team
     if (player.team === 'blue') {
-        player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        const blueSpawnPositions = [
+            { x: 50, y: 550 },   // At cradle
+            { x: 30, y: 530 },   // Bottom left of cradle
+            { x: 70, y: 530 },   // Bottom right of cradle
+            { x: 30, y: 570 },   // Top left of cradle
+            { x: 70, y: 570 }    // Top right of cradle
+        ];
+        const spawnIndex = Math.min(heroIndex, blueSpawnPositions.length - 1);
+        player.x = blueSpawnPositions[spawnIndex].x;
+        player.y = blueSpawnPositions[spawnIndex].y;
     } else {
-        player.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        player.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        const redSpawnPositions = [
+            { x: 550, y: 50 },   // At cradle
+            { x: 530, y: 30 },   // Top left of cradle
+            { x: 570, y: 30 },   // Top right of cradle
+            { x: 530, y: 70 },   // Bottom left of cradle
+            { x: 570, y: 70 }    // Bottom right of cradle
+        ];
+        const spawnIndex = Math.min(heroIndex, redSpawnPositions.length - 1);
+        player.x = redSpawnPositions[spawnIndex].x;
+        player.y = redSpawnPositions[spawnIndex].y;
     }
 }
 

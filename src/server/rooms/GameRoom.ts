@@ -84,15 +84,20 @@ export class GameRoom extends Room<GameState> {
             ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
             : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
         
-        // Spawn hero through the game engine
-        this.gameEngine.spawnPlayer(client.sessionId, team);
+        // Try to replace a bot on the appropriate team
+        const replacedBot = this.replaceBotWithPlayer(client.sessionId, team);
+        
+        if (!replacedBot) {
+            // If no bot to replace, spawn a new hero
+            this.gameEngine.spawnPlayer(client.sessionId, team);
+        }
     }
 
     onLeave(client: Client, consented: boolean) {
         console.log(`${client.sessionId} left`);
         
-        // Remove player through the game engine
-        this.gameEngine.removePlayer(client.sessionId);
+        // Find the hero controlled by this player and replace it with a bot
+        this.replacePlayerWithBot(client.sessionId);
     }
 
     onDispose() {
@@ -165,22 +170,96 @@ export class GameRoom extends Room<GameState> {
 
     private handleMoveCommand(command: GameCommand) {
         if (command.data.targetX !== undefined && command.data.targetY !== undefined) {
-            this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
+            // For bot commands, use the hero ID directly
+            if (command.clientId.startsWith('hero-')) {
+                this.gameEngine.moveHero(command.clientId, command.data.targetX, command.data.targetY);
+            } else {
+                // For player commands, use the clientId directly (session ID)
+                this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
+            }
         }
     }
 
     private handleUseAbilityCommand(command: GameCommand) {
         if (command.data.x !== undefined && command.data.y !== undefined) {
-            this.gameEngine.useAbility(command.clientId, command.data.x, command.data.y);
+            // For bot commands, find the hero by ID and use its controller
+            if (command.clientId.startsWith('hero-')) {
+                const hero = this.state.combatants.get(command.clientId) as any;
+                if (hero) {
+                    this.gameEngine.useAbility(hero.controller, command.data.x, command.data.y);
+                }
+            } else {
+                // For player commands, use the clientId directly
+                this.gameEngine.useAbility(command.clientId, command.data.x, command.data.y);
+            }
         }
     }
 
     private spawnBots() {
-        // Spawn blue bot
-        this.gameEngine.spawnPlayer('bot-simpleton', 'blue');
+        // Spawn 5 blue bots at different positions around the blue cradle
+        const blueSpawnPositions = [
+            { x: 50, y: 550 },   // At cradle
+            { x: 30, y: 530 },   // Bottom left of cradle
+            { x: 70, y: 530 },   // Bottom right of cradle
+            { x: 30, y: 570 },   // Top left of cradle
+            { x: 70, y: 570 }    // Top right of cradle
+        ];
         
-        // Spawn red bot
-        this.gameEngine.spawnPlayer('bot-simpleton', 'red');
+        const redSpawnPositions = [
+            { x: 550, y: 50 },   // At cradle
+            { x: 530, y: 30 },   // Top left of cradle
+            { x: 570, y: 30 },   // Top right of cradle
+            { x: 530, y: 70 },   // Bottom left of cradle
+            { x: 570, y: 70 }    // Bottom right of cradle
+        ];
+        
+        // Spawn blue bots
+        for (let i = 0; i < 5; i++) {
+            this.gameEngine.spawnPlayer('bot-simpleton', 'blue', blueSpawnPositions[i]);
+        }
+        
+        // Spawn red bots
+        for (let i = 0; i < 5; i++) {
+            this.gameEngine.spawnPlayer('bot-simpleton', 'red', redSpawnPositions[i]);
+        }
+    }
+
+    private replaceBotWithPlayer(playerId: string, team: string): boolean {
+        // Find a bot on the specified team to replace
+        let botToReplace: any = null;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.type === 'hero' && 
+                combatant.controller.startsWith('bot-') && 
+                combatant.team === team && 
+                !botToReplace) {
+                botToReplace = combatant;
+            }
+        });
+        
+        if (botToReplace) {
+            // Replace the bot's controller with the player
+            botToReplace.controller = playerId;
+            console.log(`Replaced bot ${botToReplace.id} with player ${playerId} on team ${team}`);
+            return true;
+        }
+        
+        return false;
+    }
+
+    private replacePlayerWithBot(playerId: string): void {
+        // Find the hero controlled by this player
+        let playerHero: any = null;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.type === 'hero' && combatant.controller === playerId) {
+                playerHero = combatant;
+            }
+        });
+        
+        if (playerHero) {
+            // Replace the player's controller with a bot
+            playerHero.controller = 'bot-simpleton';
+            console.log(`Replaced player ${playerId} with bot on hero ${playerHero.id}`);
+        }
     }
 
 

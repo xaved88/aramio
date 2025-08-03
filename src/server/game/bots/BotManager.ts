@@ -1,6 +1,5 @@
 import { GameState } from '../../schema/GameState';
 import { SimpletonBotStrategy } from './strategies/SimpletonBotStrategy';
-import { SharedGameState } from '../../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
 
 export interface BotCommand {
@@ -28,7 +27,7 @@ export class BotManager {
         state.combatants.forEach((combatant: any) => {
             if (combatant.type === 'hero' && combatant.controller.startsWith('bot-')) {
                 const strategy = this.strategies.get(combatant.controller);
-                
+
                 if (strategy) {
                     const botCommands = strategy.generateCommands(combatant, sharedState);
                     commands.push(...botCommands);

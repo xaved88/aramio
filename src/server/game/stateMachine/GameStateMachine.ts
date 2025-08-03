@@ -4,6 +4,7 @@ import { handleSetupGame } from './actions/setupGame';
 import { handleSpawnPlayer } from './actions/spawnPlayer';
 import { handleRemovePlayer } from './actions/removePlayer';
 import { handleMovePlayer } from './actions/movePlayer';
+import { handleMoveHero } from './actions/moveHero';
 import { handleUpdateGame } from './actions/updateGame';
 import { handleEndGame } from './actions/endGame';
 
@@ -32,6 +33,9 @@ export class GameStateMachine {
                 
             case 'MOVE_PLAYER':
                 return handleMovePlayer(currentState, action);
+                
+            case 'MOVE_HERO':
+                return handleMoveHero(currentState, action);
                 
             case 'UPDATE_GAME':
                 return handleUpdateGame(currentState, action);

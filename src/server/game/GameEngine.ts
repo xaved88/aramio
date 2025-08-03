@@ -65,10 +65,14 @@ export class GameEngine {
      * @param playerId The player's ID
      * @param team The player's team
      */
-    spawnPlayer(playerId: string, team: 'blue' | 'red'): void {
+    spawnPlayer(playerId: string, team: 'blue' | 'red', position?: { x: number, y: number }): void {
         this.processAction({
             type: 'SPAWN_PLAYER',
-            payload: { playerId, team }
+            payload: { 
+                playerId, 
+                team,
+                ...(position && { x: position.x, y: position.y })
+            }
         });
     }
 
@@ -97,6 +101,19 @@ export class GameEngine {
     }
 
     /**
+     * Moves a hero to a target position
+     * @param heroId The hero's ID
+     * @param targetX Target X coordinate
+     * @param targetY Target Y coordinate
+     */
+    moveHero(heroId: string, targetX: number, targetY: number): void {
+        this.processAction({
+            type: 'MOVE_HERO',
+            payload: { heroId, targetX, targetY }
+        });
+    }
+
+    /**
      * Uses a player's ability at the specified coordinates
      * @param playerId The player's ID
      * @param x X coordinate where ability was used
@@ -112,7 +129,6 @@ export class GameEngine {
         });
         
         if (!player || player.type !== 'hero') {
-            console.log(`Ability use failed: Player ${playerId} not found or not a hero`);
             return;
         }
 
@@ -120,22 +136,17 @@ export class GameEngine {
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (player.ability.lastUsedTime === 0) {
-            console.log('Ability used (first time)');
             player.ability.lastUsedTime = currentTime;
             this.createProjectile(playerId, x, y);
             return;
         }
         
         const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
-        
-        console.log(`Ability check: timeSinceLastUse=${timeSinceLastUse}, cooldown=${player.ability.cooldown}`);
-        
+  
         if (timeSinceLastUse < player.ability.cooldown) {
-            console.log(`No`);
             return; // Ability is on cooldown
         }
 
-        console.log('Ability used');
         player.ability.lastUsedTime = currentTime;
         this.createProjectile(playerId, x, y);
     }
@@ -149,8 +160,6 @@ export class GameEngine {
             }
         });
         if (!player) return;
-
-        console.log(`Creating projectile: player at (${player.x}, ${player.y}), target at (${targetX}, ${targetY})`);
 
         // Calculate direction from player to target
         const dx = targetX - player.x;
@@ -176,7 +185,6 @@ export class GameEngine {
         projectile.team = player.team;
         
         this.state.projectiles.set(projectile.id, projectile);
-        console.log(`Projectile created: ${projectile.id} from (${projectile.x}, ${projectile.y}) to (${targetX}, ${targetY})`);
     }
 
     private updateProjectiles(deltaTime: number): void {
@@ -222,7 +230,6 @@ export class GameEngine {
                 // Only damage units (players and minions), not structures
                 if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
                     closestCombatant.health = Math.max(0, closestCombatant.health - projectile.strength);
-                    console.log(`Projectile ${projectile.id} hit ${closestCombatant.id} for ${projectile.strength} damage`);
                 }
             }
         });

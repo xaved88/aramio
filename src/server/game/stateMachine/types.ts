@@ -14,6 +14,8 @@ export interface SpawnPlayerAction extends GameAction {
     payload: {
         playerId: string;
         team: 'blue' | 'red';
+        x?: number;
+        y?: number;
     };
 }
 
@@ -28,6 +30,15 @@ export interface MovePlayerAction extends GameAction {
     type: 'MOVE_PLAYER';
     payload: {
         playerId: string;
+        targetX: number;
+        targetY: number;
+    };
+}
+
+export interface MoveHeroAction extends GameAction {
+    type: 'MOVE_HERO';
+    payload: {
+        heroId: string;
         targetX: number;
         targetY: number;
     };
@@ -52,6 +63,7 @@ export type GameActionTypes =
     | SpawnPlayerAction 
     | RemovePlayerAction 
     | MovePlayerAction 
+    | MoveHeroAction 
     | UpdateGameAction 
     | EndGameAction;
 

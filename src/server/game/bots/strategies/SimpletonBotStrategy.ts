@@ -22,7 +22,7 @@ export class SimpletonBotStrategy {
                 commands.push({
                     type: 'useAbility',
                     data: { x: closestEnemy.x, y: closestEnemy.y },
-                    clientId: bot.controller
+                    clientId: bot.id
                 });
             }
         } else {
@@ -31,7 +31,7 @@ export class SimpletonBotStrategy {
             commands.push({
                 type: 'move',
                 data: { targetX: targetPosition.x, targetY: targetPosition.y },
-                clientId: bot.controller
+                clientId: bot.id
             });
         }
 
@@ -63,10 +63,17 @@ export class SimpletonBotStrategy {
     }
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
-        if (team === 'blue') {
-            return GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
-        } else {
-            return GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;
-        }
+        const basePosition = team === 'blue' 
+            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED 
+            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;
+        
+        // Add some randomization to avoid all bots targeting the exact same spot
+        const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
+        const offsetY = (Math.random() - 0.5) * 60; // ±30 pixels
+        
+        return {
+            x: basePosition.x + offsetX,
+            y: basePosition.y + offsetY
+        };
     }
 } 

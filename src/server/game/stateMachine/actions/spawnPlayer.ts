@@ -11,13 +11,19 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.team = action.payload.team;
     hero.controller = action.payload.playerId; // client ID becomes the controller
     
-    // Spawn hero near their team's cradle
-    if (hero.team === 'blue') {
-        hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+    // Spawn hero at custom position or near their team's cradle
+    if (action.payload.x !== undefined && action.payload.y !== undefined) {
+        hero.x = action.payload.x;
+        hero.y = action.payload.y;
     } else {
-        hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-        hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        // Default spawn near cradle
+        if (hero.team === 'blue') {
+            hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        } else {
+            hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+        }
     }
     
     hero.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
