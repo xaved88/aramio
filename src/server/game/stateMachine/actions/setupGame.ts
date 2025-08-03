@@ -7,8 +7,12 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     // Clear existing state
     state.combatants.clear();
     state.attackEvents.clear();
+    state.projectiles.clear();
     state.gameTime = 0;
     state.gamePhase = 'playing';
+    state.winningTeam = '';
+    state.gameEndTime = 0;
+    state.currentWave = 0;
     
     // Create blue cradle (bottom left)
     const blueCradle = new Combatant();

@@ -157,9 +157,18 @@ export class GameScene extends Phaser.Scene {
             console.log('Game restarted by server');
             // Reset client-side state for the new game
             this.playerTeam = null;
+            this.lastState = null;
+            this.stateLogTimer = 0;
+            this.totalHP = 0;
             this.processedAttackEvents.clear();
             this.entityManager.clearAllEntities();
+            this.animationManager.clearAllAnimations();
+            // Stop all tweens to ensure no animations are left running
+            this.tweens.killAll();
+            this.uiManager.clearHUD();
             this.uiManager.createHUD();
+            // Hide victory screen if it's showing
+            this.uiManager.hideVictoryScreen();
         });
         
         this.room.onLeave((code: number) => {

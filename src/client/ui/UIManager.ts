@@ -41,6 +41,9 @@ export class UIManager {
      * Creates all HUD elements
      */
     createHUD(): void {
+        // Clear any existing HUD elements first
+        this.clearHUD();
+        
         const hudElements = this.hudRenderer.createHUDElements();
         
         this.hudHealthBar = hudElements.healthBar;
@@ -52,6 +55,38 @@ export class UIManager {
         this.hudLevelText = hudElements.levelText;
         this.hudAbilityBar = hudElements.abilityBar;
         this.hudAbilityBarBackground = hudElements.abilityBarBackground;
+    }
+
+    /**
+     * Clears all HUD elements
+     */
+    clearHUD(): void {
+        if (this.hudHealthBar) this.hudHealthBar.destroy();
+        if (this.hudHealthBarBackground) this.hudHealthBarBackground.destroy();
+        if (this.hudHealthText) this.hudHealthText.destroy();
+        if (this.hudExperienceBar) this.hudExperienceBar.destroy();
+        if (this.hudExperienceBarBackground) this.hudExperienceBarBackground.destroy();
+        if (this.hudExperienceText) this.hudExperienceText.destroy();
+        if (this.hudLevelText) this.hudLevelText.destroy();
+        if (this.hudAbilityBar) this.hudAbilityBar.destroy();
+        if (this.hudAbilityBarBackground) this.hudAbilityBarBackground.destroy();
+        
+        this.hudHealthBar = null;
+        this.hudHealthBarBackground = null;
+        this.hudHealthText = null;
+        this.hudExperienceBar = null;
+        this.hudExperienceBarBackground = null;
+        this.hudExperienceText = null;
+        this.hudLevelText = null;
+        this.hudAbilityBar = null;
+        this.hudAbilityBarBackground = null;
+    }
+
+    /**
+     * Hides the victory screen if it's showing
+     */
+    hideVictoryScreen(): void {
+        this.victoryScreen.destroy();
     }
 
     /**

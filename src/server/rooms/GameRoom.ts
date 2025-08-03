@@ -291,6 +291,9 @@ export class GameRoom extends Room<GameState> {
         // Clear any pending commands
         this.commands = [];
         
+        // Reset update time
+        this.lastUpdateTime = 0;
+        
         // Store existing players before resetting
         const existingPlayers = Array.from(this.clients).map(client => client.sessionId);
         
