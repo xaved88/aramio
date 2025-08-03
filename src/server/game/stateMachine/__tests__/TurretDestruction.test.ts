@@ -293,5 +293,105 @@ describe('TurretDestruction', () => {
             expect(updatedPlayer?.level).toBe(2);
             expect(updatedPlayer?.experience).toBe(18);
         });
+
+        it('should grant turret XP to dead players but not minion XP', () => {
+            // Setup game with two players on blue team
+            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player1', team: 'blue' }
+            });
+            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player2', team: 'blue' }
+            });
+            
+            // Find both heroes
+            let hero1: Hero | undefined;
+            let hero2: Hero | undefined;
+            spawnResult2.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    hero1 = combatant as Hero;
+                }
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player2') {
+                    hero2 = combatant as Hero;
+                }
+            });
+            
+            // Kill hero2 (make them respawning)
+            if (hero2) {
+                hero2.health = 0;
+                hero2.state = 'respawning';
+                hero2.respawnTime = spawnResult2.newState.gameTime + hero2.respawnDuration;
+            }
+            
+            // Record initial experience
+            const initialExp1 = hero1?.experience || 0;
+            const initialExp2 = hero2?.experience || 0;
+            
+            // Destroy a turret - both players should get XP
+            const redTurret = spawnResult2.newState.combatants.get('red-turret');
+            if (redTurret) {
+                redTurret.health = 0; // Destroy the turret
+            }
+            
+            // Update game to process turret destruction
+            const result1 = GameStateMachine.processAction(spawnResult2.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 100 }
+            });
+            
+            // Find updated heroes
+            let updatedHero1: Hero | undefined;
+            let updatedHero2: Hero | undefined;
+            result1.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    updatedHero1 = combatant as Hero;
+                }
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player2') {
+                    updatedHero2 = combatant as Hero;
+                }
+            });
+            
+            // Both players should have gained turret XP (even the dead one)
+            // Account for leveling: 20 XP granted, 10 needed for level 1, so 10 remaining
+            expect(updatedHero1?.experience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED - GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER);
+            expect(updatedHero2?.experience).toBe(initialExp2 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED - GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER);
+            
+            // Now kill a minion - only alive player should get XP
+            const minions = Array.from(result1.newState.combatants.values())
+                .filter(combatant => combatant.type === COMBATANT_TYPES.MINION);
+            
+            if (minions.length > 0) {
+                const minion = minions[0];
+                minion.health = 0; // Kill the minion
+                
+                // Record experience before minion kill
+                const expBeforeMinion1 = updatedHero1?.experience || 0;
+                const expBeforeMinion2 = updatedHero2?.experience || 0;
+                
+                // Update game to process minion death
+                const result2 = GameStateMachine.processAction(result1.newState, {
+                    type: 'UPDATE_GAME',
+                    payload: { deltaTime: 100 }
+                });
+                
+                // Find heroes after minion kill
+                let finalHero1: Hero | undefined;
+                let finalHero2: Hero | undefined;
+                result2.newState.combatants.forEach((combatant) => {
+                    if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                        finalHero1 = combatant as Hero;
+                    }
+                    if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player2') {
+                        finalHero2 = combatant as Hero;
+                    }
+                });
+                
+                // Only alive player should get minion XP
+                expect(finalHero1?.experience).toBe(expBeforeMinion1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                expect(finalHero2?.experience).toBe(expBeforeMinion2); // Dead player should not get minion XP
+            }
+        });
     });
 }); 

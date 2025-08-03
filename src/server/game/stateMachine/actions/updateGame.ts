@@ -123,7 +123,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state);
+                grantExperienceToTeamForTurret(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state);
                 turretsToRemove.push(id);
             }
         }
@@ -139,7 +139,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.MINION) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeam(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state);
+                grantExperienceToTeamForUnitKill(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state);
                 minionsToRemove.push(id);
             }
         }
@@ -196,6 +196,32 @@ function completePlayerRespawn(player: Hero): void {
 }
 
 function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameState): void {
+    const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
+    
+    state.combatants.forEach((combatant, id) => {
+        if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
+            const hero = combatant as Hero;
+            // Only grant experience to alive players, not respawning ones
+            if (hero.state === 'alive') {
+                grantExperience(hero, amount);
+            }
+        }
+    });
+}
+
+function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState): void {
+    const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
+    
+    state.combatants.forEach((combatant, id) => {
+        if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
+            const hero = combatant as Hero;
+            // Grant experience to all players on opposing team, even when dead/respawning
+            grantExperience(hero, amount);
+        }
+    });
+}
+
+function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     state.combatants.forEach((combatant, id) => {
