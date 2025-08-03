@@ -21,6 +21,7 @@ export class GameRoom extends Room<GameState> {
 
     onCreate(options: any) {
         this.initializeGame();
+        this.setupMessageHandlers();
     }
 
     private initializeGame() {
@@ -56,7 +57,9 @@ export class GameRoom extends Room<GameState> {
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
-        
+    }
+
+    private setupMessageHandlers() {
         this.onMessage('move', (client, data) => {
             this.commands.push({
                 type: 'move',
@@ -297,15 +300,33 @@ export class GameRoom extends Room<GameState> {
             this.restartTimer = null;
         }
         
-        // Disconnect all clients so they reconnect and spawn new players
-        console.log(`Disconnecting ${this.clients.length} clients for restart`);
-        this.clients.forEach(client => {
-            console.log(`Disconnecting client: ${client.sessionId}`);
-            client.leave();
+        // Clear any pending commands
+        this.commands = [];
+        
+        // Store existing players before resetting
+        const existingPlayers = Array.from(this.clients).map(client => client.sessionId);
+        
+        // Instead of disconnecting clients, reset the game state
+        // This keeps the room alive and allows clients to continue playing
+        this.initializeGame();
+        
+        // Reassign existing players to new heroes
+        existingPlayers.forEach((playerId, index) => {
+            const team = index % 2 === 0 
+                ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
+                : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
+            
+            // Try to replace a bot on the appropriate team
+            const replacedBot = this.replaceBotWithPlayer(playerId, team);
+            
+            if (!replacedBot) {
+                // If no bot to replace, spawn a new hero
+                this.gameEngine.spawnPlayer(playerId, team);
+            }
         });
         
-        // The room will be automatically disposed when all clients leave
-        // A new room will be created when clients reconnect
+        // Notify clients that the game has restarted
+        this.broadcast('gameRestarted', {});
     }
 
 

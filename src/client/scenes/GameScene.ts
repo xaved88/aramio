@@ -153,6 +153,15 @@ export class GameScene extends Phaser.Scene {
             this.updateHUD(sharedState);
         });
         
+        this.room.onMessage('gameRestarted', () => {
+            console.log('Game restarted by server');
+            // Reset client-side state for the new game
+            this.playerTeam = null;
+            this.processedAttackEvents.clear();
+            this.entityManager.clearAllEntities();
+            this.uiManager.createHUD();
+        });
+        
         this.room.onLeave((code: number) => {
             console.log('Left room with code:', code);
             // When disconnected, restart the entire scene for a fresh game
