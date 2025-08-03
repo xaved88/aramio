@@ -58,6 +58,9 @@ export class GameScene extends Phaser.Scene {
             this.playerSessionId = this.room.sessionId;
             console.log(`Client session ID: ${this.playerSessionId}`);
             
+            // Set the player session ID in the entity manager
+            this.entityManager.setPlayerSessionId(this.playerSessionId);
+            
             this.setupRoomHandlers();
             this.setupInputHandlers();
             

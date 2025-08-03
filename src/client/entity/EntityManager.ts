@@ -20,6 +20,7 @@ export class EntityManager {
     private scene: Phaser.Scene;
     private entityFactory: EntityFactory;
     private entityRenderer: EntityRenderer;
+    private playerSessionId: string | null = null;
     
     // Entity storage
     private entityGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
@@ -33,6 +34,10 @@ export class EntityManager {
         this.scene = scene;
         this.entityFactory = new EntityFactory(scene);
         this.entityRenderer = new EntityRenderer(scene);
+    }
+
+    setPlayerSessionId(sessionId: string | null): void {
+        this.playerSessionId = sessionId;
     }
 
     /**
@@ -140,7 +145,8 @@ export class EntityManager {
             radiusIndicator,
             respawnRing,
             abilityReadyIndicator,
-            state
+            state,
+            this.playerSessionId
         );
     }
 

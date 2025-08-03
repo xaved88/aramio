@@ -23,7 +23,8 @@ export class EntityRenderer {
         radiusIndicator: Phaser.GameObjects.Graphics,
         respawnRing: Phaser.GameObjects.Graphics | undefined,
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
-        state?: SharedGameState
+        state?: SharedGameState,
+        playerSessionId?: string | null
     ): void {
         // Render the main entity graphics
         this.renderEntityGraphics(combatant, graphics);
@@ -33,9 +34,12 @@ export class EntityRenderer {
             this.renderRespawnRing(combatant, respawnRing, state);
         }
         
-        // Render ability ready indicator for heroes
+        // Render ability ready indicator only for the current player
         if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
-            this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
+            // Only show ability indicator for the current player
+            if (playerSessionId && combatant.controller === playerSessionId) {
+                this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
+            }
         }
         
         // Render radius indicator
