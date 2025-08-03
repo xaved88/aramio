@@ -10,6 +10,7 @@ export const SERVER_CONFIG = {
             ODD_PLAYER_COUNT_TEAM: 'red',
         },
     },
+
 } as const;
 
 // Gameplay Configuration
@@ -52,7 +53,7 @@ export const GAMEPLAY_CONFIG = {
             HEALTH: 2000,
             ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 40,
-            ATTACK_SPEED: 0.3, // attacks per second
+            ATTACK_SPEED: 1, // attacks per second
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
@@ -100,6 +101,25 @@ export const GAMEPLAY_CONFIG = {
         DISPLAY_DURATION_MS: 3000, // 3 seconds display
         FADE_OUT_DURATION_MS: 1000, // 1 second fade out
         BACKGROUND_ALPHA: 0.5, // 50% alpha black background
+    },
+    PLAYER_SPAWN_POSITIONS: {
+        BLUE: [
+            { x: 50, y: 515 },   // Above cradle
+            { x: 30, y: 530 },   // Top left of cradle
+            { x: 70, y: 530 },   // Top right of cradle
+            { x: 30, y: 570 },   // Bottom left of cradle
+            { x: 70, y: 570 }    // Bottom right of cradle
+        ],
+        RED: [
+            { x: 550, y: 15 },   // Above cradle
+            { x: 530, y: 30 },   // Top left of cradle
+            { x: 570, y: 30 },   // Top right of cradle
+            { x: 530, y: 70 },   // Bottom left of cradle
+            { x: 570, y: 70 }    // Bottom right of cradle
+        ],
+    },
+    BOTS: {
+        SPAWN_COUNT_PER_TEAM: 5, // Number of bots to spawn per team
     },
 } as const;
 

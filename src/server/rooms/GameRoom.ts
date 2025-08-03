@@ -1,6 +1,6 @@
 import { Room, Client } from '@colyseus/core';
 import { GameState } from '../schema/GameState';
-import { SERVER_CONFIG } from '../../Config';
+import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
 import { getTotalCombatantHealth, gameStateToString } from '../../shared/utils/DebugUtils';
@@ -199,30 +199,18 @@ export class GameRoom extends Room<GameState> {
     }
 
     private spawnBots() {
-        // Spawn 5 blue bots at different positions around the blue cradle
-        const blueSpawnPositions = [
-            { x: 50, y: 515 },   // Above cradle
-            { x: 30, y: 530 },   // Top left of cradle
-            { x: 70, y: 530 },   // Top right of cradle
-            { x: 30, y: 570 },   // Bottom left of cradle
-            { x: 70, y: 570 }    // Bottom right of cradle
-        ];
-
-        const redSpawnPositions = [
-            { x: 550, y: 15 },   // Above cradle
-            { x: 530, y: 30 },   // Top left of cradle
-            { x: 570, y: 30 },   // Top right of cradle
-            { x: 530, y: 70 },   // Bottom left of cradle
-            { x: 570, y: 70 }    // Bottom right of cradle
-        ];
+        // Spawn bots at different positions around the cradles
+        const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
+        const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
+        const botCount = GAMEPLAY_CONFIG.BOTS.SPAWN_COUNT_PER_TEAM;
         
         // Spawn blue bots
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < botCount; i++) {
             this.gameEngine.spawnPlayer('bot-simpleton', 'blue', blueSpawnPositions[i]);
         }
         
         // Spawn red bots
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < botCount; i++) {
             this.gameEngine.spawnPlayer('bot-simpleton', 'red', redSpawnPositions[i]);
         }
     }

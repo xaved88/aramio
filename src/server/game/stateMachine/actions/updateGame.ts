@@ -1,6 +1,6 @@
 import { GameState, Hero } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG, SERVER_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { AttackEvent } from '../../../schema/GameState';
@@ -178,24 +178,12 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     
     // Move player to spawn location based on their position in the team
     if (player.team === 'blue') {
-        const blueSpawnPositions = [
-            { x: 50, y: 515 },   // Above cradle
-            { x: 30, y: 530 },   // Top left of cradle
-            { x: 70, y: 530 },   // Top right of cradle
-            { x: 30, y: 570 },   // Bottom left of cradle
-            { x: 70, y: 570 }    // Bottom right of cradle
-        ];
+        const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
         const spawnIndex = Math.min(heroIndex, blueSpawnPositions.length - 1);
         player.x = blueSpawnPositions[spawnIndex].x;
         player.y = blueSpawnPositions[spawnIndex].y;
     } else {
-        const redSpawnPositions = [
-            { x: 550, y: 15 },   // Above cradle
-            { x: 530, y: 30 },   // Top left of cradle
-            { x: 570, y: 30 },   // Top right of cradle
-            { x: 530, y: 70 },   // Bottom left of cradle
-            { x: 570, y: 70 }    // Bottom right of cradle
-        ];
+        const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
         const spawnIndex = Math.min(heroIndex, redSpawnPositions.length - 1);
         player.x = redSpawnPositions[spawnIndex].x;
         player.y = redSpawnPositions[spawnIndex].y;
