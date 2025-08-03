@@ -35,6 +35,7 @@ export const GAMEPLAY_CONFIG = {
     },
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
     COMBAT: {
+        COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         PLAYER: {
             HEALTH: 50,
             ATTACK_RADIUS: 35,

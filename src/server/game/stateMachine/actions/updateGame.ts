@@ -127,7 +127,7 @@ function handleCollisions(state: GameState): void {
 
             // Calculate distance between centers
             const distance = CombatantUtils.getDistance(combatant1, combatant2);
-            const collisionThreshold = combatant1.size + combatant2.size;
+            const collisionThreshold = (combatant1.size + combatant2.size) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
             
             // Check if they're colliding
             if (distance < collisionThreshold) {
@@ -166,12 +166,15 @@ function resolveCollision(combatant1: any, combatant2: any, distance: number, co
         combatant1.x -= dirX * overlap;
         combatant1.y -= dirY * overlap;
     } else {
-        // Unit vs unit: move both away by half the distance each
-        const halfOverlap = overlap / 2;
-        combatant1.x -= dirX * halfOverlap;
-        combatant1.y -= dirY * halfOverlap;
-        combatant2.x += dirX * halfOverlap;
-        combatant2.y += dirY * halfOverlap;
+        // Unit vs unit: move proportionally based on size (larger units move less)
+        const totalSize = combatant1.size + combatant2.size;
+        const moveRatio1 = combatant2.size / totalSize; // Larger unit moves less
+        const moveRatio2 = combatant1.size / totalSize; // Smaller unit moves more
+        
+        combatant1.x -= dirX * overlap * moveRatio1;
+        combatant1.y -= dirY * overlap * moveRatio1;
+        combatant2.x += dirX * overlap * moveRatio2;
+        combatant2.y += dirY * overlap * moveRatio2;
     }
 }
 

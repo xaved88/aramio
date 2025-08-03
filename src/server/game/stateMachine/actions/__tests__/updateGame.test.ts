@@ -543,4 +543,314 @@ describe('handleUpdateGame', () => {
             expect(result.newState.attackEvents.length).toBe(0);
         });
     });
+
+    describe('collision detection and resolution', () => {
+        let player1: Hero;
+        let player2: Hero;
+        let minion: Minion;
+        let turret: Combatant;
+        let cradle: Combatant;
+
+        beforeEach(() => {
+            // Create player 1
+            player1 = new Hero();
+            player1.id = 'player1';
+            player1.type = COMBATANT_TYPES.HERO;
+            player1.team = 'blue';
+            player1.x = 100;
+            player1.y = 100;
+            player1.health = 50;
+            player1.maxHealth = 50;
+            player1.attackRadius = 35;
+            player1.attackStrength = 5;
+            player1.attackSpeed = 1;
+            player1.lastAttackTime = 0;
+            player1.state = 'alive';
+            player1.respawnTime = 0;
+            player1.respawnDuration = 6000;
+            player1.experience = 0;
+            player1.level = 1;
+            player1.ability = new (require('../../../../schema/GameState').Ability)();
+            player1.ability.type = 'projectile';
+            player1.ability.cooldown = 1000;
+            player1.ability.lastUsedTime = 0;
+            player1.ability.strength = 5;
+            player1.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            // Create player 2
+            player2 = new Hero();
+            player2.id = 'player2';
+            player2.type = COMBATANT_TYPES.HERO;
+            player2.team = 'red';
+            player2.x = 110; // 10 units away from player1 (both have size 15, so threshold is 27)
+            player2.y = 100;
+            player2.health = 50;
+            player2.maxHealth = 50;
+            player2.attackRadius = 35;
+            player2.attackStrength = 5;
+            player2.attackSpeed = 1;
+            player2.lastAttackTime = 0;
+            player2.state = 'alive';
+            player2.respawnTime = 0;
+            player2.respawnDuration = 6000;
+            player2.experience = 0;
+            player2.level = 1;
+            player2.ability = new (require('../../../../schema/GameState').Ability)();
+            player2.ability.type = 'projectile';
+            player2.ability.cooldown = 1000;
+            player2.ability.lastUsedTime = 0;
+            player2.ability.strength = 5;
+            player2.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            // Create minion
+            minion = new Minion();
+            minion.id = 'minion1';
+            minion.type = COMBATANT_TYPES.MINION;
+            minion.team = 'blue';
+            minion.x = 200;
+            minion.y = 200;
+            minion.health = 50;
+            minion.maxHealth = 50;
+            minion.attackRadius = 20;
+            minion.attackStrength = 10;
+            minion.attackSpeed = 0.8;
+            minion.lastAttackTime = 0;
+            minion.minionType = 'warrior';
+            minion.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
+
+            // Create turret
+            turret = new Combatant();
+            turret.id = 'turret1';
+            turret.type = COMBATANT_TYPES.TURRET;
+            turret.team = 'blue';
+            turret.x = 300;
+            turret.y = 300;
+            turret.health = 500;
+            turret.maxHealth = 500;
+            turret.attackRadius = 70;
+            turret.attackStrength = 25;
+            turret.attackSpeed = 2;
+            turret.lastAttackTime = 0;
+            turret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
+
+            // Create cradle
+            cradle = new Combatant();
+            cradle.id = 'cradle1';
+            cradle.type = COMBATANT_TYPES.CRADLE;
+            cradle.team = 'blue';
+            cradle.x = 400;
+            cradle.y = 400;
+            cradle.health = 2000;
+            cradle.maxHealth = 2000;
+            cradle.attackRadius = 120;
+            cradle.attackStrength = 40;
+            cradle.attackSpeed = 1;
+            cradle.lastAttackTime = 0;
+            cradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
+
+            gameState.combatants.set(player1.id, player1);
+            gameState.combatants.set(player2.id, player2);
+            gameState.combatants.set(minion.id, minion);
+            gameState.combatants.set(turret.id, turret);
+            gameState.combatants.set(cradle.id, cradle);
+        });
+
+        it('should resolve collision between two units with proportional movement', () => {
+            const originalPlayer1X = player1.x;
+            const originalPlayer1Y = player1.y;
+            const originalPlayer2X = player2.x;
+            const originalPlayer2Y = player2.y;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
+            const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
+
+            // Both players should have moved away from each other
+            expect(finalPlayer1.x).toBeLessThan(originalPlayer1X);
+            expect(finalPlayer1.y).toBe(originalPlayer1Y); // Same Y, so no Y movement
+            expect(finalPlayer2.x).toBeGreaterThan(originalPlayer2X);
+            expect(finalPlayer2.y).toBe(originalPlayer2Y); // Same Y, so no Y movement
+
+            // They should have moved equal distances (same size units)
+            const player1Movement = originalPlayer1X - finalPlayer1.x;
+            const player2Movement = finalPlayer2.x - originalPlayer2X;
+            expect(player1Movement).toBeCloseTo(player2Movement, 1);
+        });
+
+        it('should resolve collision between unit and structure (unit moves, structure stays)', () => {
+            // Move minion close to turret
+            minion.x = 305; // 5 units away from turret (size 12 + 20 = 32, threshold = 28.8)
+            minion.y = 300;
+
+            const originalMinionX = minion.x;
+            const originalMinionY = minion.y;
+            const originalTurretX = turret.x;
+            const originalTurretY = turret.y;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalMinion = result.newState.combatants.get('minion1') as Minion;
+            const finalTurret = result.newState.combatants.get('turret1') as Combatant;
+
+            // Minion should have moved away from turret
+            expect(finalMinion.x).toBeGreaterThan(originalMinionX);
+            expect(finalMinion.y).toBe(originalMinionY); // Same Y, so no Y movement
+
+            // Turret should not have moved
+            expect(finalTurret.x).toBe(originalTurretX);
+            expect(finalTurret.y).toBe(originalTurretY);
+        });
+
+        it('should ignore collision between two structures', () => {
+            // Move turret close to cradle
+            turret.x = 410; // 10 units away from cradle (size 20 + 25 = 45, threshold = 40.5)
+            turret.y = 400;
+
+            const originalTurretX = turret.x;
+            const originalTurretY = turret.y;
+            const originalCradleX = cradle.x;
+            const originalCradleY = cradle.y;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalTurret = result.newState.combatants.get('turret1') as Combatant;
+            const finalCradle = result.newState.combatants.get('cradle1') as Combatant;
+
+            // Neither should have moved
+            expect(finalTurret.x).toBe(originalTurretX);
+            expect(finalTurret.y).toBe(originalTurretY);
+            expect(finalCradle.x).toBe(originalCradleX);
+            expect(finalCradle.y).toBe(originalCradleY);
+        });
+
+        it('should not trigger collision when units are far apart', () => {
+            // Move players far apart
+            player1.x = 100;
+            player1.y = 100;
+            player2.x = 200; // 100 units away, well beyond collision threshold
+            player2.y = 100;
+
+            const originalPlayer1X = player1.x;
+            const originalPlayer1Y = player1.y;
+            const originalPlayer2X = player2.x;
+            const originalPlayer2Y = player2.y;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
+            const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
+
+            // Neither should have moved
+            expect(finalPlayer1.x).toBe(originalPlayer1X);
+            expect(finalPlayer1.y).toBe(originalPlayer1Y);
+            expect(finalPlayer2.x).toBe(originalPlayer2X);
+            expect(finalPlayer2.y).toBe(originalPlayer2Y);
+        });
+
+        it('should handle proportional movement for different sized units', () => {
+            // Create a large unit (size 25) and small unit (size 12)
+            const largeUnit = new Combatant();
+            largeUnit.id = 'large-unit';
+            largeUnit.type = COMBATANT_TYPES.CRADLE;
+            largeUnit.team = 'blue';
+            largeUnit.x = 500;
+            largeUnit.y = 500;
+            largeUnit.health = 100;
+            largeUnit.maxHealth = 100;
+            largeUnit.attackRadius = 50;
+            largeUnit.attackStrength = 10;
+            largeUnit.attackSpeed = 1;
+            largeUnit.lastAttackTime = 0;
+            largeUnit.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
+
+            const smallUnit = new Minion();
+            smallUnit.id = 'small-unit';
+            smallUnit.type = COMBATANT_TYPES.MINION;
+            smallUnit.team = 'red';
+            smallUnit.x = 510; // 10 units away from large unit
+            smallUnit.y = 500;
+            smallUnit.health = 50;
+            smallUnit.maxHealth = 50;
+            smallUnit.attackRadius = 20;
+            smallUnit.attackStrength = 10;
+            smallUnit.attackSpeed = 0.8;
+            smallUnit.lastAttackTime = 0;
+            smallUnit.minionType = 'warrior';
+            smallUnit.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
+
+            gameState.combatants.set(largeUnit.id, largeUnit);
+            gameState.combatants.set(smallUnit.id, smallUnit);
+
+            const originalLargeX = largeUnit.x;
+            const originalSmallX = smallUnit.x;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalLarge = result.newState.combatants.get('large-unit') as Combatant;
+            const finalSmall = result.newState.combatants.get('small-unit') as Minion;
+
+            // Only the small unit should have moved (large unit is a structure)
+            expect(finalLarge.x).toBe(originalLargeX); // Structure shouldn't move
+            expect(finalSmall.x).toBeGreaterThan(originalSmallX); // Unit should move away
+        });
+
+        it('should not process collisions for dead units', () => {
+            // Kill player2
+            player2.health = 0;
+
+            const originalPlayer1X = player1.x;
+            const originalPlayer1Y = player1.y;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
+            const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
+
+            // Player1 should not have moved (dead unit doesn't participate in collision)
+            expect(finalPlayer1.x).toBe(originalPlayer1X);
+            expect(finalPlayer1.y).toBe(originalPlayer1Y);
+            
+            // Player2 will move due to respawn logic, but not due to collision
+            expect(finalPlayer2.health).toBe(0); // Should still be dead
+        });
+
+        it('should use configurable collision threshold', () => {
+            // Test with units just at the threshold boundary
+            const threshold = (GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE + GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
+            
+            // Position players exactly at the threshold
+            player1.x = 100;
+            player1.y = 100;
+            player2.x = 100 + threshold;
+            player2.y = 100;
+
+            const originalPlayer1X = player1.x;
+            const originalPlayer2X = player2.x;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
+            const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
+
+            // Should not collide at exactly the threshold
+            expect(finalPlayer1.x).toBe(originalPlayer1X);
+            expect(finalPlayer2.x).toBe(originalPlayer2X);
+
+            // Move them slightly closer to trigger collision
+            player2.x = 100 + threshold - 1;
+
+            const collisionPlayer1X = player1.x;
+            const collisionPlayer2X = player2.x;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalPlayer1After = result.newState.combatants.get('player1') as Hero;
+            const finalPlayer2After = result.newState.combatants.get('player2') as Hero;
+
+            // Should now collide
+            expect(finalPlayer1After.x).toBeLessThan(collisionPlayer1X);
+            expect(finalPlayer2After.x).toBeGreaterThan(collisionPlayer2X);
+        });
+    });
 }); 
