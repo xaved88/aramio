@@ -25,11 +25,11 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
         state.attackEvents.splice(index, 1);
     });
     
-    // Clear old XP events (older than 2 seconds)
+    // Clear old XP events
     const xpEventsToRemove: number[] = [];
     
     state.xpEvents.forEach((event, index) => {
-        if (currentTime - event.timestamp > 2000) { // 2 seconds
+        if (currentTime - event.timestamp > GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS) {
             xpEventsToRemove.push(index);
         }
     });

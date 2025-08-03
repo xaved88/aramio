@@ -4,6 +4,7 @@ import { SharedGameState, XPEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
+import { GAMEPLAY_CONFIG } from '../../Config';
 
 /**
  * EntityManager handles the lifecycle of all game world entities.
@@ -228,7 +229,7 @@ export class EntityManager {
             targets: xpText,
             y: xpText.y - 30,
             alpha: 0,
-            duration: 2000,
+            duration: GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 xpText.destroy();
