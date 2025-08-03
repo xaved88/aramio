@@ -63,6 +63,7 @@ export class GameScene extends Phaser.Scene {
             
             this.setupRoomHandlers();
             this.setupInputHandlers();
+            this.setupVisibilityHandlers();
             
             this.uiManager.createHUD();
             
@@ -197,6 +198,16 @@ export class GameScene extends Phaser.Scene {
                     x: pointer.x,
                     y: pointer.y
                 });
+            }
+        });
+    }
+
+    private setupVisibilityHandlers(): void {
+        // Handle visibility change events
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                // Browser tab became visible again, force cleanup of texts
+                this.entityManager.forceCleanupTexts();
             }
         });
     }

@@ -30,7 +30,6 @@ export class EntityManager {
     private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private xpTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
 
@@ -42,6 +41,16 @@ export class EntityManager {
 
     setPlayerSessionId(sessionId: string | null): void {
         this.playerSessionId = sessionId;
+    }
+
+    /**
+     * Forces cleanup of all XP and level-up texts
+     * Call this when the browser tab becomes active again
+     */
+    forceCleanupTexts(): void {
+        // Clear processed events so new texts can be created
+        this.processedXPEvents.clear();
+        this.processedLevelUpEvents.clear();
     }
 
     /**
@@ -285,6 +294,8 @@ export class EntityManager {
         });
     }
 
+
+
     /**
      * Removes projectiles that no longer exist in the game state
      */
@@ -425,6 +436,8 @@ export class EntityManager {
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
         this.projectileGraphics.clear();
+        this.processedXPEvents.clear();
+        this.processedLevelUpEvents.clear();
     }
 
     /**
@@ -444,5 +457,7 @@ export class EntityManager {
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
         this.projectileGraphics.clear();
+        this.processedXPEvents.clear();
+        this.processedLevelUpEvents.clear();
     }
 } 

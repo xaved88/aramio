@@ -47,11 +47,22 @@ aramio/
 ├── src/
 │   ├── client/              # Phaser game client
 │   │   ├── main.ts         # Game initialization
-│   │   └── scenes/         # Game scenes
-│   └── server/             # Colyseus server
-│       ├── index.ts        # Server setup
-│       ├── rooms/          # Game rooms
-│       └── schema/         # Game state definitions
+│   │   ├── scenes/         # Game scenes
+│   │   ├── entity/         # Entity rendering and management
+│   │   └── ui/             # HUD and UI components
+│   ├── server/             # Colyseus server
+│   │   ├── index.ts        # Server setup
+│   │   ├── rooms/          # Game rooms
+│   │   ├── schema/         # Game state definitions
+│   │   ├── game/           # Game logic and systems
+│   │   │   ├── stateMachine/  # Game state management
+│   │   │   ├── combatants/    # Player, bot, and minion logic
+│   │   │   └── utils/         # Utility functions
+│   │   └── shared/         # Shared types and utilities
+│   ├── shared/             # Shared code between client and server
+│   │   ├── types/          # TypeScript interfaces
+│   │   └── utils/          # Shared utilities
+│   └── Config.ts           # Centralized game configuration
 ├── index.html              # Main HTML file
 ├── package.json            # Dependencies and scripts
 ├── tsconfig.json           # TypeScript configuration
@@ -69,6 +80,7 @@ aramio/
 - `npm run build` - Build for production
 - `npm run build:server` - Build server only
 - `npm start` - Start production server
+- `npm test` - Run unit tests
 
 ### Tech Stack
 
@@ -77,13 +89,17 @@ aramio/
 - **Language**: TypeScript
 - **Build Tool**: Vite
 - **Server**: Express + WebSocket
+- **Testing**: Jest
 
 ### Game Architecture
 
 - **GameScene**: Main Phaser scene handling game rendering
 - **GameRoom**: Colyseus room managing multiplayer state
 - **GameState**: Schema defining synchronized game data
-- **Player**: Individual player state and properties
+- **EntityManager**: Manages client-side entities and visual effects
+- **EntityRenderer**: Handles rendering of game entities
+- **HUDRenderer**: Displays player stats and UI
+- **CollisionUtils**: Handles collision detection and resolution
 
 ## 🎯 Current Features
 
@@ -96,21 +112,16 @@ aramio/
 - ✅ Turret system (defensive structures)
 - ✅ Player respawning system with visual timer
 - ✅ Combat system with attack radius indicators
-- ✅ Dynamic respawn duration (ready for leveling)
+- ✅ Experience and leveling system
+- ✅ Minion spawning and AI
+- ✅ Collision detection and resolution
+- ✅ Visual feedback for XP gains and level-ups
+- ✅ Centralized configuration management
+- ✅ Projectile system with team-based colors
+- ✅ Bot spawning and management
+- ✅ Unit testing with Jest
 
-## 🚧 Roadmap
 
-- [ ] Player abilities and combat
-- [ ] Map with lanes and objectives
-- [ ] Item system
-- [ ] Experience and leveling
-- [ ] Minions and towers
-- [ ] Victory conditions
-- [ ] UI improvements
-- [ ] Sound effects and music
-- [ ] Leveling system (affects respawn times)
-- [ ] More defensive structures
-- [ ] Team coordination features
 
 ## 🔧 Configuration
 
@@ -124,12 +135,28 @@ aramio/
 - Server: 2567
 - Colyseus Monitor: 2567/colyseus
 
+## 🧪 Testing
+
+The project includes a comprehensive test suite:
+
+```bash
+npm test                    # Run all tests
+npm test -- --watch        # Run tests in watch mode
+npm test -- --coverage     # Run tests with coverage report
+```
+
+### Test Structure
+- **Unit Tests**: Test individual game logic functions
+- **Integration Tests**: Test game state interactions
+- **Configuration Tests**: Ensure config values are properly applied
+
 ## 📝 Contributing
 
 1. Update `PROJECT_CONTEXT.md` with your changes
 2. Follow TypeScript best practices
 3. Test multiplayer functionality
-4. Update documentation as needed
+4. Add tests for new features
+5. Update documentation as needed
 
 ## 🐛 Troubleshooting
 
@@ -158,7 +185,8 @@ npm run build:server
 - [Phaser Documentation](https://phaser.io/docs)
 - [Colyseus Documentation](https://docs.colyseus.io/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
 
 ---
 
-**Last updated**: August 2nd, 2025 
+**Last updated**: August 4th, 2025 
