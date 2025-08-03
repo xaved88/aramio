@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
-import { SharedGameState, XPEvent } from '../../shared/types/GameStateTypes';
+import { SharedGameState, XPEvent, LevelUpEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
@@ -32,6 +32,7 @@ export class EntityManager {
     private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private xpTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     private processedXPEvents: Set<string> = new Set();
+    private processedLevelUpEvents: Set<string> = new Set();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -57,6 +58,9 @@ export class EntityManager {
         
         // Process XP events
         this.processXPEvents(state);
+        
+        // Process level-up events
+        this.processLevelUpEvents(state);
         
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
@@ -233,6 +237,50 @@ export class EntityManager {
             ease: 'Power2',
             onComplete: () => {
                 xpText.destroy();
+            }
+        });
+    }
+
+    /**
+     * Processes level-up events and creates level-up text animations
+     */
+    private processLevelUpEvents(state: SharedGameState): void {
+        state.levelUpEvents.forEach(levelUpEvent => {
+            const eventKey = `${levelUpEvent.playerId}-${levelUpEvent.newLevel}-${levelUpEvent.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedLevelUpEvents.has(eventKey)) return;
+            
+            // Find the player who leveled up and check if it's the current player
+            const player = state.combatants.get(levelUpEvent.playerId);
+            if (player && player.type === 'hero' && this.playerSessionId && player.controller === this.playerSessionId) {
+                this.createLevelUpText(levelUpEvent);
+            }
+            
+            // Mark as processed
+            this.processedLevelUpEvents.add(eventKey);
+        });
+    }
+
+    /**
+     * Creates level-up text animation at the specified position
+     */
+    private createLevelUpText(levelUpEvent: LevelUpEvent): void {
+        const levelUpText = this.scene.add.text(levelUpEvent.x, levelUpEvent.y, `Level Up!`, {
+            fontSize: '20px',
+            color: '#ffd700', // Gold color for level up
+            fontFamily: 'Arial'
+        }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
+        
+        // Animate the text floating up and fading out
+        this.scene.tweens.add({
+            targets: levelUpText,
+            y: levelUpText.y - 50,
+            alpha: 0,
+            duration: GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS,
+            ease: 'Power2',
+            onComplete: () => {
+                levelUpText.destroy();
             }
         });
     }

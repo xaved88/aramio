@@ -1,4 +1,4 @@
-import { GameState, Hero, XPEvent } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent, LevelUpEvent } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -37,6 +37,20 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     // Remove XP events in reverse order to maintain indices
     xpEventsToRemove.reverse().forEach(index => {
         state.xpEvents.splice(index, 1);
+    });
+    
+    // Clear old level-up events (older than configured duration)
+    const levelUpEventsToRemove: number[] = [];
+    
+    state.levelUpEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS) {
+            levelUpEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove level-up events in reverse order to maintain indices
+    levelUpEventsToRemove.reverse().forEach(index => {
+        state.levelUpEvents.splice(index, 1);
     });
     
     // Process combat
@@ -209,7 +223,7 @@ function handleDeadCombatants(state: GameState): void {
             // Check for level up (regardless of how experience was gained)
             const experienceNeeded = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
             if (hero.experience >= experienceNeeded) {
-                levelUpPlayer(hero);
+                levelUpPlayer(hero, state);
             }
         }
     });
@@ -355,11 +369,11 @@ function grantExperience(player: Hero, amount: number, state: GameState, xpX?: n
     // Check for level up immediately when experience is granted
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
     if (player.experience >= experienceNeeded) {
-        levelUpPlayer(player);
+        levelUpPlayer(player, state);
     }
 }
 
-function levelUpPlayer(player: Hero): void {
+function levelUpPlayer(player: Hero, state: GameState): void {
     const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
     const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
@@ -387,6 +401,15 @@ function levelUpPlayer(player: Hero): void {
     
     // Boost ability strength by different configurable percentage
     player.ability.strength = Math.round(player.ability.strength * abilityBoostMultiplier);
+    
+    // Create level-up event
+    const levelUpEvent = new LevelUpEvent();
+    levelUpEvent.playerId = player.id;
+    levelUpEvent.newLevel = player.level;
+    levelUpEvent.x = player.x;
+    levelUpEvent.y = player.y;
+    levelUpEvent.timestamp = state.gameTime;
+    state.levelUpEvents.push(levelUpEvent);
 }
 
 function checkGameEndConditions(state: GameState): StateMachineResult | null {
@@ -414,4 +437,5 @@ function checkGameEndConditions(state: GameState): StateMachineResult | null {
     
     return null;
 } 
+
 

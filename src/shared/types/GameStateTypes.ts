@@ -8,6 +8,14 @@ export interface XPEvent {
     timestamp: number;
 }
 
+export interface LevelUpEvent {
+    playerId: string;
+    newLevel: number;
+    x: number;
+    y: number;
+    timestamp: number;
+}
+
 export interface SharedGameState {
     gameTime: number;
     gamePhase: string;
@@ -17,5 +25,6 @@ export interface SharedGameState {
     combatants: Map<string, Combatant>;
     attackEvents: AttackEvent[];
     xpEvents: XPEvent[];
+    levelUpEvents: LevelUpEvent[];
     projectiles: Map<string, Projectile>;
 } 

@@ -15,6 +15,14 @@ export class XPEvent extends Schema {
     @type('number') timestamp!: number; // When the XP was earned
 }
 
+export class LevelUpEvent extends Schema {
+    @type('string') playerId!: string; // ID of the player who leveled up
+    @type('number') newLevel!: number; // The new level they reached
+    @type('number') x!: number; // X position of the player
+    @type('number') y!: number; // Y position of the player
+    @type('number') timestamp!: number; // When the level up occurred
+}
+
 export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
@@ -72,5 +80,6 @@ export class GameState extends Schema {
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
     @type([XPEvent]) xpEvents = new ArraySchema<XPEvent>();
+    @type([LevelUpEvent]) levelUpEvents = new ArraySchema<LevelUpEvent>();
     @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
 } 
