@@ -308,17 +308,33 @@ function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state
 function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: any): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
+    // Find all alive heroes in range
+    const heroesInRange: Hero[] = [];
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
             const hero = combatant as Hero;
-            // Only grant experience to alive players within range of the dying unit
             if (hero.state === 'alive') {
                 const distance = CombatantUtils.getDistance(hero, dyingUnit);
                 if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.UNIT_KILL_RADIUS) {
-                    grantExperience(hero, amount, state, dyingUnit.x, dyingUnit.y);
+                    heroesInRange.push(hero);
                 }
             }
         }
+    });
+    
+    // If no heroes in range, no experience is granted
+    if (heroesInRange.length === 0) {
+        return;
+    }
+    
+    // Calculate experience multiplier based on number of heroes
+    // Formula: (100% + 40% * (number of heroes - 1)) / number of heroes
+    const totalMultiplier = 1 + (0.4 * (heroesInRange.length - 1));
+    const experiencePerHero = amount * totalMultiplier / heroesInRange.length;
+    
+    // Grant experience to each hero in range
+    heroesInRange.forEach(hero => {
+        grantExperience(hero, experiencePerHero, state, dyingUnit.x, dyingUnit.y);
     });
 }
 
@@ -398,3 +414,4 @@ function checkGameEndConditions(state: GameState): StateMachineResult | null {
     
     return null;
 } 
+

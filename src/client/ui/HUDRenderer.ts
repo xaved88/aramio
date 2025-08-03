@@ -151,7 +151,7 @@ export class HUDRenderer {
         );
         
         // Update experience text
-        hudElements.experienceText.setText(`${player.experience}/${experienceNeeded} XP`);
+        hudElements.experienceText.setText(`${Math.floor(player.experience)}/${experienceNeeded} XP`);
         
         // Update level text
         hudElements.levelText.setText(`Lv.${player.level}`);

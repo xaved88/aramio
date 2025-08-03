@@ -853,4 +853,267 @@ describe('handleUpdateGame', () => {
             expect(finalPlayer2After.x).toBeGreaterThan(collisionPlayer2X);
         });
     });
+
+    describe('experience sharing with fall-off', () => {
+        let blueHero1: Hero;
+        let blueHero2: Hero;
+        let blueHero3: Hero;
+        let redMinion: Minion;
+        let redHero: Hero;
+
+        beforeEach(() => {
+            // Create blue heroes
+            blueHero1 = new Hero();
+            blueHero1.id = 'blue-hero-1';
+            blueHero1.type = COMBATANT_TYPES.HERO;
+            blueHero1.team = 'blue';
+            blueHero1.x = 100;
+            blueHero1.y = 100;
+            blueHero1.health = 50;
+            blueHero1.maxHealth = 50;
+            blueHero1.attackRadius = 35;
+            blueHero1.attackStrength = 5;
+            blueHero1.attackSpeed = 1;
+            blueHero1.lastAttackTime = 0;
+            blueHero1.state = 'alive';
+            blueHero1.respawnTime = 0;
+            blueHero1.respawnDuration = 6000;
+            blueHero1.experience = 0;
+            blueHero1.level = 1;
+            blueHero1.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero1.ability.type = 'projectile';
+            blueHero1.ability.cooldown = 1000;
+            blueHero1.ability.lastUsedTime = 0;
+            blueHero1.ability.strength = 5;
+            blueHero1.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            blueHero2 = new Hero();
+            blueHero2.id = 'blue-hero-2';
+            blueHero2.type = COMBATANT_TYPES.HERO;
+            blueHero2.team = 'blue';
+            blueHero2.x = 120;
+            blueHero2.y = 100;
+            blueHero2.health = 50;
+            blueHero2.maxHealth = 50;
+            blueHero2.attackRadius = 35;
+            blueHero2.attackStrength = 5;
+            blueHero2.attackSpeed = 1;
+            blueHero2.lastAttackTime = 0;
+            blueHero2.state = 'alive';
+            blueHero2.respawnTime = 0;
+            blueHero2.respawnDuration = 6000;
+            blueHero2.experience = 0;
+            blueHero2.level = 1;
+            blueHero2.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero2.ability.type = 'projectile';
+            blueHero2.ability.cooldown = 1000;
+            blueHero2.ability.lastUsedTime = 0;
+            blueHero2.ability.strength = 5;
+            blueHero2.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            blueHero3 = new Hero();
+            blueHero3.id = 'blue-hero-3';
+            blueHero3.type = COMBATANT_TYPES.HERO;
+            blueHero3.team = 'blue';
+            blueHero3.x = 140;
+            blueHero3.y = 100;
+            blueHero3.health = 50;
+            blueHero3.maxHealth = 50;
+            blueHero3.attackRadius = 35;
+            blueHero3.attackStrength = 5;
+            blueHero3.attackSpeed = 1;
+            blueHero3.lastAttackTime = 0;
+            blueHero3.state = 'alive';
+            blueHero3.respawnTime = 0;
+            blueHero3.respawnDuration = 6000;
+            blueHero3.experience = 0;
+            blueHero3.level = 1;
+            blueHero3.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero3.ability.type = 'projectile';
+            blueHero3.ability.cooldown = 1000;
+            blueHero3.ability.lastUsedTime = 0;
+            blueHero3.ability.strength = 5;
+            blueHero3.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            // Create red minion to be killed
+            redMinion = new Minion();
+            redMinion.id = 'red-minion';
+            redMinion.type = COMBATANT_TYPES.MINION;
+            redMinion.team = 'red';
+            redMinion.x = 110;
+            redMinion.y = 100;
+            redMinion.health = 0; // Dead
+            redMinion.maxHealth = 50;
+            redMinion.attackRadius = 20;
+            redMinion.attackStrength = 10;
+            redMinion.attackSpeed = 0.8;
+            redMinion.lastAttackTime = 0;
+            redMinion.minionType = 'warrior';
+            redMinion.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
+
+            // Create red hero to be killed
+            redHero = new Hero();
+            redHero.id = 'red-hero';
+            redHero.type = COMBATANT_TYPES.HERO;
+            redHero.team = 'red';
+            redHero.x = 110;
+            redHero.y = 100;
+            redHero.health = 0; // Dead
+            redHero.maxHealth = 50;
+            redHero.attackRadius = 35;
+            redHero.attackStrength = 5;
+            redHero.attackSpeed = 1;
+            redHero.lastAttackTime = 0;
+            redHero.state = 'alive';
+            redHero.respawnTime = 0;
+            redHero.respawnDuration = 6000;
+            redHero.experience = 0;
+            redHero.level = 1;
+            redHero.ability = new (require('../../../../schema/GameState').Ability)();
+            redHero.ability.type = 'projectile';
+            redHero.ability.cooldown = 1000;
+            redHero.ability.lastUsedTime = 0;
+            redHero.ability.strength = 5;
+            redHero.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+
+            gameState.combatants.set(blueHero1.id, blueHero1);
+            gameState.combatants.set(blueHero2.id, blueHero2);
+            gameState.combatants.set(blueHero3.id, blueHero3);
+            gameState.combatants.set(redMinion.id, redMinion);
+            gameState.combatants.set(redHero.id, redHero);
+        });
+
+        it('should give 100% XP to single hero for unit kill', () => {
+            // Only one hero in range
+            blueHero2.x = 300; // Move out of range
+            blueHero3.x = 300; // Move out of range
+            
+            // Remove the dead hero to avoid double XP
+            gameState.combatants.delete('red-hero');
+
+            const baseXP = GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED;
+            const originalXP = blueHero1.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero = result.newState.combatants.get('blue-hero-1') as Hero;
+            expect(finalHero.experience).toBe(originalXP + baseXP);
+        });
+
+        it('should give 70% XP each to two heroes for unit kill', () => {
+            // Two heroes in range
+            blueHero3.x = 300; // Move out of range
+            
+            // Remove the dead hero to avoid double XP
+            gameState.combatants.delete('red-hero');
+
+            const baseXP = GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED;
+            const expectedXP = baseXP * 1.4 / 2; // 140% total, split between 2 heroes
+
+            const originalXP1 = blueHero1.experience;
+            const originalXP2 = blueHero2.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
+            const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
+
+            expect(finalHero1.experience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.experience).toBe(originalXP2 + expectedXP);
+        });
+
+        it('should give 60% XP each to three heroes for unit kill', () => {
+            // Three heroes in range
+            
+            // Remove the dead hero to avoid double XP
+            gameState.combatants.delete('red-hero');
+            
+            const baseXP = GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED;
+            const expectedXP = baseXP * 1.8 / 3; // 180% total, split between 3 heroes
+
+            const originalXP1 = blueHero1.experience;
+            const originalXP2 = blueHero2.experience;
+            const originalXP3 = blueHero3.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
+            const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
+            const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
+
+            expect(finalHero1.experience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.experience).toBe(originalXP2 + expectedXP);
+            expect(finalHero3.experience).toBe(originalXP3 + expectedXP);
+        });
+
+        it('should not give XP to heroes outside range', () => {
+            // Move all heroes out of range
+            blueHero1.x = 300;
+            blueHero2.x = 300;
+            blueHero3.x = 300;
+            
+            // Remove the dead hero to avoid double XP
+            gameState.combatants.delete('red-hero');
+
+            const originalXP1 = blueHero1.experience;
+            const originalXP2 = blueHero2.experience;
+            const originalXP3 = blueHero3.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
+            const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
+            const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
+
+            expect(finalHero1.experience).toBe(originalXP1);
+            expect(finalHero2.experience).toBe(originalXP2);
+            expect(finalHero3.experience).toBe(originalXP3);
+        });
+
+        it('should not give XP to dead heroes', () => {
+            // Kill one hero
+            blueHero1.health = 0;
+            blueHero1.state = 'dead';
+            
+            // Remove the dead hero to avoid double XP
+            gameState.combatants.delete('red-hero');
+
+            const baseXP = GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED;
+            const expectedXP = baseXP * 1.4 / 2; // 140% total, split between 2 alive heroes
+
+            const originalXP1 = blueHero1.experience;
+            const originalXP2 = blueHero2.experience;
+            const originalXP3 = blueHero3.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
+            const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
+            const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
+
+            expect(finalHero1.experience).toBe(originalXP1); // Dead hero gets no XP
+            expect(finalHero2.experience).toBe(originalXP2 + expectedXP);
+            expect(finalHero3.experience).toBe(originalXP3 + expectedXP);
+        });
+
+        it('should apply fall-off to hero kills as well', () => {
+            // Remove minion, keep hero
+            gameState.combatants.delete('red-minion');
+            redHero.health = 0; // Dead hero
+
+            const baseXP = redHero.level * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
+            const expectedXP = baseXP * 1.2 / 2; // 120% total, split between 2 heroes
+
+            const originalXP1 = blueHero1.experience;
+            const originalXP2 = blueHero2.experience;
+
+            result = handleUpdateGame(gameState, action);
+
+            const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
+            const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
+
+            expect(finalHero1.experience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.experience).toBe(originalXP2 + expectedXP);
+        });
+    });
 }); 
