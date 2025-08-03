@@ -82,10 +82,11 @@ export const GAMEPLAY_CONFIG = {
     EXPERIENCE: {
         TOWER_DESTROYED: 20,
         MINION_KILLED: 2,
+        HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * 4
         LEVEL_UP_MULTIPLIER: 10, // experience needed = level * 10
         STAT_BOOST_PERCENTAGE: 0.15, // 15% increase per level
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30, // 30% increase per level for ability strength
-        MINION_KILL_RADIUS: 175, // radius within which heroes must be to get minion XP
+        UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,

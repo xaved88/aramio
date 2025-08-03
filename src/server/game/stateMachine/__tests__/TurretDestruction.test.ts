@@ -369,6 +369,93 @@ describe('TurretDestruction', () => {
             }
         });
 
+        it('should grant hero kill XP to heroes within range', () => {
+            // Setup game with two players on blue team and one on red team
+            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player1', team: 'blue' }
+            });
+            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player2', team: 'blue' }
+            });
+            const spawnResult3 = GameStateMachine.processAction(spawnResult2.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player3', team: 'red' }
+            });
+            
+            // Find all heroes
+            let blueHero1: Hero | undefined;
+            let blueHero2: Hero | undefined;
+            let redHero: Hero | undefined;
+            spawnResult3.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO) {
+                    const hero = combatant as Hero;
+                    if (hero.controller === 'player1') blueHero1 = hero;
+                    if (hero.controller === 'player2') blueHero2 = hero;
+                    if (hero.controller === 'player3') redHero = hero;
+                }
+            });
+            
+            // Position blueHero1 close to redHero (within 175 radius)
+            // Position blueHero2 far from redHero (outside 175 radius)
+            if (blueHero1 && blueHero2 && redHero) {
+                // Place redHero at center
+                redHero.x = 300;
+                redHero.y = 300;
+                
+                // Place blueHero1 within range
+                blueHero1.x = 400; // 100 pixels away (within 175)
+                blueHero1.y = 300;
+                
+                // Place blueHero2 far away (more than 175 pixels)
+                blueHero2.x = 100;
+                blueHero2.y = 100;
+                
+                                 // Give redHero some levels to make XP calculation interesting
+                 redHero.level = 3;
+                 redHero.experience = 0;
+                 
+                 // Give blueHero1 level 2 so they don't level up from the XP
+                 blueHero1.level = 2;
+                 blueHero1.experience = 0;
+            }
+            
+            // Record initial experience
+            const initialExp1 = blueHero1?.experience || 0;
+            const initialExp2 = blueHero2?.experience || 0;
+            
+                         // Kill the red hero
+             if (redHero) {
+                 redHero.health = 0; // Kill the hero
+             }
+             
+             // Update game to process hero death
+             const result = GameStateMachine.processAction(spawnResult3.newState, {
+                 type: 'UPDATE_GAME',
+                 payload: { deltaTime: 100 }
+             });
+            
+            // Find updated heroes
+            let updatedBlueHero1: Hero | undefined;
+            let updatedBlueHero2: Hero | undefined;
+            result.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO) {
+                    const hero = combatant as Hero;
+                    if (hero.controller === 'player1') updatedBlueHero1 = hero;
+                    if (hero.controller === 'player2') updatedBlueHero2 = hero;
+                }
+            });
+            
+            // Calculate expected XP: level 3 * 4 = 12 XP
+            const expectedXP = 3 * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
+            
+            // Only blueHero1 should get XP (within range), blueHero2 should not (out of range)
+            expect(updatedBlueHero1?.experience).toBe(initialExp1 + expectedXP);
+            expect(updatedBlueHero2?.experience).toBe(initialExp2); // Should not get XP
+        });
+
         it('should grant turret XP to dead players but not minion XP', () => {
             // Setup game with two players on blue team
             const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });

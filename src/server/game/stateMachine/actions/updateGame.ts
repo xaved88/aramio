@@ -97,6 +97,18 @@ function processCombat(state: GameState): void {
 function handleDeadCombatants(state: GameState): void {
     const currentTime = state.gameTime;
     
+    // Handle hero death and grant XP BEFORE respawn logic
+    state.combatants.forEach((combatant, id) => {
+        if (combatant.type === COMBATANT_TYPES.HERO) {
+            const hero = combatant as Hero;
+            if (hero.health <= 0 && hero.state === 'alive') {
+                // Hero just died, grant XP to opposing team
+                const heroKillXP = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
+                grantExperienceToTeamForUnitKill(heroKillXP, hero.team, state, hero);
+            }
+        }
+    });
+    
     // Handle player respawning and level ups
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO) {
@@ -230,7 +242,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
             // Only grant experience to alive players within range of the dying unit
             if (hero.state === 'alive') {
                 const distance = CombatantUtils.getDistance(hero, dyingUnit);
-                if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILL_RADIUS) {
+                if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.UNIT_KILL_RADIUS) {
                     grantExperience(hero, amount);
                 }
             }
