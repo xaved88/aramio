@@ -81,7 +81,7 @@ export const GAMEPLAY_CONFIG = {
         },
     },
     EXPERIENCE: {
-        LEVEL_UP_MULTIPLIER: 10, // experience needed per level
+        LEVEL_UP_MULTIPLIER: 15, // experience needed per level
         STAT_BOOST_PERCENTAGE: 0.15,
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30,
         MINION_KILLED: 2,

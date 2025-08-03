@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { hexToColorString } from '../utils/ColorUtils';
 
 /**
@@ -138,7 +138,7 @@ export class HUDRenderer {
         hudElements.healthText.setText(`${healthPercentText}%`);
         
         // Update experience bar
-        const experienceNeeded = player.level * 10; // level * 10
+        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
         const experiencePercent = player.experience / experienceNeeded;
         
         hudElements.experienceBar.clear();
