@@ -1,5 +1,5 @@
 export const COMBATANT_TYPES = {
-    PLAYER: 'player',
+    HERO: 'hero',
     CRADLE: 'cradle',
     TURRET: 'turret',
     MINION: 'minion'
@@ -35,14 +35,15 @@ export interface BaseCombatant {
     lastAttackTime: number;
 }
 
-export interface PlayerCombatant extends BaseCombatant {
-    type: typeof COMBATANT_TYPES.PLAYER;
+export interface HeroCombatant extends BaseCombatant {
+    type: typeof COMBATANT_TYPES.HERO;
     state: 'alive' | 'respawning';
     respawnTime: number;
     respawnDuration: number;
     experience: number;
     level: number;
     ability: Ability;
+    controller: string; // client ID for players, bot strategy for bots
 }
 
 export interface CradleCombatant extends BaseCombatant {
@@ -58,7 +59,7 @@ export interface MinionCombatant extends BaseCombatant {
     minionType: MinionType;
 }
 
-export type Combatant = PlayerCombatant | CradleCombatant | TurretCombatant | MinionCombatant;
+export type Combatant = HeroCombatant | CradleCombatant | TurretCombatant | MinionCombatant;
 
 export interface AttackEvent {
     sourceId: string;
@@ -78,8 +79,8 @@ export interface Projectile {
     team: string;
 }
 
-export function isPlayerCombatant(combatant: Combatant): combatant is PlayerCombatant {
-    return combatant.type === COMBATANT_TYPES.PLAYER;
+export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {
+    return combatant.type === COMBATANT_TYPES.HERO;
 }
 
 export function isCradleCombatant(combatant: Combatant): combatant is CradleCombatant {

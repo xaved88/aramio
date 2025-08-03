@@ -126,7 +126,7 @@ export class GameScene extends Phaser.Scene {
 
     private updateHUD(state: SharedGameState) {
         // Delegate HUD updates to the UIManager
-        this.uiManager.updateHUD(state, this.playerTeam);
+        this.uiManager.updateHUD(state, this.playerTeam, this.playerSessionId);
     }
 
     private restartGame(): void {
@@ -158,14 +158,15 @@ export class GameScene extends Phaser.Scene {
     }
 
     private updatePlayerTeam(state: SharedGameState): void {
-        // Find the player that belongs to this client by session ID
+        // Find the hero that belongs to this client by controller (session ID)
         if (!this.playerSessionId || this.playerTeam) return;
         
-        const player = state.combatants.get(this.playerSessionId);
-        if (player && player.type === 'player') {
-            this.playerTeam = player.team;
-            console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
-        }
+        state.combatants.forEach((combatant) => {
+            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+                this.playerTeam = combatant.team;
+                console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
+            }
+        });
     }
 
     private setupInputHandlers(): void {

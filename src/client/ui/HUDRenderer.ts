@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PlayerCombatant } from '../../shared/types/CombatantTypes';
+import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { hexToColorString } from '../utils/ColorUtils';
 
@@ -105,7 +105,7 @@ export class HUDRenderer {
      * Updates the HUD with player data
      */
     updateHUD(
-        player: PlayerCombatant,
+        player: HeroCombatant,
         hudElements: {
             healthBar: Phaser.GameObjects.Graphics;
             healthBarBackground: Phaser.GameObjects.Graphics;

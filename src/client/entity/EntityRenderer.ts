@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isPlayerCombatant, PlayerCombatant, MINION_TYPES, isMinionCombatant, MinionCombatant } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, MINION_TYPES, isMinionCombatant, MinionCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 
@@ -28,20 +28,20 @@ export class EntityRenderer {
         // Render the main entity graphics
         this.renderEntityGraphics(combatant, graphics);
         
-        // Render respawn ring for players
-        if (respawnRing && combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
+        // Render respawn ring for heroes
+        if (respawnRing && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
             this.renderRespawnRing(combatant, respawnRing, state);
         }
         
-        // Render ability ready indicator for players
-        if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
+        // Render ability ready indicator for heroes
+        if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
             this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
         }
         
         // Render radius indicator
         this.renderRadiusIndicator(combatant, radiusIndicator);
         
-        // Update text display (level for players, nothing for others)
+        // Update text display (level for heroes, nothing for others)
         this.updateTextDisplay(combatant, text);
         
         // Handle turret visibility
@@ -61,7 +61,7 @@ export class EntityRenderer {
         
         // Determine colors based on team and state
         let primaryColor, respawnColor;
-        if (combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant) && combatant.state === 'respawning') {
+        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
             primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
             respawnColor = primaryColor; // Use same color when respawning
         } else {
@@ -71,7 +71,7 @@ export class EntityRenderer {
         
         // Render based on type
         switch (combatant.type) {
-            case COMBATANT_TYPES.PLAYER:
+            case COMBATANT_TYPES.HERO:
                 this.renderPlayerGraphics(graphics, primaryColor, respawnColor, healthPercentage);
                 break;
             case COMBATANT_TYPES.CRADLE:
@@ -258,15 +258,15 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders the respawn ring for players only
+     * Renders the respawn ring for heroes only
      */
-    private renderRespawnRing(player: PlayerCombatant, respawnRing: Phaser.GameObjects.Graphics, state?: SharedGameState): void {
+    private renderRespawnRing(hero: HeroCombatant, respawnRing: Phaser.GameObjects.Graphics, state?: SharedGameState): void {
         respawnRing.clear();
-        if (player.state === 'respawning' && state) {
-            const respawnDuration = player.respawnDuration;
-            const timeElapsed = respawnDuration - (player.respawnTime - state.gameTime);
+        if (hero.state === 'respawning' && state) {
+            const respawnDuration = hero.respawnDuration;
+            const timeElapsed = respawnDuration - (hero.respawnTime - state.gameTime);
             const respawnProgress = Math.max(0, Math.min(1, timeElapsed / respawnDuration));
-            const ringColor = player.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            const ringColor = hero.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
             
             respawnRing.lineStyle(CLIENT_CONFIG.RESPAWN_RING.THICKNESS, ringColor, CLIENT_CONFIG.RESPAWN_RING.ALPHA);
             respawnRing.beginPath();
@@ -276,17 +276,17 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders the ability ready indicator for players only
+     * Renders the ability ready indicator for heroes only
      */
-    private renderAbilityReadyIndicator(player: PlayerCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics): void {
+    private renderAbilityReadyIndicator(hero: HeroCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics): void {
         abilityReadyIndicator.clear();
         
         // Check if ability is ready
         const currentTime = Date.now();
-        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
-        const isAbilityReady = timeSinceLastUse >= player.ability.cooldown;
+        const timeSinceLastUse = currentTime - hero.ability.lastUsedTime;
+        const isAbilityReady = timeSinceLastUse >= hero.ability.cooldown;
         
-        if (isAbilityReady && player.state === 'alive') {
+        if (isAbilityReady && hero.state === 'alive') {
             abilityReadyIndicator.lineStyle(
                 CLIENT_CONFIG.ABILITY_READY_INDICATOR.THICKNESS, 
                 CLIENT_CONFIG.ABILITY_READY_INDICATOR.COLOR, 
@@ -301,17 +301,17 @@ export class EntityRenderer {
      */
     private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics): void {
         radiusIndicator.clear();
-        if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.PLAYER || !isPlayerCombatant(combatant) || combatant.state !== 'respawning')) {
+        if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.HERO || !isHeroCombatant(combatant) || combatant.state !== 'respawning')) {
             radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA);
             radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
         }
     }
 
     /**
-     * Updates the text display (level for players, nothing for others)
+     * Updates the text display (level for heroes, nothing for others)
      */
     private updateTextDisplay(combatant: Combatant, text: Phaser.GameObjects.Text): void {
-        if (combatant.type === COMBATANT_TYPES.PLAYER && isPlayerCombatant(combatant)) {
+        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
             const level = combatant.level;
             const romanNumeral = this.toRomanNumeral(level);
             text.setText(romanNumeral);
@@ -334,7 +334,7 @@ export class EntityRenderer {
                 }
             });
         } else {
-            text.setText(''); // Clear text for non-players
+            text.setText(''); // Clear text for non-heroes
         }
     }
 

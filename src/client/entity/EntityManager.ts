@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isPlayerCombatant } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
@@ -69,6 +69,14 @@ export class EntityManager {
             entityGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             entityGraphics.setPosition(combatantData.x, combatantData.y);
+            // Set depth based on entity type
+            if (combatantData.type === COMBATANT_TYPES.HERO) {
+                entityGraphics.setDepth(10); // Heroes on top
+            } else if (combatantData.type === COMBATANT_TYPES.MINION) {
+                entityGraphics.setDepth(5); // Minions in middle
+            } else {
+                entityGraphics.setDepth(0); // Buildings at bottom
+            }
             this.entityGraphics.set(entityId, entityGraphics);
         }
         
@@ -76,6 +84,14 @@ export class EntityManager {
             entityText = this.entityFactory.createEntityText();
             // Set initial position immediately to avoid spawning at (0,0)
             entityText.setPosition(combatantData.x, combatantData.y);
+            // Set depth to match entity graphics
+            if (combatantData.type === COMBATANT_TYPES.HERO) {
+                entityText.setDepth(10); // Heroes on top
+            } else if (combatantData.type === COMBATANT_TYPES.MINION) {
+                entityText.setDepth(5); // Minions in middle
+            } else {
+                entityText.setDepth(0); // Buildings at bottom
+            }
             this.entityTexts.set(entityId, entityText);
         }
         
@@ -86,10 +102,10 @@ export class EntityManager {
             this.entityRadiusIndicators.set(entityId, radiusIndicator);
         }
         
-        // Handle respawn ring for players
+        // Handle respawn ring for heroes
         let respawnRing = this.entityRespawnRings.get(entityId);
         let abilityReadyIndicator = this.entityAbilityReadyIndicators.get(entityId);
-        if (combatantData.type === COMBATANT_TYPES.PLAYER) {
+        if (combatantData.type === COMBATANT_TYPES.HERO) {
             if (!respawnRing) {
                 respawnRing = this.entityFactory.createRespawnRing();
                 // Set initial position immediately to avoid spawning at (0,0)

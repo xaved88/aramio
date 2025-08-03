@@ -1,13 +1,13 @@
-import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Player as ColyseusPlayer, Minion as ColyseusMinion } from '../../server/schema/GameState';
+import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState } from '../types/GameStateTypes';
-import { Combatant, PlayerCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<string, Combatant>();
     
     // Convert all combatants to shared types
     colyseusState.combatants.forEach((combatant: ColyseusCombatant, id: string) => {
-        const sharedCombatant = convertToSharedCombatant(combatant);
+        const sharedCombatant = convertToSharedCombatant(combatant, id);
         sharedCombatants.set(id, sharedCombatant);
     });
     
@@ -46,9 +46,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
     };
 }
 
-function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combatant {
+function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: string): Combatant {
     const baseCombatant = {
-        id: colyseusCombatant.id,
+        id: id,
         type: colyseusCombatant.type as any, // We trust the type is correct
         x: colyseusCombatant.x,
         y: colyseusCombatant.y,
@@ -63,23 +63,34 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant): Combata
     };
     
     switch (colyseusCombatant.type) {
-        case COMBATANT_TYPES.PLAYER:
-            const player = colyseusCombatant as ColyseusPlayer;
+        case COMBATANT_TYPES.HERO:
+            const hero = colyseusCombatant as ColyseusHero;
             return {
-                ...baseCombatant,
-                type: COMBATANT_TYPES.PLAYER,
-                state: player.state,
-                respawnTime: player.respawnTime,
-                respawnDuration: player.respawnDuration,
-                experience: player.experience,
-                level: player.level,
+                id: id,
+                type: COMBATANT_TYPES.HERO,
+                state: hero.state,
+                respawnTime: hero.respawnTime,
+                respawnDuration: hero.respawnDuration,
+                experience: hero.experience,
+                level: hero.level,
                 ability: {
-                    type: player.ability.type,
-                    cooldown: player.ability.cooldown,
-                    lastUsedTime: player.ability.lastUsedTime,
-                    strength: player.ability.strength
-                }
-            } as PlayerCombatant;
+                    type: hero.ability.type,
+                    cooldown: hero.ability.cooldown,
+                    lastUsedTime: hero.ability.lastUsedTime,
+                    strength: hero.ability.strength
+                },
+                controller: hero.controller,
+                team: colyseusCombatant.team,
+                x: colyseusCombatant.x,
+                y: colyseusCombatant.y,
+                health: colyseusCombatant.health,
+                maxHealth: colyseusCombatant.maxHealth,
+                attackRadius: colyseusCombatant.attackRadius,
+                attackStrength: colyseusCombatant.attackStrength,
+                attackSpeed: colyseusCombatant.attackSpeed,
+                lastAttackTime: colyseusCombatant.lastAttackTime,
+                size: colyseusCombatant.size
+            } as HeroCombatant;
             
         case COMBATANT_TYPES.CRADLE:
             return {

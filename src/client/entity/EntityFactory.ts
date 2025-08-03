@@ -16,7 +16,9 @@ export class EntityFactory {
      * Creates the main graphics object for an entity
      */
     createEntityGraphics(): Phaser.GameObjects.Graphics {
-        return this.scene.add.graphics();
+        const graphics = this.scene.add.graphics();
+        graphics.setDepth(0); // Default depth
+        return graphics;
     }
 
     /**

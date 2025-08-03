@@ -69,14 +69,14 @@ export class GameRoom extends Room<GameState> {
     onJoin(client: Client, options: any) {
         console.log(`${client.sessionId} joined`);
         
-        // Determine team based on current player count
-        const currentPlayerCount = Array.from(this.state.combatants.values())
-            .filter(c => c.type === 'player').length;
-        const team = currentPlayerCount % 2 === 0 
+        // Determine team based on current hero count
+        const currentHeroCount = Array.from(this.state.combatants.values())
+            .filter(c => c.type === 'hero').length;
+        const team = currentHeroCount % 2 === 0 
             ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
             : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
         
-        // Spawn player through the game engine
+        // Spawn hero through the game engine
         this.gameEngine.spawnPlayer(client.sessionId, team);
     }
 

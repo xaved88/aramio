@@ -1,4 +1,4 @@
-import { GameState, Player } from '../../server/schema/GameState';
+import { GameState, Hero } from '../../server/schema/GameState';
 
 export function gameStateToString(gameState: GameState): string {
     const lines: string[] = [];
@@ -14,14 +14,14 @@ export function gameStateToString(gameState: GameState): string {
         lines.push(`  No combatants`);
     } else {
         const combatants = Array.from(gameState.combatants.values());
-        const players = combatants.filter(c => c.type === 'player');
+        const heroes = combatants.filter(c => c.type === 'hero');
         const turrets = combatants.filter(c => c.type === 'turret');
         
-        if (players.length > 0) {
-            lines.push(`  PLAYERS (${players.length}):`);
-            players.forEach(player => {
-                const playerObj = player as Player;
-                lines.push(`    ${player.id} (${player.team}) - HP: ${player.health}/${player.maxHealth} - Pos: (${player.x}, ${player.y}) - Level: ${playerObj.level} - XP: ${playerObj.experience}`);
+        if (heroes.length > 0) {
+            lines.push(`  HEROES (${heroes.length}):`);
+            heroes.forEach(hero => {
+                const heroObj = hero as Hero;
+                lines.push(`    ${hero.id} (${hero.team}) - HP: ${hero.health}/${hero.maxHealth} - Pos: (${hero.x}, ${hero.y}) - Level: ${heroObj.level} - XP: ${heroObj.experience} - Controller: ${heroObj.controller}`);
             });
         }
         

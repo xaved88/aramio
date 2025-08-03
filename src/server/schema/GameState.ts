@@ -41,13 +41,14 @@ export class Combatant extends Schema {
     @type('number') size!: number; // collision radius
 }
 
-export class Player extends Combatant {
+export class Hero extends Combatant {
     @type('string') state!: string; // 'alive' or 'respawning'
     @type('number') respawnTime!: number; // timestamp when respawn completes
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
     @type(Ability) ability!: Ability;
+    @type('string') controller!: string; // client ID for players, bot strategy for bots
 }
 
 export class Minion extends Combatant {

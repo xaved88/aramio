@@ -1,5 +1,5 @@
 import { handleUpdateGame } from '../updateGame';
-import { GameState, Player, Minion, Combatant, AttackEvent } from '../../../../schema/GameState';
+import { GameState, Hero, Minion, Combatant, AttackEvent } from '../../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../../types';
 import { GAMEPLAY_CONFIG } from '../../../../../Config';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
@@ -117,14 +117,14 @@ describe('handleUpdateGame', () => {
     });
 
     describe('combat processing', () => {
-        let bluePlayer: Player;
-        let redPlayer: Player;
-
-        beforeEach(() => {
-            // Create blue player
-            bluePlayer = new Player();
+            let bluePlayer: Hero;
+    let redPlayer: Hero;
+    
+    beforeEach(() => {
+        // Create blue player
+        bluePlayer = new Hero();
             bluePlayer.id = 'blue-player';
-            bluePlayer.type = COMBATANT_TYPES.PLAYER;
+            bluePlayer.type = COMBATANT_TYPES.HERO;
             bluePlayer.team = 'blue';
             bluePlayer.x = 100;
             bluePlayer.y = 100;
@@ -140,10 +140,10 @@ describe('handleUpdateGame', () => {
             bluePlayer.experience = 0;
             bluePlayer.level = 1;
             
-            // Create red player
-            redPlayer = new Player();
+                    // Create red player
+        redPlayer = new Hero();
             redPlayer.id = 'red-player';
-            redPlayer.type = COMBATANT_TYPES.PLAYER;
+            redPlayer.type = COMBATANT_TYPES.HERO;
             redPlayer.team = 'red';
             redPlayer.x = 120; // Within attack range
             redPlayer.y = 100;
@@ -194,7 +194,7 @@ describe('handleUpdateGame', () => {
 
     describe('dead combatant handling', () => {
         let deadMinion: Minion;
-        let bluePlayer: Player;
+        let bluePlayer: Hero;
 
         beforeEach(() => {
             // Create dead minion
@@ -212,10 +212,10 @@ describe('handleUpdateGame', () => {
             deadMinion.lastAttackTime = 0;
             deadMinion.minionType = 'warrior';
             
-            // Create blue player to receive experience
-            bluePlayer = new Player();
+                    // Create blue player to receive experience
+        bluePlayer = new Hero();
             bluePlayer.id = 'blue-player';
-            bluePlayer.type = COMBATANT_TYPES.PLAYER;
+            bluePlayer.type = COMBATANT_TYPES.HERO;
             bluePlayer.team = 'blue';
             bluePlayer.x = 100;
             bluePlayer.y = 100;
@@ -244,7 +244,7 @@ describe('handleUpdateGame', () => {
             expect(result.newState.combatants.has(deadMinion.id)).toBe(false);
             
             // Blue player should receive experience (if there are opposing team players)
-            const updatedPlayer = result.newState.combatants.get(bluePlayer.id) as Player;
+            const updatedPlayer = result.newState.combatants.get(bluePlayer.id) as Hero;
             // Note: Experience is only granted when the opposing team kills the minion
             // Since this test doesn't have opposing team players, no experience is granted
             expect(updatedPlayer.experience).toBe(originalExperience);
@@ -252,9 +252,9 @@ describe('handleUpdateGame', () => {
 
         it('should grant experience to opposing team when minion dies', () => {
             // Add red player to grant experience to
-            const redPlayer = new Player();
+            const redPlayer = new Hero();
             redPlayer.id = 'red-player';
-            redPlayer.type = COMBATANT_TYPES.PLAYER;
+            redPlayer.type = COMBATANT_TYPES.HERO;
             redPlayer.team = 'red';
             redPlayer.x = 200;
             redPlayer.y = 200;
@@ -280,7 +280,7 @@ describe('handleUpdateGame', () => {
             expect(result.newState.combatants.has(deadMinion.id)).toBe(false);
             
             // Red player should receive experience for killing blue minion
-            const updatedRedPlayer = result.newState.combatants.get(redPlayer.id) as Player;
+            const updatedRedPlayer = result.newState.combatants.get(redPlayer.id) as Hero;
             expect(updatedRedPlayer.experience).toBeGreaterThan(originalExperience);
         });
     });
@@ -420,15 +420,15 @@ describe('handleUpdateGame', () => {
     });
 
     describe('nearest enemy targeting', () => {
-        let attacker: Player;
-        let nearEnemy: Player;
-        let farEnemy: Player;
+        let attacker: Hero;
+        let nearEnemy: Hero;
+        let farEnemy: Hero;
 
         beforeEach(() => {
             // Create an attacker
-            attacker = new Player();
+            attacker = new Hero();
             attacker.id = 'attacker';
-            attacker.type = COMBATANT_TYPES.PLAYER;
+            attacker.type = COMBATANT_TYPES.HERO;
             attacker.team = 'blue';
             attacker.x = 100;
             attacker.y = 100;
@@ -450,9 +450,9 @@ describe('handleUpdateGame', () => {
             attacker.ability.strength = 50;
             
             // Create a near enemy (closer to attacker)
-            nearEnemy = new Player();
+            nearEnemy = new Hero();
             nearEnemy.id = 'near-enemy';
-            nearEnemy.type = COMBATANT_TYPES.PLAYER;
+            nearEnemy.type = COMBATANT_TYPES.HERO;
             nearEnemy.team = 'red';
             nearEnemy.x = 120; // 20 units away
             nearEnemy.y = 100;
@@ -474,9 +474,9 @@ describe('handleUpdateGame', () => {
             nearEnemy.ability.strength = 50;
             
             // Create a far enemy (further from attacker)
-            farEnemy = new Player();
+            farEnemy = new Hero();
             farEnemy.id = 'far-enemy';
-            farEnemy.type = COMBATANT_TYPES.PLAYER;
+            farEnemy.type = COMBATANT_TYPES.HERO;
             farEnemy.team = 'red';
             farEnemy.x = 140; // 40 units away
             farEnemy.y = 100;

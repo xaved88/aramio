@@ -1,9 +1,19 @@
-import { GameState } from '../../../schema/GameState';
+import { GameState, Hero } from '../../../schema/GameState';
 import { RemovePlayerAction, StateMachineResult } from '../types';
+import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export function handleRemovePlayer(state: GameState, action: RemovePlayerAction): StateMachineResult {
-    // Remove the specified player
-    state.combatants.delete(action.payload.playerId);
+    // Find and remove hero by controller (client ID)
+    let heroIdToRemove: string | undefined;
+    state.combatants.forEach((combatant, id) => {
+        if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === action.payload.playerId) {
+            heroIdToRemove = id;
+        }
+    });
+    
+    if (heroIdToRemove) {
+        state.combatants.delete(heroIdToRemove);
+    }
     
     return { newState: state };
 } 

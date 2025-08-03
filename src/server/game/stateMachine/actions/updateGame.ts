@@ -1,8 +1,9 @@
-import { GameState, Player, AttackEvent } from '../../../schema/GameState';
+import { GameState, Hero } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
+import { AttackEvent } from '../../../schema/GameState';
 import { MinionManager } from '../../combatants/MinionManager';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
@@ -50,10 +51,8 @@ function processCombat(state: GameState): void {
     const currentTime = state.gameTime;
     
     allCombatants.forEach(attacker => {
-        if (!CombatantUtils.isCombatantAlive(attacker)) return;
-        
-        // Skip respawning players
-        if (attacker.type === COMBATANT_TYPES.PLAYER && (attacker as Player).state === 'respawning') return;
+        if (attacker.health <= 0) return;
+        if (attacker.type === COMBATANT_TYPES.HERO && (attacker as Hero).state === 'respawning') return;
         
         // Check if attacker can attack (based on attack speed)
         const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
@@ -100,21 +99,21 @@ function handleDeadCombatants(state: GameState): void {
     
     // Handle player respawning and level ups
     state.combatants.forEach((combatant, id) => {
-        if (combatant.type === COMBATANT_TYPES.PLAYER) {
-            const player = combatant as Player;
+        if (combatant.type === COMBATANT_TYPES.HERO) {
+            const hero = combatant as Hero;
             
-            if (!CombatantUtils.isCombatantAlive(player) && player.state === 'alive') {
-                // Player just died, start respawn process
-                startPlayerRespawn(player, state);
-            } else if (player.state === 'respawning' && currentTime >= player.respawnTime) {
-                // Respawn timer completed
-                completePlayerRespawn(player);
+            if (hero.health <= 0 && hero.state === 'alive') {
+                // Hero died, start respawn
+                startPlayerRespawn(hero, state);
+            } else if (hero.state === 'respawning' && currentTime >= hero.respawnTime) {
+                // Respawn the hero
+                completePlayerRespawn(hero);
             }
             
             // Check for level up (regardless of how experience was gained)
-            const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
-            if (player.experience >= experienceNeeded) {
-                levelUpPlayer(player);
+            const experienceNeeded = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+            if (hero.experience >= experienceNeeded) {
+                levelUpPlayer(hero);
             }
         }
     });
@@ -152,7 +151,7 @@ function handleDeadCombatants(state: GameState): void {
     });
 }
 
-function startPlayerRespawn(player: Player, state: GameState): void {
+function startPlayerRespawn(player: Hero, state: GameState): void {
     player.state = 'respawning';
     player.respawnTime = state.gameTime + player.respawnDuration;
     
@@ -166,7 +165,7 @@ function startPlayerRespawn(player: Player, state: GameState): void {
     }
 }
 
-function completePlayerRespawn(player: Player): void {
+function completePlayerRespawn(player: Hero): void {
     player.state = 'alive';
     player.health = player.maxHealth; // Restore to max health, not base health
 }
@@ -175,17 +174,17 @@ function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameSta
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     state.combatants.forEach((combatant, id) => {
-        if (combatant.type === COMBATANT_TYPES.PLAYER && combatant.team === opposingTeam) {
-            const player = combatant as Player;
+        if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
+            const hero = combatant as Hero;
             // Only grant experience to alive players, not respawning ones
-            if (player.state === 'alive') {
-                grantExperience(player, amount);
+            if (hero.state === 'alive') {
+                grantExperience(hero, amount);
             }
         }
     });
 }
 
-function grantExperience(player: Player, amount: number): void {
+function grantExperience(player: Hero, amount: number): void {
     player.experience += amount;
     
     // Check for level up immediately when experience is granted
@@ -195,7 +194,7 @@ function grantExperience(player: Player, amount: number): void {
     }
 }
 
-function levelUpPlayer(player: Player): void {
+function levelUpPlayer(player: Hero): void {
     const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
     const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;

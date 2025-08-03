@@ -103,9 +103,16 @@ export class GameEngine {
      * @param y Y coordinate where ability was used
      */
     useAbility(playerId: string, x: number, y: number): void {
-        const player = this.state.combatants.get(playerId) as any;
-        if (!player || player.type !== 'player') {
-            console.log(`Ability use failed: Player ${playerId} not found or not a player`);
+        // Find hero by controller (client ID)
+        let player: any = null;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.controller === playerId) {
+                player = combatant;
+            }
+        });
+        
+        if (!player || player.type !== 'hero') {
+            console.log(`Ability use failed: Player ${playerId} not found or not a hero`);
             return;
         }
 
@@ -134,7 +141,13 @@ export class GameEngine {
     }
 
     private createProjectile(playerId: string, targetX: number, targetY: number): void {
-        const player = this.state.combatants.get(playerId) as any;
+        // Find hero by controller (client ID)
+        let player: any = null;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.controller === playerId) {
+                player = combatant;
+            }
+        });
         if (!player) return;
 
         console.log(`Creating projectile: player at (${player.x}, ${player.y}), target at (${targetX}, ${targetY})`);
@@ -207,7 +220,7 @@ export class GameEngine {
                 projectilesToRemove.push(projectile.id);
                 
                 // Only damage units (players and minions), not structures
-                if (closestCombatant.type === 'player' || closestCombatant.type === 'minion') {
+                if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
                     closestCombatant.health = Math.max(0, closestCombatant.health - projectile.strength);
                     console.log(`Projectile ${projectile.id} hit ${closestCombatant.id} for ${projectile.strength} damage`);
                 }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COMBATANT_TYPES, isPlayerCombatant } from '../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
@@ -57,15 +57,25 @@ export class UIManager {
     /**
      * Updates the HUD based on the current game state
      */
-    updateHUD(state: SharedGameState, playerTeam: string | null = null): void {
+    updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: string | null = null): void {
         if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
             !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || 
             !this.hudLevelText || !this.hudAbilityBar || !this.hudAbilityBarBackground) return;
         
-        // Find the current player (assuming first player for now)
-        // In a real implementation, you'd track the client's player ID
-        const currentPlayer = Array.from(state.combatants.values()).find(c => c.type === COMBATANT_TYPES.PLAYER);
-        if (!currentPlayer || !isPlayerCombatant(currentPlayer)) return;
+        // Find the current player by their session ID (controller)
+        let currentPlayer = null;
+        if (playerSessionId) {
+            currentPlayer = Array.from(state.combatants.values()).find(c => 
+                c.type === COMBATANT_TYPES.HERO && c.controller === playerSessionId
+            );
+        }
+        
+        // Fallback to first player if session ID not available
+        if (!currentPlayer) {
+            currentPlayer = Array.from(state.combatants.values()).find(c => c.type === COMBATANT_TYPES.HERO);
+        }
+        
+        if (!currentPlayer || !isHeroCombatant(currentPlayer)) return;
         
         this.hudRenderer.updateHUD(
             currentPlayer,

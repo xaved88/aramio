@@ -75,7 +75,7 @@ describe('MinionManager', () => {
         // Create blue player
         bluePlayer = new Combatant();
         bluePlayer.id = 'blue-player';
-        bluePlayer.type = COMBATANT_TYPES.PLAYER;
+        bluePlayer.type = COMBATANT_TYPES.HERO;
         bluePlayer.team = 'blue';
         bluePlayer.x = 150;
         bluePlayer.y = 150;
@@ -110,7 +110,7 @@ describe('MinionManager', () => {
             // Place red player within blue minion's attack range
             const redPlayer = new Combatant();
             redPlayer.id = 'red-player';
-            redPlayer.type = COMBATANT_TYPES.PLAYER;
+            redPlayer.type = COMBATANT_TYPES.HERO;
             redPlayer.team = 'red';
             redPlayer.x = blueMinion.x + 20; // Within 40 radius
             redPlayer.y = blueMinion.y + 20;
