@@ -38,7 +38,7 @@ export const GAMEPLAY_CONFIG = {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         PLAYER: {
             HEALTH: 50,
-            ATTACK_RADIUS: 35,
+            ATTACK_RADIUS: 45,
             ATTACK_STRENGTH: 5,
             ATTACK_SPEED: 1, // attacks per second
             WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
