@@ -440,6 +440,9 @@ export class EntityManager {
             this.targetingLinesGraphics = null;
         }
         
+        // Clear flashing targeting lines
+        this.entityRenderer.clearFlashingTargetingLines();
+        
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
@@ -461,7 +464,14 @@ export class EntityManager {
         }
         
         // Render the targeting lines
-        this.entityRenderer.renderTargetingLines(state.combatants, this.targetingLinesGraphics);
+        this.entityRenderer.renderTargetingLines(state.combatants, this.targetingLinesGraphics, state.gameTime);
+    }
+
+    /**
+     * Triggers a flash animation on a targeting line when an attack fires
+     */
+    triggerTargetingLineFlash(sourceId: string, targetId: string): void {
+        this.entityRenderer.triggerTargetingLineFlash(sourceId, targetId);
     }
 
     /**
@@ -479,6 +489,9 @@ export class EntityManager {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
         }
+        
+        // Clear flashing targeting lines
+        this.entityRenderer.clearFlashingTargetingLines();
         
         this.entityGraphics.clear();
         this.entityTexts.clear();

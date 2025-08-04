@@ -157,10 +157,13 @@ export const CLIENT_CONFIG = {
     TARGETING_LINES: {
         BLUE: 0x85c1e9, // lighter blue (same as respawning)
         RED: 0xf5b7b1, // lighter red (same as respawning)
-        BASE_ALPHA: 0.4, // starting alpha for animation
-        MAX_ALPHA: 0.8, // maximum alpha when ready to fire
+        BASE_ALPHA: 0.2, // base alpha for other combatants
+        PLAYER_BASE_ALPHA: 0.5, // higher alpha when player's hero is involved
         LINE_THICKNESS: 2,
+        FLASH_LINE_THICKNESS: 3, // thicker line when flashing
         OFFSET_PIXELS: 5, // offset for line endpoints to prevent overlap
+        FLASH_DURATION_MS: 100, // flash duration when attack fires
+        FLASH_ALPHA: 0.9, // alpha during flash
     },
     ANIMATIONS: {
         ATTACK_SOURCE_DURATION_MS: 50, // radius flash duration

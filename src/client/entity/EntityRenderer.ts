@@ -9,6 +9,7 @@ import { CLIENT_CONFIG } from '../../Config';
 export class EntityRenderer {
     private scene: Phaser.Scene;
     private playerSessionId: string | null = null;
+    private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -16,6 +17,26 @@ export class EntityRenderer {
 
     setPlayerSessionId(sessionId: string | null): void {
         this.playerSessionId = sessionId;
+    }
+
+    /**
+     * Triggers a flash animation on a targeting line when an attack fires
+     */
+    triggerTargetingLineFlash(sourceId: string, targetId: string): void {
+        const targetingLineKey = `${sourceId}-${targetId}`;
+        this.flashingTargetingLines.add(targetingLineKey);
+        
+        // Remove the flash after the duration
+        setTimeout(() => {
+            this.flashingTargetingLines.delete(targetingLineKey);
+        }, CLIENT_CONFIG.TARGETING_LINES.FLASH_DURATION_MS);
+    }
+
+    /**
+     * Clears all flashing targeting lines (called when scene is destroyed)
+     */
+    clearFlashingTargetingLines(): void {
+        this.flashingTargetingLines.clear();
     }
 
     /**
@@ -64,7 +85,8 @@ export class EntityRenderer {
      */
     renderTargetingLines(
         combatants: Map<string, Combatant>,
-        graphics: Phaser.GameObjects.Graphics
+        graphics: Phaser.GameObjects.Graphics,
+        gameTime?: number
     ): void {
         graphics.clear();
         
@@ -75,45 +97,47 @@ export class EntityRenderer {
             if (combatant.target) {
                 const target = combatants.get(combatant.target);
                 if (target && target.health > 0) {
-                    // Determine line color based on team
-                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
-                    
-                    // Calculate animation alpha based on wind-up progress
-                    const currentTime = Date.now();
-                    let alpha = CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
-                    
-                    if (combatant.attackReadyAt > 0) {
-                        // Calculate progress from 0 to 1
-                        const windUpDuration = combatant.windUp * 1000; // Convert to milliseconds
-                        const elapsed = currentTime - (combatant.attackReadyAt - windUpDuration);
-                        const progress = Math.min(Math.max(elapsed / windUpDuration, 0), 1);
-                        
-                        // Interpolate alpha from base to max
-                        alpha = CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA + 
-                               (CLIENT_CONFIG.TARGETING_LINES.MAX_ALPHA - CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA) * progress;
-                    }
-                    
-                    // Calculate offset for line endpoints to prevent overlap
-                    const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
-                    let sourceX = combatant.x;
-                    let sourceY = combatant.y;
-                    let targetX = target.x;
-                    let targetY = target.y;
-                    
-                    if (combatant.team === 'blue') {
-                        sourceX += offset;
-                        targetX += offset;
-                    } else {
-                        sourceX -= offset;
-                        targetX -= offset;
-                    }
-                    
-                    // Draw targeting line
-                    graphics.lineStyle(CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS, lineColor, alpha);
-                    graphics.beginPath();
-                    graphics.moveTo(sourceX, sourceY);
-                    graphics.lineTo(targetX, targetY);
-                    graphics.strokePath();
+                                         // Determine line color based on team
+                     const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
+                     
+                     // Check if player's hero is involved in this targeting line
+                     const isPlayerInvolved = this.playerSessionId && (
+                         (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) ||
+                         (target.type === COMBATANT_TYPES.HERO && isHeroCombatant(target) && target.controller === this.playerSessionId)
+                     );
+                     
+                     // Calculate alpha - either flash or base alpha
+                     let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                     
+                     // Check if this targeting line should flash
+                     const targetingLineKey = `${combatant.id}-${target.id}`;
+                     const isFlashing = this.flashingTargetingLines.has(targetingLineKey);
+                     if (isFlashing) {
+                         alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
+                     }
+                     
+                     // Calculate offset for line endpoints to prevent overlap
+                     const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
+                     let sourceX = combatant.x;
+                     let sourceY = combatant.y;
+                     let targetX = target.x;
+                     let targetY = target.y;
+                     
+                     if (combatant.team === 'blue') {
+                         sourceX += offset;
+                         targetX += offset;
+                     } else {
+                         sourceX -= offset;
+                         targetX -= offset;
+                     }
+                     
+                     // Draw targeting line with appropriate thickness
+                     const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
+                     graphics.lineStyle(lineThickness, lineColor, alpha);
+                     graphics.beginPath();
+                     graphics.moveTo(sourceX, sourceY);
+                     graphics.lineTo(targetX, targetY);
+                     graphics.strokePath();
                 }
             }
         });

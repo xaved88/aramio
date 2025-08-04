@@ -106,6 +106,9 @@ export class GameScene extends Phaser.Scene {
             
             // Animate attack target (color flash)
             this.animateAttackTarget(event.targetId, state);
+            
+            // Trigger targeting line flash
+            this.entityManager.triggerTargetingLineFlash(event.sourceId, event.targetId);
         });
     }
 
