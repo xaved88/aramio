@@ -113,6 +113,7 @@ function processWindUpAttack(attacker: any, allCombatants: any[], state: GameSta
     }
     
     // Check if wind-up is complete and attack can be performed
+    // Allow immediate attacks when attackReadyAt is set to a past time
     if (attacker.attackReadyAt > 0 && currentTime >= attacker.attackReadyAt) {
         // Find the target
         const target = allCombatants.find(c => c.id === attacker.target);

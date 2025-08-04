@@ -38,19 +38,26 @@ describe('TurretDestruction', () => {
                 hero.x = redTurret.x + 30; // Within attack radius (50)
                 hero.y = redTurret.y;
                 
-                // Set turret to 1 HP so it can be destroyed in one hit
-                redTurret.health = 1;
-            }
+                            // Set turret to 1 HP so it can be destroyed in one hit
+            redTurret.health = 1;
+        }
+        
+        // Set hero to be ready to attack immediately
+        if (hero) {
+            hero.lastAttackTime = -2000; // Old enough to allow attack (cooldown is 1000ms)
+            hero.attackReadyAt = 100; // Ready to attack immediately (past time relative to first update at 300)
+            hero.target = redTurret.id; // Set target
+        }
             
-            // Set hero's lastAttackTime to allow immediate attack
-            if (hero) {
-                hero.lastAttackTime = -1000; // Old enough to allow attack
-            }
-            
-            // Update game to trigger combat
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            // Update game multiple times to allow wind-up period to complete
+            let result = GameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
-                payload: { deltaTime: 100 }
+                payload: { deltaTime: 300 }
+            });
+            // Run another update to allow attack to complete
+            result = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 300 }
             });
             
             // Find the updated hero by controller
@@ -90,21 +97,28 @@ describe('TurretDestruction', () => {
                 }
             });
             
-            // Position hero far from turret (outside attack radius)
+                        // Position hero far from turret (outside attack radius)
             if (hero && redTurret) {
                 hero.x = redTurret.x + 100; // Outside attack radius (50)
                 hero.y = redTurret.y;
             }
             
-            // Set hero's lastAttackTime to allow immediate attack
+            // Set hero to be ready to attack immediately
             if (hero) {
-                hero.lastAttackTime = -1000; // Old enough to allow attack
+                hero.lastAttackTime = -2000; // Old enough to allow attack (cooldown is 1000ms)
+                hero.attackReadyAt = 100; // Ready to attack immediately (past time relative to first update at 300)
+                hero.target = redTurret.id; // Set target
             }
             
-            // Update game to trigger combat
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            // Update game multiple times to allow wind-up period to complete
+            let result = GameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
-                payload: { deltaTime: 100 }
+                payload: { deltaTime: 300 }
+            });
+            // Run another update to allow attack to complete
+            result = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 300 }
             });
             
             // Find the updated hero by controller
@@ -161,15 +175,24 @@ describe('TurretDestruction', () => {
                 // Set turret to 1 HP so it can be destroyed in one hit
                 redTurret.health = 1;
                 
-                // Set heroes' lastAttackTime to allow immediate attack
-                hero1.lastAttackTime = -1000;
-                hero2.lastAttackTime = -1000;
+                // Set heroes to be ready to attack immediately
+                hero1.lastAttackTime = -2000; // Old enough to allow attack (cooldown is 1000ms)
+                hero1.attackReadyAt = 100; // Ready to attack immediately (past time relative to first update at 300)
+                hero1.target = redTurret.id; // Set target
+                hero2.lastAttackTime = -2000; // Old enough to allow attack (cooldown is 1000ms)
+                hero2.attackReadyAt = 100; // Ready to attack immediately (past time relative to first update at 300)
+                hero2.target = redTurret.id; // Set target
             }
             
-            // Update game to trigger combat
-            const result = GameStateMachine.processAction(spawnResult2.newState, {
+            // Update game multiple times to allow wind-up period to complete
+            let result = GameStateMachine.processAction(spawnResult2.newState, {
                 type: 'UPDATE_GAME',
-                payload: { deltaTime: 100 }
+                payload: { deltaTime: 300 }
+            });
+            // Run another update to allow attack to complete
+            result = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 300 }
             });
             
             // Find the updated heroes by controller
@@ -225,10 +248,15 @@ describe('TurretDestruction', () => {
                 hero.lastAttackTime = -1000;
             }
             
-            // Update game to trigger combat
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            // Update game multiple times to allow wind-up period to complete
+            let result = GameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
-                payload: { deltaTime: 100 }
+                payload: { deltaTime: 300 }
+            });
+            // Run another update to allow attack to complete
+            result = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 300 }
             });
             
             // Find the updated hero by controller
@@ -273,10 +301,15 @@ describe('TurretDestruction', () => {
                 player.lastAttackTime = -1000; // Old enough to allow attack
             }
 
-            // Update game
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            // Update game multiple times to allow wind-up period to complete
+            let result = GameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
-                payload: { deltaTime: 100 }
+                payload: { deltaTime: 300 }
+            });
+            // Run another update to allow attack to complete
+            result = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 300 }
             });
 
             const newState = result.newState;
