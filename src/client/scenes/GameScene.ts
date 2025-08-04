@@ -189,6 +189,9 @@ export class GameScene extends Phaser.Scene {
                 console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
             }
         });
+
+        // Update UI manager with player session ID
+        this.uiManager.setPlayerSessionId(this.playerSessionId);
     }
 
     private setupInputHandlers(): void {
@@ -198,6 +201,14 @@ export class GameScene extends Phaser.Scene {
                     x: pointer.x,
                     y: pointer.y
                 });
+            }
+        });
+
+        // Add shift key handler for stats overlay
+        this.input.keyboard?.on('keydown-SHIFT', () => {
+            if (this.lastState) {
+                const sharedState = convertToSharedGameState(this.lastState);
+                this.uiManager.toggleStatsOverlay(sharedState);
             }
         });
     }

@@ -1,6 +1,6 @@
-import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
+import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion, HeroStats as ColyseusHeroStats } from '../../server/schema/GameState';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, HeroStats, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<string, Combatant>();
@@ -9,6 +9,15 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
     colyseusState.combatants.forEach((combatant: ColyseusCombatant, id: string) => {
         const sharedCombatant = convertToSharedCombatant(combatant, id);
         sharedCombatants.set(id, sharedCombatant);
+    });
+    
+    // Convert hero stats
+    const sharedHeroStats = new Map<string, HeroStats>();
+    colyseusState.heroStats.forEach((heroStats: ColyseusHeroStats, heroId: string) => {
+        sharedHeroStats.set(heroId, {
+            heroId: heroStats.heroId,
+            totalExperience: heroStats.totalExperience
+        });
     });
     
     // Convert projectiles
@@ -59,6 +68,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         winningTeam: colyseusState.winningTeam,
         gameEndTime: colyseusState.gameEndTime,
         combatants: sharedCombatants,
+        heroStats: sharedHeroStats,
         attackEvents: sharedAttackEvents,
         xpEvents: sharedXPEvents,
         levelUpEvents: sharedLevelUpEvents,

@@ -79,6 +79,11 @@ export interface Projectile {
     team: string;
 }
 
+export interface HeroStats {
+    heroId: string; // hero ID
+    totalExperience: number; // total XP earned throughout the match
+}
+
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {
     return combatant.type === COMBATANT_TYPES.HERO;
 }

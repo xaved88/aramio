@@ -23,6 +23,11 @@ export class LevelUpEvent extends Schema {
     @type('number') timestamp!: number; // When the level up occurred
 }
 
+export class HeroStats extends Schema {
+    @type('string') heroId!: string; // hero ID
+    @type('number') totalExperience = 0; // total XP earned throughout the match
+}
+
 export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
@@ -78,6 +83,7 @@ export class GameState extends Schema {
     @type('string') winningTeam = '';
     @type('number') gameEndTime = 0;
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
+    @type({ map: HeroStats }) heroStats = new MapSchema<HeroStats>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
     @type([XPEvent]) xpEvents = new ArraySchema<XPEvent>();
     @type([LevelUpEvent]) levelUpEvents = new ArraySchema<LevelUpEvent>();

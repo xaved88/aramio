@@ -3,6 +3,7 @@ import { COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTy
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
+import { StatsOverlay } from './StatsOverlay';
 
 /**
  * UIManager handles all UI elements including HUD, menus, and interface components.
@@ -12,6 +13,7 @@ export class UIManager {
     private scene: Phaser.Scene;
     private hudRenderer: HUDRenderer;
     private victoryScreen: VictoryScreen;
+    private statsOverlay: StatsOverlay;
 
     
     // HUD elements
@@ -29,6 +31,7 @@ export class UIManager {
         this.scene = scene;
         this.hudRenderer = new HUDRenderer(scene);
         this.victoryScreen = new VictoryScreen(scene);
+        this.statsOverlay = new StatsOverlay(scene);
         this.victoryScreen.setRestartCallback(() => {
             // Restart is now handled by the server, so we don't need to do anything here
             console.log('Victory screen restart callback - restart handled by server');
@@ -90,6 +93,27 @@ export class UIManager {
     }
 
     /**
+     * Sets the player session ID for stats overlay
+     */
+    setPlayerSessionId(sessionId: string | null): void {
+        this.statsOverlay.setPlayerSessionId(sessionId);
+    }
+
+    /**
+     * Toggles the stats overlay
+     */
+    toggleStatsOverlay(state: SharedGameState): void {
+        this.statsOverlay.toggle(state);
+    }
+
+    /**
+     * Updates the stats overlay
+     */
+    updateStatsOverlay(state: SharedGameState): void {
+        this.statsOverlay.update(state);
+    }
+
+    /**
      * Updates the HUD based on the current game state
      */
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: string | null = null): void {
@@ -127,6 +151,9 @@ export class UIManager {
             }
         );
         
+        // Update stats overlay if visible
+        this.updateStatsOverlay(state);
+        
         // Check for game end and show victory screen
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
             // Use the player's team if available, otherwise fall back to the current player's team
@@ -150,6 +177,7 @@ export class UIManager {
         if (this.hudAbilityBarBackground) this.hudAbilityBarBackground.destroy();
         
         this.victoryScreen.destroy();
+        this.statsOverlay.destroy();
         
         this.hudHealthBar = null;
         this.hudHealthBarBackground = null;

@@ -1,4 +1,4 @@
-import { GameState, Hero, XPEvent, LevelUpEvent } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent, LevelUpEvent, HeroStats } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -322,7 +322,7 @@ function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state
 function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: any): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
-    // Find all alive heroes in range
+    // Find all alive heroes in range and give XP to them
     const heroesInRange: Hero[] = [];
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
@@ -354,6 +354,12 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
 
 function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number): void {
     player.experience += amount;
+    
+    // Update totalExperience in HeroStats instead of Hero
+    const heroStats = state.heroStats.get(player.id);
+    if (heroStats) {
+        heroStats.totalExperience += amount;
+    }
     
     // Create XP event if position is provided
     if (xpX !== undefined && xpY !== undefined) {

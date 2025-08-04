@@ -1,4 +1,4 @@
-import { GameState, Hero, Ability } from '../../../schema/GameState';
+import { GameState, Hero, Ability, HeroStats } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -46,8 +46,14 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.ability.lastUsedTime = 0; // Start with 0, first use will be available
     hero.ability.strength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.STRENGTH;
     
-    // Add hero to state
+    // Initialize hero stats
+    const heroStats = new HeroStats();
+    heroStats.heroId = hero.id;
+    heroStats.totalExperience = 0;
+    
+    // Add hero and hero stats to state
     state.combatants.set(hero.id, hero);
+    state.heroStats.set(hero.id, heroStats);
     
     return { newState: state };
 } 
