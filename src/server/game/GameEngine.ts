@@ -132,6 +132,11 @@ export class GameEngine {
             return;
         }
 
+        // Prevent respawning entities from firing projectiles
+        if (player.state === 'respawning') {
+            return;
+        }
+
         const currentTime = Date.now();
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
