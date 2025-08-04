@@ -42,6 +42,7 @@ export class EntityManager {
 
     setPlayerSessionId(sessionId: string | null): void {
         this.playerSessionId = sessionId;
+        this.entityRenderer.setPlayerSessionId(sessionId);
     }
 
     /**

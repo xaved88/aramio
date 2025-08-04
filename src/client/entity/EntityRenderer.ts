@@ -8,9 +8,14 @@ import { CLIENT_CONFIG } from '../../Config';
  */
 export class EntityRenderer {
     private scene: Phaser.Scene;
+    private playerSessionId: string | null = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setPlayerSessionId(sessionId: string | null): void {
+        this.playerSessionId = sessionId;
     }
 
     /**
@@ -71,13 +76,43 @@ export class EntityRenderer {
                 const target = combatants.get(combatant.target);
                 if (target && target.health > 0) {
                     // Determine line color based on team
-                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
+                    
+                    // Calculate animation alpha based on wind-up progress
+                    const currentTime = Date.now();
+                    let alpha = CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                    
+                    if (combatant.attackReadyAt > 0) {
+                        // Calculate progress from 0 to 1
+                        const windUpDuration = combatant.windUp * 1000; // Convert to milliseconds
+                        const elapsed = currentTime - (combatant.attackReadyAt - windUpDuration);
+                        const progress = Math.min(Math.max(elapsed / windUpDuration, 0), 1);
+                        
+                        // Interpolate alpha from base to max
+                        alpha = CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA + 
+                               (CLIENT_CONFIG.TARGETING_LINES.MAX_ALPHA - CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA) * progress;
+                    }
+                    
+                    // Calculate offset for line endpoints to prevent overlap
+                    const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
+                    let sourceX = combatant.x;
+                    let sourceY = combatant.y;
+                    let targetX = target.x;
+                    let targetY = target.y;
+                    
+                    if (combatant.team === 'blue') {
+                        sourceX += offset;
+                        targetX += offset;
+                    } else {
+                        sourceX -= offset;
+                        targetX -= offset;
+                    }
                     
                     // Draw targeting line
-                    graphics.lineStyle(2, lineColor, 0.6);
+                    graphics.lineStyle(CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS, lineColor, alpha);
                     graphics.beginPath();
-                    graphics.moveTo(combatant.x, combatant.y);
-                    graphics.lineTo(target.x, target.y);
+                    graphics.moveTo(sourceX, sourceY);
+                    graphics.lineTo(targetX, targetY);
                     graphics.strokePath();
                 }
             }
@@ -375,8 +410,24 @@ export class EntityRenderer {
      */
     private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics): void {
         radiusIndicator.clear();
-        if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.HERO || !isHeroCombatant(combatant) || combatant.state !== 'respawning')) {
-            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA);
+        
+        // Only show radius indicator for structures (cradles, turrets) and the player's hero
+        const shouldShowRadius = (
+            combatant.health > 0 && 
+            (
+                // Structures always show radius
+                combatant.type === COMBATANT_TYPES.CRADLE || 
+                combatant.type === COMBATANT_TYPES.TURRET ||
+                // Player's hero shows radius (if not respawning)
+                (combatant.type === COMBATANT_TYPES.HERO && 
+                 isHeroCombatant(combatant) && 
+                 combatant.state !== 'respawning' &&
+                 combatant.controller === this.playerSessionId)
+            )
+        );
+        
+        if (shouldShowRadius) {
+            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 0.2); // Lighter alpha
             radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
         }
     }
