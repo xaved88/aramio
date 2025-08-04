@@ -8,11 +8,13 @@ const mockScene = {
             fillStyle: jest.fn().mockReturnThis(),
             fillRect: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn()
         })),
         text: jest.fn(() => ({
             setOrigin: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn()
         }))
     },
@@ -111,11 +113,13 @@ describe('VictoryScreen', () => {
             fillStyle: jest.fn().mockReturnThis(),
             fillRect: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn() 
         };
         const mockText = { 
             setOrigin: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn() 
         };
         const mockTween = { stop: jest.fn() };
