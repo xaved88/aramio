@@ -26,6 +26,8 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
     blueCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     blueCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+    blueCradle.windUp = GAMEPLAY_CONFIG.COMBAT.CRADLE.WIND_UP;
+    blueCradle.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     blueCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     blueCradle.lastAttackTime = 0;
     state.combatants.set(blueCradle.id, blueCradle);
@@ -42,6 +44,8 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redCradle.attackRadius = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS;
     redCradle.attackStrength = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH;
     redCradle.attackSpeed = GAMEPLAY_CONFIG.COMBAT.CRADLE.ATTACK_SPEED;
+    redCradle.windUp = GAMEPLAY_CONFIG.COMBAT.CRADLE.WIND_UP;
+    redCradle.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     redCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     redCradle.lastAttackTime = 0;
     state.combatants.set(redCradle.id, redCradle);
@@ -58,6 +62,8 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
     blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+    blueTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
+    blueTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     blueTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     blueTurret.lastAttackTime = 0;
     state.combatants.set(blueTurret.id, blueTurret);
@@ -74,6 +80,8 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
     redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
     redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+    redTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
+    redTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     redTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     redTurret.lastAttackTime = 0;
     state.combatants.set(redTurret.id, redTurret);

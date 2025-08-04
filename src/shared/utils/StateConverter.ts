@@ -80,7 +80,9 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: stri
         attackSpeed: colyseusCombatant.attackSpeed,
         lastAttackTime: colyseusCombatant.lastAttackTime,
         size: colyseusCombatant.size,
-        target: colyseusCombatant.target
+        target: colyseusCombatant.target,
+        windUp: colyseusCombatant.windUp,
+        attackReadyAt: colyseusCombatant.attackReadyAt
     };
     
     switch (colyseusCombatant.type) {
@@ -111,7 +113,9 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: stri
                 attackSpeed: colyseusCombatant.attackSpeed,
                 lastAttackTime: colyseusCombatant.lastAttackTime,
                 size: colyseusCombatant.size,
-                target: colyseusCombatant.target
+                target: colyseusCombatant.target,
+                windUp: colyseusCombatant.windUp,
+                attackReadyAt: colyseusCombatant.attackReadyAt
             } as HeroCombatant;
             
         case COMBATANT_TYPES.CRADLE:

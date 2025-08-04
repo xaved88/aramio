@@ -31,6 +31,8 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
     hero.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
     hero.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
+    hero.windUp = GAMEPLAY_CONFIG.COMBAT.PLAYER.WIND_UP;
+    hero.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
     hero.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
     hero.experience = 0;

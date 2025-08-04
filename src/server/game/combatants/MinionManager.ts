@@ -104,6 +104,8 @@ export class MinionManager {
         minion.attackRadius = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_RADIUS;
         minion.attackStrength = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_STRENGTH;
         minion.attackSpeed = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_SPEED;
+        minion.windUp = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].WIND_UP;
+        minion.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
         minion.size = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].SIZE;
         minion.lastAttackTime = 0;
 

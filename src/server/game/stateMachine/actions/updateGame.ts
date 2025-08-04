@@ -88,47 +88,55 @@ function processCombat(state: GameState): void {
         updateCombatantTargeting(attacker, allCombatants);
     });
     
+    // NEW: Wind-up attack system
     allCombatants.forEach(attacker => {
         if (!CombatantUtils.isCombatantAlive(attacker)) return;
         
-        // Check if attacker can attack (based on attack speed)
+        processWindUpAttack(attacker, allCombatants, state, currentTime);
+    });
+}
+
+/**
+ * Processes wind-up attack logic for a combatant
+ */
+function processWindUpAttack(attacker: any, allCombatants: any[], state: GameState, currentTime: number): void {
+    // Check if attacker has a target and can start wind-up
+    if (attacker.target && attacker.attackReadyAt === 0) {
+        // Check if attack is off cooldown
         const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
         const attackCooldown = 1000 / attacker.attackSpeed; // Convert to milliseconds
         
         if (timeSinceLastAttack >= attackCooldown) {
-            // Find enemies in range
-            const enemiesInRange = allCombatants.filter(target => {
-                if (!CombatantUtils.isCombatantAlive(target)) return false;
-                if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
-                return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
-            });
-            
-            // Find the nearest enemy in range
-            if (enemiesInRange.length > 0) {
-                let nearestEnemy = enemiesInRange[0];
-                let nearestDistance = CombatantUtils.getDistance(attacker, nearestEnemy);
-                
-                enemiesInRange.forEach(enemy => {
-                    const distance = CombatantUtils.getDistance(attacker, enemy);
-                    if (distance < nearestDistance) {
-                        nearestEnemy = enemy;
-                        nearestDistance = distance;
-                    }
-                });
-                
-                // Attack the nearest enemy
-                CombatantUtils.damageCombatant(nearestEnemy, attacker.attackStrength);
-                attacker.lastAttackTime = currentTime;
-                
-                // Create attack event
-                const attackEvent = new AttackEvent();
-                attackEvent.sourceId = attacker.id;
-                attackEvent.targetId = nearestEnemy.id;
-                attackEvent.timestamp = currentTime;
-                state.attackEvents.push(attackEvent);
-            }
+            // Start wind-up period
+            attacker.attackReadyAt = currentTime + (attacker.windUp * 1000); // Convert windUp to milliseconds
         }
-    });
+    }
+    
+    // Check if wind-up is complete and attack can be performed
+    if (attacker.attackReadyAt > 0 && currentTime >= attacker.attackReadyAt) {
+        // Find the target
+        const target = allCombatants.find(c => c.id === attacker.target);
+        
+        if (target && CombatantUtils.isCombatantAlive(target) && 
+            CombatantUtils.areOpposingTeams(attacker, target) &&
+            CombatantUtils.isInRange(attacker, target, attacker.attackRadius)) {
+            
+            // Perform the attack
+            CombatantUtils.damageCombatant(target, attacker.attackStrength);
+            attacker.lastAttackTime = currentTime;
+            attacker.attackReadyAt = 0; // Reset wind-up
+            
+            // Create attack event
+            const attackEvent = new AttackEvent();
+            attackEvent.sourceId = attacker.id;
+            attackEvent.targetId = target.id;
+            attackEvent.timestamp = currentTime;
+            state.attackEvents.push(attackEvent);
+        } else {
+            // Target is no longer valid, reset wind-up
+            attacker.attackReadyAt = 0;
+        }
+    }
 }
 
 /**
@@ -142,9 +150,10 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
         return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
     });
     
-    // If no enemies in range, clear target
+    // If no enemies in range, clear target and reset attack ready time
     if (enemiesInRange.length === 0) {
         attacker.target = undefined;
+        attacker.attackReadyAt = 0; // Reset wind-up when target is lost
         return;
     }
     
@@ -184,6 +193,7 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
         });
         
         attacker.target = nearestEnemy.id;
+        attacker.attackReadyAt = 0; // Reset wind-up when target changes
     }
 }
 

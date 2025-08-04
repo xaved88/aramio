@@ -56,6 +56,8 @@ export class Combatant extends Schema {
     @type('number') lastAttackTime!: number;
     @type('number') size!: number; // collision radius
     @type('string') target?: string; // ID of the combatant being targeted
+    @type('number') windUp!: number; // Time in seconds before attack can be performed
+    @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
 }
 
 export class Hero extends Combatant {
