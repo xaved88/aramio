@@ -33,6 +33,7 @@ export interface BaseCombatant {
     attackStrength: number;
     attackSpeed: number;
     lastAttackTime: number;
+    target?: string; // ID of the combatant being targeted
 }
 
 export interface HeroCombatant extends BaseCombatant {

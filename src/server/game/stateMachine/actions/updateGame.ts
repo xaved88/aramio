@@ -81,9 +81,15 @@ function processCombat(state: GameState): void {
     const allCombatants = Array.from(state.combatants.values());
     const currentTime = state.gameTime;
     
+    // Update targeting for all combatants
     allCombatants.forEach(attacker => {
-        if (attacker.health <= 0) return;
-        if (attacker.type === COMBATANT_TYPES.HERO && (attacker as Hero).state === 'respawning') return;
+        if (!CombatantUtils.isCombatantAlive(attacker)) return;
+        
+        updateCombatantTargeting(attacker, allCombatants);
+    });
+    
+    allCombatants.forEach(attacker => {
+        if (!CombatantUtils.isCombatantAlive(attacker)) return;
         
         // Check if attacker can attack (based on attack speed)
         const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
@@ -123,6 +129,62 @@ function processCombat(state: GameState): void {
             }
         }
     });
+}
+
+/**
+ * Updates targeting for a combatant based on available enemies in range
+ */
+function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
+    // Find alive enemies in attack range
+    const enemiesInRange = allCombatants.filter(target => {
+        if (!CombatantUtils.isCombatantAlive(target)) return false;
+        if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
+        return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
+    });
+    
+    // If no enemies in range, clear target
+    if (enemiesInRange.length === 0) {
+        attacker.target = undefined;
+        return;
+    }
+    
+    // If we have no target but enemies are in range, set target to nearest enemy
+    if (!attacker.target) {
+        let nearestEnemy = enemiesInRange[0];
+        let nearestDistance = CombatantUtils.getDistance(attacker, nearestEnemy);
+        
+        enemiesInRange.forEach(enemy => {
+            const distance = CombatantUtils.getDistance(attacker, enemy);
+            if (distance < nearestDistance) {
+                nearestEnemy = enemy;
+                nearestDistance = distance;
+            }
+        });
+        
+        attacker.target = nearestEnemy.id;
+        return;
+    }
+    
+    // Check if current target is still valid (alive, in range, and still exists)
+    const currentTarget = allCombatants.find(c => c.id === attacker.target);
+    if (!currentTarget || 
+        !CombatantUtils.isCombatantAlive(currentTarget) || 
+        !CombatantUtils.areOpposingTeams(attacker, currentTarget) ||
+        !CombatantUtils.isInRange(attacker, currentTarget, attacker.attackRadius)) {
+        // Current target is invalid, find new nearest target
+        let nearestEnemy = enemiesInRange[0];
+        let nearestDistance = CombatantUtils.getDistance(attacker, nearestEnemy);
+        
+        enemiesInRange.forEach(enemy => {
+            const distance = CombatantUtils.getDistance(attacker, enemy);
+            if (distance < nearestDistance) {
+                nearestEnemy = enemy;
+                nearestDistance = distance;
+            }
+        });
+        
+        attacker.target = nearestEnemy.id;
+    }
 }
 
 function handleCollisions(state: GameState): void {

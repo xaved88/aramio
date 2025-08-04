@@ -55,6 +55,7 @@ export class Combatant extends Schema {
     @type('number') attackSpeed!: number; // attacks per second
     @type('number') lastAttackTime!: number;
     @type('number') size!: number; // collision radius
+    @type('string') target?: string; // ID of the combatant being targeted
 }
 
 export class Hero extends Combatant {

@@ -30,6 +30,7 @@ export class EntityManager {
     private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
 
@@ -64,6 +65,9 @@ export class EntityManager {
         
         // Update projectiles
         this.updateProjectileEntities(state);
+        
+        // Render targeting lines
+        this.renderTargetingLines(state);
         
         // Process XP events
         this.processXPEvents(state);
@@ -430,6 +434,11 @@ export class EntityManager {
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         
+        if (this.targetingLinesGraphics) {
+            this.targetingLinesGraphics.destroy();
+            this.targetingLinesGraphics = null;
+        }
+        
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
@@ -438,6 +447,20 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+    }
+
+    /**
+     * Renders targeting lines between combatants and their targets
+     */
+    private renderTargetingLines(state: SharedGameState): void {
+        // Create targeting lines graphics if it doesn't exist
+        if (!this.targetingLinesGraphics) {
+            this.targetingLinesGraphics = this.scene.add.graphics();
+            this.targetingLinesGraphics.setDepth(1); // Above buildings, below units
+        }
+        
+        // Render the targeting lines
+        this.entityRenderer.renderTargetingLines(state.combatants, this.targetingLinesGraphics);
     }
 
     /**
@@ -450,6 +473,11 @@ export class EntityManager {
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
+        
+        if (this.targetingLinesGraphics) {
+            this.targetingLinesGraphics.destroy();
+            this.targetingLinesGraphics = null;
+        }
         
         this.entityGraphics.clear();
         this.entityTexts.clear();

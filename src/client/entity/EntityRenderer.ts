@@ -55,6 +55,36 @@ export class EntityRenderer {
     }
 
     /**
+     * Renders targeting lines between combatants and their targets
+     */
+    renderTargetingLines(
+        combatants: Map<string, Combatant>,
+        graphics: Phaser.GameObjects.Graphics
+    ): void {
+        graphics.clear();
+        
+        combatants.forEach((combatant, id) => {
+            if (combatant.health <= 0) return;
+            if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') return;
+            
+            if (combatant.target) {
+                const target = combatants.get(combatant.target);
+                if (target && target.health > 0) {
+                    // Determine line color based on team
+                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+                    
+                    // Draw targeting line
+                    graphics.lineStyle(2, lineColor, 0.6);
+                    graphics.beginPath();
+                    graphics.moveTo(combatant.x, combatant.y);
+                    graphics.lineTo(target.x, target.y);
+                    graphics.strokePath();
+                }
+            }
+        });
+    }
+
+    /**
      * Renders the main graphics for an entity based on its type
      */
     private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
