@@ -139,6 +139,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.respawnDuration = 6000;
             bluePlayer.experience = 0;
             bluePlayer.level = 1;
+            bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             
                     // Create red player
         redPlayer = new Hero();
@@ -158,6 +159,7 @@ describe('handleUpdateGame', () => {
             redPlayer.respawnDuration = 6000;
             redPlayer.experience = 0;
             redPlayer.level = 1;
+            redPlayer.attackReadyAt = 0; // Initialize wind-up field
             
             gameState.combatants.set(bluePlayer.id, bluePlayer);
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -166,14 +168,43 @@ describe('handleUpdateGame', () => {
         it('should process combat between players', () => {
             const originalHealth = redPlayer.health;
             
+            // Set targets explicitly to ensure attacks happen
+            bluePlayer.target = redPlayer.id;
+            redPlayer.target = bluePlayer.id;
+            
+            // Set attackReadyAt to a positive past time to trigger immediate attacks
+            bluePlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
+            redPlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
+            
+            // Run multiple updates to allow wind-up period to complete
             result = handleUpdateGame(gameState, action);
+            
+            // With wind-up system, first update should start wind-up, second should execute attack
+            // Run another update to allow attack to complete
+            result = handleUpdateGame(result.newState, action);
+            
+            // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
+            result = handleUpdateGame(result.newState, action);
             
             // Red player should take damage from blue player
             expect(result.newState.combatants.get(redPlayer.id)!.health).toBeLessThan(originalHealth);
         });
 
         it('should create attack events during combat', () => {
+            // Set targets explicitly to ensure attacks happen
+            bluePlayer.target = redPlayer.id;
+            redPlayer.target = bluePlayer.id;
+            
+            // Set attackReadyAt to a positive past time to trigger immediate attacks
+            bluePlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
+            redPlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
+            
+            // Run multiple updates to allow wind-up period to complete
             result = handleUpdateGame(gameState, action);
+            result = handleUpdateGame(result.newState, action);
+            
+            // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
+            result = handleUpdateGame(result.newState, action);
             
             expect(result.newState.attackEvents.length).toBeGreaterThan(0);
             expect(result.newState.attackEvents[0]?.sourceId).toBe(bluePlayer.id);
@@ -230,6 +261,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.respawnDuration = 6000;
             bluePlayer.experience = 0;
             bluePlayer.level = 1;
+            bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             
             gameState.combatants.set(deadMinion.id, deadMinion);
             gameState.combatants.set(bluePlayer.id, bluePlayer);
@@ -269,6 +301,7 @@ describe('handleUpdateGame', () => {
             redPlayer.respawnDuration = 6000;
             redPlayer.experience = 0;
             redPlayer.level = 1;
+            redPlayer.attackReadyAt = 0; // Initialize wind-up field
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             
@@ -443,6 +476,7 @@ describe('handleUpdateGame', () => {
             attacker.respawnDuration = 6000;
             attacker.experience = 0;
             attacker.level = 1;
+            attacker.attackReadyAt = 0; // Initialize wind-up field
             attacker.ability = new (require('../../../../schema/GameState').Ability)();
             attacker.ability.type = 'projectile';
             attacker.ability.cooldown = 5000;
@@ -467,6 +501,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.respawnDuration = 6000;
             nearEnemy.experience = 0;
             nearEnemy.level = 1;
+            nearEnemy.attackReadyAt = 0; // Initialize wind-up field
             nearEnemy.ability = new (require('../../../../schema/GameState').Ability)();
             nearEnemy.ability.type = 'projectile';
             nearEnemy.ability.cooldown = 5000;
@@ -491,6 +526,7 @@ describe('handleUpdateGame', () => {
             farEnemy.respawnDuration = 6000;
             farEnemy.experience = 0;
             farEnemy.level = 1;
+            farEnemy.attackReadyAt = 0; // Initialize wind-up field
             farEnemy.ability = new (require('../../../../schema/GameState').Ability)();
             farEnemy.ability.type = 'projectile';
             farEnemy.ability.cooldown = 5000;
@@ -507,7 +543,18 @@ describe('handleUpdateGame', () => {
             const initialNearHealth = nearEnemy.health;
             const initialFarHealth = farEnemy.health;
             
+            // Set target explicitly to ensure attack happens
+            attacker.target = nearEnemy.id;
+            
+            // Set attackReadyAt to a positive past time to trigger immediate attack
+            attacker.attackReadyAt = 900; // Past time relative to gameTime 1000
+            
+            // Run multiple updates to allow wind-up period to complete
             result = handleUpdateGame(gameState, action);
+            result = handleUpdateGame(result.newState, action);
+            
+            // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
+            result = handleUpdateGame(result.newState, action);
             
             const finalNearHealth = result.newState.combatants.get('near-enemy')?.health;
             const finalFarHealth = result.newState.combatants.get('far-enemy')?.health;
@@ -570,6 +617,7 @@ describe('handleUpdateGame', () => {
             player1.respawnDuration = 6000;
             player1.experience = 0;
             player1.level = 1;
+            player1.attackReadyAt = 0; // Initialize wind-up field
             player1.ability = new (require('../../../../schema/GameState').Ability)();
             player1.ability.type = 'projectile';
             player1.ability.cooldown = 1000;
@@ -595,6 +643,7 @@ describe('handleUpdateGame', () => {
             player2.respawnDuration = 6000;
             player2.experience = 0;
             player2.level = 1;
+            player2.attackReadyAt = 0; // Initialize wind-up field
             player2.ability = new (require('../../../../schema/GameState').Ability)();
             player2.ability.type = 'projectile';
             player2.ability.cooldown = 1000;
@@ -880,6 +929,7 @@ describe('handleUpdateGame', () => {
             blueHero1.respawnDuration = 6000;
             blueHero1.experience = 0;
             blueHero1.level = 1;
+            blueHero1.attackReadyAt = 0; // Initialize wind-up field
             blueHero1.ability = new (require('../../../../schema/GameState').Ability)();
             blueHero1.ability.type = 'projectile';
             blueHero1.ability.cooldown = 1000;

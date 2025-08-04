@@ -38,9 +38,10 @@ export const GAMEPLAY_CONFIG = {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         PLAYER: {
             HEALTH: 50,
-            ATTACK_RADIUS: 35,
+            ATTACK_RADIUS: 45,
             ATTACK_STRENGTH: 5,
             ATTACK_SPEED: 1, // attacks per second
+            WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
             RESPAWN_TIME_MS: 6000,
             SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
             ABILITY: {
@@ -55,6 +56,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 1, // attacks per second
+            WIND_UP: 0.1, // 0.1 seconds wind-up time for cradles
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
@@ -62,6 +64,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 70,
             ATTACK_STRENGTH: 25,
             ATTACK_SPEED: 2, // attacks per second
+            WIND_UP: 0.5, // 0.5 seconds wind-up time for turrets
             SIZE: 20, // collision radius (average of width/height)
         },
         MINION: {
@@ -70,6 +73,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 25,
                 ATTACK_STRENGTH: 10,
                 ATTACK_SPEED: 0.8, // attacks per second
+                WIND_UP: 0.3, // 0.3 seconds wind-up time for warrior minions
                 SIZE: 12, // collision radius (matches MINION_SIZE)
             },
             ARCHER: {
@@ -77,6 +81,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 70,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1.2, // attacks per second
+                WIND_UP: 0.25, // 0.25 seconds wind-up time for archer minions
                 SIZE: 12, // collision radius (matches MINION_SIZE)
             },
         },
@@ -148,6 +153,17 @@ export const CLIENT_CONFIG = {
         RED: 0xe74c3c,
         BLUE_RESPAWNING: 0x85c1e9, // much lighter blue
         RED_RESPAWNING: 0xf5b7b1, // much lighter red
+    },
+    TARGETING_LINES: {
+        BLUE: 0x85c1e9, // lighter blue (same as respawning)
+        RED: 0xf5b7b1, // lighter red (same as respawning)
+        BASE_ALPHA: 0.2, // base alpha for other combatants
+        PLAYER_BASE_ALPHA: 0.5, // higher alpha when player's hero is involved
+        LINE_THICKNESS: 2,
+        FLASH_LINE_THICKNESS: 3, // thicker line when flashing
+        OFFSET_PIXELS: 5, // offset for line endpoints to prevent overlap
+        FLASH_DURATION_MS: 100, // flash duration when attack fires
+        FLASH_ALPHA: 0.9, // alpha during flash
     },
     ANIMATIONS: {
         ATTACK_SOURCE_DURATION_MS: 200, // flash duration

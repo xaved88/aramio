@@ -8,9 +8,35 @@ import { CLIENT_CONFIG } from '../../Config';
  */
 export class EntityRenderer {
     private scene: Phaser.Scene;
+    private playerSessionId: string | null = null;
+    private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setPlayerSessionId(sessionId: string | null): void {
+        this.playerSessionId = sessionId;
+    }
+
+    /**
+     * Triggers a flash animation on a targeting line when an attack fires
+     */
+    triggerTargetingLineFlash(sourceId: string, targetId: string): void {
+        const targetingLineKey = `${sourceId}-${targetId}`;
+        this.flashingTargetingLines.add(targetingLineKey);
+        
+        // Remove the flash after the duration
+        setTimeout(() => {
+            this.flashingTargetingLines.delete(targetingLineKey);
+        }, CLIENT_CONFIG.TARGETING_LINES.FLASH_DURATION_MS);
+    }
+
+    /**
+     * Clears all flashing targeting lines (called when scene is destroyed)
+     */
+    clearFlashingTargetingLines(): void {
+        this.flashingTargetingLines.clear();
     }
 
     /**
@@ -52,6 +78,69 @@ export class EntityRenderer {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             this.handleTurretVisibility(combatant, text, radiusIndicator);
         }
+    }
+
+    /**
+     * Renders targeting lines between combatants and their targets
+     */
+    renderTargetingLines(
+        combatants: Map<string, Combatant>,
+        graphics: Phaser.GameObjects.Graphics,
+        gameTime?: number
+    ): void {
+        graphics.clear();
+        
+        combatants.forEach((combatant, id) => {
+            if (combatant.health <= 0) return;
+            if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') return;
+            
+            if (combatant.target) {
+                const target = combatants.get(combatant.target);
+                if (target && target.health > 0) {
+                                         // Determine line color based on team
+                     const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
+                     
+                     // Check if player's hero is involved in this targeting line
+                     const isPlayerInvolved = this.playerSessionId && (
+                         (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) ||
+                         (target.type === COMBATANT_TYPES.HERO && isHeroCombatant(target) && target.controller === this.playerSessionId)
+                     );
+                     
+                     // Calculate alpha - either flash or base alpha
+                     let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                     
+                     // Check if this targeting line should flash
+                     const targetingLineKey = `${combatant.id}-${target.id}`;
+                     const isFlashing = this.flashingTargetingLines.has(targetingLineKey);
+                     if (isFlashing) {
+                         alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
+                     }
+                     
+                     // Calculate offset for line endpoints to prevent overlap
+                     const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
+                     let sourceX = combatant.x;
+                     let sourceY = combatant.y;
+                     let targetX = target.x;
+                     let targetY = target.y;
+                     
+                     if (combatant.team === 'blue') {
+                         sourceX += offset;
+                         targetX += offset;
+                     } else {
+                         sourceX -= offset;
+                         targetX -= offset;
+                     }
+                     
+                     // Draw targeting line with appropriate thickness
+                     const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
+                     graphics.lineStyle(lineThickness, lineColor, alpha);
+                     graphics.beginPath();
+                     graphics.moveTo(sourceX, sourceY);
+                     graphics.lineTo(targetX, targetY);
+                     graphics.strokePath();
+                }
+            }
+        });
     }
 
     /**
@@ -345,8 +434,24 @@ export class EntityRenderer {
      */
     private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics): void {
         radiusIndicator.clear();
-        if (combatant.health > 0 && (combatant.type !== COMBATANT_TYPES.HERO || !isHeroCombatant(combatant) || combatant.state !== 'respawning')) {
-            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA);
+        
+        // Only show radius indicator for structures (cradles, turrets) and the player's hero
+        const shouldShowRadius = (
+            combatant.health > 0 && 
+            (
+                // Structures always show radius
+                combatant.type === COMBATANT_TYPES.CRADLE || 
+                combatant.type === COMBATANT_TYPES.TURRET ||
+                // Player's hero shows radius (if not respawning)
+                (combatant.type === COMBATANT_TYPES.HERO && 
+                 isHeroCombatant(combatant) && 
+                 combatant.state !== 'respawning' &&
+                 combatant.controller === this.playerSessionId)
+            )
+        );
+        
+        if (shouldShowRadius) {
+            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 0.2); // Lighter alpha
             radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
         }
     }
