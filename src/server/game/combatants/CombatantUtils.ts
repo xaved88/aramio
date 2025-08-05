@@ -2,14 +2,19 @@ import { Combatant } from '../../schema/GameState';
 
 export class CombatantUtils {
     /**
-     * Applies damage to a combatant and returns whether they died
+     * Applies damage to a combatant and returns damage result
      * @param combatant The combatant to damage
      * @param damage Amount of damage to apply
-     * @returns true if the combatant died (health <= 0)
+     * @returns Object with kill status and damage dealt
      */
-    static damageCombatant(combatant: Combatant, damage: number): boolean {
+    static damageCombatant(combatant: Combatant, damage: number): { killed: boolean; damageDealt: number } {
+        const previousHealth = combatant.health;
         combatant.health = Math.max(0, combatant.health - damage);
-        return combatant.health <= 0;
+        const actualDamage = previousHealth - combatant.health;
+        return {
+            killed: combatant.health <= 0,
+            damageDealt: actualDamage
+        };
     }
 
     /**

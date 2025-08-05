@@ -3,6 +3,7 @@ import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes, StateMachineResult } from './stateMachine/types';
 import { GAMEPLAY_CONFIG } from '../../Config';
 import { CLIENT_CONFIG } from '../../Config';
+import { CombatantUtils } from './combatants/CombatantUtils';
 
 export class GameEngine {
     private state: GameState;
@@ -234,7 +235,7 @@ export class GameEngine {
                 
                 // Only damage units (players and minions), not structures
                 if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
-                    closestCombatant.health = Math.max(0, closestCombatant.health - projectile.strength);
+                    CombatantUtils.damageCombatant(closestCombatant, projectile.strength);
                 }
             }
         });
