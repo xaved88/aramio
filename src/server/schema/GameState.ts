@@ -24,6 +24,21 @@ export class LevelUpEvent extends Schema {
     @type('number') timestamp!: number; // When the level up occurred
 }
 
+export class DamageEvent extends Schema {
+    @type('string') sourceId!: string; // ID of the combatant that dealt damage
+    @type('string') targetId!: string; // ID of the combatant that took damage
+    @type('string') targetType!: string; // Type of the target (minion, hero, turret, cradle)
+    @type('number') amount!: number; // Amount of damage dealt
+    @type('number') timestamp!: number; // When the damage occurred
+}
+
+export class KillEvent extends Schema {
+    @type('string') sourceId!: string; // ID of the combatant that got the kill
+    @type('string') targetId!: string; // ID of the combatant that was killed
+    @type('string') targetType!: string; // Type of the target (minion, hero, turret, cradle)
+    @type('number') timestamp!: number; // When the kill occurred
+}
+
 export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
@@ -86,5 +101,7 @@ export class GameState extends Schema {
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
     @type([XPEvent]) xpEvents = new ArraySchema<XPEvent>();
     @type([LevelUpEvent]) levelUpEvents = new ArraySchema<LevelUpEvent>();
+    @type([DamageEvent]) damageEvents = new ArraySchema<DamageEvent>();
+    @type([KillEvent]) killEvents = new ArraySchema<KillEvent>();
     @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
 } 

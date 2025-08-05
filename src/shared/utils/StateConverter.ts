@@ -1,6 +1,6 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, COMBATANT_TYPES } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<string, Combatant>();
@@ -52,6 +52,23 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    // Convert damage events
+    const sharedDamageEvents: DamageEvent[] = colyseusState.damageEvents.map(event => ({
+        sourceId: event.sourceId,
+        targetId: event.targetId,
+        targetType: event.targetType,
+        amount: event.amount,
+        timestamp: event.timestamp
+    }));
+    
+    // Convert kill events
+    const sharedKillEvents: KillEvent[] = colyseusState.killEvents.map(event => ({
+        sourceId: event.sourceId,
+        targetId: event.targetId,
+        targetType: event.targetType,
+        timestamp: event.timestamp
+    }));
+    
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
@@ -62,6 +79,8 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         attackEvents: sharedAttackEvents,
         xpEvents: sharedXPEvents,
         levelUpEvents: sharedLevelUpEvents,
+        damageEvents: sharedDamageEvents,
+        killEvents: sharedKillEvents,
         projectiles: sharedProjectiles
     };
 }

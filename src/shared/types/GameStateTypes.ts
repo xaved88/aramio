@@ -1,4 +1,4 @@
-import { Combatant, AttackEvent, Projectile } from './CombatantTypes';
+import { Combatant, AttackEvent, DamageEvent, KillEvent, Projectile } from './CombatantTypes';
 
 export interface XPEvent {
     playerId: string;
@@ -26,5 +26,7 @@ export interface SharedGameState {
     attackEvents: AttackEvent[];
     xpEvents: XPEvent[];
     levelUpEvents: LevelUpEvent[];
+    damageEvents: DamageEvent[];
+    killEvents: KillEvent[];
     projectiles: Map<string, Projectile>;
 } 

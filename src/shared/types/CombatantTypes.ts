@@ -71,6 +71,21 @@ export interface AttackEvent {
     timestamp: number;
 }
 
+export interface DamageEvent {
+    sourceId: string;
+    targetId: string;
+    targetType: string;
+    amount: number;
+    timestamp: number;
+}
+
+export interface KillEvent {
+    sourceId: string;
+    targetId: string;
+    targetType: string;
+    timestamp: number;
+}
+
 export interface Projectile {
     id: string;
     ownerId: string;

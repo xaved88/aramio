@@ -44,6 +44,28 @@ export function gameStateToString(gameState: GameState): string {
         });
     }
     
+    // Damage events
+    lines.push(``);
+    lines.push(`DAMAGE EVENTS (${gameState.damageEvents.length}):`);
+    if (gameState.damageEvents.length === 0) {
+        lines.push(`  No recent damage`);
+    } else {
+        gameState.damageEvents.slice(-5).forEach(event => {
+            lines.push(`  ${event.sourceId} -> ${event.targetId} (${event.targetType}) for ${event.amount} damage at ${event.timestamp}ms`);
+        });
+    }
+    
+    // Kill events
+    lines.push(``);
+    lines.push(`KILL EVENTS (${gameState.killEvents.length}):`);
+    if (gameState.killEvents.length === 0) {
+        lines.push(`  No recent kills`);
+    } else {
+        gameState.killEvents.slice(-5).forEach(event => {
+            lines.push(`  ${event.sourceId} killed ${event.targetId} (${event.targetType}) at ${event.timestamp}ms`);
+        });
+    }
+    
     // Summary stats
     lines.push(``);
     const totalHealth = Array.from(gameState.combatants.values())
