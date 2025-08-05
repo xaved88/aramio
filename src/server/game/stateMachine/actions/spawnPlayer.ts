@@ -1,4 +1,4 @@
-import { GameState, Hero, Ability } from '../../../schema/GameState';
+import { GameState, Hero, Ability, RoundStats } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -37,10 +37,18 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
     hero.experience = 0;
     hero.level = 1;
-    hero.totalExperience = 0;
     hero.lastAttackTime = 0;
     hero.state = 'alive';
     hero.respawnTime = 0;
+    
+    // Initialize round stats
+    hero.roundStats = new RoundStats();
+    hero.roundStats.totalExperience = 0;
+    hero.roundStats.minionKills = 0;
+    hero.roundStats.heroKills = 0;
+    hero.roundStats.turretKills = 0;
+    hero.roundStats.damageTaken = 0;
+    hero.roundStats.damageDealt = 0;
     
     // Initialize ability
     hero.ability = new Ability();

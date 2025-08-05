@@ -10,6 +10,11 @@ interface PlayerStats {
     level: number;
     experience: number;
     totalExperience: number; // total XP earned throughout the match
+    minionKills: number;
+    heroKills: number;
+    turretKills: number;
+    damageTaken: number;
+    damageDealt: number;
     isBot: boolean;
     isCurrentPlayer: boolean;
 }
@@ -39,7 +44,12 @@ export class StatsOverlay {
         arrow: 20,
         playerId: 120,
         level: 50,
-        totalXp: 70
+        totalXp: 70,
+        minionKills: 80,
+        heroKills: 70,
+        turretKills: 80,
+        damageTaken: 90,
+        damageDealt: 90
     };
 
     constructor(scene: Phaser.Scene) {
@@ -224,6 +234,56 @@ export class StatsOverlay {
         cells.push(xpHeader);
         currentX += this.COLUMN_WIDTHS.totalXp;
 
+        // Minion Kills header
+        const minionKillsHeader = this.scene.add.text(currentX, startY, 'Minion K', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        minionKillsHeader.setDepth(1001);
+        cells.push(minionKillsHeader);
+        currentX += this.COLUMN_WIDTHS.minionKills;
+
+        // Hero Kills header
+        const heroKillsHeader = this.scene.add.text(currentX, startY, 'Hero K', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        heroKillsHeader.setDepth(1001);
+        cells.push(heroKillsHeader);
+        currentX += this.COLUMN_WIDTHS.heroKills;
+
+        // Turret Kills header
+        const turretKillsHeader = this.scene.add.text(currentX, startY, 'Turret K', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        turretKillsHeader.setDepth(1001);
+        cells.push(turretKillsHeader);
+        currentX += this.COLUMN_WIDTHS.turretKills;
+
+        // Damage Taken header
+        const damageTakenHeader = this.scene.add.text(currentX, startY, 'Dmg Taken', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageTakenHeader.setDepth(1001);
+        cells.push(damageTakenHeader);
+        currentX += this.COLUMN_WIDTHS.damageTaken;
+
+        // Damage Dealt header
+        const damageDealtHeader = this.scene.add.text(currentX, startY, 'Dmg Dealt', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageDealtHeader.setDepth(1001);
+        cells.push(damageDealtHeader);
+        currentX += this.COLUMN_WIDTHS.damageDealt;
+
         return cells;
     }
 
@@ -276,6 +336,56 @@ export class StatsOverlay {
         cells.push(xpCell);
         currentX += this.COLUMN_WIDTHS.totalXp;
 
+        // Minion Kills cell
+        const minionKillsCell = this.scene.add.text(currentX, startY, Math.round(player.minionKills).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        minionKillsCell.setDepth(1001);
+        cells.push(minionKillsCell);
+        currentX += this.COLUMN_WIDTHS.minionKills;
+
+        // Hero Kills cell
+        const heroKillsCell = this.scene.add.text(currentX, startY, Math.round(player.heroKills).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        heroKillsCell.setDepth(1001);
+        cells.push(heroKillsCell);
+        currentX += this.COLUMN_WIDTHS.heroKills;
+
+        // Turret Kills cell
+        const turretKillsCell = this.scene.add.text(currentX, startY, Math.round(player.turretKills).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        turretKillsCell.setDepth(1001);
+        cells.push(turretKillsCell);
+        currentX += this.COLUMN_WIDTHS.turretKills;
+
+        // Damage Taken cell
+        const damageTakenCell = this.scene.add.text(currentX, startY, Math.round(player.damageTaken).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageTakenCell.setDepth(1001);
+        cells.push(damageTakenCell);
+        currentX += this.COLUMN_WIDTHS.damageTaken;
+
+        // Damage Dealt cell
+        const damageDealtCell = this.scene.add.text(currentX, startY, Math.round(player.damageDealt).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageDealtCell.setDepth(1001);
+        cells.push(damageDealtCell);
+        currentX += this.COLUMN_WIDTHS.damageDealt;
+
         return cells;
     }
 
@@ -303,7 +413,12 @@ export class StatsOverlay {
                     team: combatant.team,
                     level: combatant.level,
                     experience: combatant.experience,
-                    totalExperience: combatant.totalExperience,
+                    totalExperience: combatant.roundStats.totalExperience,
+                    minionKills: combatant.roundStats.minionKills,
+                    heroKills: combatant.roundStats.heroKills,
+                    turretKills: combatant.roundStats.turretKills,
+                    damageTaken: combatant.roundStats.damageTaken,
+                    damageDealt: combatant.roundStats.damageDealt,
                     isBot,
                     isCurrentPlayer
                 });

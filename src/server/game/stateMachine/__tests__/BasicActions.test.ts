@@ -275,7 +275,7 @@ describe('GameStateMachine', () => {
             
             // Player should have gained experience and leveled up
             // 20 experience granted, 10 needed for level 1, so 10 remaining
-            expect(player?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(2); // Should have leveled up
         });
 
@@ -297,7 +297,7 @@ describe('GameStateMachine', () => {
             // Manually grant experience by updating the hero directly
             if (hero) {
                 hero.experience = 5; // Less than the 10 needed to level up
-                hero.totalExperience = 5;
+                hero.roundStats.totalExperience = 5;
             }
             
             // Update game to process the experience
@@ -315,7 +315,7 @@ describe('GameStateMachine', () => {
             });
             
             // Hero should have gained experience
-            expect(updatedHero?.totalExperience).toBe(5);
+            expect(updatedHero?.roundStats.totalExperience).toBe(5);
         });
 
         it('should level up players when they gain enough experience', () => {
@@ -336,7 +336,7 @@ describe('GameStateMachine', () => {
             // Give hero enough experience to level up
             if (hero) {
                 hero.experience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // Enough to level up
-                hero.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+                hero.roundStats.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
             }
             
             // Update game to trigger level up
@@ -355,7 +355,7 @@ describe('GameStateMachine', () => {
             
             // Hero should be level 2 with boosted stats
             expect(updatedHero?.level).toBe(2);
-            expect(updatedHero?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
+            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
             expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
             expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH);
         });
@@ -429,7 +429,7 @@ describe('GameStateMachine', () => {
             
             // Player should have gained experience and leveled up
             // 20 experience granted, 10 needed for level 1, so 10 remaining
-            expect(player?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(2); // Should have leveled up
         });
 
@@ -450,7 +450,7 @@ describe('GameStateMachine', () => {
             });
             if (player) {
                 player.experience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5; // More than enough to level up
-                player.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5;
+                player.roundStats.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5;
             }
             
             // Update game - should trigger level up
@@ -470,7 +470,7 @@ describe('GameStateMachine', () => {
             
             // Player should be level 2 with boosted stats
             expect(updatedPlayer?.level).toBe(2);
-            expect(updatedPlayer?.totalExperience).toBe(20); // Should have 20 total experience (15 + 5)
+            expect(updatedPlayer?.roundStats.totalExperience).toBe(20); // Should have 20 total experience (15 + 5)
             expect(updatedPlayer?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
             expect(updatedPlayer?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH);
         });
@@ -494,7 +494,7 @@ describe('GameStateMachine', () => {
             
             if (player) {
                 player.experience = 50;
-                player.totalExperience = 50;
+                player.roundStats.totalExperience = 50;
             }
             if (redTurret) redTurret.health = 0;
             
@@ -518,7 +518,7 @@ describe('GameStateMachine', () => {
             // Player starts with 50, gets 20 from turret destruction (total 70)
             // Level 1->2: consumes 15 XP, leaving 55
             // Level 2->3: consumes 30 XP, leaving 25
-            expect(newPlayer?.totalExperience).toBe(70);
+            expect(newPlayer?.roundStats.totalExperience).toBe(70);
             expect(newRedTurret).toBeUndefined(); // Turret was destroyed and removed
         });
     });

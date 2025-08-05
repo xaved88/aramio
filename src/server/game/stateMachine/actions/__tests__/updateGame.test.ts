@@ -1,5 +1,5 @@
 import { handleUpdateGame } from '../updateGame';
-import { GameState, Hero, Minion, Combatant, AttackEvent } from '../../../../schema/GameState';
+import { GameState, Hero, Minion, Combatant, AttackEvent, RoundStats, Ability } from '../../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../../types';
 import { GAMEPLAY_CONFIG } from '../../../../../Config';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
@@ -138,7 +138,8 @@ describe('handleUpdateGame', () => {
             bluePlayer.respawnTime = 0;
             bluePlayer.respawnDuration = 6000;
             bluePlayer.experience = 0;
-            bluePlayer.totalExperience = 0;
+            bluePlayer.roundStats = new RoundStats();
+            bluePlayer.roundStats.totalExperience = 0;
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             
@@ -159,7 +160,8 @@ describe('handleUpdateGame', () => {
             redPlayer.respawnTime = 0;
             redPlayer.respawnDuration = 6000;
             redPlayer.experience = 0;
-            redPlayer.totalExperience = 0;
+            redPlayer.roundStats = new RoundStats();
+            redPlayer.roundStats.totalExperience = 0;
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
             
@@ -262,7 +264,8 @@ describe('handleUpdateGame', () => {
             bluePlayer.respawnTime = 0;
             bluePlayer.respawnDuration = 6000;
             bluePlayer.experience = 0;
-            bluePlayer.totalExperience = 0;
+            bluePlayer.roundStats = new RoundStats();
+            bluePlayer.roundStats.totalExperience = 0;
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             
@@ -282,7 +285,7 @@ describe('handleUpdateGame', () => {
             const updatedPlayer = result.newState.combatants.get(bluePlayer.id) as Hero;
             // Note: Experience is only granted when the opposing team kills the minion
             // Since this test doesn't have opposing team players, no experience is granted
-            expect(updatedPlayer.totalExperience).toBe(originalExperience);
+            expect(updatedPlayer.roundStats.totalExperience).toBe(originalExperience);
         });
 
         it('should grant experience to opposing team when minion dies', () => {
@@ -303,7 +306,8 @@ describe('handleUpdateGame', () => {
             redPlayer.respawnTime = 0;
             redPlayer.respawnDuration = 6000;
             redPlayer.experience = 0;
-            redPlayer.totalExperience = 0;
+            redPlayer.roundStats = new RoundStats();
+            redPlayer.roundStats.totalExperience = 0;
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
             
@@ -318,7 +322,7 @@ describe('handleUpdateGame', () => {
             
             // Red player should receive experience for killing blue minion
             const updatedRedPlayer = result.newState.combatants.get(redPlayer.id) as Hero;
-            expect(updatedRedPlayer.totalExperience).toBeGreaterThan(originalExperience);
+            expect(updatedRedPlayer.roundStats.totalExperience).toBeGreaterThan(originalExperience);
         });
     });
 
@@ -479,10 +483,11 @@ describe('handleUpdateGame', () => {
             attacker.respawnTime = 0;
             attacker.respawnDuration = 6000;
             attacker.experience = 0;
-            attacker.totalExperience = 0;
+            attacker.roundStats = new RoundStats();
+            attacker.roundStats.totalExperience = 0;
             attacker.level = 1;
             attacker.attackReadyAt = 0; // Initialize wind-up field
-            attacker.ability = new (require('../../../../schema/GameState').Ability)();
+            attacker.ability = new Ability();
             attacker.ability.type = 'projectile';
             attacker.ability.cooldown = 5000;
             attacker.ability.lastUsedTime = 0;
@@ -505,10 +510,11 @@ describe('handleUpdateGame', () => {
             nearEnemy.respawnTime = 0;
             nearEnemy.respawnDuration = 6000;
             nearEnemy.experience = 0;
-            nearEnemy.totalExperience = 0;
+            nearEnemy.roundStats = new RoundStats();
+            nearEnemy.roundStats.totalExperience = 0;
             nearEnemy.level = 1;
             nearEnemy.attackReadyAt = 0; // Initialize wind-up field
-            nearEnemy.ability = new (require('../../../../schema/GameState').Ability)();
+            nearEnemy.ability = new Ability();
             nearEnemy.ability.type = 'projectile';
             nearEnemy.ability.cooldown = 5000;
             nearEnemy.ability.lastUsedTime = 0;
@@ -531,10 +537,11 @@ describe('handleUpdateGame', () => {
             farEnemy.respawnTime = 0;
             farEnemy.respawnDuration = 6000;
             farEnemy.experience = 0;
-            farEnemy.totalExperience = 0;
+            farEnemy.roundStats = new RoundStats();
+            farEnemy.roundStats.totalExperience = 0;
             farEnemy.level = 1;
             farEnemy.attackReadyAt = 0; // Initialize wind-up field
-            farEnemy.ability = new (require('../../../../schema/GameState').Ability)();
+            farEnemy.ability = new Ability();
             farEnemy.ability.type = 'projectile';
             farEnemy.ability.cooldown = 5000;
             farEnemy.ability.lastUsedTime = 0;
@@ -623,10 +630,11 @@ describe('handleUpdateGame', () => {
             player1.respawnTime = 0;
             player1.respawnDuration = 6000;
             player1.experience = 0;
-            player1.totalExperience = 0;
+            player1.roundStats = new RoundStats();
+            player1.roundStats.totalExperience = 0;
             player1.level = 1;
             player1.attackReadyAt = 0; // Initialize wind-up field
-            player1.ability = new (require('../../../../schema/GameState').Ability)();
+            player1.ability = new Ability();
             player1.ability.type = 'projectile';
             player1.ability.cooldown = 1000;
             player1.ability.lastUsedTime = 0;
@@ -650,10 +658,11 @@ describe('handleUpdateGame', () => {
             player2.respawnTime = 0;
             player2.respawnDuration = 6000;
             player2.experience = 0;
-            player2.totalExperience = 0;
+            player2.roundStats = new RoundStats();
+            player2.roundStats.totalExperience = 0;
             player2.level = 1;
             player2.attackReadyAt = 0; // Initialize wind-up field
-            player2.ability = new (require('../../../../schema/GameState').Ability)();
+            player2.ability = new Ability();
             player2.ability.type = 'projectile';
             player2.ability.cooldown = 1000;
             player2.ability.lastUsedTime = 0;
@@ -937,10 +946,11 @@ describe('handleUpdateGame', () => {
             blueHero1.respawnTime = 0;
             blueHero1.respawnDuration = 6000;
             blueHero1.experience = 0;
-            blueHero1.totalExperience = 0;
+            blueHero1.roundStats = new RoundStats();
+            blueHero1.roundStats.totalExperience = 0;
             blueHero1.level = 1;
             blueHero1.attackReadyAt = 0; // Initialize wind-up field
-            blueHero1.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero1.ability = new Ability();
             blueHero1.ability.type = 'projectile';
             blueHero1.ability.cooldown = 1000;
             blueHero1.ability.lastUsedTime = 0;
@@ -963,9 +973,10 @@ describe('handleUpdateGame', () => {
             blueHero2.respawnTime = 0;
             blueHero2.respawnDuration = 6000;
             blueHero2.experience = 0;
-            blueHero2.totalExperience = 0;
+            blueHero2.roundStats = new RoundStats();
+            blueHero2.roundStats.totalExperience = 0;
             blueHero2.level = 1;
-            blueHero2.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero2.ability = new Ability();
             blueHero2.ability.type = 'projectile';
             blueHero2.ability.cooldown = 1000;
             blueHero2.ability.lastUsedTime = 0;
@@ -988,9 +999,10 @@ describe('handleUpdateGame', () => {
             blueHero3.respawnTime = 0;
             blueHero3.respawnDuration = 6000;
             blueHero3.experience = 0;
-            blueHero3.totalExperience = 0;
+            blueHero3.roundStats = new RoundStats();
+            blueHero3.roundStats.totalExperience = 0;
             blueHero3.level = 1;
-            blueHero3.ability = new (require('../../../../schema/GameState').Ability)();
+            blueHero3.ability = new Ability();
             blueHero3.ability.type = 'projectile';
             blueHero3.ability.cooldown = 1000;
             blueHero3.ability.lastUsedTime = 0;
@@ -1030,9 +1042,10 @@ describe('handleUpdateGame', () => {
             redHero.respawnTime = 0;
             redHero.respawnDuration = 6000;
             redHero.experience = 0;
-            redHero.totalExperience = 0;
+            redHero.roundStats = new RoundStats();
+            redHero.roundStats.totalExperience = 0;
             redHero.level = 1;
-            redHero.ability = new (require('../../../../schema/GameState').Ability)();
+            redHero.ability = new Ability();
             redHero.ability.type = 'projectile';
             redHero.ability.cooldown = 1000;
             redHero.ability.lastUsedTime = 0;
@@ -1060,7 +1073,7 @@ describe('handleUpdateGame', () => {
             result = handleUpdateGame(gameState, action);
 
             const finalHero = result.newState.combatants.get('blue-hero-1') as Hero;
-            expect(finalHero.totalExperience).toBe(originalXP + baseXP);
+            expect(finalHero.roundStats.totalExperience).toBe(originalXP + baseXP);
         });
 
         it('should give 70% XP each to two heroes for unit kill', () => {
@@ -1081,8 +1094,8 @@ describe('handleUpdateGame', () => {
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
 
-            expect(finalHero1.totalExperience).toBe(originalXP1 + expectedXP);
-            expect(finalHero2.totalExperience).toBe(originalXP2 + expectedXP);
+            expect(finalHero1.roundStats.totalExperience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.roundStats.totalExperience).toBe(originalXP2 + expectedXP);
         });
 
         it('should give 60% XP each to three heroes for unit kill', () => {
@@ -1104,9 +1117,9 @@ describe('handleUpdateGame', () => {
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
             const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
 
-            expect(finalHero1.totalExperience).toBe(originalXP1 + expectedXP);
-            expect(finalHero2.totalExperience).toBe(originalXP2 + expectedXP);
-            expect(finalHero3.totalExperience).toBe(originalXP3 + expectedXP);
+            expect(finalHero1.roundStats.totalExperience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.roundStats.totalExperience).toBe(originalXP2 + expectedXP);
+            expect(finalHero3.roundStats.totalExperience).toBe(originalXP3 + expectedXP);
         });
 
         it('should not give XP to heroes outside range', () => {
@@ -1128,9 +1141,9 @@ describe('handleUpdateGame', () => {
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
             const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
 
-            expect(finalHero1.totalExperience).toBe(originalXP1);
-            expect(finalHero2.totalExperience).toBe(originalXP2);
-            expect(finalHero3.totalExperience).toBe(originalXP3);
+            expect(finalHero1.roundStats.totalExperience).toBe(originalXP1);
+            expect(finalHero2.roundStats.totalExperience).toBe(originalXP2);
+            expect(finalHero3.roundStats.totalExperience).toBe(originalXP3);
         });
 
         it('should not give XP to dead heroes', () => {
@@ -1154,9 +1167,9 @@ describe('handleUpdateGame', () => {
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
             const finalHero3 = result.newState.combatants.get('blue-hero-3') as Hero;
 
-            expect(finalHero1.totalExperience).toBe(originalXP1); // Dead hero gets no XP
-            expect(finalHero2.totalExperience).toBe(originalXP2 + expectedXP);
-            expect(finalHero3.totalExperience).toBe(originalXP3 + expectedXP);
+            expect(finalHero1.roundStats.totalExperience).toBe(originalXP1); // Dead hero gets no XP
+            expect(finalHero2.roundStats.totalExperience).toBe(originalXP2 + expectedXP);
+            expect(finalHero3.roundStats.totalExperience).toBe(originalXP3 + expectedXP);
         });
 
         it('should apply fall-off to hero kills as well', () => {
@@ -1175,8 +1188,8 @@ describe('handleUpdateGame', () => {
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
 
-            expect(finalHero1.totalExperience).toBe(originalXP1 + expectedXP);
-            expect(finalHero2.totalExperience).toBe(originalXP2 + expectedXP);
+            expect(finalHero1.roundStats.totalExperience).toBe(originalXP1 + expectedXP);
+            expect(finalHero2.roundStats.totalExperience).toBe(originalXP2 + expectedXP);
         });
     });
 }); 

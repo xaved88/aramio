@@ -69,7 +69,7 @@ describe('TurretDestruction', () => {
             });
             
             // Hero should have gained experience and leveled up
-            expect(updatedHero?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(updatedHero?.level).toBe(2);
             
             // Hero stats should be boosted
@@ -130,7 +130,7 @@ describe('TurretDestruction', () => {
             });
             
             // Hero should not have gained experience
-            expect(updatedHero?.totalExperience).toBe(0);
+            expect(updatedHero?.roundStats.totalExperience).toBe(0);
             expect(updatedHero?.level).toBe(1);
         });
 
@@ -170,9 +170,9 @@ describe('TurretDestruction', () => {
                 
                 // Ensure both heroes start with 0 experience
                             hero1.experience = 0;
-            hero1.totalExperience = 0;
+            hero1.roundStats.totalExperience = 0;
             hero2.experience = 0;
-            hero2.totalExperience = 0;
+            hero2.roundStats.totalExperience = 0;
                 
                 // Set turret to 1 HP so it can be destroyed in one hit
                 redTurret.health = 1;
@@ -210,8 +210,8 @@ describe('TurretDestruction', () => {
             
             // Both blue team heroes should have gained experience and leveled up
             // They get 20 experience each, level up (consuming 10), so 10 remaining each
-            expect(updatedHero1?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Check that both heroes leveled up
             expect(updatedHero1?.level).toBe(2);
@@ -271,7 +271,7 @@ describe('TurretDestruction', () => {
             
             // Hero should be level 2 with remaining experience
             expect(updatedHero?.level).toBe(2);
-            expect(updatedHero?.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
         });
 
         it('should handle multiple level ups correctly', () => {
@@ -295,7 +295,7 @@ describe('TurretDestruction', () => {
             // Give player enough experience to be close to leveling up
             if (player && redTurret) {
                 player.experience = 8; // Just 2 short of level 2
-            player.totalExperience = 8;
+            player.roundStats.totalExperience = 8;
                 player.x = redTurret.x + 30;
                 player.y = redTurret.y;
                 redTurret.health = 1;
@@ -327,7 +327,7 @@ describe('TurretDestruction', () => {
             // Player should be level 2 with remaining experience
             // 8 + 20 = 28 experience, 15 needed for level 2, so 13 remaining
             expect(updatedPlayer?.level).toBe(2);
-            expect(updatedPlayer?.totalExperience).toBe(28);
+            expect(updatedPlayer?.roundStats.totalExperience).toBe(28);
         });
 
         it('should only grant minion XP to heroes within range', () => {
@@ -400,8 +400,8 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only hero1 should get XP (within range), hero2 should not (out of range)
-                            expect(updatedHero1?.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
-            expect(updatedHero2?.totalExperience).toBe(initialExp2); // Should not get XP
+                            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2); // Should not get XP
             }
         });
 
@@ -452,12 +452,12 @@ describe('TurretDestruction', () => {
                                  // Give redHero some levels to make XP calculation interesting
                  redHero.level = 3;
                  redHero.experience = 0;
-            redHero.totalExperience = 0;
+            redHero.roundStats.totalExperience = 0;
                  
                  // Give blueHero1 level 2 so they don't level up from the XP
                  blueHero1.level = 2;
                  blueHero1.experience = 0;
-            blueHero1.totalExperience = 0;
+            blueHero1.roundStats.totalExperience = 0;
             }
             
             // Record initial experience
@@ -490,8 +490,8 @@ describe('TurretDestruction', () => {
             const expectedXP = 3 * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
             
             // Only blueHero1 should get XP (within range), blueHero2 should not (out of range)
-            expect(updatedBlueHero1?.totalExperience).toBe(initialExp1 + expectedXP);
-            expect(updatedBlueHero2?.totalExperience).toBe(initialExp2); // Should not get XP
+            expect(updatedBlueHero1?.roundStats.totalExperience).toBe(initialExp1 + expectedXP);
+            expect(updatedBlueHero2?.roundStats.totalExperience).toBe(initialExp2); // Should not get XP
         });
 
         it('should grant turret XP to dead players but not minion XP', () => {
@@ -555,8 +555,8 @@ describe('TurretDestruction', () => {
             
             // Both players should have gained turret XP (even the dead one)
             // Account for leveling: 20 XP granted, 10 needed for level 1, so 10 remaining
-            expect(updatedHero1?.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.totalExperience).toBe(initialExp2 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Now kill a minion - only alive player should get XP
             const minions = Array.from(result1.newState.combatants.values())
@@ -589,8 +589,8 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only alive player should get minion XP
-                            expect(finalHero1?.totalExperience).toBe(expBeforeMinion1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
-            expect(finalHero2?.totalExperience).toBe(expBeforeMinion2); // Dead player should not get minion XP
+                            expect(finalHero1?.roundStats.totalExperience).toBe(expBeforeMinion1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+            expect(finalHero2?.roundStats.totalExperience).toBe(expBeforeMinion2); // Dead player should not get minion XP
             }
         });
     });

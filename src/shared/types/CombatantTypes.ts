@@ -14,6 +14,15 @@ export const MINION_TYPES = {
 
 export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 
+export interface RoundStats {
+    totalExperience: number; // total XP earned throughout the match
+    minionKills: number; // number of minions killed
+    heroKills: number; // number of heroes killed
+    turretKills: number; // number of turrets destroyed
+    damageTaken: number; // total damage taken
+    damageDealt: number; // total damage dealt
+}
+
 export interface Ability {
     type: string;
     cooldown: number;
@@ -45,7 +54,7 @@ export interface HeroCombatant extends BaseCombatant {
     respawnDuration: number;
     experience: number;
     level: number;
-    totalExperience: number; // total XP earned throughout the match
+    roundStats: RoundStats;
     ability: Ability;
     controller: string; // client ID for players, bot strategy for bots
 }

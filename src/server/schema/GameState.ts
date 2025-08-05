@@ -39,6 +39,15 @@ export class KillEvent extends Schema {
     @type('number') timestamp!: number; // When the kill occurred
 }
 
+export class RoundStats extends Schema {
+    @type('number') totalExperience = 0; // total XP earned throughout the match
+    @type('number') minionKills = 1; // number of minions killed
+    @type('number') heroKills = 2; // number of heroes killed
+    @type('number') turretKills = 3; // number of turrets destroyed
+    @type('number') damageTaken = 4; // total damage taken
+    @type('number') damageDealt = 5; // total damage dealt
+}
+
 export class Ability extends Schema {
     @type('string') type!: string;
     @type('number') cooldown!: number; // cooldown duration in ms
@@ -82,7 +91,7 @@ export class Hero extends Combatant {
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
-    @type('number') totalExperience = 0; // total XP earned throughout the match
+    @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
     @type('string') controller!: string; // client ID for players, bot strategy for bots
 }

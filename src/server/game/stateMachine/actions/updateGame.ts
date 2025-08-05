@@ -427,7 +427,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
 
 function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number): void {
     player.experience += amount;
-    player.totalExperience += amount;
+    player.roundStats.totalExperience += amount;
     
     // Create XP event if position is provided
     if (xpX !== undefined && xpY !== undefined) {
