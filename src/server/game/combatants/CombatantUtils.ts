@@ -1,20 +1,69 @@
-import { Combatant } from '../../schema/GameState';
+import { Combatant, GameState, DamageEvent, KillEvent } from '../../schema/GameState';
 
 export class CombatantUtils {
     /**
-     * Applies damage to a combatant and returns damage result
+     * Applies damage to a combatant and dispatches events
      * @param combatant The combatant to damage
      * @param damage Amount of damage to apply
-     * @returns Object with kill status and damage dealt
+     * @param gameState The game state for event dispatching
+     * @param sourceId The ID of the combatant causing the damage
      */
-    static damageCombatant(combatant: Combatant, damage: number): { killed: boolean; damageDealt: number } {
+    static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string): void {
         const previousHealth = combatant.health;
         combatant.health = Math.max(0, combatant.health - damage);
         const actualDamage = previousHealth - combatant.health;
-        return {
-            killed: combatant.health <= 0,
-            damageDealt: actualDamage
-        };
+        
+        // Find the source combatant
+        const sourceCombatant = gameState.combatants.get(sourceId);
+        
+        // Update stats for source combatant (damage dealt)
+        if (sourceCombatant && sourceCombatant.type === 'hero') {
+            const hero = sourceCombatant as any;
+            hero.roundStats.damageDealt += actualDamage;
+        }
+        
+        // Update stats for target combatant (damage taken)
+        if (combatant.type === 'hero') {
+            const hero = combatant as any;
+            hero.roundStats.damageTaken += actualDamage;
+        }
+        
+        // Dispatch damage event if damage was dealt
+        if (actualDamage > 0) {
+            const damageEvent = new DamageEvent();
+            damageEvent.sourceId = sourceId;
+            damageEvent.targetId = combatant.id;
+            damageEvent.targetType = combatant.type;
+            damageEvent.amount = actualDamage;
+            damageEvent.timestamp = gameState.gameTime;
+            gameState.damageEvents.push(damageEvent);
+        }
+        
+        // Dispatch kill event and update kill stats if combatant was killed
+        if (combatant.health <= 0) {
+            const killEvent = new KillEvent();
+            killEvent.sourceId = sourceId;
+            killEvent.targetId = combatant.id;
+            killEvent.targetType = combatant.type;
+            killEvent.timestamp = gameState.gameTime;
+            gameState.killEvents.push(killEvent);
+            
+            // Update kill stats for source combatant
+            if (sourceCombatant && sourceCombatant.type === 'hero') {
+                const hero = sourceCombatant as any;
+                switch (combatant.type) {
+                    case 'minion':
+                        hero.roundStats.minionKills++;
+                        break;
+                    case 'hero':
+                        hero.roundStats.heroKills++;
+                        break;
+                    case 'turret':
+                        hero.roundStats.turretKills++;
+                        break;
+                }
+            }
+        }
     }
 
     /**

@@ -41,11 +41,11 @@ export class KillEvent extends Schema {
 
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
-    @type('number') minionKills = 1; // number of minions killed
-    @type('number') heroKills = 2; // number of heroes killed
-    @type('number') turretKills = 3; // number of turrets destroyed
-    @type('number') damageTaken = 4; // total damage taken
-    @type('number') damageDealt = 5; // total damage dealt
+    @type('number') minionKills = 0; // number of minions killed
+    @type('number') heroKills = 0; // number of heroes killed
+    @type('number') turretKills = 0; // number of turrets destroyed
+    @type('number') damageTaken = 0; // total damage taken
+    @type('number') damageDealt = 0; // total damage dealt
 }
 
 export class Ability extends Schema {

@@ -123,7 +123,7 @@ function processWindUpAttack(attacker: any, allCombatants: any[], state: GameSta
             CombatantUtils.isInRange(attacker, target, attacker.attackRadius)) {
             
             // Perform the attack
-            CombatantUtils.damageCombatant(target, attacker.attackStrength);
+            CombatantUtils.damageCombatant(target, attacker.attackStrength, state, attacker.id);
             attacker.lastAttackTime = currentTime;
             attacker.attackReadyAt = 0; // Reset wind-up
             

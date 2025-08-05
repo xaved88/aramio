@@ -181,7 +181,7 @@ export class GameEngine {
         // Create projectile
         const projectile = new (require('../schema/GameState').Projectile)();
         projectile.id = `projectile_${Date.now()}_${Math.random()}`;
-        projectile.ownerId = playerId;
+        projectile.ownerId = player.id; // Use the hero's actual ID instead of controller
         projectile.x = player.x;
         projectile.y = player.y;
         projectile.directionX = directionX;
@@ -235,7 +235,7 @@ export class GameEngine {
                 
                 // Only damage units (players and minions), not structures
                 if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
-                    CombatantUtils.damageCombatant(closestCombatant, projectile.strength);
+                    CombatantUtils.damageCombatant(closestCombatant, projectile.strength, this.state, projectile.ownerId);
                 }
             }
         });
