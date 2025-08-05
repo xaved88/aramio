@@ -1,4 +1,4 @@
-import { Combatant, AttackEvent, Projectile, HeroStats } from './CombatantTypes';
+import { Combatant, AttackEvent, Projectile } from './CombatantTypes';
 
 export interface XPEvent {
     playerId: string;
@@ -23,7 +23,6 @@ export interface SharedGameState {
     winningTeam: string;
     gameEndTime: number;
     combatants: Map<string, Combatant>;
-    heroStats: Map<string, HeroStats>;
     attackEvents: AttackEvent[];
     xpEvents: XPEvent[];
     levelUpEvents: LevelUpEvent[];

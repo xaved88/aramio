@@ -1,6 +1,7 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { CombatantType, MinionType } from '../../shared/types/CombatantTypes';
 
+// Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
     @type('string') sourceId!: string;
     @type('string') targetId!: string;
@@ -21,11 +22,6 @@ export class LevelUpEvent extends Schema {
     @type('number') x!: number; // X position of the player
     @type('number') y!: number; // Y position of the player
     @type('number') timestamp!: number; // When the level up occurred
-}
-
-export class HeroStats extends Schema {
-    @type('string') heroId!: string; // hero ID
-    @type('number') totalExperience = 0; // total XP earned throughout the match
 }
 
 export class Ability extends Schema {
@@ -71,6 +67,7 @@ export class Hero extends Combatant {
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
+    @type('number') totalExperience = 0; // total XP earned throughout the match
     @type(Ability) ability!: Ability;
     @type('string') controller!: string; // client ID for players, bot strategy for bots
 }
@@ -86,7 +83,6 @@ export class GameState extends Schema {
     @type('string') winningTeam = '';
     @type('number') gameEndTime = 0;
     @type({ map: Combatant }) combatants = new MapSchema<Combatant>();
-    @type({ map: HeroStats }) heroStats = new MapSchema<HeroStats>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();
     @type([XPEvent]) xpEvents = new ArraySchema<XPEvent>();
     @type([LevelUpEvent]) levelUpEvents = new ArraySchema<LevelUpEvent>();

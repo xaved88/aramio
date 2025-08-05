@@ -297,16 +297,13 @@ export class StatsOverlay {
                 const isBot = combatant.controller.startsWith('bot');
                 const isCurrentPlayer = this.playerSessionId === combatant.controller;
                 
-                // Get hero stats from the heroStats map
-                const heroStats = state.heroStats.get(combatant.id);
-                
                 stats.push({
                     id: combatant.id,
                     controller: combatant.controller,
                     team: combatant.team,
                     level: combatant.level,
                     experience: combatant.experience,
-                    totalExperience: heroStats?.totalExperience || 0,
+                    totalExperience: combatant.totalExperience,
                     isBot,
                     isCurrentPlayer
                 });

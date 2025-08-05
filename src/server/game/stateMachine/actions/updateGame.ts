@@ -1,4 +1,4 @@
-import { GameState, Hero, XPEvent, LevelUpEvent, HeroStats } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent, LevelUpEvent } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -427,12 +427,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
 
 function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number): void {
     player.experience += amount;
-    
-    // Update totalExperience in HeroStats instead of Hero
-    const heroStats = state.heroStats.get(player.id);
-    if (heroStats) {
-        heroStats.totalExperience += amount;
-    }
+    player.totalExperience += amount;
     
     // Create XP event if position is provided
     if (xpX !== undefined && xpY !== undefined) {

@@ -45,6 +45,7 @@ export interface HeroCombatant extends BaseCombatant {
     respawnDuration: number;
     experience: number;
     level: number;
+    totalExperience: number; // total XP earned throughout the match
     ability: Ability;
     controller: string; // client ID for players, bot strategy for bots
 }
@@ -80,11 +81,6 @@ export interface Projectile {
     speed: number;
     strength: number;
     team: string;
-}
-
-export interface HeroStats {
-    heroId: string; // hero ID
-    totalExperience: number; // total XP earned throughout the match
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {
