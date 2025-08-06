@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, MINION_TYPES, isMinionCombatant, MinionCombatant } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, MINION_TYPES, isMinionCombatant, CombatantId, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 
@@ -8,21 +8,21 @@ import { CLIENT_CONFIG } from '../../Config';
  */
 export class EntityRenderer {
     private scene: Phaser.Scene;
-    private playerSessionId: string | null = null;
+    private playerSessionId: ControllerId | null = null;
     private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
     }
 
-    setPlayerSessionId(sessionId: string | null): void {
+    setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
     }
 
     /**
      * Triggers a flash animation on a targeting line when an attack fires
      */
-    triggerTargetingLineFlash(sourceId: string, targetId: string): void {
+    triggerTargetingLineFlash(sourceId: CombatantId, targetId: CombatantId): void {
         const targetingLineKey = `${sourceId}-${targetId}`;
         this.flashingTargetingLines.add(targetingLineKey);
         
@@ -50,7 +50,7 @@ export class EntityRenderer {
         respawnRing: Phaser.GameObjects.Graphics | undefined,
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         state?: SharedGameState,
-        playerSessionId?: string | null
+        playerSessionId?: ControllerId | null
     ): void {
         // Render the main entity graphics
         this.renderEntityGraphics(combatant, graphics);
@@ -84,7 +84,7 @@ export class EntityRenderer {
      * Renders targeting lines between combatants and their targets
      */
     renderTargetingLines(
-        combatants: Map<string, Combatant>,
+        combatants: Map<CombatantId, Combatant>,
         graphics: Phaser.GameObjects.Graphics,
         gameTime?: number
     ): void {

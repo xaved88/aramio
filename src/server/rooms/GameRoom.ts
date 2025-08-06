@@ -3,12 +3,13 @@ import { GameState } from '../schema/GameState';
 import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
-import { getTotalCombatantHealth, gameStateToString } from '../../shared/utils/DebugUtils';
+import { gameStateToString } from '../../shared/utils/DebugUtils';
+import { ControllerId } from '../../shared/types/CombatantTypes';
 
 interface GameCommand {
     type: string;
     data: any;
-    clientId: string;
+    clientId: ControllerId;
 }
 
 export class GameRoom extends Room<GameState> {
@@ -215,7 +216,7 @@ export class GameRoom extends Room<GameState> {
         }
     }
 
-    private replaceBotWithPlayer(playerId: string, team: string): boolean {
+    private replaceBotWithPlayer(playerId: ControllerId, team: string): boolean {
         // Find a bot on the specified team to replace
         let botToReplace: any = null;
         this.state.combatants.forEach((combatant: any) => {
@@ -237,7 +238,7 @@ export class GameRoom extends Room<GameState> {
         return false;
     }
 
-    private replacePlayerWithBot(playerId: string): void {
+    private replacePlayerWithBot(playerId: ControllerId): void {
         // Find the hero controlled by this player
         let playerHero: any = null;
         this.state.combatants.forEach((combatant: any) => {

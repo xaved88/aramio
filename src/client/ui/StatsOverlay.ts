@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant } from '../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 
 interface PlayerStats {
     id: string;
-    controller: string;
+    controller: ControllerId;
     team: string;
     level: number;
     experience: number;
@@ -35,7 +35,7 @@ export class StatsOverlay {
     private scene: Phaser.Scene;
     private overlayElements: Phaser.GameObjects.GameObject[] = [];
     private isVisible: boolean = false;
-    private playerSessionId: string | null = null;
+    private playerSessionId: ControllerId | null = null;
 
     // Table configuration
     private readonly CELL_HEIGHT = 20;
@@ -59,7 +59,7 @@ export class StatsOverlay {
     /**
      * Sets the current player session ID for highlighting
      */
-    setPlayerSessionId(sessionId: string | null): void {
+    setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
     }
 

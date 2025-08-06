@@ -1,4 +1,5 @@
 import { GameState } from '../../schema/GameState';
+import { ControllerId, CombatantId } from '../../../shared/types/CombatantTypes';
 
 export interface GameAction {
     type: string;
@@ -12,7 +13,7 @@ export interface SetupGameAction extends GameAction {
 export interface SpawnPlayerAction extends GameAction {
     type: 'SPAWN_PLAYER';
     payload: {
-        playerId: string;
+        playerId: ControllerId;
         team: 'blue' | 'red';
         x?: number;
         y?: number;
@@ -22,14 +23,14 @@ export interface SpawnPlayerAction extends GameAction {
 export interface RemovePlayerAction extends GameAction {
     type: 'REMOVE_PLAYER';
     payload: {
-        playerId: string;
+        playerId: ControllerId;
     };
 }
 
 export interface MovePlayerAction extends GameAction {
     type: 'MOVE_PLAYER';
     payload: {
-        playerId: string;
+        playerId: ControllerId;
         targetX: number;
         targetY: number;
     };
@@ -38,7 +39,7 @@ export interface MovePlayerAction extends GameAction {
 export interface MoveHeroAction extends GameAction {
     type: 'MOVE_HERO';
     payload: {
-        heroId: string;
+        heroId: CombatantId;
         targetX: number;
         targetY: number;
     };

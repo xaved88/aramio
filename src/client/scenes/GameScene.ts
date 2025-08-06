@@ -8,7 +8,7 @@ import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
 import { hexToColorString } from '../utils/ColorUtils';
-import { gameStateToString, getTotalCombatantHealth } from '../../shared/utils/DebugUtils';
+import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -18,10 +18,8 @@ export class GameScene extends Phaser.Scene {
     private uiManager!: UIManager;
     private processedAttackEvents: Set<string> = new Set();
     private lastState: GameState|null = null
-    private stateLogTimer: number = 0;
-    private totalHP: number = 0;
     private playerTeam: string | null = null;
-    private playerSessionId: string | null = null;
+    private playerSessionId: ControllerId | null = null;
     private spaceKeyPressed: boolean = false;
     private moveTarget: { x: number, y: number } | null = null;
     private isClickHeld: boolean = false;
@@ -140,7 +138,7 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    private animateAttackSource(combatantId: string) {
+    private animateAttackSource(combatantId: CombatantId) {
         const radiusIndicator = this.entityManager.getEntityRadiusIndicator(combatantId);
         
         if (radiusIndicator) {
@@ -148,7 +146,7 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
-    private animateAttackTarget(combatantId: string, state: SharedGameState) {
+    private animateAttackTarget(combatantId: CombatantId, state: SharedGameState) {
         const combatant = state.combatants.get(combatantId);
         if (!combatant) return;
         
@@ -190,8 +188,6 @@ export class GameScene extends Phaser.Scene {
             // Reset client-side state for the new game
             this.playerTeam = null;
             this.lastState = null;
-            this.stateLogTimer = 0;
-            this.totalHP = 0;
             this.processedAttackEvents.clear();
             this.entityManager.clearAllEntities();
             this.animationManager.clearAllAnimations();

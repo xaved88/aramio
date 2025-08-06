@@ -1,3 +1,8 @@
+// Type aliases for different ID types
+export type CombatantId = string;
+export type ControllerId = string;
+export type ProjectileId = string;
+
 export const COMBATANT_TYPES = {
     HERO: 'hero',
     CRADLE: 'cradle',
@@ -31,7 +36,7 @@ export interface Ability {
 }
 
 export interface BaseCombatant {
-    id: string;
+    id: CombatantId;
     type: CombatantType;
     x: number;
     y: number;
@@ -42,7 +47,7 @@ export interface BaseCombatant {
     attackStrength: number;
     attackSpeed: number;
     lastAttackTime: number;
-    target?: string; // ID of the combatant being targeted
+    target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
 }
@@ -56,7 +61,7 @@ export interface HeroCombatant extends BaseCombatant {
     level: number;
     roundStats: RoundStats;
     ability: Ability;
-    controller: string; // client ID for players, bot strategy for bots
+    controller: ControllerId; // client ID for players, bot strategy for bots
 }
 
 export interface CradleCombatant extends BaseCombatant {
@@ -75,29 +80,29 @@ export interface MinionCombatant extends BaseCombatant {
 export type Combatant = HeroCombatant | CradleCombatant | TurretCombatant | MinionCombatant;
 
 export interface AttackEvent {
-    sourceId: string;
-    targetId: string;
+    sourceId: CombatantId;
+    targetId: CombatantId;
     timestamp: number;
 }
 
 export interface DamageEvent {
-    sourceId: string;
-    targetId: string;
+    sourceId: CombatantId;
+    targetId: CombatantId;
     targetType: string;
     amount: number;
     timestamp: number;
 }
 
 export interface KillEvent {
-    sourceId: string;
-    targetId: string;
+    sourceId: CombatantId;
+    targetId: CombatantId;
     targetType: string;
     timestamp: number;
 }
 
 export interface Projectile {
-    id: string;
-    ownerId: string;
+    id: ProjectileId;
+    ownerId: CombatantId;
     x: number;
     y: number;
     directionX: number;

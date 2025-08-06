@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
@@ -21,15 +21,15 @@ export class EntityManager {
     private scene: Phaser.Scene;
     private entityFactory: EntityFactory;
     private entityRenderer: EntityRenderer;
-    private playerSessionId: string | null = null;
+    private playerSessionId: ControllerId | null = null;
     
     // Entity storage
-    private entityGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private entityTexts: Map<string, Phaser.GameObjects.Text> = new Map();
-    private entityRadiusIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private entityRespawnRings: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private entityAbilityReadyIndicators: Map<string, Phaser.GameObjects.Graphics> = new Map();
-    private projectileGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private entityGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entityTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
+    private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
@@ -40,7 +40,7 @@ export class EntityManager {
         this.entityRenderer = new EntityRenderer(scene);
     }
 
-    setPlayerSessionId(sessionId: string | null): void {
+    setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
         this.entityRenderer.setPlayerSessionId(sessionId);
     }
@@ -328,7 +328,7 @@ export class EntityManager {
     /**
      * Destroys a projectile entity
      */
-    private destroyProjectileEntity(entityId: string): void {
+    private destroyProjectileEntity(entityId: ProjectileId): void {
         // Stop any animations
         this.stopEntityAnimations(entityId);
         
@@ -393,14 +393,14 @@ export class EntityManager {
     /**
      * Gets an entity's graphics for external use (e.g., animations)
      */
-    getEntityGraphics(entityId: string): Phaser.GameObjects.Graphics | undefined {
+    getEntityGraphics(entityId: CombatantId): Phaser.GameObjects.Graphics | undefined {
         return this.entityGraphics.get(entityId);
     }
 
     /**
      * Gets an entity's radius indicator for external use (e.g., attack animations)
      */
-    getEntityRadiusIndicator(entityId: string): Phaser.GameObjects.Graphics | undefined {
+    getEntityRadiusIndicator(entityId: CombatantId): Phaser.GameObjects.Graphics | undefined {
         return this.entityRadiusIndicators.get(entityId);
     }
 
@@ -408,7 +408,7 @@ export class EntityManager {
      * Animates entity movement to a new position
      */
     private animateEntityMovement(
-        entityId: string,
+        entityId: CombatantId,
         targets: (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text)[],
         targetX: number,
         targetY: number
@@ -432,7 +432,7 @@ export class EntityManager {
     /**
      * Stops all animations for a specific entity
      */
-    private stopEntityAnimations(entityId: string): void {
+    private stopEntityAnimations(entityId: CombatantId): void {
         // In a more sophisticated system, we'd track tweens by entity ID
         // For now, we'll let Phaser handle cleanup
     }
@@ -483,7 +483,7 @@ export class EntityManager {
     /**
      * Triggers a flash animation on a targeting line when an attack fires
      */
-    triggerTargetingLineFlash(sourceId: string, targetId: string): void {
+    triggerTargetingLineFlash(sourceId: CombatantId, targetId: CombatantId): void {
         this.entityRenderer.triggerTargetingLineFlash(sourceId, targetId);
     }
 

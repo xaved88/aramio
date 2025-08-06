@@ -1,7 +1,7 @@
-import { Combatant, AttackEvent, DamageEvent, KillEvent, Projectile } from './CombatantTypes';
+import { Combatant, AttackEvent, DamageEvent, KillEvent, Projectile, CombatantId, ProjectileId } from './CombatantTypes';
 
 export interface XPEvent {
-    playerId: string;
+    playerId: CombatantId;
     amount: number;
     x: number;
     y: number;
@@ -10,7 +10,7 @@ export interface XPEvent {
 }
 
 export interface LevelUpEvent {
-    playerId: string;
+    playerId: CombatantId;
     newLevel: number;
     x: number;
     y: number;
@@ -23,11 +23,11 @@ export interface SharedGameState {
     currentWave: number;
     winningTeam: string;
     gameEndTime: number;
-    combatants: Map<string, Combatant>;
+    combatants: Map<CombatantId, Combatant>;
     attackEvents: AttackEvent[];
     xpEvents: XPEvent[];
     levelUpEvents: LevelUpEvent[];
     damageEvents: DamageEvent[];
     killEvents: KillEvent[];
-    projectiles: Map<string, Projectile>;
+    projectiles: Map<ProjectileId, Projectile>;
 } 

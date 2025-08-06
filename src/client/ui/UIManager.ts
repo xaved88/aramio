@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COMBATANT_TYPES, isHeroCombatant } from '../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, isHeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
@@ -111,7 +111,7 @@ export class UIManager {
     /**
      * Sets the player session ID for stats overlay
      */
-    setPlayerSessionId(sessionId: string | null): void {
+    setPlayerSessionId(sessionId: ControllerId | null): void {
         this.statsOverlay.setPlayerSessionId(sessionId);
     }
 
@@ -139,7 +139,7 @@ export class UIManager {
     /**
      * Updates the HUD based on the current game state
      */
-    updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: string | null = null): void {
+    updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: ControllerId | null = null): void {
         if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
             !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || 
             !this.hudLevelText || !this.hudAbilityBar || !this.hudAbilityBarBackground ||

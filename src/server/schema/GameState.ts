@@ -1,15 +1,15 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { CombatantType, MinionType } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
 
 // Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
-    @type('string') sourceId!: string;
-    @type('string') targetId!: string;
+    @type('string') sourceId!: CombatantId;
+    @type('string') targetId!: CombatantId;
     @type('number') timestamp!: number;
 }
 
 export class XPEvent extends Schema {
-    @type('string') playerId!: string; // ID of the player who earned XP
+    @type('string') playerId!: CombatantId; // ID of the combatant who earned XP
     @type('number') amount!: number; // Amount of XP earned
     @type('number') x!: number; // X position where XP was earned
     @type('number') y!: number; // Y position where XP was earned
@@ -18,7 +18,7 @@ export class XPEvent extends Schema {
 }
 
 export class LevelUpEvent extends Schema {
-    @type('string') playerId!: string; // ID of the player who leveled up
+    @type('string') playerId!: CombatantId; // ID of the combatant who leveled up
     @type('number') newLevel!: number; // The new level they reached
     @type('number') x!: number; // X position of the player
     @type('number') y!: number; // Y position of the player
@@ -26,16 +26,16 @@ export class LevelUpEvent extends Schema {
 }
 
 export class DamageEvent extends Schema {
-    @type('string') sourceId!: string; // ID of the combatant that dealt damage
-    @type('string') targetId!: string; // ID of the combatant that took damage
+    @type('string') sourceId!: CombatantId; // ID of the combatant that dealt damage
+    @type('string') targetId!: CombatantId; // ID of the combatant that took damage
     @type('string') targetType!: string; // Type of the target (minion, hero, turret, cradle)
     @type('number') amount!: number; // Amount of damage dealt
     @type('number') timestamp!: number; // When the damage occurred
 }
 
 export class KillEvent extends Schema {
-    @type('string') sourceId!: string; // ID of the combatant that got the kill
-    @type('string') targetId!: string; // ID of the combatant that was killed
+    @type('string') sourceId!: CombatantId; // ID of the combatant that got the kill
+    @type('string') targetId!: CombatantId; // ID of the combatant that was killed
     @type('string') targetType!: string; // Type of the target (minion, hero, turret, cradle)
     @type('number') timestamp!: number; // When the kill occurred
 }
@@ -57,8 +57,8 @@ export class Ability extends Schema {
 }
 
 export class Projectile extends Schema {
-    @type('string') id!: string;
-    @type('string') ownerId!: string; // who fired the projectile
+    @type('string') id!: ProjectileId;
+    @type('string') ownerId!: CombatantId; // who fired the projectile
     @type('number') x!: number;
     @type('number') y!: number;
     @type('number') directionX!: number; // normalized direction vector
@@ -69,7 +69,7 @@ export class Projectile extends Schema {
 }
 
 export class Combatant extends Schema {
-    @type('string') id!: string;
+    @type('string') id!: CombatantId;
     @type('string') type!: CombatantType;
     @type('number') x!: number;
     @type('number') y!: number;
@@ -81,7 +81,7 @@ export class Combatant extends Schema {
     @type('number') attackSpeed!: number; // attacks per second
     @type('number') lastAttackTime!: number;
     @type('number') size!: number; // collision radius
-    @type('string') target?: string; // ID of the combatant being targeted
+    @type('string') target?: CombatantId; // ID of the combatant being targeted
     @type('number') windUp!: number; // Time in seconds before attack can be performed
     @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
 }
@@ -94,7 +94,7 @@ export class Hero extends Combatant {
     @type('number') level!: number;
     @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
-    @type('string') controller!: string; // client ID for players, bot strategy for bots
+    @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
 }
 
 export class Minion extends Combatant {

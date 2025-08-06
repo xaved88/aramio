@@ -4,6 +4,7 @@ import { GameActionTypes, StateMachineResult } from './stateMachine/types';
 import { GAMEPLAY_CONFIG } from '../../Config';
 import { CLIENT_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
+import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 
 export class GameEngine {
     private state: GameState;
@@ -62,44 +63,22 @@ export class GameEngine {
     }
 
     /**
-     * Spawns a new player
-     * @param playerId The player's ID
-     * @param team The player's team
+     * Spawns a new hero controlled by a player
+     * @param controllerId The controller's ID (player session or bot strategy)
+     * @param team The hero's team
      */
-    spawnPlayer(playerId: string, team: 'blue' | 'red', position?: { x: number, y: number }): void {
+    spawnControlledHero(controllerId: ControllerId, team: 'blue' | 'red', position?: { x: number, y: number }): void {
         this.processAction({
             type: 'SPAWN_PLAYER',
             payload: { 
-                playerId, 
+                playerId: controllerId, 
                 team,
                 ...(position && { x: position.x, y: position.y })
             }
         });
     }
 
-    /**
-     * Removes a player (for disconnections)
-     * @param playerId The player's ID
-     */
-    removePlayer(playerId: string): void {
-        this.processAction({
-            type: 'REMOVE_PLAYER',
-            payload: { playerId }
-        });
-    }
 
-    /**
-     * Moves a player to a target position
-     * @param playerId The player's ID
-     * @param targetX Target X coordinate
-     * @param targetY Target Y coordinate
-     */
-    movePlayer(playerId: string, targetX: number, targetY: number): void {
-        this.processAction({
-            type: 'MOVE_PLAYER',
-            payload: { playerId, targetX, targetY }
-        });
-    }
 
     /**
      * Moves a hero to a target position
@@ -107,69 +86,64 @@ export class GameEngine {
      * @param targetX Target X coordinate
      * @param targetY Target Y coordinate
      */
-    moveHero(heroId: string, targetX: number, targetY: number): void {
+    moveHero(heroId: CombatantId, targetX: number, targetY: number): void {
         this.processAction({
             type: 'MOVE_HERO',
             payload: { heroId, targetX, targetY }
         });
     }
 
+
+
     /**
-     * Uses a player's ability at the specified coordinates
-     * @param playerId The player's ID
+     * Uses a hero's ability at the specified coordinates
+     * @param heroId The hero's ID
      * @param x X coordinate where ability was used
      * @param y Y coordinate where ability was used
      */
-    useAbility(playerId: string, x: number, y: number): void {
-        // Find hero by controller (client ID)
-        let player: any = null;
-        this.state.combatants.forEach((combatant: any) => {
-            if (combatant.controller === playerId) {
-                player = combatant;
-            }
-        });
+    useAbility(heroId: CombatantId, x: number, y: number): void {
+        // Find hero by ID
+        const hero = this.state.combatants.get(heroId);
         
-        if (!player || player.type !== 'hero') {
+        if (!hero || hero.type !== 'hero') {
             return;
         }
 
+        // Cast to Hero type to access hero-specific properties
+        const heroCombatant = hero as any;
+
         // Prevent respawning entities from firing projectiles
-        if (player.state === 'respawning') {
+        if (heroCombatant.state === 'respawning') {
             return;
         }
 
         const currentTime = Date.now();
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (player.ability.lastUsedTime === 0) {
-            player.ability.lastUsedTime = currentTime;
-            this.createProjectile(playerId, x, y);
+        if (heroCombatant.ability.lastUsedTime === 0) {
+            heroCombatant.ability.lastUsedTime = currentTime;
+            this.createProjectile(heroId, x, y);
             return;
         }
         
-        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
+        const timeSinceLastUse = currentTime - heroCombatant.ability.lastUsedTime;
   
-        if (timeSinceLastUse < player.ability.cooldown) {
+        if (timeSinceLastUse < heroCombatant.ability.cooldown) {
             return; // Ability is on cooldown
         }
 
-        player.ability.lastUsedTime = currentTime;
-        this.createProjectile(playerId, x, y);
+        heroCombatant.ability.lastUsedTime = currentTime;
+        this.createProjectile(heroId, x, y);
     }
 
-    private createProjectile(playerId: string, targetX: number, targetY: number): void {
-        // Find hero by controller (client ID)
-        let player: any = null;
-        this.state.combatants.forEach((combatant: any) => {
-            if (combatant.controller === playerId) {
-                player = combatant;
-            }
-        });
-        if (!player) return;
+    private createProjectile(heroId: CombatantId, targetX: number, targetY: number): void {
+        // Find hero by ID
+        const hero = this.state.combatants.get(heroId);
+        if (!hero) return;
 
-        // Calculate direction from player to target
-        const dx = targetX - player.x;
-        const dy = targetY - player.y;
+        // Calculate direction from hero to target
+        const dx = targetX - hero.x;
+        const dy = targetY - hero.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance === 0) return; // Can't shoot at self
@@ -181,14 +155,14 @@ export class GameEngine {
         // Create projectile
         const projectile = new (require('../schema/GameState').Projectile)();
         projectile.id = `projectile_${Date.now()}_${Math.random()}`;
-        projectile.ownerId = player.id; // Use the hero's actual ID instead of controller
-        projectile.x = player.x;
-        projectile.y = player.y;
+        projectile.ownerId = hero.id; // Use the hero's actual ID
+        projectile.x = hero.x;
+        projectile.y = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
         projectile.speed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.SPEED;
-        projectile.strength = player.ability.strength;
-        projectile.team = player.team;
+        projectile.strength = (hero as any).ability.strength;
+        projectile.team = hero.team;
         
         this.state.projectiles.set(projectile.id, projectile);
     }
