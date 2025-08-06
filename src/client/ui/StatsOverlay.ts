@@ -84,17 +84,6 @@ export class StatsOverlay {
     }
 
     /**
-     * Toggles the stats overlay visibility
-     */
-    toggle(state: SharedGameState): void {
-        if (this.isVisible) {
-            this.hide();
-        } else {
-            this.show(state);
-        }
-    }
-
-    /**
      * Updates the stats overlay with new data
      */
     update(state: SharedGameState): void {

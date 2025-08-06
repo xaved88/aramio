@@ -116,10 +116,17 @@ export class UIManager {
     }
 
     /**
-     * Toggles the stats overlay
+     * Shows the stats overlay
      */
-    toggleStatsOverlay(state: SharedGameState): void {
-        this.statsOverlay.toggle(state);
+    showStatsOverlay(state: SharedGameState): void {
+        this.statsOverlay.show(state);
+    }
+
+    /**
+     * Hides the stats overlay
+     */
+    hideStatsOverlay(): void {
+        this.statsOverlay.hide();
     }
 
     /**

@@ -207,12 +207,16 @@ export class GameScene extends Phaser.Scene {
             }
         });
 
-        // Add shift key handler for stats overlay
+        // Add shift key handlers for stats overlay (hold to show)
         this.input.keyboard?.on('keydown-SHIFT', () => {
             if (this.lastState) {
                 const sharedState = convertToSharedGameState(this.lastState);
-                this.uiManager.toggleStatsOverlay(sharedState);
+                this.uiManager.showStatsOverlay(sharedState);
             }
+        });
+
+        this.input.keyboard?.on('keyup-SHIFT', () => {
+            this.uiManager.hideStatsOverlay();
         });
     }
 
