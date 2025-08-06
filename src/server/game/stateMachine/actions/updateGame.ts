@@ -1,4 +1,4 @@
-import { GameState, Hero, XPEvent, LevelUpEvent } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent, LevelUpEvent, Combatant } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -366,20 +366,6 @@ function completePlayerRespawn(player: Hero): void {
     player.health = player.maxHealth; // Restore to max health, not base health
 }
 
-function grantExperienceToTeam(amount: number, enemyTeam: string, state: GameState): void {
-    const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
-    
-    state.combatants.forEach((combatant, id) => {
-        if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
-            const hero = combatant as Hero;
-            // Only grant experience to alive players, not respawning ones
-            if (hero.state === 'alive') {
-                grantExperience(hero, amount, state);
-            }
-        }
-    });
-}
-
 function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
@@ -392,8 +378,23 @@ function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state
     });
 }
 
-function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: any): void {
+function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: Combatant): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
+    
+    // Find the killer (last hit) from kill events
+    let killerHero: Hero | null = null;
+    const recentKillEvents = [...state.killEvents].sort((a, b) => b.timestamp - a.timestamp);
+    
+    for (const killEvent of recentKillEvents) {
+        if (killEvent.targetId === dyingUnit.id) {
+            // Found the kill event for this unit, now find the killer
+            const killer = state.combatants.get(killEvent.sourceId);
+            if (killer && killer.type === COMBATANT_TYPES.HERO && killer.team === opposingTeam) {
+                killerHero = killer as Hero;
+                break;
+            }
+        }
+    }
     
     // Find all alive heroes in range and give XP to them
     const heroesInRange: Hero[] = [];
@@ -409,6 +410,11 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         }
     });
     
+    // If killer is not in range, add them to the list
+    if (killerHero && !heroesInRange.find(hero => hero.id === killerHero!.id)) {
+        heroesInRange.push(killerHero);
+    }
+    
     // If no heroes in range, no experience is granted
     if (heroesInRange.length === 0) {
         return;
@@ -421,11 +427,27 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
     
     // Grant experience to each hero in range
     heroesInRange.forEach(hero => {
-        grantExperience(hero, experiencePerHero, state, dyingUnit.x, dyingUnit.y);
+        let bonusExperience = 0;
+        let xpType: string | undefined = undefined;
+        
+        // Grant additional bonus to the killer
+        if (killerHero && hero.id === killerHero.id) {
+            bonusExperience = amount * GAMEPLAY_CONFIG.EXPERIENCE.LAST_HIT_BONUS_PERCENTAGE;
+            
+            // Set the type based on what was killed
+            if (dyingUnit.type === COMBATANT_TYPES.MINION) {
+                xpType = 'minionKill';
+            } else if (dyingUnit.type === COMBATANT_TYPES.HERO) {
+                xpType = 'heroKill';
+            }
+        }
+        
+        const totalExperience = experiencePerHero + bonusExperience;
+        grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType);
     });
 }
 
-function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number): void {
+function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string): void {
     player.experience += amount;
     player.roundStats.totalExperience += amount;
     
@@ -437,6 +459,9 @@ function grantExperience(player: Hero, amount: number, state: GameState, xpX?: n
         xpEvent.x = xpX;
         xpEvent.y = xpY;
         xpEvent.timestamp = state.gameTime;
+        if (type) {
+            xpEvent.type = type;
+        }
         state.xpEvents.push(xpEvent);
     }
     

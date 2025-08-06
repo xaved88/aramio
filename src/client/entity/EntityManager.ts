@@ -236,18 +236,31 @@ export class EntityManager {
      * Creates XP text animation at the specified position
      */
     private createXPText(xpEvent: XPEvent): void {
-        const xpText = this.scene.add.text(xpEvent.x, xpEvent.y, `+${Math.round(xpEvent.amount)}XP`, {
-            fontSize: '16px',
-            color: '#ffffff', // White color for XP
-            fontFamily: 'Arial'
+        let text = `+${Math.round(xpEvent.amount)}XP`;
+        let color: string = CLIENT_CONFIG.XP_EVENTS.COLORS.DEFAULT;
+        let fontSize: string = CLIENT_CONFIG.XP_EVENTS.FONTS.DEFAULT_SIZE;
+        
+        // Special styling for last hits
+        if (xpEvent.type === 'minionKill') {
+            color = CLIENT_CONFIG.XP_EVENTS.COLORS.LAST_HIT;
+        } else if (xpEvent.type === 'heroKill') {
+            color = CLIENT_CONFIG.XP_EVENTS.COLORS.LAST_HIT;
+            text = `+${Math.round(xpEvent.amount)}XP Kill!`;
+            fontSize = CLIENT_CONFIG.XP_EVENTS.FONTS.HERO_KILL_SIZE;
+        }
+        
+        const xpText = this.scene.add.text(xpEvent.x, xpEvent.y, text, {
+            fontSize: fontSize,
+            color: color,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
         }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
             targets: xpText,
-            y: xpText.y - 30,
+            y: xpText.y - CLIENT_CONFIG.XP_EVENTS.ANIMATION.FLOAT_DISTANCE,
             alpha: 0,
-            duration: GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS,
+            duration: CLIENT_CONFIG.XP_EVENTS.ANIMATION.DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 xpText.destroy();
@@ -281,17 +294,17 @@ export class EntityManager {
      */
     private createLevelUpText(levelUpEvent: LevelUpEvent): void {
         const levelUpText = this.scene.add.text(levelUpEvent.x, levelUpEvent.y, `Level Up!`, {
-            fontSize: '20px',
-            color: '#ffd700', // Gold color for level up
-            fontFamily: 'Arial'
+            fontSize: CLIENT_CONFIG.LEVEL_UP_EVENTS.FONT_SIZE,
+            color: CLIENT_CONFIG.LEVEL_UP_EVENTS.COLOR,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
         }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
             targets: levelUpText,
-            y: levelUpText.y - 50,
+            y: levelUpText.y - CLIENT_CONFIG.LEVEL_UP_EVENTS.ANIMATION.FLOAT_DISTANCE,
             alpha: 0,
-            duration: GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS,
+            duration: CLIENT_CONFIG.LEVEL_UP_EVENTS.ANIMATION.DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 levelUpText.destroy();

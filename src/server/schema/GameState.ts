@@ -14,6 +14,7 @@ export class XPEvent extends Schema {
     @type('number') x!: number; // X position where XP was earned
     @type('number') y!: number; // Y position where XP was earned
     @type('number') timestamp!: number; // When the XP was earned
+    @type('string') type?: string; // Type of XP event (e.g., 'minionKill', 'heroKill')
 }
 
 export class LevelUpEvent extends Schema {

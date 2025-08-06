@@ -40,7 +40,8 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         amount: event.amount,
         x: event.x,
         y: event.y,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
+        type: event.type
     }));
     
     // Convert level-up events

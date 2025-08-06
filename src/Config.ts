@@ -94,6 +94,7 @@ export const GAMEPLAY_CONFIG = {
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
         TOWER_DESTROYED: 20,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
+        LAST_HIT_BONUS_PERCENTAGE: 0.4, // 40% bonus experience for getting the last hit on a unit
         XP_EVENT_DURATION_MS: 2000, // how long XP events stay in state (matches client animation)
         LEVEL_UP_EVENT_DURATION_MS: 3000, // how long level-up events stay in state (matches client animation)
     },
@@ -230,6 +231,7 @@ export const CLIENT_CONFIG = {
             LARGE: '14px',
             ERROR: '16px',
             VICTORY: '48px',
+            DEFAULT_FAMILY: 'Arial',
         },
         COLORS: {
             TEXT_PRIMARY: 0xffffff,
@@ -240,6 +242,28 @@ export const CLIENT_CONFIG = {
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,
+        },
+    },
+    XP_EVENTS: {
+        COLORS: {
+            DEFAULT: '#ffffff', // White for regular XP events
+            LAST_HIT: '#ffff00', // Yellow for last hits (minion and hero kills)
+        },
+        FONTS: {
+            DEFAULT_SIZE: '16px',
+            HERO_KILL_SIZE: '18px', // Larger font for hero kills
+        },
+        ANIMATION: {
+            FLOAT_DISTANCE: 30, // How far the text floats up
+            DURATION_MS: 2000, // Matches GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS
+        },
+    },
+    LEVEL_UP_EVENTS: {
+        COLOR: '#ffd700', // Gold color for level up
+        FONT_SIZE: '20px',
+        ANIMATION: {
+            FLOAT_DISTANCE: 50, // How far the text floats up
+            DURATION_MS: 3000, // Matches GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS
         },
     },
 } as const;

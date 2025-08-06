@@ -6,6 +6,7 @@ export interface XPEvent {
     x: number;
     y: number;
     timestamp: number;
+    type?: string; // Type of XP event (e.g., 'minionKill', 'heroKill')
 }
 
 export interface LevelUpEvent {
