@@ -22,6 +22,8 @@ export class GameScene extends Phaser.Scene {
     private totalHP: number = 0;
     private playerTeam: string | null = null;
     private playerSessionId: string | null = null;
+    private spaceKeyPressed: boolean = false;
+    private moveTarget: { x: number, y: number } | null = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -79,12 +81,22 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (!this.room || !this.room.state) return;
         
-        // Get mouse position and send continuously
-        const pointer = this.input.activePointer;
-        this.room.send('move', { 
-            targetX: pointer.x, 
-            targetY: pointer.y 
-        });
+        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
+            // Control scheme A: point to move (original behavior)
+            const pointer = this.input.activePointer;
+            this.room.send('move', { 
+                targetX: pointer.x, 
+                targetY: pointer.y 
+            });
+        } else {
+            // Control scheme B: send continuous movement to target if we have one
+            if (this.moveTarget) {
+                this.room.send('move', {
+                    targetX: this.moveTarget.x,
+                    targetY: this.moveTarget.y
+                });
+            }
+        }
     }
 
     private updateCombatantEntities(state: SharedGameState) {
@@ -198,8 +210,34 @@ export class GameScene extends Phaser.Scene {
     }
 
     private setupInputHandlers(): void {
-        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            if (this.room) {
+        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
+            // Scheme A: point to move, click to use ability
+            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                if (this.room) {
+                    this.room.send('useAbility', {
+                        x: pointer.x,
+                        y: pointer.y
+                    });
+                }
+            });
+        } else {
+            // Scheme B: click to move, space+point to use ability
+            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                if (this.room && !this.spaceKeyPressed) {
+                    // Click without space: set move target
+                    this.moveTarget = { x: pointer.x, y: pointer.y };
+                }
+            });
+
+            // For scheme B abilities: space key press triggers ability at current pointer location
+        }
+
+        // Space key handlers for control scheme B
+        this.input.keyboard?.on('keydown-SPACE', () => {
+            this.spaceKeyPressed = true;
+            // Fire ability at current pointer position when space is pressed
+            if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B' && this.room) {
+                const pointer = this.input.activePointer;
                 this.room.send('useAbility', {
                     x: pointer.x,
                     y: pointer.y
@@ -207,7 +245,11 @@ export class GameScene extends Phaser.Scene {
             }
         });
 
-        // Add shift key handlers for stats overlay (hold to show)
+        this.input.keyboard?.on('keyup-SPACE', () => {
+            this.spaceKeyPressed = false;
+        });
+
+        // Shift key handlers for stats overlay (hold to show)
         this.input.keyboard?.on('keydown-SHIFT', () => {
             if (this.lastState) {
                 const sharedState = convertToSharedGameState(this.lastState);
