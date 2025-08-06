@@ -104,6 +104,7 @@ export const GAMEPLAY_CONFIG = {
         FIRST_WAVE_DELAY_MS: 2000,
         WAVE_INTERVAL_MS: 12000,
         SPAWN_RADIUS: 50, // radius around cradle to spawn minions
+        ARCHER_SPAWN_DELAY_MS: 1300, // delay before spawning archers after warriors
     },
     VICTORY_SCREEN: {
         FADE_IN_DURATION_MS: 1000, // 1 second fade in

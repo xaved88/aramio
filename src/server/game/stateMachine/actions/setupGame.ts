@@ -13,6 +13,8 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     state.winningTeam = '';
     state.gameEndTime = 0;
     state.currentWave = 0;
+    state.warriorSpawnTimes.clear();
+    state.archerSpawned.clear();
     
     // Create blue cradle (bottom left)
     const blueCradle = new Combatant();

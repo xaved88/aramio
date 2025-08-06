@@ -70,11 +70,34 @@ export class MinionManager {
     }
 
     static spawnMinionWave(state: GameState): void {
-        // Spawn minions for blue team
-        this.spawnTeamMinions(state, 'blue');
+        // Spawn warriors for both teams first
+        this.spawnTeamWarriors(state, 'blue');
+        this.spawnTeamWarriors(state, 'red');
         
-        // Spawn minions for red team
-        this.spawnTeamMinions(state, 'red');
+        // Track when warriors were spawned for this wave
+        state.warriorSpawnTimes.set(state.currentWave.toString(), state.gameTime);
+    }
+
+    private static spawnTeamWarriors(state: GameState, team: string): void {
+        const cradlePosition = team === 'blue' 
+            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
+            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+
+        // Spawn warriors
+        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE; i++) {
+            this.spawnMinion(state, team, MINION_TYPES.WARRIOR, cradlePosition);
+        }
+    }
+
+    private static spawnTeamArchers(state: GameState, team: string): void {
+        const cradlePosition = team === 'blue' 
+            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
+            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+
+        // Spawn archers
+        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE; i++) {
+            this.spawnMinion(state, team, MINION_TYPES.ARCHER, cradlePosition);
+        }
     }
 
     private static spawnTeamMinions(state: GameState, team: string): void {
@@ -137,6 +160,30 @@ export class MinionManager {
         while (state.currentWave < expectedWave) {
             state.currentWave++;
             this.spawnMinionWave(state);
+        }
+
+        // Check if it's time to spawn archers for any waves
+        this.checkAndSpawnArchers(state);
+    }
+
+    private static checkAndSpawnArchers(state: GameState): void {
+        const currentTime = state.gameTime;
+        const archerDelay = GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS;
+
+        // Check each wave to see if archers should be spawned
+        for (let wave = 1; wave <= state.currentWave; wave++) {
+            const waveKey = wave.toString();
+            const warriorSpawnTime = state.warriorSpawnTimes.get(waveKey);
+            const archersAlreadySpawned = state.archerSpawned.get(waveKey) || false;
+            
+            if (warriorSpawnTime && !archersAlreadySpawned && currentTime >= warriorSpawnTime + archerDelay) {
+                // Spawn archers for this wave
+                this.spawnTeamArchers(state, 'blue');
+                this.spawnTeamArchers(state, 'red');
+                
+                // Mark that archers have been spawned for this wave
+                state.archerSpawned.set(waveKey, true);
+            }
         }
     }
 } 

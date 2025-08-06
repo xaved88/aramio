@@ -195,13 +195,13 @@ describe('MinionManager', () => {
     });
 
     describe('spawnMinionWave', () => {
-        it('should spawn correct number of minions for each team', () => {
+        it('should spawn correct number of warriors for each team', () => {
             const initialMinionCount = gameState.combatants.size;
             
             MinionManager.spawnMinionWave(gameState);
             
-            // Should spawn 2 warriors + 2 archers for each team = 8 total new minions
-            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
         });
 
@@ -238,7 +238,7 @@ describe('MinionManager', () => {
             });
         });
 
-        it('should spawn both warrior and archer minions', () => {
+        it('should spawn only warrior minions initially', () => {
             // Clear existing minions to test only new spawns
             const existingMinions = Array.from(gameState.combatants.values()).filter(c => c.type === COMBATANT_TYPES.MINION);
             existingMinions.forEach(minion => gameState.combatants.delete(minion.id));
@@ -258,9 +258,9 @@ describe('MinionManager', () => {
             const redArchers = redMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
             
             expect(blueWarriors.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
-            expect(blueArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(blueArchers.length).toBe(0); // No archers spawned initially
             expect(redWarriors.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
-            expect(redArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(redArchers.length).toBe(0); // No archers spawned initially
         });
 
         it('should spawn minions with correct stats based on type', () => {
@@ -275,17 +275,11 @@ describe('MinionManager', () => {
             ) as Minion[];
             
             const warrior = blueMinions.find(m => m.minionType === MINION_TYPES.WARRIOR);
-            const archer = blueMinions.find(m => m.minionType === MINION_TYPES.ARCHER);
             
             expect(warrior?.health).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.HEALTH);
             expect(warrior?.attackRadius).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS);
             expect(warrior?.attackStrength).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH);
             expect(warrior?.attackSpeed).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_SPEED);
-            
-            expect(archer?.health).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.HEALTH);
-            expect(archer?.attackRadius).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_RADIUS);
-            expect(archer?.attackStrength).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_STRENGTH);
-            expect(archer?.attackSpeed).toBe(GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER.ATTACK_SPEED);
         });
     });
 
@@ -300,13 +294,14 @@ describe('MinionManager', () => {
             expect(gameState.currentWave).toBe(0);
         });
 
-        it('should spawn first wave after delay', () => {
+        it('should spawn first wave warriors after delay', () => {
             gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
             const initialMinionCount = gameState.combatants.size;
             
             MinionManager.checkAndSpawnWave(gameState);
             
-            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(gameState.currentWave).toBe(1);
         });
@@ -317,7 +312,8 @@ describe('MinionManager', () => {
             
             MinionManager.checkAndSpawnWave(gameState);
             
-            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2 * 3; // 3 waves
+            // Should spawn only warriors initially (2 warriors per team * 3 waves = 12 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2 * 3;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(gameState.currentWave).toBe(3);
         });
@@ -332,6 +328,36 @@ describe('MinionManager', () => {
             
             expect(gameState.combatants.size).toBe(initialMinionCount);
             expect(gameState.currentWave).toBe(1);
+        });
+
+        it('should spawn archers after delay', () => {
+            // Spawn a wave first
+            gameState.gameTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            const initialMinionCount = gameState.combatants.size;
+            
+            // Advance time to trigger archer spawning
+            gameState.gameTime += GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS + 100;
+            MinionManager.checkAndSpawnWave(gameState);
+            
+            // Should spawn archers for the wave (3 archers per team = 6 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE * 2;
+            expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
+            
+            // Verify archers were spawned
+            const blueMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'blue'
+            ) as Minion[];
+            const redMinions = Array.from(gameState.combatants.values()).filter(c => 
+                c.type === COMBATANT_TYPES.MINION && c.team === 'red'
+            ) as Minion[];
+            
+            const blueArchers = blueMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
+            const redArchers = redMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
+            
+            expect(blueArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(redArchers.length).toBe(GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
         });
     });
 }); 

@@ -443,7 +443,8 @@ describe('handleUpdateGame', () => {
             
             result = handleUpdateGame(gameState, action);
             
-            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2;
+            // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
             expect(result.newState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(result.newState.currentWave).toBe(1);
         });
@@ -454,7 +455,8 @@ describe('handleUpdateGame', () => {
             
             result = handleUpdateGame(gameState, action);
             
-            const expectedNewMinions = (GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE + GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE) * 2 * 3; // 3 waves
+            // Should spawn only warriors initially (2 warriors per team * 3 waves = 12 total new minions)
+            const expectedNewMinions = GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2 * 3;
             expect(result.newState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(result.newState.currentWave).toBe(3);
         });

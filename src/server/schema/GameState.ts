@@ -114,4 +114,6 @@ export class GameState extends Schema {
     @type([DamageEvent]) damageEvents = new ArraySchema<DamageEvent>();
     @type([KillEvent]) killEvents = new ArraySchema<KillEvent>();
     @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
+    @type({ map: 'number' }) warriorSpawnTimes = new MapSchema<number>(); // Track when warriors were spawned for each wave
+    @type({ map: 'boolean' }) archerSpawned = new MapSchema<boolean>(); // Track if archers have been spawned for each wave
 } 
