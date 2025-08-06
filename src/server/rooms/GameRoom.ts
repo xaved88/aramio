@@ -179,7 +179,7 @@ export class GameRoom extends Room<GameState> {
                 this.handleUseAbilityCommand(command);
                 break;
             default:
-                console.log(`Unknown command type: ${command.type}`);
+                console.log(`Unknown command type: ${(command as any).type}`);
         }
     }
 
