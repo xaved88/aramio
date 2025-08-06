@@ -1,12 +1,7 @@
 import { GameState } from '../../schema/GameState';
 import { SimpletonBotStrategy } from './strategies/SimpletonBotStrategy';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
-
-export interface BotCommand {
-    type: 'move' | 'useAbility';
-    data: any;
-    clientId: string;
-}
+import { GameCommand } from '../../../shared/types/GameCommands';
 
 export class BotManager {
     private strategies: Map<string, any> = new Map();
@@ -19,8 +14,8 @@ export class BotManager {
     /**
      * Process all bots and generate commands for them
      */
-    processBots(state: GameState): BotCommand[] {
-        const commands: BotCommand[] = [];
+    processBots(state: GameState): GameCommand[] {
+        const commands: GameCommand[] = [];
         const sharedState = convertToSharedGameState(state);
 
         // Find all bot-controlled heroes

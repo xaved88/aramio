@@ -4,13 +4,8 @@ import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
 import { gameStateToString } from '../../shared/utils/DebugUtils';
-import { ControllerId } from '../../shared/types/CombatantTypes';
-
-interface GameCommand {
-    type: string;
-    data: any;
-    clientId: ControllerId;
-}
+import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
+import { GameCommand, GameMoveCommand, GameUseAbilityCommand } from '../../shared/types/GameCommands';
 
 export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
@@ -19,6 +14,7 @@ export class GameRoom extends Room<GameState> {
     private gameEngine!: GameEngine;
     private botManager!: BotManager;
     private restartTimer: NodeJS.Timeout | null = null;
+
 
     onCreate(options: any) {
         this.initializeGame();
@@ -62,19 +58,31 @@ export class GameRoom extends Room<GameState> {
 
     private setupMessageHandlers() {
         this.onMessage('move', (client, data) => {
-            this.commands.push({
-                type: 'move',
-                data: data,
-                clientId: client.sessionId
-            });
+            const heroId = this.findHeroByController(client.sessionId);
+            if (heroId) {
+                this.commands.push({
+                    type: 'move',
+                    data: {
+                        heroId: heroId,
+                        targetX: data.targetX,
+                        targetY: data.targetY
+                    }
+                });
+            }
         });
         
         this.onMessage('useAbility', (client, data) => {
-            this.commands.push({
-                type: 'useAbility',
-                data: data,
-                clientId: client.sessionId
-            });
+            const heroId = this.findHeroByController(client.sessionId);
+            if (heroId) {
+                this.commands.push({
+                    type: 'useAbility',
+                    data: {
+                        heroId: heroId,
+                        x: data.x,
+                        y: data.y
+                    }
+                });
+            }
         });
     }
 
@@ -93,7 +101,8 @@ export class GameRoom extends Room<GameState> {
         
         if (!replacedBot) {
             // If no bot to replace, spawn a new hero
-            this.gameEngine.spawnPlayer(client.sessionId, team);
+            this.gameEngine.spawnControlledHero(client.sessionId, team);
+            // The hero ID will be set in the next update cycle when we process the spawn action
         }
     }
 
@@ -124,6 +133,8 @@ export class GameRoom extends Room<GameState> {
             this.handleGameEvents(result.events);
         }
 
+
+
         // Process bot commands
         const botCommands = this.botManager.processBots(this.state);
         this.commands.push(...botCommands);
@@ -136,13 +147,13 @@ export class GameRoom extends Room<GameState> {
     }
 
     private processCommands() {
-        // Group move commands by client and take the latest from each
-        const latestMoveCommands = new Map<string, GameCommand>();
+        // Group move commands by hero and take the latest from each
+        const latestMoveCommands = new Map<CombatantId, GameCommand>();
         const otherCommands: GameCommand[] = [];
         
         this.commands.forEach(command => {
             if (command.type === 'move') {
-                latestMoveCommands.set(command.clientId, command);
+                latestMoveCommands.set(command.data.heroId, command);
             } else {
                 otherCommands.push(command);
             }
@@ -172,32 +183,24 @@ export class GameRoom extends Room<GameState> {
         }
     }
 
-    private handleMoveCommand(command: GameCommand) {
-        if (command.data.targetX !== undefined && command.data.targetY !== undefined) {
-            // For bot commands, use the hero ID directly
-            if (command.clientId.startsWith('hero-')) {
-                this.gameEngine.moveHero(command.clientId, command.data.targetX, command.data.targetY);
-            } else {
-                // For player commands, use the clientId directly (session ID)
-                this.gameEngine.movePlayer(command.clientId, command.data.targetX, command.data.targetY);
-            }
-        }
+    private handleMoveCommand(command: GameMoveCommand) {
+        this.gameEngine.moveHero(command.data.heroId, command.data.targetX, command.data.targetY);
     }
 
-    private handleUseAbilityCommand(command: GameCommand) {
-        if (command.data.x !== undefined && command.data.y !== undefined) {
-            // For bot commands, find the hero by ID and use its controller
-            if (command.clientId.startsWith('hero-')) {
-                const hero = this.state.combatants.get(command.clientId) as any;
-                if (hero) {
-                    this.gameEngine.useAbility(hero.controller, command.data.x, command.data.y);
-                }
-            } else {
-                // For player commands, use the clientId directly
-                this.gameEngine.useAbility(command.clientId, command.data.x, command.data.y);
+    private handleUseAbilityCommand(command: GameUseAbilityCommand) {
+        this.gameEngine.useAbility(command.data.heroId, command.data.x, command.data.y);
+    }
+
+    private findHeroByController(controllerId: ControllerId): CombatantId | null {
+        for (const [heroId, combatant] of this.state.combatants.entries()) {
+            if (combatant.type === 'hero' && (combatant as any).controller === controllerId) {
+                return heroId;
             }
         }
+        return null;
     }
+
+
 
     private spawnBots() {
         // Spawn bots at different positions around the cradles
@@ -207,12 +210,12 @@ export class GameRoom extends Room<GameState> {
         
         // Spawn blue bots
         for (let i = 0; i < botCount; i++) {
-            this.gameEngine.spawnPlayer('bot-simpleton', 'blue', blueSpawnPositions[i]);
+            this.gameEngine.spawnControlledHero('bot-simpleton', 'blue', blueSpawnPositions[i]);
         }
         
         // Spawn red bots
         for (let i = 0; i < botCount; i++) {
-            this.gameEngine.spawnPlayer('bot-simpleton', 'red', redSpawnPositions[i]);
+            this.gameEngine.spawnControlledHero('bot-simpleton', 'red', redSpawnPositions[i]);
         }
     }
 
@@ -313,7 +316,7 @@ export class GameRoom extends Room<GameState> {
             
             if (!replacedBot) {
                 // If no bot to replace, spawn a new hero
-                this.gameEngine.spawnPlayer(playerId, team);
+                this.gameEngine.spawnControlledHero(playerId, team);
             }
         });
         

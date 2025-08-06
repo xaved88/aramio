@@ -1,10 +1,10 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
-import { BotCommand } from '../BotManager';
+import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
 export class SimpletonBotStrategy {
-    generateCommands(bot: any, state: SharedGameState): BotCommand[] {
-        const commands: BotCommand[] = [];
+    generateCommands(bot: any, state: SharedGameState): GameCommand[] {
+        const commands: GameCommand[] = [];
 
         // Skip if bot is dead or respawning
         if (bot.health <= 0 || bot.state === 'respawning') {
@@ -21,8 +21,7 @@ export class SimpletonBotStrategy {
                 const closestEnemy = enemiesInRange[0];
                 commands.push({
                     type: 'useAbility',
-                    data: { x: closestEnemy.x, y: closestEnemy.y },
-                    clientId: bot.id
+                    data: { heroId: bot.id, x: closestEnemy.x, y: closestEnemy.y }
                 });
             }
         } else {
@@ -30,8 +29,7 @@ export class SimpletonBotStrategy {
             const targetPosition = this.getEnemyCradlePosition(bot.team);
             commands.push({
                 type: 'move',
-                data: { targetX: targetPosition.x, targetY: targetPosition.y },
-                clientId: bot.id
+                data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
             });
         }
 
