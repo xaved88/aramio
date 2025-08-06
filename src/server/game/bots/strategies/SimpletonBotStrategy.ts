@@ -12,6 +12,17 @@ export class SimpletonBotStrategy {
             return commands;
         }
 
+        // Check if bot is being targeted by defensive structures
+        if (this.isBeingTargetedByDefensiveStructure(bot, state)) {
+            // Retreat to safe position
+            const safePosition = this.getSafeRetreatPosition(bot, state);
+            commands.push({
+                type: 'move',
+                data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+            });
+            return commands;
+        }
+
         // Find all enemies (not just in range)
         const allEnemies = this.findAllEnemies(bot, state);
         
@@ -91,7 +102,7 @@ export class SimpletonBotStrategy {
     private findAllEnemies(bot: any, state: SharedGameState): any[] {
         const enemies: any[] = [];
         
-        state.combatants.forEach((combatant: any) => {
+        Array.from(state.combatants.values()).forEach((combatant: any) => {
             // Skip allies and dead entities
             if (combatant.team === bot.team || combatant.health <= 0) {
                 return;
@@ -137,7 +148,7 @@ export class SimpletonBotStrategy {
     private findEnemiesInRange(bot: any, state: SharedGameState): any[] {
         const enemies: any[] = [];
         
-        state.combatants.forEach((combatant: any) => {
+        Array.from(state.combatants.values()).forEach((combatant: any) => {
             // Skip allies and dead entities
             if (combatant.team === bot.team || combatant.health <= 0) {
                 return;
@@ -156,6 +167,78 @@ export class SimpletonBotStrategy {
 
         // Sort by distance (closest first)
         return enemies.sort((a, b) => a.distance - b.distance);
+    }
+
+    private isBeingTargetedByDefensiveStructure(bot: any, state: SharedGameState): boolean {
+        return Array.from(state.combatants.values()).some((combatant: any) => {
+            // Only check enemy turrets and cradles
+            if (combatant.team === bot.team || combatant.health <= 0) {
+                return false;
+            }
+            
+            if (combatant.type !== 'turret' && combatant.type !== 'cradle') {
+                return false;
+            }
+
+            // Check if this defensive structure is targeting the bot
+            return combatant.target === bot.id;
+        });
+    }
+
+
+
+    private getSafeRetreatPosition(bot: any, state: SharedGameState): { x: number, y: number } {
+        // Find the closest friendly defensive structure to retreat to
+        const friendlyStructures = Array.from(state.combatants.values()).filter((combatant: any) => 
+            combatant.team === bot.team && 
+            combatant.health > 0 && 
+            (combatant.type === 'cradle' || combatant.type === 'turret')
+        );
+
+        if (friendlyStructures.length === 0) {
+            // Fallback to team spawn position
+            return bot.team === 'blue' 
+                ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
+                : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+        }
+
+        // Find closest friendly structure
+        let closestStructure = friendlyStructures[0];
+        let closestDistance = Infinity;
+
+        friendlyStructures.forEach((structure: any) => {
+            const dx = structure.x - bot.x;
+            const dy = structure.y - bot.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestStructure = structure;
+            }
+        });
+
+        // Return position near the closest friendly structure, but outside its attack range
+        const retreatDistance = closestStructure.attackRadius + 50; // 50 pixels buffer
+        const dx = bot.x - closestStructure.x;
+        const dy = bot.y - closestStructure.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) {
+            // Bot is at structure position, move away
+            return {
+                x: closestStructure.x + retreatDistance,
+                y: closestStructure.y + retreatDistance
+            };
+        }
+
+        // Normalize direction and scale to retreat distance
+        const normalizedDx = dx / distance;
+        const normalizedDy = dy / distance;
+        
+        return {
+            x: closestStructure.x + (normalizedDx * retreatDistance),
+            y: closestStructure.y + (normalizedDy * retreatDistance)
+        };
     }
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
