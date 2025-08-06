@@ -24,6 +24,7 @@ export class GameScene extends Phaser.Scene {
     private playerSessionId: string | null = null;
     private spaceKeyPressed: boolean = false;
     private moveTarget: { x: number, y: number } | null = null;
+    private isClickHeld: boolean = false;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -88,9 +89,24 @@ export class GameScene extends Phaser.Scene {
                 targetX: pointer.x, 
                 targetY: pointer.y 
             });
-        } else {
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
             // Control scheme B: send continuous movement to target if we have one
             if (this.moveTarget) {
+                this.room.send('move', {
+                    targetX: this.moveTarget.x,
+                    targetY: this.moveTarget.y
+                });
+            }
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
+            // Control scheme C: point to move when not clicking, hold position when clicking
+            if (!this.isClickHeld) {
+                const pointer = this.input.activePointer;
+                this.room.send('move', { 
+                    targetX: pointer.x, 
+                    targetY: pointer.y 
+                });
+            } else if (this.moveTarget) {
+                // When click is held, keep moving to the click-down position
                 this.room.send('move', {
                     targetX: this.moveTarget.x,
                     targetY: this.moveTarget.y
@@ -220,7 +236,7 @@ export class GameScene extends Phaser.Scene {
                     });
                 }
             });
-        } else {
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
             // Scheme B: click to move, space+point to use ability
             this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
                 if (this.room && !this.spaceKeyPressed) {
@@ -228,8 +244,26 @@ export class GameScene extends Phaser.Scene {
                     this.moveTarget = { x: pointer.x, y: pointer.y };
                 }
             });
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
+            // Scheme C: click down to stop at position, click up to use ability
+            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                if (this.room) {
+                    this.isClickHeld = true;
+                    this.moveTarget = { x: pointer.x, y: pointer.y };
+                }
+            });
 
-            // For scheme B abilities: space key press triggers ability at current pointer location
+            this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+                if (this.room && this.isClickHeld) {
+                    // Use ability at release position
+                    this.room.send('useAbility', {
+                        x: pointer.x,
+                        y: pointer.y
+                    });
+                    this.isClickHeld = false;
+                    this.moveTarget = null; // Clear move target to resume point-to-move
+                }
+            });
         }
 
         // Space key handlers for control scheme B

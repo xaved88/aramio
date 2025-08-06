@@ -137,7 +137,7 @@ export const CLIENT_CONFIG = {
     INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
     ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
     CONTROLS: {
-        SCHEME: 'A' as 'A' | 'B', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability
+        SCHEME: 'C' as 'A' | 'B' | 'C', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability
     },
     GAME_CANVAS_WIDTH: 600,
     GAME_CANVAS_HEIGHT: 600,
