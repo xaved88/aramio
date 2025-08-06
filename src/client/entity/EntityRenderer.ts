@@ -97,47 +97,47 @@ export class EntityRenderer {
             if (combatant.target) {
                 const target = combatants.get(combatant.target);
                 if (target && target.health > 0) {
-                                         // Determine line color based on team
-                     const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
-                     
-                     // Check if player's hero is involved in this targeting line
-                     const isPlayerInvolved = this.playerSessionId && (
-                         (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) ||
-                         (target.type === COMBATANT_TYPES.HERO && isHeroCombatant(target) && target.controller === this.playerSessionId)
-                     );
-                     
-                     // Calculate alpha - either flash or base alpha
-                     let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
-                     
-                     // Check if this targeting line should flash
-                     const targetingLineKey = `${combatant.id}-${target.id}`;
-                     const isFlashing = this.flashingTargetingLines.has(targetingLineKey);
-                     if (isFlashing) {
-                         alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
-                     }
-                     
-                     // Calculate offset for line endpoints to prevent overlap
-                     const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
-                     let sourceX = combatant.x;
-                     let sourceY = combatant.y;
-                     let targetX = target.x;
-                     let targetY = target.y;
-                     
-                     if (combatant.team === 'blue') {
-                         sourceX += offset;
-                         targetX += offset;
-                     } else {
-                         sourceX -= offset;
-                         targetX -= offset;
-                     }
-                     
-                     // Draw targeting line with appropriate thickness
-                     const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
-                     graphics.lineStyle(lineThickness, lineColor, alpha);
-                     graphics.beginPath();
-                     graphics.moveTo(sourceX, sourceY);
-                     graphics.lineTo(targetX, targetY);
-                     graphics.strokePath();
+                    // Determine line color based on team
+                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
+                    
+                    // Check if player's hero is involved in this targeting line
+                    const isPlayerInvolved = this.playerSessionId && (
+                        (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) ||
+                        (target.type === COMBATANT_TYPES.HERO && isHeroCombatant(target) && target.controller === this.playerSessionId)
+                    );
+                    
+                    // Calculate alpha - either flash or base alpha
+                    let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                    
+                    // Check if this targeting line should flash
+                    const targetingLineKey = `${combatant.id}-${target.id}`;
+                    const isFlashing = this.flashingTargetingLines.has(targetingLineKey);
+                    if (isFlashing) {
+                        alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
+                    }
+                    
+                    // Calculate offset for line endpoints to prevent overlap
+                    const offset = CLIENT_CONFIG.TARGETING_LINES.OFFSET_PIXELS;
+                    let sourceX = combatant.x;
+                    let sourceY = combatant.y;
+                    let targetX = target.x;
+                    let targetY = target.y;
+                    
+                    if (combatant.team === 'blue') {
+                        sourceX += offset;
+                        targetX += offset;
+                    } else {
+                        sourceX -= offset;
+                        targetX -= offset;
+                    }
+                    
+                    // Draw targeting line with appropriate thickness
+                    const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
+                    graphics.lineStyle(lineThickness, lineColor, alpha);
+                    graphics.beginPath();
+                    graphics.moveTo(sourceX, sourceY);
+                    graphics.lineTo(targetX, targetY);
+                    graphics.strokePath();
                 }
             }
         });

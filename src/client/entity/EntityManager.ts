@@ -476,6 +476,9 @@ export class EntityManager {
             this.targetingLinesGraphics.setDepth(1); // Above buildings, below units
         }
         
+        // Clear the graphics before rendering new targeting lines
+        this.targetingLinesGraphics.clear();
+        
         // Render the targeting lines
         this.entityRenderer.renderTargetingLines(state.combatants, this.targetingLinesGraphics, state.gameTime);
     }
@@ -491,6 +494,7 @@ export class EntityManager {
      * Clears all entities without destroying the manager
      */
     clearAllEntities(): void {
+        // Clear all entity graphics
         this.entityGraphics.forEach(graphics => graphics.destroy());
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
@@ -498,6 +502,7 @@ export class EntityManager {
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         
+        // Clear targeting lines graphics
         if (this.targetingLinesGraphics) {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
@@ -506,6 +511,7 @@ export class EntityManager {
         // Clear flashing targeting lines
         this.entityRenderer.clearFlashingTargetingLines();
         
+        // Clear all collections
         this.entityGraphics.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
@@ -514,5 +520,13 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        
+        // Force clear any remaining graphics by recreating the targeting lines graphics
+        // This ensures a completely fresh state
+        this.targetingLinesGraphics = this.scene.add.graphics();
+        this.targetingLinesGraphics.setDepth(1);
+        
+        // Ensure all tweens are stopped for this scene
+        this.scene.tweens.killAll();
     }
 } 

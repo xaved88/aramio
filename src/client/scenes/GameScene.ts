@@ -23,6 +23,7 @@ export class GameScene extends Phaser.Scene {
     private spaceKeyPressed: boolean = false;
     private moveTarget: { x: number, y: number } | null = null;
     private isClickHeld: boolean = false;
+    private isRestarting: boolean = false;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -171,6 +172,11 @@ export class GameScene extends Phaser.Scene {
 
     private setupRoomHandlers() {
         this.room.onStateChange((colyseusState: GameState) => {
+            // Skip processing if we're in the middle of a restart
+            if (this.isRestarting) {
+                return;
+            }
+            
             this.lastState = colyseusState      
             
             const sharedState = convertToSharedGameState(colyseusState);
@@ -185,18 +191,33 @@ export class GameScene extends Phaser.Scene {
         
         this.room.onMessage('gameRestarted', () => {
             console.log('Game restarted by server');
+            
+            // Set restarting flag to prevent state processing during cleanup
+            this.isRestarting = true;
+            
             // Reset client-side state for the new game
             this.playerTeam = null;
             this.lastState = null;
             this.processedAttackEvents.clear();
+            
+            // Clear all entities and animations
             this.entityManager.clearAllEntities();
             this.animationManager.clearAllAnimations();
+            
             // Stop all tweens to ensure no animations are left running
             this.tweens.killAll();
+            
+            // Clear UI
             this.uiManager.clearHUD();
             this.uiManager.createHUD();
+            
             // Hide victory screen if it's showing
             this.uiManager.hideVictoryScreen();
+            
+            // Clear the restarting flag after a short delay to allow cleanup to complete
+            setTimeout(() => {
+                this.isRestarting = false;
+            }, 100);
         });
         
         this.room.onLeave((code: number) => {
