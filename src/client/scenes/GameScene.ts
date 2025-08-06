@@ -111,6 +111,16 @@ export class GameScene extends Phaser.Scene {
                     targetY: this.moveTarget.y
                 });
             }
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
+            // Control scheme D: point to move when not clicking, stop moving when clicking
+            if (!this.isClickHeld) {
+                const pointer = this.input.activePointer;
+                this.room.send('move', { 
+                    targetX: pointer.x, 
+                    targetY: pointer.y 
+                });
+            }
+            // When click is held, don't send any move commands (stop moving)
         }
     }
 
@@ -279,6 +289,25 @@ export class GameScene extends Phaser.Scene {
                     });
                     this.isClickHeld = false;
                     this.moveTarget = null; // Clear move target to resume point-to-move
+                }
+            });
+        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
+            // Scheme D: click down to stop moving, click up to use ability
+            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                if (this.room) {
+                    this.isClickHeld = true;
+                    // Don't set moveTarget - we want to stop moving, not move to this position
+                }
+            });
+
+            this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+                if (this.room && this.isClickHeld) {
+                    // Use ability at release position
+                    this.room.send('useAbility', {
+                        x: pointer.x,
+                        y: pointer.y
+                    });
+                    this.isClickHeld = false;
                 }
             });
         }

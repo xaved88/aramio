@@ -47,7 +47,7 @@ export const GAMEPLAY_CONFIG = {
             ABILITY: {
                 TYPE: 'projectile',
                 COOLDOWN_MS: 1000,
-                STRENGTH: 5, // damage dealt by projectile
+                STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
             },
         },
@@ -89,7 +89,7 @@ export const GAMEPLAY_CONFIG = {
     EXPERIENCE: {
         LEVEL_UP_MULTIPLIER: 15, // experience needed per level
         STAT_BOOST_PERCENTAGE: 0.15,
-        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.30,
+        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.20,
         MINION_KILLED: 2,
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
         TOWER_DESTROYED: 20,
@@ -142,7 +142,7 @@ export const CLIENT_CONFIG = {
     INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
     ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
     CONTROLS: {
-        SCHEME: 'C' as 'A' | 'B' | 'C', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability
+        SCHEME: 'D' as 'A' | 'B' | 'C' | 'D', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability, D: point-to-move + click-down-to-stop-moving + click-up-for-ability
     },
     GAME_CANVAS_WIDTH: 600,
     GAME_CANVAS_HEIGHT: 600,
