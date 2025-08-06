@@ -129,6 +129,10 @@ export const GAMEPLAY_CONFIG = {
     },
     BOTS: {
         SPAWN_COUNT_PER_TEAM: 5, // Number of bots to spawn per team
+        ABILITY_COOLDOWN_MULTIPLIER: {
+            MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
+            MAX: 2.2, // The max % of cooldown to wait before firing again
+        },
     },
 } as const;
 
