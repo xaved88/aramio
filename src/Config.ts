@@ -94,7 +94,7 @@ export const GAMEPLAY_CONFIG = {
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
         TOWER_DESTROYED: 20,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
-        LAST_HIT_BONUS_PERCENTAGE: 0.4, // 40% bonus experience for getting the last hit on a unit
+        LAST_HIT_BONUS_PERCENTAGE: 0.25, // bonus experience for getting the last hit on a unit
         XP_EVENT_DURATION_MS: 2000, // how long XP events stay in state (matches client animation)
         LEVEL_UP_EVENT_DURATION_MS: 3000, // how long level-up events stay in state (matches client animation)
     },
