@@ -113,18 +113,18 @@ export const GAMEPLAY_CONFIG = {
     },
     PLAYER_SPAWN_POSITIONS: {
         BLUE: [
-            { x: 50, y: 515 },   // Above cradle
-            { x: 30, y: 530 },   // Top left of cradle
-            { x: 70, y: 530 },   // Top right of cradle
-            { x: 30, y: 570 },   // Bottom left of cradle
-            { x: 70, y: 570 }    // Bottom right of cradle
+            { x: 20, y: 520 }, 
+            { x: 50, y: 510 },
+            { x: 80, y: 520 },
+            { x: 90, y: 550 },
+            { x: 80, y: 580 }
         ],
         RED: [
-            { x: 550, y: 15 },   // Above cradle
-            { x: 530, y: 30 },   // Top left of cradle
-            { x: 570, y: 30 },   // Top right of cradle
-            { x: 530, y: 70 },   // Bottom left of cradle
-            { x: 570, y: 70 }    // Bottom right of cradle
+            { x: 580, y: 80 },
+            { x: 550, y: 90 },
+            { x: 520, y: 80 },
+            { x: 510, y: 50 },
+            { x: 520, y: 20 }
         ],
     },
     BOTS: {
