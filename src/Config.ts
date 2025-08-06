@@ -223,6 +223,14 @@ export const CLIENT_CONFIG = {
             FONT_SIZE: '14px',
             COLOR: 0xffffff,
         },
+        KILL_COUNTERS: {
+            X: 20,
+            Y: 80, // Below experience bar
+            ICON_SIZE: 12,
+            SPACING: 25, // Space between icon and number
+            TEXT_COLOR: 0xffffff,
+            FONT_SIZE: '14px',
+        },
     },
     UI: {
         FONTS: {

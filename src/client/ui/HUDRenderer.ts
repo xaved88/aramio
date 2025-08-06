@@ -26,10 +26,15 @@ export class HUDRenderer {
         levelText: Phaser.GameObjects.Text;
         abilityBar: Phaser.GameObjects.Graphics;
         abilityBarBackground: Phaser.GameObjects.Graphics;
+        heroKillIcon: Phaser.GameObjects.Graphics;
+        heroKillText: Phaser.GameObjects.Text;
+        minionKillIcon: Phaser.GameObjects.Graphics;
+        minionKillText: Phaser.GameObjects.Text;
     } {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
         const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
+        const killConfig = CLIENT_CONFIG.HUD.KILL_COUNTERS;
         
         // Create health bar background
         const healthBarBackground = this.scene.add.graphics();
@@ -88,6 +93,41 @@ export class HUDRenderer {
         // Create ability bar
         const abilityBar = this.scene.add.graphics();
 
+        // Create hero kill icon (white circle)
+        const heroKillIcon = this.scene.add.graphics();
+        heroKillIcon.fillStyle(0xffffff, 1);
+        heroKillIcon.fillCircle(killConfig.X, killConfig.Y, killConfig.ICON_SIZE / 2);
+
+        // Create hero kill text
+        const heroKillText = this.scene.add.text(killConfig.X + killConfig.SPACING, killConfig.Y, '0', {
+            fontSize: killConfig.FONT_SIZE,
+            color: hexToColorString(killConfig.TEXT_COLOR)
+        }).setOrigin(0, 0.5);
+
+        // Create minion kill icon (diamond) - positioned horizontally next to hero counter
+        const minionKillIcon = this.scene.add.graphics();
+        minionKillIcon.fillStyle(0xffffff, 1);
+        
+        // Position minion icon horizontally to the right of hero text
+        const minionX = killConfig.X + killConfig.SPACING + 60; // Hero text + some extra space
+        const minionY = killConfig.Y; // Same Y as hero icon
+        const halfSize = killConfig.ICON_SIZE / 2;
+        
+        // Draw diamond only
+        minionKillIcon.beginPath();
+        minionKillIcon.moveTo(minionX, minionY - halfSize);
+        minionKillIcon.lineTo(minionX + halfSize, minionY);
+        minionKillIcon.lineTo(minionX, minionY + halfSize);
+        minionKillIcon.lineTo(minionX - halfSize, minionY);
+        minionKillIcon.closePath();
+        minionKillIcon.fillPath();
+
+        // Create minion kill text
+        const minionKillText = this.scene.add.text(minionX + killConfig.SPACING, minionY, '0', {
+            fontSize: killConfig.FONT_SIZE,
+            color: hexToColorString(killConfig.TEXT_COLOR)
+        }).setOrigin(0, 0.5);
+
         return {
             healthBar,
             healthBarBackground,
@@ -97,7 +137,11 @@ export class HUDRenderer {
             experienceText,
             levelText,
             abilityBar,
-            abilityBarBackground
+            abilityBarBackground,
+            heroKillIcon,
+            heroKillText,
+            minionKillIcon,
+            minionKillText
         };
     }
 
@@ -116,6 +160,10 @@ export class HUDRenderer {
             levelText: Phaser.GameObjects.Text;
             abilityBar: Phaser.GameObjects.Graphics;
             abilityBarBackground: Phaser.GameObjects.Graphics;
+            heroKillIcon: Phaser.GameObjects.Graphics;
+            heroKillText: Phaser.GameObjects.Text;
+            minionKillIcon: Phaser.GameObjects.Graphics;
+            minionKillText: Phaser.GameObjects.Text;
         }
     ): void {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
@@ -155,6 +203,10 @@ export class HUDRenderer {
         
         // Update level text
         hudElements.levelText.setText(`Lv.${player.level}`);
+
+        // Update kill counters
+        hudElements.heroKillText.setText(player.roundStats.heroKills.toString());
+        hudElements.minionKillText.setText(player.roundStats.minionKills.toString());
 
         // Update ability bar
         const currentTime = Date.now();

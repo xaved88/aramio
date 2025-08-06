@@ -26,6 +26,10 @@ export class UIManager {
     private hudLevelText: Phaser.GameObjects.Text | null = null;
     private hudAbilityBar: Phaser.GameObjects.Graphics | null = null;
     private hudAbilityBarBackground: Phaser.GameObjects.Graphics | null = null;
+    private hudHeroKillIcon: Phaser.GameObjects.Graphics | null = null;
+    private hudHeroKillText: Phaser.GameObjects.Text | null = null;
+    private hudMinionKillIcon: Phaser.GameObjects.Graphics | null = null;
+    private hudMinionKillText: Phaser.GameObjects.Text | null = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -58,6 +62,10 @@ export class UIManager {
         this.hudLevelText = hudElements.levelText;
         this.hudAbilityBar = hudElements.abilityBar;
         this.hudAbilityBarBackground = hudElements.abilityBarBackground;
+        this.hudHeroKillIcon = hudElements.heroKillIcon;
+        this.hudHeroKillText = hudElements.heroKillText;
+        this.hudMinionKillIcon = hudElements.minionKillIcon;
+        this.hudMinionKillText = hudElements.minionKillText;
     }
 
     /**
@@ -73,6 +81,10 @@ export class UIManager {
         if (this.hudLevelText) this.hudLevelText.destroy();
         if (this.hudAbilityBar) this.hudAbilityBar.destroy();
         if (this.hudAbilityBarBackground) this.hudAbilityBarBackground.destroy();
+        if (this.hudHeroKillIcon) this.hudHeroKillIcon.destroy();
+        if (this.hudHeroKillText) this.hudHeroKillText.destroy();
+        if (this.hudMinionKillIcon) this.hudMinionKillIcon.destroy();
+        if (this.hudMinionKillText) this.hudMinionKillText.destroy();
         
         this.hudHealthBar = null;
         this.hudHealthBarBackground = null;
@@ -83,6 +95,10 @@ export class UIManager {
         this.hudLevelText = null;
         this.hudAbilityBar = null;
         this.hudAbilityBarBackground = null;
+        this.hudHeroKillIcon = null;
+        this.hudHeroKillText = null;
+        this.hudMinionKillIcon = null;
+        this.hudMinionKillText = null;
     }
 
     /**
@@ -119,7 +135,8 @@ export class UIManager {
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: string | null = null): void {
         if (!this.hudHealthBar || !this.hudHealthBarBackground || !this.hudHealthText || 
             !this.hudExperienceBar || !this.hudExperienceBarBackground || !this.hudExperienceText || 
-            !this.hudLevelText || !this.hudAbilityBar || !this.hudAbilityBarBackground) return;
+            !this.hudLevelText || !this.hudAbilityBar || !this.hudAbilityBarBackground ||
+            !this.hudHeroKillIcon || !this.hudHeroKillText || !this.hudMinionKillIcon || !this.hudMinionKillText) return;
         
         // Find the current player by their session ID (controller)
         let currentPlayer = null;
@@ -147,7 +164,11 @@ export class UIManager {
                 experienceText: this.hudExperienceText,
                 levelText: this.hudLevelText,
                 abilityBar: this.hudAbilityBar,
-                abilityBarBackground: this.hudAbilityBarBackground
+                abilityBarBackground: this.hudAbilityBarBackground,
+                heroKillIcon: this.hudHeroKillIcon,
+                heroKillText: this.hudHeroKillText,
+                minionKillIcon: this.hudMinionKillIcon,
+                minionKillText: this.hudMinionKillText
             }
         );
         
