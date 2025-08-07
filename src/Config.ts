@@ -164,6 +164,12 @@ export const CLIENT_CONFIG = {
         BLUE_RESPAWNING: 0x85c1e9, // much lighter blue
         RED_RESPAWNING: 0xf5b7b1, // much lighter red
     },
+    SELF_COLORS: {
+        PRIMARY: 0x9b59b6, // Medium purple for normal state
+        RESPAWNING: 0xd2b4de, // Light purple for respawning/low health
+        TEXT: 0x6c3483, // Dark purple for level text
+        PROJECTILE: 0x8e44ad, // Slightly darker purple for projectiles
+    },
     TARGETING_LINES: {
         BLUE: 0x85c1e9, // lighter blue (same as respawning)
         RED: 0xf5b7b1, // lighter red (same as respawning)

@@ -155,14 +155,33 @@ export class EntityRenderer {
         // Calculate health percentage
         const healthPercentage = combatant.health / combatant.maxHealth;
         
-        // Determine colors based on team and state
+        // Determine colors based on team, state, and player control
         let primaryColor, respawnColor;
-        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
-            primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
-            respawnColor = primaryColor; // Use same color when respawning
+        
+        // Check if this hero is controlled by the current player
+        const isControlledByPlayer = combatant.type === COMBATANT_TYPES.HERO && 
+                                   isHeroCombatant(combatant) && 
+                                   this.playerSessionId && 
+                                   combatant.controller === this.playerSessionId;
+        
+        if (isControlledByPlayer) {
+            // Use purple palette for player-controlled heroes
+            if (combatant.state === 'respawning') {
+                primaryColor = CLIENT_CONFIG.SELF_COLORS.RESPAWNING;
+                respawnColor = primaryColor;
+            } else {
+                primaryColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;
+                respawnColor = CLIENT_CONFIG.SELF_COLORS.RESPAWNING;
+            }
         } else {
-            primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
-            respawnColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            // Use team colors for other heroes/entities
+            if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
+                primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+                respawnColor = primaryColor; // Use same color when respawning
+            } else {
+                primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+                respawnColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            }
         }
         
         // Render based on type
@@ -185,13 +204,24 @@ export class EntityRenderer {
     /**
      * Renders projectile graphics
      */
-    renderProjectile(projectile: any, graphics: Phaser.GameObjects.Graphics): void {
+    renderProjectile(projectile: any, graphics: Phaser.GameObjects.Graphics, state?: any): void {
         graphics.clear();
         
-        // Use team-specific color for projectiles
-        const projectileColor = projectile.team === 'blue' 
-            ? CLIENT_CONFIG.PROJECTILE.BLUE_COLOR 
-            : CLIENT_CONFIG.PROJECTILE.RED_COLOR;
+        // Check if projectile is owned by current player's controlled hero
+        let isOwnerControlledByPlayer = false;
+        if (state && this.playerSessionId && projectile.ownerId) {
+            const owner = state.combatants.get(projectile.ownerId);
+            if (owner && owner.type === COMBATANT_TYPES.HERO && owner.controller === this.playerSessionId) {
+                isOwnerControlledByPlayer = true;
+            }
+        }
+        
+        // Use purple for player-controlled hero projectiles, otherwise team colors
+        const projectileColor = isOwnerControlledByPlayer
+            ? CLIENT_CONFIG.SELF_COLORS.PROJECTILE
+            : (projectile.team === 'blue' 
+                ? CLIENT_CONFIG.PROJECTILE.BLUE_COLOR 
+                : CLIENT_CONFIG.PROJECTILE.RED_COLOR);
         
         const radius = CLIENT_CONFIG.PROJECTILE.RADIUS;
         const spikes = 8; // Number of spikes
@@ -402,7 +432,12 @@ export class EntityRenderer {
             const respawnDuration = hero.respawnDuration;
             const timeElapsed = respawnDuration - (hero.respawnTime - state.gameTime);
             const respawnProgress = Math.max(0, Math.min(1, timeElapsed / respawnDuration));
-            const ringColor = hero.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+            
+            // Check if this hero is controlled by the current player
+            const isControlledByPlayer = this.playerSessionId && hero.controller === this.playerSessionId;
+            const ringColor = isControlledByPlayer 
+                ? CLIENT_CONFIG.SELF_COLORS.PRIMARY
+                : (hero.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED);
             
             respawnRing.lineStyle(CLIENT_CONFIG.RESPAWN_RING.THICKNESS, ringColor, CLIENT_CONFIG.RESPAWN_RING.ALPHA);
             respawnRing.beginPath();
@@ -468,13 +503,19 @@ export class EntityRenderer {
             const romanNumeral = this.toRomanNumeral(level);
             text.setText(romanNumeral);
             
-            // Set bold text with much darker team color, matching victory text style
-            const darkerColor = combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a; // Much darker shades
+            // Check if this hero is controlled by the current player
+            const isControlledByPlayer = this.playerSessionId && combatant.controller === this.playerSessionId;
+            
+            // Set color based on control
+            const textColor = isControlledByPlayer 
+                ? CLIENT_CONFIG.SELF_COLORS.TEXT
+                : (combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a); // Team colors for others
+            
             text.setStyle({ 
                 fontSize: '16px', 
                 fontStyle: 'bold',
-                fontWeight: '900', // Extra bold
-                color: `#${darkerColor.toString(16).padStart(6, '0')}`,
+                fontWeight: '900',
+                color: `#${textColor.toString(16).padStart(6, '0')}`,
                 stroke: '#000000',
                 strokeThickness: 1,
                 shadow: {

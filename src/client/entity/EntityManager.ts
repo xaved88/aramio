@@ -179,14 +179,14 @@ export class EntityManager {
      */
     private updateProjectileEntities(state: SharedGameState): void {
         state.projectiles.forEach((projectileData: any) => {
-            this.updateProjectileEntity(projectileData);
+            this.updateProjectileEntity(projectileData, state);
         });
     }
 
     /**
      * Updates a single projectile entity, creating it if it doesn't exist
      */
-    private updateProjectileEntity(projectileData: any): void {
+    private updateProjectileEntity(projectileData: any, state: SharedGameState): void {
         const entityId = projectileData.id;
         
         // Get or create projectile graphics
@@ -208,7 +208,7 @@ export class EntityManager {
         );
         
         // Render the projectile
-        this.entityRenderer.renderProjectile(projectileData, projectileGraphics);
+        this.entityRenderer.renderProjectile(projectileData, projectileGraphics, state);
     }
 
     /**
