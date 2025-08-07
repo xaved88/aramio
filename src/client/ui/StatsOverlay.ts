@@ -41,15 +41,15 @@ export class StatsOverlay {
     private readonly CELL_HEIGHT = 20;
     private readonly CELL_PADDING = 5;
     private readonly COLUMN_WIDTHS = {
-        arrow: 20,
+        arrow: 60,
         playerId: 120,
-        level: 50,
-        totalXp: 70,
-        minionKills: 80,
-        heroKills: 70,
-        turretKills: 80,
-        damageTaken: 90,
-        damageDealt: 90
+        level: 60,
+        totalXp: 60,
+        minionKills: 60,
+        heroKills: 60,
+        turretKills: 60,
+        damageTaken: 60,
+        damageDealt: 60
     };
 
     constructor(scene: Phaser.Scene) {
@@ -112,7 +112,7 @@ export class StatsOverlay {
         // Calculate center positions
         const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
         const tableWidth = this.getTotalTableWidth();
-        const tableX = centerX - tableWidth / 2; // Center the table horizontally
+        const tableX = centerX - tableWidth / 2 - 10; // Center the table horizontally, offset slightly left
 
         // Create team headers
         const headerStyle = {
@@ -121,14 +121,14 @@ export class StatsOverlay {
             fontStyle: 'bold'
         };
 
-        const redHeader = this.scene.add.text(tableX, 50, 'Red Team', {
+        const redHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 50, 'Red Team', {
             ...headerStyle,
             color: '#e74c3c'
         });
         redHeader.setDepth(1001);
         this.overlayElements.push(redHeader);
 
-        const blueHeader = this.scene.add.text(tableX, 350, 'Blue Team', {
+        const blueHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 350, 'Blue Team', {
             ...headerStyle,
             color: '#3498db'
         });
@@ -194,7 +194,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.arrow;
 
         // Player ID header
-        const playerIdHeader = this.scene.add.text(currentX, startY, 'Player ID', {
+        const playerIdHeader = this.scene.add.text(currentX, startY, 'Player', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -204,7 +204,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.playerId;
 
         // Level header
-        const levelHeader = this.scene.add.text(currentX, startY, 'Level', {
+        const levelHeader = this.scene.add.text(currentX, startY, 'Lvl', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -214,7 +214,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.level;
 
         // Total XP header
-        const xpHeader = this.scene.add.text(currentX, startY, 'Total XP', {
+        const xpHeader = this.scene.add.text(currentX, startY, 'XP', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -224,7 +224,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.totalXp;
 
         // Minion Kills header
-        const minionKillsHeader = this.scene.add.text(currentX, startY, 'Minion K', {
+        const minionKillsHeader = this.scene.add.text(currentX, startY, 'Minion', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -234,7 +234,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.minionKills;
 
         // Hero Kills header
-        const heroKillsHeader = this.scene.add.text(currentX, startY, 'Hero K', {
+        const heroKillsHeader = this.scene.add.text(currentX, startY, 'Hero', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -244,7 +244,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.heroKills;
 
         // Turret Kills header
-        const turretKillsHeader = this.scene.add.text(currentX, startY, 'Turret K', {
+        const turretKillsHeader = this.scene.add.text(currentX, startY, 'Turret', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -254,7 +254,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.turretKills;
 
         // Damage Taken header
-        const damageTakenHeader = this.scene.add.text(currentX, startY, 'Dmg Taken', {
+        const damageTakenHeader = this.scene.add.text(currentX, startY, 'Taken', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -264,7 +264,7 @@ export class StatsOverlay {
         currentX += this.COLUMN_WIDTHS.damageTaken;
 
         // Damage Dealt header
-        const damageDealtHeader = this.scene.add.text(currentX, startY, 'Dmg Dealt', {
+        const damageDealtHeader = this.scene.add.text(currentX, startY, 'Dealt', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
@@ -283,9 +283,9 @@ export class StatsOverlay {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
-        // Arrow cell
-        const arrowText = player.isCurrentPlayer ? '▶' : ' ';
-        const arrowCell = this.scene.add.text(currentX, startY, arrowText, {
+        // Arrow cell pointing at player
+        const arrowText = player.isCurrentPlayer ? '▶' : '';
+        const arrowCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 15, startY, arrowText, {
             fontSize: '14px',
             color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
             fontFamily: 'monospace'
@@ -298,7 +298,7 @@ export class StatsOverlay {
         const playerId = player.controller.length > 16 ? player.controller.substring(0, 16) : player.controller;
         const playerIdCell = this.scene.add.text(currentX, startY, playerId, {
             fontSize: '14px',
-            color: teamColor,
+            color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
             fontFamily: 'monospace'
         });
         playerIdCell.setDepth(1001);
