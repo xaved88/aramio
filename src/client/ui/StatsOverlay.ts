@@ -13,6 +13,7 @@ interface PlayerStats {
     minionKills: number;
     heroKills: number;
     turretKills: number;
+    deaths: number; // number of times this hero has died
     damageTaken: number;
     damageDealt: number;
     isBot: boolean;
@@ -40,14 +41,15 @@ export class StatsOverlay {
     // Table configuration
     private readonly CELL_HEIGHT = 20;
     private readonly CELL_PADDING = 5;
-    private readonly COLUMN_WIDTHS = {
+        private readonly COLUMN_WIDTHS = {
         arrow: 60,
-        heroId: 140,
-        level: 60,
-        totalXp: 60,
+        heroId: 120,
+        level: 30,
+        totalXp: 50,
         minionKills: 60,
         heroKills: 60,
         turretKills: 60,
+        deaths: 60,
         damageTaken: 60,
         damageDealt: 60
     };
@@ -112,7 +114,7 @@ export class StatsOverlay {
         // Calculate center positions
         const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
         const tableWidth = this.getTotalTableWidth();
-        const tableX = centerX - tableWidth / 2 - 10; // Center the table horizontally, offset slightly left
+        const tableX = centerX - tableWidth / 2 - 30; // Center the table horizontally, offset more to the left
 
         // Create team headers
         const headerStyle = {
@@ -183,17 +185,18 @@ export class StatsOverlay {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
-        // Arrow column header (empty)
-        const arrowHeader = this.scene.add.text(currentX, startY, '', {
+        // Arrow column header (empty) - right aligned
+        const arrowHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 5, startY, '', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        arrowHeader.setOrigin(1, 0);
         arrowHeader.setDepth(1001);
         cells.push(arrowHeader);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Hero ID header
+        // Hero ID header - left aligned (keep as is)
         const playerIdHeader = this.scene.add.text(currentX, startY, 'Hero', {
             fontSize: '14px',
             color: teamColor,
@@ -203,75 +206,93 @@ export class StatsOverlay {
         cells.push(playerIdHeader);
         currentX += this.COLUMN_WIDTHS.heroId;
 
-        // Level header
-        const levelHeader = this.scene.add.text(currentX, startY, 'Lvl', {
+        // Level header - right aligned
+        const levelHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, 'Lvl', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        levelHeader.setOrigin(1, 0);
         levelHeader.setDepth(1001);
         cells.push(levelHeader);
         currentX += this.COLUMN_WIDTHS.level;
 
-        // Total XP header
-        const xpHeader = this.scene.add.text(currentX, startY, 'XP', {
+        // Total XP header - right aligned
+        const xpHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.totalXp - 5, startY, 'XP', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        xpHeader.setOrigin(1, 0);
         xpHeader.setDepth(1001);
         cells.push(xpHeader);
         currentX += this.COLUMN_WIDTHS.totalXp;
 
-        // Minion Kills header
-        const minionKillsHeader = this.scene.add.text(currentX, startY, 'Minion', {
+        // Hero Kills header - right aligned
+        const heroKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.heroKills - 5, startY, 'Kills', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
-        minionKillsHeader.setDepth(1001);
-        cells.push(minionKillsHeader);
-        currentX += this.COLUMN_WIDTHS.minionKills;
-
-        // Hero Kills header
-        const heroKillsHeader = this.scene.add.text(currentX, startY, 'Hero', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
+        heroKillsHeader.setOrigin(1, 0);
         heroKillsHeader.setDepth(1001);
         cells.push(heroKillsHeader);
         currentX += this.COLUMN_WIDTHS.heroKills;
 
-        // Turret Kills header
-        const turretKillsHeader = this.scene.add.text(currentX, startY, 'Turret', {
+        // Deaths header - right aligned
+        const deathsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.deaths - 5, startY, 'Deaths', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        deathsHeader.setOrigin(1, 0);
+        deathsHeader.setDepth(1001);
+        cells.push(deathsHeader);
+        currentX += this.COLUMN_WIDTHS.deaths;
+
+        // Minion Kills header - right aligned
+        const minionKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.minionKills - 5, startY, 'Minions', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        minionKillsHeader.setOrigin(1, 0);
+        minionKillsHeader.setDepth(1001);
+        cells.push(minionKillsHeader);
+        currentX += this.COLUMN_WIDTHS.minionKills;
+
+        // Turret Kills header - right aligned
+        const turretKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.turretKills - 5, startY, 'Turrets', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        turretKillsHeader.setOrigin(1, 0);
         turretKillsHeader.setDepth(1001);
         cells.push(turretKillsHeader);
         currentX += this.COLUMN_WIDTHS.turretKills;
 
-        // Damage Taken header
-        const damageTakenHeader = this.scene.add.text(currentX, startY, 'Taken', {
+        // Damage Dealt header - right aligned
+        const damageDealtHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageDealt - 5, startY, 'Dealt', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
-        damageTakenHeader.setDepth(1001);
-        cells.push(damageTakenHeader);
-        currentX += this.COLUMN_WIDTHS.damageTaken;
-
-        // Damage Dealt header
-        const damageDealtHeader = this.scene.add.text(currentX, startY, 'Dealt', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
+        damageDealtHeader.setOrigin(1, 0);
         damageDealtHeader.setDepth(1001);
         cells.push(damageDealtHeader);
         currentX += this.COLUMN_WIDTHS.damageDealt;
+
+        // Damage Taken header - right aligned
+        const damageTakenHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageTaken - 5, startY, 'Taken', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageTakenHeader.setOrigin(1, 0);
+        damageTakenHeader.setDepth(1001);
+        cells.push(damageTakenHeader);
+        currentX += this.COLUMN_WIDTHS.damageTaken;
 
         return cells;
     }
@@ -283,18 +304,19 @@ export class StatsOverlay {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
-        // Arrow cell pointing at currently controlled hero
+        // Arrow cell pointing at currently controlled hero - right aligned
         const arrowText = player.isCurrentPlayer ? '▶' : '';
-        const arrowCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 15, startY, arrowText, {
+        const arrowCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 5, startY, arrowText, {
             fontSize: '14px',
             color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
             fontFamily: 'monospace'
         });
+        arrowCell.setOrigin(1, 0);
         arrowCell.setDepth(1001);
         cells.push(arrowCell);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Hero ID cell - highlight if this hero is controlled by the current player
+        // Hero ID cell - left aligned (keep as is)
         const heroId = player.id.length > 14 
             ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5)
             : player.id;
@@ -307,75 +329,93 @@ export class StatsOverlay {
         cells.push(playerIdCell);
         currentX += this.COLUMN_WIDTHS.heroId;
 
-        // Level cell
-        const levelCell = this.scene.add.text(currentX, startY, player.level.toString(), {
+        // Level cell - right aligned
+        const levelCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, player.level.toString(), {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        levelCell.setOrigin(1, 0);
         levelCell.setDepth(1001);
         cells.push(levelCell);
         currentX += this.COLUMN_WIDTHS.level;
 
-        // Total XP cell
-        const xpCell = this.scene.add.text(currentX, startY, Math.round(player.totalExperience).toString(), {
+        // Total XP cell - right aligned
+        const xpCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.totalXp - 5, startY, Math.round(player.totalExperience).toString(), {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        xpCell.setOrigin(1, 0);
         xpCell.setDepth(1001);
         cells.push(xpCell);
         currentX += this.COLUMN_WIDTHS.totalXp;
 
-        // Minion Kills cell
-        const minionKillsCell = this.scene.add.text(currentX, startY, Math.round(player.minionKills).toString(), {
+        // Hero Kills cell - right aligned
+        const heroKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.heroKills - 5, startY, Math.round(player.heroKills).toString(), {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
-        minionKillsCell.setDepth(1001);
-        cells.push(minionKillsCell);
-        currentX += this.COLUMN_WIDTHS.minionKills;
-
-        // Hero Kills cell
-        const heroKillsCell = this.scene.add.text(currentX, startY, Math.round(player.heroKills).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
+        heroKillsCell.setOrigin(1, 0);
         heroKillsCell.setDepth(1001);
         cells.push(heroKillsCell);
         currentX += this.COLUMN_WIDTHS.heroKills;
 
-        // Turret Kills cell
-        const turretKillsCell = this.scene.add.text(currentX, startY, Math.round(player.turretKills).toString(), {
+        // Deaths cell - right aligned
+        const deathsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.deaths - 5, startY, player.deaths.toString(), {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
+        deathsCell.setOrigin(1, 0);
+        deathsCell.setDepth(1001);
+        cells.push(deathsCell);
+        currentX += this.COLUMN_WIDTHS.deaths;
+
+        // Minion Kills cell - right aligned
+        const minionKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.minionKills - 5, startY, Math.round(player.minionKills).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        minionKillsCell.setOrigin(1, 0);
+        minionKillsCell.setDepth(1001);
+        cells.push(minionKillsCell);
+        currentX += this.COLUMN_WIDTHS.minionKills;
+
+        // Turret Kills cell - right aligned
+        const turretKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.turretKills - 5, startY, Math.round(player.turretKills).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        turretKillsCell.setOrigin(1, 0);
         turretKillsCell.setDepth(1001);
         cells.push(turretKillsCell);
         currentX += this.COLUMN_WIDTHS.turretKills;
 
-        // Damage Taken cell
-        const damageTakenCell = this.scene.add.text(currentX, startY, Math.round(player.damageTaken).toString(), {
+        // Damage Dealt cell - right aligned
+        const damageDealtCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageDealt - 5, startY, Math.round(player.damageDealt).toString(), {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
-        damageTakenCell.setDepth(1001);
-        cells.push(damageTakenCell);
-        currentX += this.COLUMN_WIDTHS.damageTaken;
-
-        // Damage Dealt cell
-        const damageDealtCell = this.scene.add.text(currentX, startY, Math.round(player.damageDealt).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
+        damageDealtCell.setOrigin(1, 0);
         damageDealtCell.setDepth(1001);
         cells.push(damageDealtCell);
         currentX += this.COLUMN_WIDTHS.damageDealt;
+
+        // Damage Taken cell - right aligned
+        const damageTakenCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageTaken - 5, startY, Math.round(player.damageTaken).toString(), {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        damageTakenCell.setOrigin(1, 0);
+        damageTakenCell.setDepth(1001);
+        cells.push(damageTakenCell);
+        currentX += this.COLUMN_WIDTHS.damageTaken;
 
         return cells;
     }
@@ -398,6 +438,11 @@ export class StatsOverlay {
                 const isBot = combatant.controller.startsWith('bot');
                 const isCurrentPlayer = this.playerSessionId === combatant.controller;
                 
+                // Calculate deaths by counting kill events where this hero was the target
+                const deaths = state.killEvents.filter(killEvent => 
+                    killEvent.targetId === combatant.id && killEvent.targetType === 'hero'
+                ).length;
+                
                 stats.push({
                     id: combatant.id,
                     controller: combatant.controller,
@@ -408,6 +453,7 @@ export class StatsOverlay {
                     minionKills: combatant.roundStats.minionKills,
                     heroKills: combatant.roundStats.heroKills,
                     turretKills: combatant.roundStats.turretKills,
+                    deaths: deaths,
                     damageTaken: combatant.roundStats.damageTaken,
                     damageDealt: combatant.roundStats.damageDealt,
                     isBot,
