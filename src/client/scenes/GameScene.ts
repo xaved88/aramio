@@ -17,6 +17,7 @@ export class GameScene extends Phaser.Scene {
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
     private processedAttackEvents: Set<string> = new Set();
+    private processedDamageEvents: Set<string> = new Set();
     private lastState: GameState|null = null
     private playerTeam: string | null = null;
     private playerSessionId: ControllerId | null = null;
@@ -138,22 +139,33 @@ export class GameScene extends Phaser.Scene {
             
             this.processedAttackEvents.add(eventKey);
             
-            // Animate attack target (color flash)
-            this.animateAttackTarget(event.targetId, event.sourceId);
-            
             // Trigger targeting line flash
             this.entityManager.triggerTargetingLineFlash(event.sourceId, event.targetId);
         });
     }
 
-    private animateAttackTarget(combatantId: CombatantId, sourceId?: CombatantId) {
+    private processDamageEvents(state: SharedGameState) {
+        state.damageEvents.forEach(event => {
+            const eventKey = `${event.sourceId}-${event.targetId}-${event.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedDamageEvents.has(eventKey)) return;
+            
+            this.processedDamageEvents.add(eventKey);
+            
+            // Animate damage target (color flash)
+            this.animateDamageTarget(event.targetId, event.sourceId);
+        });
+    }
+
+    private animateDamageTarget(combatantId: CombatantId, sourceId?: CombatantId) {
         const combatantGraphics = this.entityManager.getEntityGraphics(combatantId);
         
         if (combatantGraphics) {
             // Check if player is involved in this attack (either as attacker or target)
             const isPlayerInvolved = this.isPlayerInvolvedInAttack(combatantId, sourceId);
             
-            this.animationManager.animateAttackTarget(combatantId, combatantGraphics, isPlayerInvolved);
+            this.animationManager.animateDamageTarget(combatantId, combatantGraphics, isPlayerInvolved);
         }
     }
     
@@ -202,6 +214,7 @@ export class GameScene extends Phaser.Scene {
             
             this.updateCombatantEntities(sharedState);
             this.processAttackEvents(sharedState);
+            this.processDamageEvents(sharedState);
             this.updateHUD(sharedState);
         });
         
@@ -215,6 +228,7 @@ export class GameScene extends Phaser.Scene {
             this.playerTeam = null;
             this.lastState = null;
             this.processedAttackEvents.clear();
+            this.processedDamageEvents.clear();
             
             // Clear all entities and animations
             this.entityManager.clearAllEntities();

@@ -14,9 +14,9 @@ export class AnimationManager {
     }
 
     /**
-     * Animates an attack target (color flash)
+     * Animates a damage target (color flash)
      */
-    animateAttackTarget(entityId: string, graphics: Phaser.GameObjects.Graphics, shouldAnimate: boolean = true): void {
+    animateDamageTarget(entityId: string, graphics: Phaser.GameObjects.Graphics, shouldAnimate: boolean = true): void {
         // Only animate if explicitly requested (when player is involved)
         if (!shouldAnimate) {
             return;
