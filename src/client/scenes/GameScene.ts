@@ -349,23 +349,23 @@ export class GameScene extends Phaser.Scene {
             this.spaceKeyPressed = false;
         });
 
-        // Tab key handler for hero cycling
-        this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default tab behavior
+        // S key handler for hero cycling
+        this.input.keyboard?.on('keydown-S', (event: KeyboardEvent) => {
             if (this.room) {
                 this.room.send('toggleHero');
             }
         });
 
-        // Shift key handlers for stats overlay (hold to show)
-        this.input.keyboard?.on('keydown-SHIFT', () => {
+        // Tab key handlers for stats overlay (hold to show)
+        this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default tab behavior
             if (this.lastState) {
                 const sharedState = convertToSharedGameState(this.lastState);
                 this.uiManager.showStatsOverlay(sharedState);
             }
         });
 
-        this.input.keyboard?.on('keyup-SHIFT', () => {
+        this.input.keyboard?.on('keyup-TAB', () => {
             this.uiManager.hideStatsOverlay();
         });
     }
