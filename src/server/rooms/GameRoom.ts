@@ -84,6 +84,10 @@ export class GameRoom extends Room<GameState> {
                 });
             }
         });
+
+        this.onMessage('toggleHero', (client) => {
+            this.handleToggleHero(client.sessionId);
+        });
     }
 
     onJoin(client: Client, options: any) {
@@ -255,6 +259,50 @@ export class GameRoom extends Room<GameState> {
             playerHero.controller = 'bot-simpleton';
             console.log(`Replaced player ${playerId} with bot on hero ${playerHero.id}`);
         }
+    }
+
+    private handleToggleHero(playerId: ControllerId): void {
+        // Find current hero controlled by the player
+        let currentHero: any = null;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.type === 'hero' && combatant.controller === playerId) {
+                currentHero = combatant;
+            }
+        });
+
+        if (!currentHero) {
+            console.log(`No hero found for player ${playerId}`);
+            return;
+        }
+
+        // Get all heroes on the same team
+        const teamHeroes: any[] = [];
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.type === 'hero' && combatant.team === currentHero.team) {
+                teamHeroes.push(combatant);
+            }
+        });
+
+        // Sort heroes by ID for consistent ordering
+        teamHeroes.sort((a, b) => a.id.localeCompare(b.id));
+
+        // Find current hero index
+        const currentIndex = teamHeroes.findIndex(hero => hero.id === currentHero.id);
+        if (currentIndex === -1) {
+            console.log(`Current hero not found in team list`);
+            return;
+        }
+
+        // Get next hero (loop back to first if at end)
+        const nextIndex = (currentIndex + 1) % teamHeroes.length;
+        const nextHero = teamHeroes[nextIndex];
+
+        // Swap controllers
+        const nextHeroOriginalController = nextHero.controller;
+        nextHero.controller = playerId;
+        currentHero.controller = nextHeroOriginalController;
+
+        console.log(`Player ${playerId} switched from hero ${currentHero.id} to hero ${nextHero.id}`);
     }
 
 

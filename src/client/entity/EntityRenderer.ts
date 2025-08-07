@@ -65,6 +65,9 @@ export class EntityRenderer {
             // Only show ability indicator for the current player
             if (playerSessionId && combatant.controller === playerSessionId) {
                 this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
+            } else {
+                // Clear the indicator if this hero is not controlled by the current player
+                abilityReadyIndicator.clear();
             }
         }
         
