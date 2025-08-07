@@ -42,7 +42,7 @@ export class StatsOverlay {
     private readonly CELL_PADDING = 5;
     private readonly COLUMN_WIDTHS = {
         arrow: 60,
-        playerId: 120,
+        heroId: 140,
         level: 60,
         totalXp: 60,
         minionKills: 60,
@@ -193,15 +193,15 @@ export class StatsOverlay {
         cells.push(arrowHeader);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Player ID header
-        const playerIdHeader = this.scene.add.text(currentX, startY, 'Player', {
+        // Hero ID header
+        const playerIdHeader = this.scene.add.text(currentX, startY, 'Hero', {
             fontSize: '14px',
             color: teamColor,
             fontFamily: 'monospace'
         });
         playerIdHeader.setDepth(1001);
         cells.push(playerIdHeader);
-        currentX += this.COLUMN_WIDTHS.playerId;
+        currentX += this.COLUMN_WIDTHS.heroId;
 
         // Level header
         const levelHeader = this.scene.add.text(currentX, startY, 'Lvl', {
@@ -283,7 +283,7 @@ export class StatsOverlay {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
-        // Arrow cell pointing at player
+        // Arrow cell pointing at currently controlled hero
         const arrowText = player.isCurrentPlayer ? '▶' : '';
         const arrowCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 15, startY, arrowText, {
             fontSize: '14px',
@@ -294,16 +294,18 @@ export class StatsOverlay {
         cells.push(arrowCell);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Player ID cell
-        const playerId = player.controller.length > 16 ? player.controller.substring(0, 16) : player.controller;
-        const playerIdCell = this.scene.add.text(currentX, startY, playerId, {
+        // Hero ID cell - highlight if this hero is controlled by the current player
+        const heroId = player.id.length > 14 
+            ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5)
+            : player.id;
+        const playerIdCell = this.scene.add.text(currentX, startY, heroId, {
             fontSize: '14px',
             color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
             fontFamily: 'monospace'
         });
         playerIdCell.setDepth(1001);
         cells.push(playerIdCell);
-        currentX += this.COLUMN_WIDTHS.playerId;
+        currentX += this.COLUMN_WIDTHS.heroId;
 
         // Level cell
         const levelCell = this.scene.add.text(currentX, startY, player.level.toString(), {
@@ -414,12 +416,12 @@ export class StatsOverlay {
             }
         });
 
-        // Sort by team, then by controller
+        // Sort by team, then by hero ID for consistent ordering
         return stats.sort((a, b) => {
             if (a.team !== b.team) {
                 return a.team.localeCompare(b.team);
             }
-            return a.controller.localeCompare(b.controller);
+            return a.id.localeCompare(b.id);
         });
     }
 
