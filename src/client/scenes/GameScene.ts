@@ -349,6 +349,14 @@ export class GameScene extends Phaser.Scene {
             this.spaceKeyPressed = false;
         });
 
+        // Tab key handler for hero cycling
+        this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default tab behavior
+            if (this.room) {
+                this.room.send('toggleHero');
+            }
+        });
+
         // Shift key handlers for stats overlay (hold to show)
         this.input.keyboard?.on('keydown-SHIFT', () => {
             if (this.lastState) {
