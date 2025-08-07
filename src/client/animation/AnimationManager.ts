@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
+import { ControllerId } from '../../shared/types/CombatantTypes';
 
 /**
  * AnimationManager handles all animations and tweens for entities
@@ -28,30 +29,30 @@ export class AnimationManager {
     /**
      * Animates an attack target (color flash)
      */
-    animateAttackTarget(entityId: string, graphics: Phaser.GameObjects.Graphics): void {
-        // Disabled to remove distracting flash effect
-        // The draining glass health display provides sufficient visual feedback
-        return;
+    animateAttackTarget(entityId: string, graphics: Phaser.GameObjects.Graphics, shouldAnimate: boolean = true): void {
+        // Only animate if explicitly requested (when player is involved)
+        if (!shouldAnimate) {
+            return;
+        }
         
-        // Original implementation (commented out):
-        // const flashDuration = CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_DURATION_MS;
-        // 
-        // // Quick jump to flash alpha, then slow fade back
-        // this.scene.tweens.add({
-        //     targets: graphics,
-        //     alpha: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_ALPHA,
-        //     duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS,
-        //     ease: 'Power2',
-        //     onComplete: () => {
-        //         // Slow fade back to normal
-        //         this.scene.tweens.add({
-        //             targets: graphics,
-        //             alpha: 1,
-        //             duration: flashDuration - CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS, // Remaining time for slow fade
-        //             ease: 'Power1'
-        //         });
-        //     }
-        // });
+        const flashDuration = CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_DURATION_MS;
+        
+        // Quick jump to flash alpha, then slow fade back
+        this.scene.tweens.add({
+            targets: graphics,
+            alpha: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_FLASH_ALPHA,
+            duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS,
+            ease: 'Power2',
+            onComplete: () => {
+                // Slow fade back to normal
+                this.scene.tweens.add({
+                    targets: graphics,
+                    alpha: 1,
+                    duration: flashDuration - CLIENT_CONFIG.ANIMATIONS.ATTACK_TARGET_QUICK_JUMP_DURATION_MS, // Remaining time for slow fade
+                    ease: 'Power1'
+                });
+            }
+        });
     }
 
     /**

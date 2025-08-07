@@ -223,7 +223,7 @@ export class EntityManager {
             
             // Find the player who earned XP and check if it's the current player
             const player = state.combatants.get(xpEvent.playerId);
-            if (player && player.type === 'hero' && this.playerSessionId && player.controller === this.playerSessionId) {
+            if (player && isHeroCombatant(player) && this.playerSessionId && player.controller === this.playerSessionId) {
                 this.createXPText(xpEvent);
             }
             
@@ -280,7 +280,7 @@ export class EntityManager {
             
             // Find the player who leveled up and check if it's the current player
             const player = state.combatants.get(levelUpEvent.playerId);
-            if (player && player.type === 'hero' && this.playerSessionId && player.controller === this.playerSessionId) {
+            if (player && isHeroCombatant(player) && this.playerSessionId && player.controller === this.playerSessionId) {
                 this.createLevelUpText(levelUpEvent);
             }
             

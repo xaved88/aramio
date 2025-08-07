@@ -8,7 +8,7 @@ import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
 import { hexToColorString } from '../utils/ColorUtils';
-import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
+import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -142,7 +142,7 @@ export class GameScene extends Phaser.Scene {
             this.animateAttackSource(event.sourceId);
             
             // Animate attack target (color flash)
-            this.animateAttackTarget(event.targetId, state);
+            this.animateAttackTarget(event.targetId, event.sourceId);
             
             // Trigger targeting line flash
             this.entityManager.triggerTargetingLineFlash(event.sourceId, event.targetId);
@@ -157,15 +157,32 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
-    private animateAttackTarget(combatantId: CombatantId, state: SharedGameState) {
-        const combatant = state.combatants.get(combatantId);
-        if (!combatant) return;
-        
+    private animateAttackTarget(combatantId: CombatantId, sourceId?: CombatantId) {
         const combatantGraphics = this.entityManager.getEntityGraphics(combatantId);
         
         if (combatantGraphics) {
-            this.animationManager.animateAttackTarget(combatantId, combatantGraphics);
+            // Check if player is involved in this attack (either as attacker or target)
+            const isPlayerInvolved = this.isPlayerInvolvedInAttack(combatantId, sourceId);
+            
+            this.animationManager.animateAttackTarget(combatantId, combatantGraphics, isPlayerInvolved);
         }
+    }
+    
+    /**
+     * Helper method to check if the player is involved in an attack
+     */
+    private isPlayerInvolvedInAttack(targetId: CombatantId, sourceId?: CombatantId): boolean {
+        if (!this.playerSessionId) return false;
+        
+        // Check if player is the target
+        const targetEntity = this.lastState ? convertToSharedGameState(this.lastState).combatants.get(targetId) : null;
+        const isPlayerTarget = !!(targetEntity && isHeroCombatant(targetEntity) && targetEntity.controller === this.playerSessionId);
+        
+        // Check if player is the source
+        const sourceEntity = sourceId && this.lastState ? convertToSharedGameState(this.lastState).combatants.get(sourceId) : null;
+        const isPlayerSource = !!(sourceEntity && isHeroCombatant(sourceEntity) && sourceEntity.controller === this.playerSessionId);
+        
+        return isPlayerTarget || isPlayerSource;
     }
 
     private updateHUD(state: SharedGameState) {
@@ -242,7 +259,7 @@ export class GameScene extends Phaser.Scene {
         if (!this.playerSessionId || this.playerTeam) return;
         
         state.combatants.forEach((combatant) => {
-            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+            if (isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) {
                 this.playerTeam = combatant.team;
                 console.log(`Player team determined: ${this.playerTeam} (session: ${this.playerSessionId})`);
             }

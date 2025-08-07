@@ -176,7 +176,7 @@ export const CLIENT_CONFIG = {
     },
     ANIMATIONS: {
         ATTACK_SOURCE_DURATION_MS: 200, // flash duration
-        ATTACK_TARGET_FLASH_DURATION_MS: 800, // target flash duration (increased from 500)
+        ATTACK_TARGET_FLASH_DURATION_MS: 500, // target flash duration (increased from 500)
         ATTACK_TARGET_FLASH_ALPHA: 0.65, // alpha value when flashing (reduced fade - was 0.3)
         ATTACK_TARGET_QUICK_JUMP_DURATION_MS: 150, // quick jump duration for attack flash (increased from 50)
     },
