@@ -138,23 +138,12 @@ export class GameScene extends Phaser.Scene {
             
             this.processedAttackEvents.add(eventKey);
             
-            // Animate attack source (radius flash)
-            this.animateAttackSource(event.sourceId);
-            
             // Animate attack target (color flash)
             this.animateAttackTarget(event.targetId, event.sourceId);
             
             // Trigger targeting line flash
             this.entityManager.triggerTargetingLineFlash(event.sourceId, event.targetId);
         });
-    }
-
-    private animateAttackSource(combatantId: CombatantId) {
-        const radiusIndicator = this.entityManager.getEntityRadiusIndicator(combatantId);
-        
-        if (radiusIndicator) {
-            this.animationManager.animateAttackSource(combatantId, radiusIndicator);
-        }
     }
 
     private animateAttackTarget(combatantId: CombatantId, sourceId?: CombatantId) {

@@ -14,19 +14,6 @@ export class AnimationManager {
     }
 
     /**
-     * Animates an attack source (radius flash)
-     */
-    animateAttackSource(entityId: string, radiusIndicator: Phaser.GameObjects.Graphics): void {
-        this.scene.tweens.add({
-            targets: radiusIndicator,
-            alpha: 0,
-            duration: CLIENT_CONFIG.ANIMATIONS.ATTACK_SOURCE_DURATION_MS,
-            yoyo: true,
-            ease: 'Linear'
-        });
-    }
-
-    /**
      * Animates an attack target (color flash)
      */
     animateAttackTarget(entityId: string, graphics: Phaser.GameObjects.Graphics, shouldAnimate: boolean = true): void {
