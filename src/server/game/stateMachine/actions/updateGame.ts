@@ -474,6 +474,7 @@ function grantExperience(player: Hero, amount: number, state: GameState, xpX?: n
 
 function levelUpPlayer(player: Hero, state: GameState): void {
     const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
+    const rangeBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
     const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
     
@@ -492,7 +493,7 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     player.health = Math.min(player.health + healthIncrease, player.maxHealth);
     
     player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
-    player.attackRadius = Math.round(player.attackRadius * boostMultiplier);
+    player.attackRadius = Math.round(player.attackRadius * rangeBoostMultiplier); // Use separate range scaling
     player.attackSpeed = player.attackSpeed * boostMultiplier;
 
     // Make respawn duration longer as a punishment for higher level deaths.

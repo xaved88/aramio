@@ -38,7 +38,7 @@ export const GAMEPLAY_CONFIG = {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         PLAYER: {
             HEALTH: 50,
-            ATTACK_RADIUS: 45,
+            ATTACK_RADIUS: 60, // Increased from 45 for better early game range
             ATTACK_STRENGTH: 5,
             ATTACK_SPEED: 1, // attacks per second
             WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
@@ -89,6 +89,7 @@ export const GAMEPLAY_CONFIG = {
     EXPERIENCE: {
         LEVEL_UP_MULTIPLIER: 15, // experience needed per level
         STAT_BOOST_PERCENTAGE: 0.15,
+        RANGE_BOOST_PERCENTAGE: 0.10, // Reduced range scaling (was 0.15) to prevent excessive late-game range
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.20,
         MINION_KILLED: 2,
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
