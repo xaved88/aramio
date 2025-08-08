@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES } from '../../shared/types/CombatantTypes';
 
 // Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
@@ -50,7 +50,15 @@ export class RoundStats extends Schema {
 }
 
 export class Ability extends Schema {
-    @type('string') type!: string;
+    @type('string') type!: AbilityType;
+}
+
+export class DefaultAbility extends Ability {
+    constructor() {
+        super();
+        this.type = ABILITY_TYPES.DEFAULT;
+    }
+    
     @type('number') cooldown!: number; // cooldown duration in ms
     @type('number') lastUsedTime!: number; // timestamp when ability was last used
     @type('number') strength!: number; // damage dealt by ability
@@ -93,7 +101,7 @@ export class Hero extends Combatant {
     @type('number') experience!: number;
     @type('number') level!: number;
     @type(RoundStats) roundStats!: RoundStats;
-    @type(Ability) ability!: Ability;
+    @type(DefaultAbility) ability!: DefaultAbility;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
 }
 

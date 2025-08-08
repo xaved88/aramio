@@ -19,6 +19,13 @@ export const MINION_TYPES = {
 
 export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 
+// Ability type constants
+export const ABILITY_TYPES = {
+    DEFAULT: 'default'
+} as const;
+
+export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
+
 export interface RoundStats {
     totalExperience: number; // total XP earned throughout the match
     minionKills: number; // number of minions killed
@@ -29,7 +36,10 @@ export interface RoundStats {
 }
 
 export interface Ability {
-    type: string;
+    type: AbilityType;
+}
+
+export interface DefaultAbility extends Ability {
     cooldown: number;
     lastUsedTime: number;
     strength: number;
@@ -60,7 +70,7 @@ export interface HeroCombatant extends BaseCombatant {
     experience: number;
     level: number;
     roundStats: RoundStats;
-    ability: Ability;
+    ability: DefaultAbility;
     controller: ControllerId; // client ID for players, bot strategy for bots
 }
 

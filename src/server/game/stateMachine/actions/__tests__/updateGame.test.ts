@@ -1,8 +1,8 @@
 import { handleUpdateGame } from '../updateGame';
-import { GameState, Hero, Minion, Combatant, AttackEvent, RoundStats, Ability } from '../../../../schema/GameState';
+import { GameState, Hero, Minion, Combatant, AttackEvent, RoundStats, DefaultAbility } from '../../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../../types';
 import { GAMEPLAY_CONFIG } from '../../../../../Config';
-import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES, ABILITY_TYPES } from '../../../../../shared/types/CombatantTypes';
 
 describe('handleUpdateGame', () => {
     let gameState: GameState;
@@ -489,8 +489,7 @@ describe('handleUpdateGame', () => {
             attacker.roundStats.totalExperience = 0;
             attacker.level = 1;
             attacker.attackReadyAt = 0; // Initialize wind-up field
-            attacker.ability = new Ability();
-            attacker.ability.type = 'projectile';
+            attacker.ability = new DefaultAbility();
             attacker.ability.cooldown = 5000;
             attacker.ability.lastUsedTime = 0;
             attacker.ability.strength = 50;
@@ -516,8 +515,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.roundStats.totalExperience = 0;
             nearEnemy.level = 1;
             nearEnemy.attackReadyAt = 0; // Initialize wind-up field
-            nearEnemy.ability = new Ability();
-            nearEnemy.ability.type = 'projectile';
+            nearEnemy.ability = new DefaultAbility();
             nearEnemy.ability.cooldown = 5000;
             nearEnemy.ability.lastUsedTime = 0;
             nearEnemy.ability.strength = 50;
@@ -543,8 +541,7 @@ describe('handleUpdateGame', () => {
             farEnemy.roundStats.totalExperience = 0;
             farEnemy.level = 1;
             farEnemy.attackReadyAt = 0; // Initialize wind-up field
-            farEnemy.ability = new Ability();
-            farEnemy.ability.type = 'projectile';
+            farEnemy.ability = new DefaultAbility();
             farEnemy.ability.cooldown = 5000;
             farEnemy.ability.lastUsedTime = 0;
             farEnemy.ability.strength = 50;
@@ -636,8 +633,7 @@ describe('handleUpdateGame', () => {
             player1.roundStats.totalExperience = 0;
             player1.level = 1;
             player1.attackReadyAt = 0; // Initialize wind-up field
-            player1.ability = new Ability();
-            player1.ability.type = 'projectile';
+            player1.ability = new DefaultAbility();
             player1.ability.cooldown = 1000;
             player1.ability.lastUsedTime = 0;
             player1.ability.strength = 5;
@@ -664,8 +660,7 @@ describe('handleUpdateGame', () => {
             player2.roundStats.totalExperience = 0;
             player2.level = 1;
             player2.attackReadyAt = 0; // Initialize wind-up field
-            player2.ability = new Ability();
-            player2.ability.type = 'projectile';
+            player2.ability = new DefaultAbility();
             player2.ability.cooldown = 1000;
             player2.ability.lastUsedTime = 0;
             player2.ability.strength = 5;
@@ -952,8 +947,7 @@ describe('handleUpdateGame', () => {
             blueHero1.roundStats.totalExperience = 0;
             blueHero1.level = 1;
             blueHero1.attackReadyAt = 0; // Initialize wind-up field
-            blueHero1.ability = new Ability();
-            blueHero1.ability.type = 'projectile';
+            blueHero1.ability = new DefaultAbility();
             blueHero1.ability.cooldown = 1000;
             blueHero1.ability.lastUsedTime = 0;
             blueHero1.ability.strength = 5;
@@ -978,8 +972,7 @@ describe('handleUpdateGame', () => {
             blueHero2.roundStats = new RoundStats();
             blueHero2.roundStats.totalExperience = 0;
             blueHero2.level = 1;
-            blueHero2.ability = new Ability();
-            blueHero2.ability.type = 'projectile';
+            blueHero2.ability = new DefaultAbility();
             blueHero2.ability.cooldown = 1000;
             blueHero2.ability.lastUsedTime = 0;
             blueHero2.ability.strength = 5;
@@ -1004,8 +997,7 @@ describe('handleUpdateGame', () => {
             blueHero3.roundStats = new RoundStats();
             blueHero3.roundStats.totalExperience = 0;
             blueHero3.level = 1;
-            blueHero3.ability = new Ability();
-            blueHero3.ability.type = 'projectile';
+            blueHero3.ability = new DefaultAbility();
             blueHero3.ability.cooldown = 1000;
             blueHero3.ability.lastUsedTime = 0;
             blueHero3.ability.strength = 5;
@@ -1047,8 +1039,7 @@ describe('handleUpdateGame', () => {
             redHero.roundStats = new RoundStats();
             redHero.roundStats.totalExperience = 0;
             redHero.level = 1;
-            redHero.ability = new Ability();
-            redHero.ability.type = 'projectile';
+            redHero.ability = new DefaultAbility();
             redHero.ability.cooldown = 1000;
             redHero.ability.lastUsedTime = 0;
             redHero.ability.strength = 5;

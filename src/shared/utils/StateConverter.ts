@@ -1,6 +1,6 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<CombatantId, Combatant>();
@@ -126,10 +126,10 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                 },
                 ability: {
                     type: hero.ability.type,
-                    cooldown: hero.ability.cooldown,
-                    lastUsedTime: hero.ability.lastUsedTime,
-                    strength: hero.ability.strength
-                },
+                    cooldown: (hero.ability as any).cooldown,
+                    lastUsedTime: (hero.ability as any).lastUsedTime,
+                    strength: (hero.ability as any).strength
+                } as DefaultAbility,
                 controller: hero.controller,
                 team: colyseusCombatant.team,
                 x: colyseusCombatant.x,

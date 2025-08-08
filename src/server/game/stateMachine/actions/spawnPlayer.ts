@@ -1,23 +1,24 @@
-import { GameState, Hero, Ability, RoundStats } from '../../../schema/GameState';
+import { GameState, Hero, DefaultAbility, RoundStats } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): StateMachineResult {
-    // Create new hero with generated ID
+    const { playerId, team, x, y } = action.payload;
+    
     const hero = new Hero();
     hero.id = `hero-${Date.now()}-${Math.random()}`;
     hero.type = COMBATANT_TYPES.HERO;
-    hero.team = action.payload.team;
-    hero.controller = action.payload.playerId; // client ID becomes the controller
+    hero.team = team;
+    hero.controller = playerId; // client ID becomes the controller
     
-    // Spawn hero at custom position or near their team's cradle
-    if (action.payload.x !== undefined && action.payload.y !== undefined) {
-        hero.x = action.payload.x;
-        hero.y = action.payload.y;
+    // Handle optional coordinates
+    if (x !== undefined && y !== undefined) {
+        hero.x = x;
+        hero.y = y;
     } else {
         // Default spawn near cradle
-        if (hero.team === 'blue') {
+        if (team === 'blue') {
             hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
             hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
         } else {
@@ -31,15 +32,16 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.attackRadius = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_RADIUS;
     hero.attackStrength = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH;
     hero.attackSpeed = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_SPEED;
-    hero.windUp = GAMEPLAY_CONFIG.COMBAT.HERO.WIND_UP;
-    hero.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
-    hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS;
     hero.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+    hero.windUp = GAMEPLAY_CONFIG.COMBAT.HERO.WIND_UP;
+    hero.attackReadyAt = 0;
+    hero.controller = playerId;
     hero.experience = 0;
     hero.level = 1;
     hero.lastAttackTime = 0;
     hero.state = 'alive';
     hero.respawnTime = 0;
+    hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS;
     
     // Initialize round stats
     hero.roundStats = new RoundStats();
@@ -51,8 +53,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.roundStats.damageDealt = 0;
     
     // Initialize ability
-    hero.ability = new Ability();
-    hero.ability.type = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.TYPE;
+    hero.ability = new DefaultAbility();
     hero.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.COOLDOWN_MS;
     hero.ability.lastUsedTime = 0; // Start with 0, first use will be available
     hero.ability.strength = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.STRENGTH;
