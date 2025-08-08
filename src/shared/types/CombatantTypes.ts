@@ -50,6 +50,12 @@ export interface CombatantEffect {
     type: CombatantEffectType;
     duration: number; // Duration in milliseconds, 0 = permanent
     appliedAt: number; // Timestamp when effect was applied
+    // Additional data for specific effects
+    moveData?: {
+        targetX: number;
+        targetY: number;
+        speed: number; // pixels per second
+    };
 }
 
 // Projectile effect types

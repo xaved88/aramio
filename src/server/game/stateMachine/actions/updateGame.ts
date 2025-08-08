@@ -366,6 +366,11 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     player.state = 'respawning';
     player.respawnTime = state.gameTime + player.respawnDuration;
     
+    // Clear all effects when hero dies
+    if (player.effects && player.effects.length > 0) {
+        player.effects.clear();
+    }
+    
     // Get all heroes on the same team, sorted by ID
     const teamHeroes = Array.from(state.combatants.values())
         .filter(combatant => combatant.type === COMBATANT_TYPES.HERO && combatant.team === player.team)

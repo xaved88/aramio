@@ -54,8 +54,11 @@ export const GAMEPLAY_CONFIG = {
             'hookshot': {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
-                SPEED: 250, // pixels per second
-                DURATION_MS: 500,
+                SPEED: 250, // pixels per second (base speed)
+                DURATION_MS: 500, // 500ms projectile duration
+                STUN_DURATION_MS: 500, // 500ms base stun duration
+                STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
+                SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
             }
         },
         CRADLE: {

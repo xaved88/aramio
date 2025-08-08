@@ -54,8 +54,8 @@ export class GameEngine {
         // Update projectiles
         this.updateProjectiles(deltaTime);
         
-        // Update effects (remove expired ones)
-        this.updateEffects();
+        // Update effects (remove expired ones and process active effects)
+        this.updateEffects(deltaTime);
         
         return result;
     }
@@ -192,12 +192,16 @@ export class GameEngine {
                 }
             });
             
-            // If we found a target, hit it and remove the projectile
+            // If we found a target, handle it based on type
             if (closestCombatant) {
                 projectilesToRemove.push(projectile.id);
                 
-                // Apply projectile effects
-                this.applyProjectileEffects(projectile, closestCombatant);
+                // Only apply effects to heroes and minions
+                if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
+                    // Apply projectile effects
+                    this.applyProjectileEffects(projectile, closestCombatant);
+                }
+                // For structures (turrets, cradles), just destroy the projectile without applying effects
             }
         });
         
@@ -239,12 +243,24 @@ export class GameEngine {
         combatantEffect.duration = effect.duration;
         combatantEffect.appliedAt = Date.now();
         
+        // Handle move effect data
+        if (effect.type === 'move') {
+            combatantEffect.moveTargetX = effect.moveTargetX;
+            combatantEffect.moveTargetY = effect.moveTargetY;
+            combatantEffect.moveSpeed = effect.moveSpeed;
+        }
+        
         // Add it to the target's effects
         target.effects.push(combatantEffect);
         
-        // Handle stun effect specifically
-        if (effect.type === 'stun') {
-            this.handleStunEffect(target);
+        // Handle specific effects
+        switch (effect.type) {
+            case 'stun':
+                this.handleStunEffect(target);
+                break;
+            case 'move':
+                this.handleMoveEffect(target, effect);
+                break;
         }
     }
     
@@ -258,11 +274,19 @@ export class GameEngine {
         // Reset attack ready time to prevent immediate attacks
         target.attackReadyAt = 0;
     }
+    
+    /**
+     * Handles the application of a move effect
+     */
+    private handleMoveEffect(target: any, moveData: any): void {
+        // Move effect doesn't need special handling on application
+        // The movement will be processed in the update loop
+    }
 
     /**
-     * Updates effects by removing expired ones
+     * Updates effects by removing expired ones and processing active effects
      */
-    private updateEffects(): void {
+    private updateEffects(deltaTime: number): void {
         const currentTime = Date.now();
         
         this.state.combatants.forEach((combatant: any) => {
@@ -271,8 +295,16 @@ export class GameEngine {
             const effectsToRemove: number[] = [];
             
             combatant.effects.forEach((effect: any, index: number) => {
-                // Skip permanent effects (duration = 0)
-                if (effect.duration === 0) return;
+                // Process move effects
+                if (effect.type === 'move') {
+                    const shouldRemove = this.processMoveEffect(combatant, effect, deltaTime);
+                    if (shouldRemove) {
+                        effectsToRemove.push(index);
+                    }
+                }
+                
+                // Check for expired effects (skip permanent effects and infinite duration effects)
+                if (effect.duration === 0 || effect.duration === -1) return;
                 
                 const timeSinceApplied = currentTime - effect.appliedAt;
                 if (timeSinceApplied >= effect.duration) {
@@ -285,6 +317,48 @@ export class GameEngine {
                 combatant.effects.splice(index, 1);
             });
         });
+    }
+    
+    /**
+     * Processes a move effect on a combatant
+     * @returns true if the effect should be removed
+     */
+    private processMoveEffect(combatant: any, effect: any, deltaTime: number): boolean {
+        if (!effect.moveTargetX || !effect.moveTargetY || !effect.moveSpeed) return true;
+        
+        // Calculate direction to target
+        const dx = effect.moveTargetX - combatant.x;
+        const dy = effect.moveTargetY - combatant.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // If we've reached the target, remove the effect
+        if (distance < 5) { // 5 pixel threshold
+            return true;
+        }
+        
+        // Calculate movement distance for this frame
+        const moveDistance = (effect.moveSpeed * deltaTime) / 1000; // Convert to pixels
+        
+        // If we would overshoot the target, just move to the target exactly
+        if (moveDistance >= distance) {
+            combatant.x = effect.moveTargetX;
+            combatant.y = effect.moveTargetY;
+            return true; // Remove the effect since we've reached the target
+        }
+        
+        // Calculate normalized direction and move
+        const normalizedDx = dx / distance;
+        const normalizedDy = dy / distance;
+        
+        // Move the combatant
+        combatant.x += normalizedDx * moveDistance;
+        combatant.y += normalizedDy * moveDistance;
+        
+        // Clamp to game bounds
+        combatant.x = Math.max(20, Math.min(580, combatant.x));
+        combatant.y = Math.max(20, Math.min(580, combatant.y));
+        
+        return false; // Don't remove the effect yet
     }
 
     /**

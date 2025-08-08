@@ -75,6 +75,9 @@ export class CombatantEffect extends Schema {
     @type('string') type!: CombatantEffectType;
     @type('number') duration!: number; // Duration in milliseconds, 0 = permanent
     @type('number') appliedAt!: number; // Timestamp when effect was applied
+    @type('number') moveTargetX?: number; // Target X for move effect
+    @type('number') moveTargetY?: number; // Target Y for move effect
+    @type('number') moveSpeed?: number; // Speed for move effect (pixels per second)
 }
 
 export class ProjectileEffect extends Schema {
