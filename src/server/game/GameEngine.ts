@@ -324,7 +324,17 @@ export class GameEngine {
      * @returns true if the effect should be removed
      */
     private processMoveEffect(combatant: any, effect: any, deltaTime: number): boolean {
-        if (!effect.moveTargetX || !effect.moveTargetY || !effect.moveSpeed) return true;
+        // Validate move effect data
+        if (!effect.moveTargetX || !effect.moveTargetY || !effect.moveSpeed) {
+            console.warn(`Move effect has invalid data: targetX=${effect.moveTargetX}, targetY=${effect.moveTargetY}, speed=${effect.moveSpeed}`);
+            return true; // Remove invalid effect
+        }
+        
+        // Validate combatant position
+        if (!combatant.x || !combatant.y) {
+            console.warn(`Combatant ${combatant.id} has invalid position: x=${combatant.x}, y=${combatant.y}`);
+            return true; // Remove effect if combatant has invalid position
+        }
         
         // Calculate direction to target
         const dx = effect.moveTargetX - combatant.x;

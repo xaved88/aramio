@@ -58,7 +58,19 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
     private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: HookshotAbility): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
-        if (!hero) return;
+        if (!hero) {
+            console.warn(`Hookshot: Hero ${heroId} not found in state`);
+            return;
+        }
+
+        // Validate hero position - if hero is at 0,0 or invalid position, don't create projectile
+        if (!hero.x || !hero.y || hero.x === 0 || hero.y === 0) {
+            console.warn(`Hookshot: Hero ${heroId} has invalid position (${hero.x}, ${hero.y}), skipping projectile creation`);
+            return;
+        }
+
+        // Log hero position for debugging
+        console.log(`Hookshot: Creating projectile for hero ${heroId} at position (${hero.x}, ${hero.y}) targeting (${targetX}, ${targetY})`);
 
         // Calculate direction from hero to target
         const dx = targetX - hero.x;
@@ -119,14 +131,19 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.effects.push(nocollisionEffect);
         
         // Add move effect (pull target towards caster) with scaled speed
+        // Use the hero's current position at the time of effect creation
         const moveEffect = new ProjectileEffect();
         moveEffect.effectType = 'applyEffect';
         moveEffect.combatantEffect = new CombatantEffect();
         moveEffect.combatantEffect.type = 'move';
         moveEffect.combatantEffect.duration = -1; // Infinite duration - move until target reached
-        moveEffect.combatantEffect.moveTargetX = hero.x;
-        moveEffect.combatantEffect.moveTargetY = hero.y;
+        moveEffect.combatantEffect.moveTargetX = hero.x; // Current hero position
+        moveEffect.combatantEffect.moveTargetY = hero.y; // Current hero position
         moveEffect.combatantEffect.moveSpeed = scaledSpeed; // Use same scaled speed as projectile
+        
+        // Log move effect data for debugging
+        console.log(`Hookshot: Creating move effect with target (${moveEffect.combatantEffect.moveTargetX}, ${moveEffect.combatantEffect.moveTargetY}) and speed ${moveEffect.combatantEffect.moveSpeed}`);
+        
         projectile.effects.push(moveEffect);
         
         state.projectiles.set(projectile.id, projectile);
