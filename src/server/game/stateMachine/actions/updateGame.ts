@@ -5,6 +5,7 @@ import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { AttackEvent } from '../../../schema/GameState';
 import { MinionManager } from '../../combatants/MinionManager';
+import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
     // Update game time directly on the state
@@ -481,7 +482,6 @@ function grantExperience(player: Hero, amount: number, state: GameState, xpX?: n
 function levelUpPlayer(player: Hero, state: GameState): void {
     const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
     const rangeBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
-    const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
     const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
     
     // Level up
@@ -505,8 +505,8 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     // Make respawn duration longer as a punishment for higher level deaths.
     player.respawnDuration = Math.round(player.respawnDuration * (1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
     
-    // Boost ability strength by different configurable percentage
-    (player.ability as any).strength = Math.round((player.ability as DefaultAbility).strength * abilityBoostMultiplier);
+    // Boost ability strength using the AbilityLevelUpManager
+    AbilityLevelUpManager.levelUpAbility(player.ability);
     
     // Create level-up event
     const levelUpEvent = new LevelUpEvent();

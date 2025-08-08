@@ -1,10 +1,10 @@
 import { GameState } from '../schema/GameState';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes, StateMachineResult } from './stateMachine/types';
-import { GAMEPLAY_CONFIG } from '../../Config';
 import { CLIENT_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
+import { AbilityUseManager } from './abilities/AbilityUseManager';
 
 export class GameEngine {
     private state: GameState;
@@ -120,57 +120,8 @@ export class GameEngine {
             return;
         }
 
-        const currentTime = Date.now();
-        
-        // Cast ability to DefaultAbility to access specific properties
-        const ability = heroCombatant.ability as any;
-        
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (ability.lastUsedTime === 0) {
-            ability.lastUsedTime = currentTime;
-            this.createProjectile(heroId, x, y);
-            return;
-        }
-        
-        const timeSinceLastUse = currentTime - ability.lastUsedTime;
-  
-        if (timeSinceLastUse < ability.cooldown) {
-            return; // Ability is on cooldown
-        }
-
-        ability.lastUsedTime = currentTime;
-        this.createProjectile(heroId, x, y);
-    }
-
-    private createProjectile(heroId: CombatantId, targetX: number, targetY: number): void {
-        // Find hero by ID
-        const hero = this.state.combatants.get(heroId);
-        if (!hero) return;
-
-        // Calculate direction from hero to target
-        const dx = targetX - hero.x;
-        const dy = targetY - hero.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance === 0) return; // Can't shoot at self
-        
-        // Normalize direction
-        const directionX = dx / distance;
-        const directionY = dy / distance;
-        
-        // Create projectile
-        const projectile = new (require('../schema/GameState').Projectile)();
-        projectile.id = `projectile_${Date.now()}_${Math.random()}`;
-        projectile.ownerId = hero.id; // Use the hero's actual ID
-        projectile.x = hero.x;
-        projectile.y = hero.y;
-        projectile.directionX = directionX;
-        projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES['default'].SPEED;
-        projectile.strength = (hero as any).ability.strength;
-        projectile.team = hero.team;
-        
-        this.state.projectiles.set(projectile.id, projectile);
+        // Use the AbilityUseManager to handle the ability usage
+        AbilityUseManager.useAbility(heroCombatant.ability, heroId, x, y, this.state);
     }
 
     private updateProjectiles(deltaTime: number): void {
