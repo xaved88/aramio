@@ -1,6 +1,6 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, HookshotAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId, Effect } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, HookshotAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId, CombatantEffect } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<CombatantId, Combatant>();
@@ -22,11 +22,29 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
             directionX: projectile.directionX,
             directionY: projectile.directionY,
             speed: projectile.speed,
-            strength: projectile.strength,
             team: projectile.team,
             type: projectile.type || 'default', // Default to 'default' if not set
             duration: projectile.duration || -1, // Default to -1 (infinite) if not set
-            createdAt: projectile.createdAt || Date.now() // Default to current time if not set
+            createdAt: projectile.createdAt || Date.now(), // Default to current time if not set
+            effects: projectile.effects ? projectile.effects.map((effect: any) => {
+                switch (effect.effectType) {
+                    case 'applyDamage':
+                        return {
+                            type: 'applyDamage',
+                            damage: effect.damage || 0
+                        };
+                    case 'applyEffect':
+                        return {
+                            type: 'applyEffect',
+                            combatantEffect: {
+                                type: effect.combatantEffect?.type || 'stun',
+                                duration: effect.combatantEffect?.duration || 0
+                            }
+                        };
+                    default:
+                        return null;
+                }
+            }).filter(Boolean) : []
         });
     });
     

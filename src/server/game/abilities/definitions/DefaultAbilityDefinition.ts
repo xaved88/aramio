@@ -1,4 +1,4 @@
-import { DefaultAbility, Projectile } from '../../../schema/GameState';
+import { DefaultAbility, Projectile, ProjectileEffect as ProjectileEffect } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
@@ -75,11 +75,16 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.directionX = directionX;
         projectile.directionY = directionY;
         projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default.SPEED;
-        projectile.strength = ability.strength;
         projectile.team = hero.team;
         projectile.type = 'default';
         projectile.duration = -1; // Infinite duration
         projectile.createdAt = Date.now();
+        
+        // Add applyDamage effect
+        const damageEffect = new ProjectileEffect();
+        damageEffect.effectType = 'applyDamage';
+        damageEffect.damage = ability.strength;
+        projectile.effects.push(damageEffect);
         
         state.projectiles.set(projectile.id, projectile);
     }

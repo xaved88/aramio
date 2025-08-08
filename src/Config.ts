@@ -54,8 +54,8 @@ export const GAMEPLAY_CONFIG = {
             'hookshot': {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
-                SPEED: 250, // pixels per second - faster than default
-                DURATION_MS: 250, // 1 second duration
+                SPEED: 250, // pixels per second
+                DURATION_MS: 500,
             }
         },
         CRADLE: {

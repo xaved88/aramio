@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES, EffectType, EFFECT_TYPES, ProjectileType } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES, CombatantEffectType, COMBATANT_EFFECT_TYPES, ProjectileType } from '../../shared/types/CombatantTypes';
 
 // Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
@@ -71,9 +71,15 @@ export class HookshotAbility extends Ability {
     @type('number') strength!: number; // damage dealt by ability
 }
 
-export class Effect extends Schema {
-    @type('string') type!: EffectType;
-    @type('number') duration!: number; // Duration in milliseconds, -1 = permanent
+export class CombatantEffect extends Schema {
+    @type('string') type!: CombatantEffectType;
+    @type('number') duration!: number; // Duration in milliseconds, 0 = permanent
+}
+
+export class ProjectileEffect extends Schema {
+    @type('string') effectType!: string; // 'applyDamage' or 'applyEffect'
+    @type('number') damage?: number; // For applyDamage effect
+    @type(CombatantEffect) combatantEffect?: CombatantEffect; // For applyEffect effect
 }
 
 export class Projectile extends Schema {
@@ -84,11 +90,11 @@ export class Projectile extends Schema {
     @type('number') directionX!: number; // normalized direction vector
     @type('number') directionY!: number;
     @type('number') speed!: number; // pixels per second
-    @type('number') strength!: number; // damage dealt
     @type('string') team!: string; // team of the owner
     @type('string') type!: ProjectileType; // type of projectile
     @type('number') duration!: number; // Duration in milliseconds, -1 = infinite
     @type('number') createdAt!: number; // Timestamp when projectile was created
+    @type([ProjectileEffect]) effects = new ArraySchema<ProjectileEffect>(); // Array of effects that trigger on collision
 }
 
 export class Combatant extends Schema {
@@ -107,7 +113,7 @@ export class Combatant extends Schema {
     @type('string') target?: CombatantId; // ID of the combatant being targeted
     @type('number') windUp!: number; // Time in seconds before attack can be performed
     @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
-    @type([Effect]) effects = new ArraySchema<Effect>(); // Array of active effects on this combatant
+    @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant
 }
 
 export class Hero extends Combatant {

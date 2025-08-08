@@ -35,8 +35,8 @@ export const PROJECTILE_TYPES = {
 
 export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];
 
-// Effect type constants
-export const EFFECT_TYPES = {
+// Effect type constants (renamed from Effect to CombatantEffect for clarity)
+export const COMBATANT_EFFECT_TYPES = {
     STUN: 'stun',
     MOVE: 'move',
     NOCOLLISION: 'nocollision',
@@ -44,12 +44,32 @@ export const EFFECT_TYPES = {
     REFLECT: 'reflect'
 } as const;
 
-export type EffectType = typeof EFFECT_TYPES[keyof typeof EFFECT_TYPES];
+export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COMBATANT_EFFECT_TYPES];
 
-export interface Effect {
-    type: EffectType;
+export interface CombatantEffect {
+    type: CombatantEffectType;
     duration: number; // Duration in milliseconds, 0 = permanent
 }
+
+// Projectile effect types
+export const PROJECTILE_EFFECT_TYPES = {
+    APPLY_DAMAGE: 'applyDamage',
+    APPLY_EFFECT: 'applyEffect'
+} as const;
+
+export type ProjectileEffectType = typeof PROJECTILE_EFFECT_TYPES[keyof typeof PROJECTILE_EFFECT_TYPES];
+
+export interface ApplyDamageEffect {
+    type: typeof PROJECTILE_EFFECT_TYPES.APPLY_DAMAGE;
+    damage: number;
+}
+
+export interface ApplyEffectEffect {
+    type: typeof PROJECTILE_EFFECT_TYPES.APPLY_EFFECT;
+    combatantEffect: CombatantEffect;
+}
+
+export type ProjectileEffect = ApplyDamageEffect | ApplyEffectEffect;
 
 export interface RoundStats {
     totalExperience: number; // total XP earned throughout the match
@@ -89,7 +109,7 @@ export interface BaseCombatant {
     target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
-    effects: Effect[]; // Array of active effects on this combatant
+    effects: CombatantEffect[]; // Array of active effects on this combatant
 }
 
 export interface HeroCombatant extends BaseCombatant {
@@ -148,11 +168,11 @@ export interface Projectile {
     directionX: number;
     directionY: number;
     speed: number;
-    strength: number;
     team: string;
     type: ProjectileType;
     duration: number; // Duration in milliseconds, -1 = infinite
     createdAt: number; // Timestamp when projectile was created
+    effects: ProjectileEffect[]; // Array of effects that trigger on collision
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {

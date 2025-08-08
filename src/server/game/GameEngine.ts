@@ -1,10 +1,12 @@
-import { GameState } from '../schema/GameState';
+import { Combatant, GameState, Projectile, ProjectileEffect } from '../schema/GameState';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
-import { GameActionTypes, StateMachineResult } from './stateMachine/types';
+import { GameActionTypes } from './stateMachine/types';
+import { StateMachineResult } from './stateMachine/types';
 import { CLIENT_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
+import { CombatantEffect } from '../schema/GameState';
 
 export class GameEngine {
     private state: GameState;
@@ -174,10 +176,8 @@ export class GameEngine {
             if (closestCombatant) {
                 projectilesToRemove.push(projectile.id);
                 
-                // Only damage units (players and minions), not structures
-                if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
-                    CombatantUtils.damageCombatant(closestCombatant, projectile.strength, this.state, projectile.ownerId);
-                }
+                // Apply projectile effects
+                this.applyProjectileEffects(projectile, closestCombatant);
             }
         });
         
@@ -185,6 +185,41 @@ export class GameEngine {
         projectilesToRemove.forEach(projectileId => {
             this.state.projectiles.delete(projectileId);
         });
+    }
+
+    /**
+     * Applies projectile effects to a target combatant
+     */
+    private applyProjectileEffects(projectile: Projectile, target: Combatant): void {
+        if (!projectile.effects || projectile.effects.length === 0) return;
+        
+        projectile.effects.forEach((effect: ProjectileEffect) => {
+            switch (effect.effectType) {
+                case 'applyDamage':
+                    if (effect.damage && (target.type === 'hero' || target.type === 'minion')) {
+                        CombatantUtils.damageCombatant(target, effect.damage, this.state, projectile.ownerId);
+                    }
+                    break;
+                case 'applyEffect':
+                    if (effect.combatantEffect) {
+                        this.applyCombatantEffect(target, effect.combatantEffect);
+                    }
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Applies a combatant effect to a target
+     */
+    private applyCombatantEffect(target: any, effect: any): void {
+        // Create a new combatant effect
+        const combatantEffect = new CombatantEffect();
+        combatantEffect.type = effect.type;
+        combatantEffect.duration = effect.duration;
+        
+        // Add it to the target's effects
+        target.effects.push(combatantEffect);
     }
 
     /**

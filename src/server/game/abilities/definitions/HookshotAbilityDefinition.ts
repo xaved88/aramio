@@ -1,4 +1,4 @@
-import { HookshotAbility, Projectile } from '../../../schema/GameState';
+import { HookshotAbility, Projectile, ProjectileEffect } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
@@ -75,11 +75,16 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.directionX = directionX;
         projectile.directionY = directionY;
         projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot.SPEED;
-        projectile.strength = ability.strength;
         projectile.team = hero.team;
         projectile.type = 'hook';
         projectile.duration = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot.DURATION_MS;
         projectile.createdAt = Date.now();
+        
+        // Add applyDamage effect
+        const damageEffect = new ProjectileEffect();
+        damageEffect.effectType = 'applyDamage';
+        damageEffect.damage = ability.strength;
+        projectile.effects.push(damageEffect);
         
         state.projectiles.set(projectile.id, projectile);
     }
