@@ -63,7 +63,7 @@ describe('GameStateMachine', () => {
             
             expect(hero).toBeDefined();
             expect(hero?.team).toBe('blue');
-            expect(hero?.health).toBe(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
+            expect(hero?.health).toBe(GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
             expect(hero?.controller).toBe('player1');
         });
 
@@ -356,8 +356,8 @@ describe('GameStateMachine', () => {
             // Hero should be level 2 with boosted stats
             expect(updatedHero?.level).toBe(2);
             expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
-            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH);
+            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH);
         });
 
         it('should preserve combatant types during game updates', () => {
@@ -471,8 +471,8 @@ describe('GameStateMachine', () => {
             // Player should be level 2 with boosted stats
             expect(updatedPlayer?.level).toBe(2);
             expect(updatedPlayer?.roundStats.totalExperience).toBe(20); // Should have 20 total experience (15 + 5)
-            expect(updatedPlayer?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
-            expect(updatedPlayer?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH);
+            expect(updatedPlayer?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
+            expect(updatedPlayer?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH);
         });
 
         it('should verify deep copy preserves manual changes', () => {

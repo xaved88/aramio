@@ -160,7 +160,7 @@ export class GameEngine {
         projectile.y = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.SPEED;
+        projectile.speed = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.SPEED;
         projectile.strength = (hero as any).ability.strength;
         projectile.team = hero.team;
         

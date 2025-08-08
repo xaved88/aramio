@@ -26,15 +26,15 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
         }
     }
     
-    hero.health = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
-    hero.maxHealth = GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH;
-    hero.attackRadius = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_RADIUS;
-    hero.attackStrength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_STRENGTH;
-    hero.attackSpeed = GAMEPLAY_CONFIG.COMBAT.PLAYER.ATTACK_SPEED;
-    hero.windUp = GAMEPLAY_CONFIG.COMBAT.PLAYER.WIND_UP;
+    hero.health = GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH;
+    hero.maxHealth = GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH;
+    hero.attackRadius = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_RADIUS;
+    hero.attackStrength = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH;
+    hero.attackSpeed = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_SPEED;
+    hero.windUp = GAMEPLAY_CONFIG.COMBAT.HERO.WIND_UP;
     hero.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
-    hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.PLAYER.RESPAWN_TIME_MS;
-    hero.size = GAMEPLAY_CONFIG.COMBAT.PLAYER.SIZE;
+    hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS;
+    hero.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
     hero.experience = 0;
     hero.level = 1;
     hero.lastAttackTime = 0;
@@ -52,10 +52,10 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     
     // Initialize ability
     hero.ability = new Ability();
-    hero.ability.type = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.TYPE;
-    hero.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.COOLDOWN_MS;
+    hero.ability.type = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.TYPE;
+    hero.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.COOLDOWN_MS;
     hero.ability.lastUsedTime = 0; // Start with 0, first use will be available
-    hero.ability.strength = GAMEPLAY_CONFIG.COMBAT.PLAYER.ABILITY.STRENGTH;
+    hero.ability.strength = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.STRENGTH;
     
     // Add hero to state
     state.combatants.set(hero.id, hero);
