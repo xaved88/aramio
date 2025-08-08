@@ -1,21 +1,21 @@
-import { DefaultAbility, Projectile } from '../../../schema/GameState';
+import { HookshotAbility, Projectile } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
-export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbility> {
-    private static _instance: DefaultAbilityDefinition | null = null;
+export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbility> {
+    private static _instance: HookshotAbilityDefinition | null = null;
     
-    static get instance(): DefaultAbilityDefinition {
-        if (!DefaultAbilityDefinition._instance) {
-            DefaultAbilityDefinition._instance = new DefaultAbilityDefinition();
+    static get instance(): HookshotAbilityDefinition {
+        if (!HookshotAbilityDefinition._instance) {
+            HookshotAbilityDefinition._instance = new HookshotAbilityDefinition();
         }
-        return DefaultAbilityDefinition._instance;
+        return HookshotAbilityDefinition._instance;
     }
 
-    create(): DefaultAbility {
-        const ability = new DefaultAbility();
+    create(): HookshotAbility {
+        const ability = new HookshotAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default;
+        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -24,12 +24,12 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         return ability;
     }
 
-    onLevelUp(ability: DefaultAbility): void {
+    onLevelUp(ability: HookshotAbility): void {
         const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
     }
 
-    useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any): boolean {
         const currentTime = Date.now();
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
@@ -50,7 +50,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         return true;
     }
 
-    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: DefaultAbility): void {
+    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: HookshotAbility): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) return;
@@ -74,10 +74,10 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.y = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default.SPEED;
+        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot.SPEED;
         projectile.strength = ability.strength;
         projectile.team = hero.team;
-        projectile.type = 'default';
+        projectile.type = 'hook';
         
         state.projectiles.set(projectile.id, projectile);
     }

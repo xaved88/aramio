@@ -253,6 +253,58 @@ export class EntityRenderer {
                 : CLIENT_CONFIG.PROJECTILE.RED_COLOR);
         
         const radius = CLIENT_CONFIG.PROJECTILE.RADIUS;
+        
+        // Render based on projectile type
+        switch (projectile.type) {
+            case 'hook':
+                // Render hookshot projectile as a question mark
+                this.renderHookProjectile(graphics, projectileColor, radius);
+                break;
+            case 'default':
+            default:
+                // Render default projectile as a star
+                this.renderDefaultProjectile(graphics, projectileColor, radius);
+                break;
+        }
+    }
+    
+    /**
+     * Renders a hookshot projectile as a question mark
+     */
+    private renderHookProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
+        // Draw a circle with a question mark inside
+        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        graphics.strokeCircle(0, 0, radius);
+        
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(0, 0, radius);
+        
+        // Draw question mark in the center - make it more prominent
+        graphics.lineStyle(4, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        graphics.beginPath();
+        
+        // Question mark shape - larger and more visible
+        const qRadius = radius * 0.5; // Increased size
+        const centerY = -qRadius * 0.2; // Better positioning
+        
+        // Draw the curved part of the question mark (top curve)
+        graphics.arc(0, centerY, qRadius, 0, Math.PI * 1.5);
+        
+        // Draw the stem (vertical line)
+        graphics.moveTo(0, centerY + qRadius * 0.5);
+        graphics.lineTo(0, centerY + qRadius * 1.1);
+        
+        // Draw the dot at the bottom
+        graphics.moveTo(0, centerY + qRadius * 1.3);
+        graphics.lineTo(0, centerY + qRadius * 1.5);
+        
+        graphics.strokePath();
+    }
+    
+    /**
+     * Renders a default projectile as a star
+     */
+    private renderDefaultProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
         const spikes = 8; // Number of spikes
         const innerRadius = radius * 0.4; // Inner radius for the star shape
         const outerRadius = radius; // Outer radius for the spikes
@@ -262,7 +314,7 @@ export class EntityRenderer {
         this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius);
         
         // Draw filled star
-        graphics.fillStyle(projectileColor, 1);
+        graphics.fillStyle(color, 1);
         this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius, true);
     }
     

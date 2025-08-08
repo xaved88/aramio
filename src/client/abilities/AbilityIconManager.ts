@@ -5,6 +5,8 @@ export class AbilityIconManager {
         switch (abilityType) {
             case 'default':
                 return '*';
+            case 'hookshot':
+                return '?';
             default:
                 return '?';
         }

@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES, EffectType, EFFECT_TYPES } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES, EffectType, EFFECT_TYPES, ProjectileType } from '../../shared/types/CombatantTypes';
 
 // Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
@@ -63,6 +63,14 @@ export class DefaultAbility extends Ability {
     @type('number') strength!: number; // damage dealt by ability
 }
 
+export class HookshotAbility extends Ability {
+    constructor() {
+        super();
+        this.type = ABILITY_TYPES.HOOKSHOT;
+    }
+    @type('number') strength!: number; // damage dealt by ability
+}
+
 export class Effect extends Schema {
     @type('string') type!: EffectType;
     @type('number') duration!: number; // Duration in milliseconds, -1 = permanent
@@ -78,6 +86,7 @@ export class Projectile extends Schema {
     @type('number') speed!: number; // pixels per second
     @type('number') strength!: number; // damage dealt
     @type('string') team!: string; // team of the owner
+    @type('string') type!: ProjectileType; // type of projectile
 }
 
 export class Combatant extends Schema {

@@ -21,10 +21,19 @@ export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 
 // Ability type constants
 export const ABILITY_TYPES = {
-    DEFAULT: 'default'
+    DEFAULT: 'default',
+    HOOKSHOT: 'hookshot'
 } as const;
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
+
+// Projectile type constants
+export const PROJECTILE_TYPES = {
+    DEFAULT: 'default',
+    HOOK: 'hook'
+} as const;
+
+export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];
 
 // Effect type constants
 export const EFFECT_TYPES = {
@@ -58,6 +67,10 @@ export interface Ability {
 }
 
 export interface DefaultAbility extends Ability {
+    strength: number;
+}
+
+export interface HookshotAbility extends Ability {
     strength: number;
 }
 
@@ -137,6 +150,7 @@ export interface Projectile {
     speed: number;
     strength: number;
     team: string;
+    type: ProjectileType;
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {

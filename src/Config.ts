@@ -50,6 +50,11 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 1000,
                 STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
+            },
+            'hookshot': {
+                COOLDOWN_MS: 5000,
+                STRENGTH: 3, // damage dealt by projectile
+                SPEED: 250, // pixels per second - faster than default
             }
         },
         CRADLE: {
@@ -131,7 +136,7 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        ABILITY_TYPES: ['default', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
+        ABILITY_TYPES: ['hookshot', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again
