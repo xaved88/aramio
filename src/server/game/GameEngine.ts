@@ -140,6 +140,16 @@ export class GameEngine {
                 return;
             }
             
+            // Check duration (expiration)
+            if (projectile.duration !== -1) { // -1 means infinite duration
+                const currentTime = Date.now();
+                const timeSinceCreation = currentTime - projectile.createdAt;
+                if (timeSinceCreation >= projectile.duration) {
+                    projectilesToRemove.push(projectile.id);
+                    return;
+                }
+            }
+            
             // Check collision with combatants - find the closest enemy
             let closestCombatant: any = null;
             let closestDistance = Infinity;
@@ -171,7 +181,7 @@ export class GameEngine {
             }
         });
         
-        // Remove projectiles that hit something or went out of bounds
+        // Remove projectiles that hit something, went out of bounds, or expired
         projectilesToRemove.forEach(projectileId => {
             this.state.projectiles.delete(projectileId);
         });

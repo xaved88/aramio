@@ -55,6 +55,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second - faster than default
+                DURATION_MS: 250, // 1 second duration
             }
         },
         CRADLE: {

@@ -78,6 +78,8 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.strength = ability.strength;
         projectile.team = hero.team;
         projectile.type = 'default';
+        projectile.duration = -1; // Infinite duration
+        projectile.createdAt = Date.now();
         
         state.projectiles.set(projectile.id, projectile);
     }

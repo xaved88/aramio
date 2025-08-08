@@ -24,7 +24,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
             speed: projectile.speed,
             strength: projectile.strength,
             team: projectile.team,
-            type: projectile.type || 'default' // Default to 'default' if not set
+            type: projectile.type || 'default', // Default to 'default' if not set
+            duration: projectile.duration || -1, // Default to -1 (infinite) if not set
+            createdAt: projectile.createdAt || Date.now() // Default to current time if not set
         });
     });
     

@@ -87,6 +87,8 @@ export class Projectile extends Schema {
     @type('number') strength!: number; // damage dealt
     @type('string') team!: string; // team of the owner
     @type('string') type!: ProjectileType; // type of projectile
+    @type('number') duration!: number; // Duration in milliseconds, -1 = infinite
+    @type('number') createdAt!: number; // Timestamp when projectile was created
 }
 
 export class Combatant extends Schema {

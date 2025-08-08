@@ -151,6 +151,8 @@ export interface Projectile {
     strength: number;
     team: string;
     type: ProjectileType;
+    duration: number; // Duration in milliseconds, -1 = infinite
+    createdAt: number; // Timestamp when projectile was created
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {

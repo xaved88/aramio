@@ -78,6 +78,8 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.strength = ability.strength;
         projectile.team = hero.team;
         projectile.type = 'hook';
+        projectile.duration = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot.DURATION_MS;
+        projectile.createdAt = Date.now();
         
         state.projectiles.set(projectile.id, projectile);
     }
