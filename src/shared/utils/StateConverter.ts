@@ -1,6 +1,6 @@
 import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId, Effect } from '../types/CombatantTypes';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<CombatantId, Combatant>();
@@ -102,14 +102,18 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         size: colyseusCombatant.size,
         target: colyseusCombatant.target,
         windUp: colyseusCombatant.windUp,
-        attackReadyAt: colyseusCombatant.attackReadyAt
+        attackReadyAt: colyseusCombatant.attackReadyAt,
+        effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => ({
+            type: effect.type,
+            duration: effect.duration
+        })) : []
     };
     
     switch (colyseusCombatant.type) {
         case COMBATANT_TYPES.HERO:
             const hero = colyseusCombatant as ColyseusHero;
             return {
-                id: id,
+                ...baseCombatant,
                 type: COMBATANT_TYPES.HERO,
                 state: hero.state,
                 respawnTime: hero.respawnTime,
@@ -130,20 +134,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     lastUsedTime: (hero.ability as any).lastUsedTime,
                     strength: (hero.ability as any).strength
                 } as DefaultAbility,
-                controller: hero.controller,
-                team: colyseusCombatant.team,
-                x: colyseusCombatant.x,
-                y: colyseusCombatant.y,
-                health: colyseusCombatant.health,
-                maxHealth: colyseusCombatant.maxHealth,
-                attackRadius: colyseusCombatant.attackRadius,
-                attackStrength: colyseusCombatant.attackStrength,
-                attackSpeed: colyseusCombatant.attackSpeed,
-                lastAttackTime: colyseusCombatant.lastAttackTime,
-                size: colyseusCombatant.size,
-                target: colyseusCombatant.target,
-                windUp: colyseusCombatant.windUp,
-                attackReadyAt: colyseusCombatant.attackReadyAt
+                controller: hero.controller
             } as HeroCombatant;
             
         case COMBATANT_TYPES.CRADLE:

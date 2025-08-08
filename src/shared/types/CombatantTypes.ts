@@ -26,6 +26,22 @@ export const ABILITY_TYPES = {
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
 
+// Effect type constants
+export const EFFECT_TYPES = {
+    STUN: 'stun',
+    MOVE: 'move',
+    NOCOLLISION: 'nocollision',
+    STATMOD: 'statmod',
+    REFLECT: 'reflect'
+} as const;
+
+export type EffectType = typeof EFFECT_TYPES[keyof typeof EFFECT_TYPES];
+
+export interface Effect {
+    type: EffectType;
+    duration: number; // Duration in milliseconds, 0 = permanent
+}
+
 export interface RoundStats {
     totalExperience: number; // total XP earned throughout the match
     minionKills: number; // number of minions killed
@@ -60,6 +76,7 @@ export interface BaseCombatant {
     target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
+    effects: Effect[]; // Array of active effects on this combatant
 }
 
 export interface HeroCombatant extends BaseCombatant {

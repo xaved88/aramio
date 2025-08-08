@@ -202,17 +202,25 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
 function handleCollisions(state: GameState): void {
     const allCombatants = Array.from(state.combatants.values());
     
+    // Filter out combatants with nocollision effects for performance
+    const collisionCombatants = allCombatants.filter(combatant => {
+        if (!CombatantUtils.isCombatantAlive(combatant)) return false;
+        
+        // Check if combatant has nocollision effect
+        if (combatant.effects && combatant.effects.length > 0) {
+            const hasNoCollision = combatant.effects.some(effect => effect.type === 'nocollision');
+            if (hasNoCollision) return false;
+        }
+        
+        return true;
+    });
+    
     // Check each pair of combatants for collisions
-    for (let i = 0; i < allCombatants.length; i++) {
-        for (let j = i + 1; j < allCombatants.length; j++) {
-            const combatant1 = allCombatants[i];
-            const combatant2 = allCombatants[j];
+    for (let i = 0; i < collisionCombatants.length; i++) {
+        for (let j = i + 1; j < collisionCombatants.length; j++) {
+            const combatant1 = collisionCombatants[i];
+            const combatant2 = collisionCombatants[j];
             
-            // Skip if either combatant is dead
-            if (!CombatantUtils.isCombatantAlive(combatant1) || !CombatantUtils.isCombatantAlive(combatant2)) {
-                continue;
-            }
-
             // Calculate distance between centers
             const distance = CombatantUtils.getDistance(combatant1, combatant2);
             const collisionThreshold = (combatant1.size + combatant2.size) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;

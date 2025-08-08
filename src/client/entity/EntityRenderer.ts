@@ -57,6 +57,9 @@ export class EntityRenderer {
         // Render the main entity graphics
         this.renderEntityGraphics(combatant, graphics);
         
+        // Apply effects to the entity
+        this.applyEffectsToEntity(combatant, graphics);
+        
         // Render respawn ring for heroes
         if (respawnRing && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
             this.renderRespawnRing(combatant, respawnRing, state);
@@ -87,6 +90,25 @@ export class EntityRenderer {
         // Handle turret visibility
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             this.handleTurretVisibility(combatant, text, radiusIndicator);
+        }
+    }
+
+    /**
+     * Applies visual effects to an entity based on its active effects
+     */
+    private applyEffectsToEntity(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
+        if (!combatant.effects || combatant.effects.length === 0) {
+            // Reset alpha to default if no effects
+            graphics.setAlpha(1);
+            return;
+        }
+
+        // Check for nocollision effect
+        const hasNoCollision = combatant.effects.some(effect => effect.type === 'nocollision');
+        if (hasNoCollision) {
+            graphics.setAlpha(0.5);
+        } else {
+            graphics.setAlpha(1);
         }
     }
 

@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES } from '../../shared/types/CombatantTypes';
+import { CombatantType, MinionType, CombatantId, ControllerId, ProjectileId, AbilityType, ABILITY_TYPES, EffectType, EFFECT_TYPES } from '../../shared/types/CombatantTypes';
 
 // Events for reporting from the server to the client, or special server reactions
 export class AttackEvent extends Schema {
@@ -63,6 +63,11 @@ export class DefaultAbility extends Ability {
     @type('number') strength!: number; // damage dealt by ability
 }
 
+export class Effect extends Schema {
+    @type('string') type!: EffectType;
+    @type('number') duration!: number; // Duration in milliseconds, -1 = permanent
+}
+
 export class Projectile extends Schema {
     @type('string') id!: ProjectileId;
     @type('string') ownerId!: CombatantId; // who fired the projectile
@@ -91,6 +96,7 @@ export class Combatant extends Schema {
     @type('string') target?: CombatantId; // ID of the combatant being targeted
     @type('number') windUp!: number; // Time in seconds before attack can be performed
     @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
+    @type([Effect]) effects = new ArraySchema<Effect>(); // Array of active effects on this combatant
 }
 
 export class Hero extends Combatant {
