@@ -28,13 +28,16 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
         }
     }
     
-    hero.health = GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH;
-    hero.maxHealth = GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH;
-    hero.attackRadius = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_RADIUS;
-    hero.attackStrength = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH;
-    hero.attackSpeed = GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_SPEED;
-    hero.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
-    hero.windUp = GAMEPLAY_CONFIG.COMBAT.HERO.WIND_UP;
+    // Get hero config based on ability type
+    const heroConfig = GAMEPLAY_CONFIG.COMBAT.HEROES[abilityType as keyof typeof GAMEPLAY_CONFIG.COMBAT.HEROES] || GAMEPLAY_CONFIG.COMBAT.HEROES.default;
+    
+    hero.health = heroConfig.HEALTH;
+    hero.maxHealth = heroConfig.HEALTH;
+    hero.attackRadius = heroConfig.ATTACK_RADIUS;
+    hero.attackStrength = heroConfig.ATTACK_STRENGTH;
+    hero.attackSpeed = heroConfig.ATTACK_SPEED;
+    hero.size = heroConfig.SIZE;
+    hero.windUp = heroConfig.WIND_UP;
     hero.attackReadyAt = 0;
     hero.controller = playerId;
     hero.experience = 0;
@@ -42,7 +45,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.lastAttackTime = 0;
     hero.state = 'alive';
     hero.respawnTime = 0;
-    hero.respawnDuration = GAMEPLAY_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS;
+    hero.respawnDuration = heroConfig.RESPAWN_TIME_MS;
     
     // Initialize round stats
     hero.roundStats = new RoundStats();

@@ -73,8 +73,8 @@ describe('TurretDestruction', () => {
             expect(updatedHero?.level).toBe(3);
             
             // Hero stats should be boosted
-            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH);
+            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
         });
 
         it('should not destroy turret when player is out of range', () => {

@@ -634,7 +634,7 @@ describe('handleUpdateGame', () => {
             player1.ability = AbilityFactory.create('default');
             player1.ability.cooldown = 1000;
             (player1.ability as DefaultAbility).strength = 5;
-            player1.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            player1.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             // Create player 2
             player2 = new Hero();
@@ -660,7 +660,7 @@ describe('handleUpdateGame', () => {
             player2.ability = AbilityFactory.create('default');
             player2.ability.cooldown = 1000;
             (player2.ability as DefaultAbility).strength = 5;
-            player2.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            player2.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             // Create minion
             minion = new Minion();
@@ -877,7 +877,7 @@ describe('handleUpdateGame', () => {
 
         it('should use configurable collision threshold', () => {
             // Test with units just at the threshold boundary
-            const threshold = (GAMEPLAY_CONFIG.COMBAT.HERO.SIZE + GAMEPLAY_CONFIG.COMBAT.HERO.SIZE) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
+            const threshold = (GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE + GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
             
             // Position players exactly at the threshold
             player1.x = 100;
@@ -946,7 +946,7 @@ describe('handleUpdateGame', () => {
             blueHero1.ability = AbilityFactory.create('default');
             blueHero1.ability.cooldown = 1000;
             (blueHero1.ability as DefaultAbility).strength = 5;
-            blueHero1.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            blueHero1.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             blueHero2 = new Hero();
             blueHero2.id = 'blue-hero-2';
@@ -970,7 +970,7 @@ describe('handleUpdateGame', () => {
             blueHero2.ability = AbilityFactory.create('default');
             blueHero2.ability.cooldown = 1000;
             (blueHero2.ability as DefaultAbility).strength = 5;
-            blueHero2.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            blueHero2.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             blueHero3 = new Hero();
             blueHero3.id = 'blue-hero-3';
@@ -994,7 +994,7 @@ describe('handleUpdateGame', () => {
             blueHero3.ability = AbilityFactory.create('default');
             blueHero3.ability.cooldown = 1000;
             (blueHero3.ability as DefaultAbility).strength = 5;
-            blueHero3.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            blueHero3.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             // Create red minion to be killed
             redMinion = new Minion();
@@ -1035,7 +1035,7 @@ describe('handleUpdateGame', () => {
             redHero.ability = AbilityFactory.create('default');
             redHero.ability.cooldown = 1000;
             (redHero.ability as DefaultAbility).strength = 5;
-            redHero.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            redHero.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
 
             gameState.combatants.set(blueHero1.id, blueHero1);
             gameState.combatants.set(blueHero2.id, blueHero2);

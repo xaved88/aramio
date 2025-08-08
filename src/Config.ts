@@ -36,14 +36,25 @@ export const GAMEPLAY_CONFIG = {
     PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
     COMBAT: {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
-        HERO: {
-            HEALTH: 50,
-            ATTACK_RADIUS: 60, // Increased from 45 for better early game range
-            ATTACK_STRENGTH: 5,
-            ATTACK_SPEED: 1, // attacks per second
-            WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
-            RESPAWN_TIME_MS: 6000,
-            SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
+        HEROES: {
+            'default': {
+                HEALTH: 50,
+                ATTACK_RADIUS: 60, // Increased from 45 for better early game range
+                ATTACK_STRENGTH: 5,
+                ATTACK_SPEED: 1, // attacks per second
+                WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
+                RESPAWN_TIME_MS: 6000,
+                SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
+            },
+            'hookshot': {
+                HEALTH: 70, // A bit tanky
+                ATTACK_RADIUS: 35, // Melee
+                ATTACK_STRENGTH: 10, // Higher attack
+                ATTACK_SPEED: 0.5, // Low attack speed
+                WIND_UP: 0.1, // Fast wind-up time
+                RESPAWN_TIME_MS: 6000,
+                SIZE: 15, // same collision radius
+            },
         },
         ABILITIES: {
             'default': {
