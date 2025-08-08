@@ -71,19 +71,39 @@ export class HookshotAbility extends Ability {
     @type('number') strength!: number; // damage dealt by ability
 }
 
-export class CombatantEffect extends Schema {
+export abstract class CombatantEffect extends Schema {
     @type('string') type!: CombatantEffectType;
     @type('number') duration!: number; // Duration in milliseconds, 0 = permanent
     @type('number') appliedAt!: number; // Timestamp when effect was applied
-    @type('number') moveTargetX?: number; // Target X for move effect
-    @type('number') moveTargetY?: number; // Target Y for move effect
-    @type('number') moveSpeed?: number; // Speed for move effect (pixels per second)
+}
+
+export class StunEffect extends CombatantEffect {
+    // type is inherited from base class
+}
+
+export class NoCollisionEffect extends CombatantEffect {
+    // type is inherited from base class
+}
+
+export class StatModEffect extends CombatantEffect {
+    // type is inherited from base class
+}
+
+export class ReflectEffect extends CombatantEffect {
+    // type is inherited from base class
+}
+
+export class MoveEffect extends CombatantEffect {
+    // type is inherited from base class
+    @type('number') moveTargetX!: number; // Target X for move effect
+    @type('number') moveTargetY!: number; // Target Y for move effect
+    @type('number') moveSpeed!: number; // Speed for move effect (pixels per second)
 }
 
 export class ProjectileEffect extends Schema {
     @type('string') effectType!: string; // 'applyDamage' or 'applyEffect'
     @type('number') damage?: number; // For applyDamage effect
-    @type(CombatantEffect) combatantEffect?: CombatantEffect; // For applyEffect effect
+    @type(CombatantEffect) combatantEffect?: CombatantEffect; // For applyEffect effect - will be one of the specific effect types
 }
 
 export class Projectile extends Schema {
@@ -117,7 +137,7 @@ export class Combatant extends Schema {
     @type('string') target?: CombatantId; // ID of the combatant being targeted
     @type('number') windUp!: number; // Time in seconds before attack can be performed
     @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
-    @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant
+    @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant - will contain specific effect types
 }
 
 export class Hero extends Combatant {

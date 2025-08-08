@@ -124,16 +124,32 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         target: colyseusCombatant.target,
         windUp: colyseusCombatant.windUp,
         attackReadyAt: colyseusCombatant.attackReadyAt,
-        effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => ({
-            type: effect.type,
-            duration: effect.duration,
-            appliedAt: effect.appliedAt || Date.now(),
-            moveData: effect.moveTargetX && effect.moveTargetY && effect.moveSpeed ? {
-                targetX: effect.moveTargetX,
-                targetY: effect.moveTargetY,
-                speed: effect.moveSpeed
-            } : undefined
-        })) : []
+        effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => {
+            const baseEffect = {
+                type: effect.type,
+                duration: effect.duration,
+                appliedAt: effect.appliedAt || Date.now()
+            };
+            
+            // Handle specific effect types
+            switch (effect.type) {
+                case 'move':
+                    return {
+                        ...baseEffect,
+                        type: 'move',
+                        moveTargetX: (effect as any).moveTargetX,
+                        moveTargetY: (effect as any).moveTargetY,
+                        moveSpeed: (effect as any).moveSpeed
+                    };
+                case 'stun':
+                case 'nocollision':
+                case 'statmod':
+                case 'reflect':
+                    return baseEffect;
+                default:
+                    return baseEffect;
+            }
+        }) : []
     };
     
     switch (colyseusCombatant.type) {

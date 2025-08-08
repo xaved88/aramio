@@ -50,12 +50,29 @@ export interface CombatantEffect {
     type: CombatantEffectType;
     duration: number; // Duration in milliseconds, 0 = permanent
     appliedAt: number; // Timestamp when effect was applied
-    // Additional data for specific effects
-    moveData?: {
-        targetX: number;
-        targetY: number;
-        speed: number; // pixels per second
-    };
+}
+
+export interface StunEffect extends CombatantEffect {
+    type: 'stun';
+}
+
+export interface NoCollisionEffect extends CombatantEffect {
+    type: 'nocollision';
+}
+
+export interface StatModEffect extends CombatantEffect {
+    type: 'statmod';
+}
+
+export interface ReflectEffect extends CombatantEffect {
+    type: 'reflect';
+}
+
+export interface MoveEffect extends CombatantEffect {
+    type: 'move';
+    moveTargetX: number;
+    moveTargetY: number;
+    moveSpeed: number; // pixels per second
 }
 
 // Projectile effect types
@@ -73,7 +90,7 @@ export interface ApplyDamageEffect {
 
 export interface ApplyEffectEffect {
     type: typeof PROJECTILE_EFFECT_TYPES.APPLY_EFFECT;
-    combatantEffect: CombatantEffect;
+    combatantEffect: CombatantEffectUnion;
 }
 
 export type ProjectileEffect = ApplyDamageEffect | ApplyEffectEffect;
@@ -101,6 +118,8 @@ export interface HookshotAbility extends Ability {
     strength: number;
 }
 
+export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | MoveEffect;
+
 export interface BaseCombatant {
     id: CombatantId;
     type: CombatantType;
@@ -116,7 +135,7 @@ export interface BaseCombatant {
     target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
-    effects: CombatantEffect[]; // Array of active effects on this combatant
+    effects: CombatantEffectUnion[]; // Array of active effects on this combatant
 }
 
 export interface HeroCombatant extends BaseCombatant {

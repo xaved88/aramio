@@ -1,4 +1,4 @@
-import { HookshotAbility, Projectile, ProjectileEffect, CombatantEffect } from '../../../schema/GameState';
+import { HookshotAbility, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
@@ -114,36 +114,36 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         damageEffect.damage = ability.strength;
         projectile.effects.push(damageEffect);
         
-        // Add stun effect with scaled duration
+        // Create stun effect
         const stunEffect = new ProjectileEffect();
         stunEffect.effectType = 'applyEffect';
-        stunEffect.combatantEffect = new CombatantEffect();
+        stunEffect.combatantEffect = new StunEffect();
         stunEffect.combatantEffect.type = 'stun';
         stunEffect.combatantEffect.duration = scaledStunDuration;
-        projectile.effects.push(stunEffect);
-        
-        // Add nocollision effect
+        stunEffect.combatantEffect.appliedAt = Date.now();
+
+        // Create nocollision effect
         const nocollisionEffect = new ProjectileEffect();
         nocollisionEffect.effectType = 'applyEffect';
-        nocollisionEffect.combatantEffect = new CombatantEffect();
+        nocollisionEffect.combatantEffect = new NoCollisionEffect();
         nocollisionEffect.combatantEffect.type = 'nocollision';
         nocollisionEffect.combatantEffect.duration = config.DURATION_MS;
-        projectile.effects.push(nocollisionEffect);
-        
-        // Add move effect (pull target towards caster) with scaled speed
-        // Use the hero's current position at the time of effect creation
+        nocollisionEffect.combatantEffect.appliedAt = Date.now();
+
+        // Create move effect
         const moveEffect = new ProjectileEffect();
         moveEffect.effectType = 'applyEffect';
-        moveEffect.combatantEffect = new CombatantEffect();
-        moveEffect.combatantEffect.type = 'move';
-        moveEffect.combatantEffect.duration = -1; // Infinite duration - move until target reached
-        moveEffect.combatantEffect.moveTargetX = hero.x; // Current hero position
-        moveEffect.combatantEffect.moveTargetY = hero.y; // Current hero position
-        moveEffect.combatantEffect.moveSpeed = scaledSpeed; // Use same scaled speed as projectile
-        
-        // Log move effect data for debugging
-        console.log(`Hookshot: Creating move effect with target (${moveEffect.combatantEffect.moveTargetX}, ${moveEffect.combatantEffect.moveTargetY}) and speed ${moveEffect.combatantEffect.moveSpeed}`);
-        
+        const moveCombatantEffect = new MoveEffect();
+        moveCombatantEffect.type = 'move';
+        moveCombatantEffect.duration = -1; // Infinite duration - move until target reached
+        moveCombatantEffect.moveTargetX = hero.x; // Current hero position
+        moveCombatantEffect.moveTargetY = hero.y; // Current hero position
+        moveCombatantEffect.moveSpeed = scaledSpeed; // Use same scaled speed as projectile
+        moveCombatantEffect.appliedAt = Date.now();
+        moveEffect.combatantEffect = moveCombatantEffect;
+
+        projectile.effects.push(stunEffect);
+        projectile.effects.push(nocollisionEffect);
         projectile.effects.push(moveEffect);
         
         state.projectiles.set(projectile.id, projectile);

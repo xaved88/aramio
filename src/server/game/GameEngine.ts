@@ -1,4 +1,4 @@
-import { Combatant, GameState, Projectile, ProjectileEffect } from '../schema/GameState';
+import { GameState, Combatant, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect } from '../schema/GameState';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
@@ -236,68 +236,33 @@ export class GameEngine {
     /**
      * Applies a combatant effect to a target
      */
-    private applyCombatantEffect(target: any, effect: any): void {
-        // Create a new combatant effect
-        const combatantEffect = new CombatantEffect();
-        combatantEffect.type = effect.type;
-        combatantEffect.duration = effect.duration;
-        combatantEffect.appliedAt = Date.now();
-        
-        // Handle move effect data
-        if (effect.type === 'move') {
-            combatantEffect.moveTargetX = effect.moveTargetX;
-            combatantEffect.moveTargetY = effect.moveTargetY;
-            combatantEffect.moveSpeed = effect.moveSpeed;
-        }
-        
-        // Add it to the target's effects
-        target.effects.push(combatantEffect);
-        
-        // Handle specific effects
-        switch (effect.type) {
-            case 'stun':
-                this.handleStunEffect(target);
-                break;
-            case 'move':
-                this.handleMoveEffect(target, effect);
-                break;
+    private applyCombatantEffect(target: any, effect: CombatantEffect): void {
+        effect.appliedAt = Date.now();
+        target.effects.push(effect);
+        // Handle specific effects that need immediate processing
+        if (effect.type === 'stun') {
+            // Remove target when stunned
+            target.target = undefined;
+            // Reset attack ready time to prevent immediate attacks
+            target.attackReadyAt = 0;
         }
     }
     
-    /**
-     * Handles the application of a stun effect
-     */
-    private handleStunEffect(target: any): void {
-        // Remove target when stunned
-        target.target = undefined;
-        
-        // Reset attack ready time to prevent immediate attacks
-        target.attackReadyAt = 0;
-    }
-    
-    /**
-     * Handles the application of a move effect
-     */
-    private handleMoveEffect(target: any, moveData: any): void {
-        // Move effect doesn't need special handling on application
-        // The movement will be processed in the update loop
-    }
-
     /**
      * Updates effects by removing expired ones and processing active effects
      */
     private updateEffects(deltaTime: number): void {
         const currentTime = Date.now();
         
-        this.state.combatants.forEach((combatant: any) => {
+        this.state.combatants.forEach((combatant: Combatant) => {
             if (!combatant.effects || combatant.effects.length === 0) return;
             
             const effectsToRemove: number[] = [];
             
-            combatant.effects.forEach((effect: any, index: number) => {
+            combatant.effects.forEach((effect: CombatantEffect, index: number) => {
                 // Process move effects
                 if (effect.type === 'move') {
-                    const shouldRemove = this.processMoveEffect(combatant, effect, deltaTime);
+                    const shouldRemove = this.processMoveEffect(combatant, effect as MoveEffect, deltaTime);
                     if (shouldRemove) {
                         effectsToRemove.push(index);
                     }
@@ -323,7 +288,7 @@ export class GameEngine {
      * Processes a move effect on a combatant
      * @returns true if the effect should be removed
      */
-    private processMoveEffect(combatant: any, effect: any, deltaTime: number): boolean {
+    private processMoveEffect(combatant: Combatant, effect: MoveEffect, deltaTime: number): boolean {
         // Validate move effect data
         if (!effect.moveTargetX || !effect.moveTargetY || !effect.moveSpeed) {
             console.warn(`Move effect has invalid data: targetX=${effect.moveTargetX}, targetY=${effect.moveTargetY}, speed=${effect.moveSpeed}`);
