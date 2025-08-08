@@ -210,8 +210,9 @@ export class HUDRenderer {
 
         // Update ability bar
         const currentTime = Date.now();
-        const timeSinceLastUse = currentTime - player.ability.lastUsedTime;
-        const isAbilityReady = timeSinceLastUse >= player.ability.cooldown;
+        const ability = player.ability as any;
+        const timeSinceLastUse = currentTime - ability.lastUsedTime;
+        const isAbilityReady = timeSinceLastUse >= ability.cooldown;
         
         hudElements.abilityBar.clear();
         
@@ -233,7 +234,7 @@ export class HUDRenderer {
             });
         } else {
             // Ability is on cooldown - fill bar based on progress
-            const cooldownProgress = Math.min(timeSinceLastUse / player.ability.cooldown, 1);
+            const cooldownProgress = Math.min(timeSinceLastUse / ability.cooldown, 1);
             const fillHeight = abilityConfig.HEIGHT * cooldownProgress;
             
             hudElements.abilityBar.fillStyle(abilityConfig.COOLDOWN_COLOR, 1);

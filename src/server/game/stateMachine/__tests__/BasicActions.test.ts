@@ -1,4 +1,4 @@
-import { GameState, Hero } from '../../../schema/GameState';
+import { DefaultAbility, GameState, Hero } from '../../../schema/GameState';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
@@ -790,7 +790,7 @@ describe('GameStateMachine', () => {
             const initialAttackRadius = player!.attackRadius;
             const initialAttackSpeed = player!.attackSpeed;
             const initialRespawnDuration = player!.respawnDuration;
-            const initialAbilityStrength = player!.ability.strength;
+            const initialAbilityStrength = (player!.ability as DefaultAbility).strength;
             
             // Grant enough experience to level up multiple times
             // Level 1->2: needs 15 XP
@@ -849,7 +849,7 @@ describe('GameStateMachine', () => {
             expect(updatedPlayer!.attackRadius).toBe(Math.round(initialAttackRadius * expectedRangeMultiplier));
             expect(updatedPlayer!.attackSpeed).toBe(initialAttackSpeed * expectedStatMultiplier);
             expect(updatedPlayer!.respawnDuration).toBe(Math.round(initialRespawnDuration * expectedStatMultiplier));
-            expect(updatedPlayer!.ability.strength).toBe(Math.round(initialAbilityStrength * expectedAbilityMultiplier));
+            expect((updatedPlayer!.ability as DefaultAbility).strength).toBe(Math.round(initialAbilityStrength * expectedAbilityMultiplier));
             
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;

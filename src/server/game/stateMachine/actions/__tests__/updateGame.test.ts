@@ -2,7 +2,8 @@ import { handleUpdateGame } from '../updateGame';
 import { GameState, Hero, Minion, Combatant, AttackEvent, RoundStats, DefaultAbility } from '../../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../../types';
 import { GAMEPLAY_CONFIG } from '../../../../../Config';
-import { COMBATANT_TYPES, ABILITY_TYPES } from '../../../../../shared/types/CombatantTypes';
+import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
+import { AbilityFactory } from '../../../abilities/AbilityFactory';
 
 describe('handleUpdateGame', () => {
     let gameState: GameState;
@@ -489,10 +490,9 @@ describe('handleUpdateGame', () => {
             attacker.roundStats.totalExperience = 0;
             attacker.level = 1;
             attacker.attackReadyAt = 0; // Initialize wind-up field
-            attacker.ability = new DefaultAbility();
+            attacker.ability = AbilityFactory.create('default');
             attacker.ability.cooldown = 5000;
-            attacker.ability.lastUsedTime = 0;
-            attacker.ability.strength = 50;
+            (attacker.ability as DefaultAbility).strength = 50;
             
             // Create a near enemy (closer to attacker)
             nearEnemy = new Hero();
@@ -515,10 +515,9 @@ describe('handleUpdateGame', () => {
             nearEnemy.roundStats.totalExperience = 0;
             nearEnemy.level = 1;
             nearEnemy.attackReadyAt = 0; // Initialize wind-up field
-            nearEnemy.ability = new DefaultAbility();
+            nearEnemy.ability = AbilityFactory.create('default');
             nearEnemy.ability.cooldown = 5000;
-            nearEnemy.ability.lastUsedTime = 0;
-            nearEnemy.ability.strength = 50;
+            (nearEnemy.ability as DefaultAbility).strength = 50;
             
             // Create a far enemy (further from attacker)
             farEnemy = new Hero();
@@ -541,10 +540,9 @@ describe('handleUpdateGame', () => {
             farEnemy.roundStats.totalExperience = 0;
             farEnemy.level = 1;
             farEnemy.attackReadyAt = 0; // Initialize wind-up field
-            farEnemy.ability = new DefaultAbility();
+            farEnemy.ability = AbilityFactory.create('default');
             farEnemy.ability.cooldown = 5000;
-            farEnemy.ability.lastUsedTime = 0;
-            farEnemy.ability.strength = 50;
+            (farEnemy.ability as DefaultAbility).strength = 50;
             
             gameState.combatants.set(attacker.id, attacker);
             gameState.combatants.set(nearEnemy.id, nearEnemy);
@@ -633,10 +631,9 @@ describe('handleUpdateGame', () => {
             player1.roundStats.totalExperience = 0;
             player1.level = 1;
             player1.attackReadyAt = 0; // Initialize wind-up field
-            player1.ability = new DefaultAbility();
+            player1.ability = AbilityFactory.create('default');
             player1.ability.cooldown = 1000;
-            player1.ability.lastUsedTime = 0;
-            player1.ability.strength = 5;
+            (player1.ability as DefaultAbility).strength = 5;
             player1.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             // Create player 2
@@ -660,10 +657,9 @@ describe('handleUpdateGame', () => {
             player2.roundStats.totalExperience = 0;
             player2.level = 1;
             player2.attackReadyAt = 0; // Initialize wind-up field
-            player2.ability = new DefaultAbility();
+            player2.ability = AbilityFactory.create('default');
             player2.ability.cooldown = 1000;
-            player2.ability.lastUsedTime = 0;
-            player2.ability.strength = 5;
+            (player2.ability as DefaultAbility).strength = 5;
             player2.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             // Create minion
@@ -947,10 +943,9 @@ describe('handleUpdateGame', () => {
             blueHero1.roundStats.totalExperience = 0;
             blueHero1.level = 1;
             blueHero1.attackReadyAt = 0; // Initialize wind-up field
-            blueHero1.ability = new DefaultAbility();
+            blueHero1.ability = AbilityFactory.create('default');
             blueHero1.ability.cooldown = 1000;
-            blueHero1.ability.lastUsedTime = 0;
-            blueHero1.ability.strength = 5;
+            (blueHero1.ability as DefaultAbility).strength = 5;
             blueHero1.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             blueHero2 = new Hero();
@@ -972,10 +967,9 @@ describe('handleUpdateGame', () => {
             blueHero2.roundStats = new RoundStats();
             blueHero2.roundStats.totalExperience = 0;
             blueHero2.level = 1;
-            blueHero2.ability = new DefaultAbility();
+            blueHero2.ability = AbilityFactory.create('default');
             blueHero2.ability.cooldown = 1000;
-            blueHero2.ability.lastUsedTime = 0;
-            blueHero2.ability.strength = 5;
+            (blueHero2.ability as DefaultAbility).strength = 5;
             blueHero2.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             blueHero3 = new Hero();
@@ -997,10 +991,9 @@ describe('handleUpdateGame', () => {
             blueHero3.roundStats = new RoundStats();
             blueHero3.roundStats.totalExperience = 0;
             blueHero3.level = 1;
-            blueHero3.ability = new DefaultAbility();
+            blueHero3.ability = AbilityFactory.create('default');
             blueHero3.ability.cooldown = 1000;
-            blueHero3.ability.lastUsedTime = 0;
-            blueHero3.ability.strength = 5;
+            (blueHero3.ability as DefaultAbility).strength = 5;
             blueHero3.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             // Create red minion to be killed
@@ -1039,10 +1032,9 @@ describe('handleUpdateGame', () => {
             redHero.roundStats = new RoundStats();
             redHero.roundStats.totalExperience = 0;
             redHero.level = 1;
-            redHero.ability = new DefaultAbility();
+            redHero.ability = AbilityFactory.create('default');
             redHero.ability.cooldown = 1000;
-            redHero.ability.lastUsedTime = 0;
-            redHero.ability.strength = 5;
+            (redHero.ability as DefaultAbility).strength = 5;
             redHero.size = GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
 
             gameState.combatants.set(blueHero1.id, blueHero1);

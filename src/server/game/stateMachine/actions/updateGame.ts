@@ -1,4 +1,4 @@
-import { GameState, Hero, XPEvent, LevelUpEvent, Combatant } from '../../../schema/GameState';
+import { GameState, Hero, XPEvent, LevelUpEvent, Combatant, DefaultAbility } from '../../../schema/GameState';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -351,13 +351,15 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     if (player.team === 'blue') {
         const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
         const spawnIndex = Math.min(heroIndex, blueSpawnPositions.length - 1);
-        player.x = blueSpawnPositions[spawnIndex].x;
-        player.y = blueSpawnPositions[spawnIndex].y;
+        const spawnPosition = blueSpawnPositions[spawnIndex];
+        player.x = spawnPosition.x;
+        player.y = spawnPosition.y;
     } else {
         const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
         const spawnIndex = Math.min(heroIndex, redSpawnPositions.length - 1);
-        player.x = redSpawnPositions[spawnIndex].x;
-        player.y = redSpawnPositions[spawnIndex].y;
+        const spawnPosition = redSpawnPositions[spawnIndex];
+        player.x = spawnPosition.x;
+        player.y = spawnPosition.y;
     }
 }
 
@@ -504,7 +506,7 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     player.respawnDuration = Math.round(player.respawnDuration * (1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
     
     // Boost ability strength by different configurable percentage
-    player.ability.strength = Math.round(player.ability.strength * abilityBoostMultiplier);
+    (player.ability as any).strength = Math.round((player.ability as DefaultAbility).strength * abilityBoostMultiplier);
     
     // Create level-up event
     const levelUpEvent = new LevelUpEvent();

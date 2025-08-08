@@ -1,10 +1,11 @@
-import { GameState, Hero, DefaultAbility, RoundStats } from '../../../schema/GameState';
+import { GameState, Hero, RoundStats } from '../../../schema/GameState';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { AbilityFactory } from '../../abilities/AbilityFactory';
 
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): StateMachineResult {
-    const { playerId, team, x, y } = action.payload;
+    const { playerId, team, x, y, abilityType = 'default' } = action.payload;
     
     const hero = new Hero();
     hero.id = `hero-${Date.now()}-${Math.random()}`;
@@ -53,10 +54,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.roundStats.damageDealt = 0;
     
     // Initialize ability
-    hero.ability = new DefaultAbility();
-    hero.ability.cooldown = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.COOLDOWN_MS;
-    hero.ability.lastUsedTime = 0; // Start with 0, first use will be available
-    hero.ability.strength = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.STRENGTH;
+    hero.ability = AbilityFactory.create(abilityType);
     
     // Add hero to state
     state.combatants.set(hero.id, hero);

@@ -66,14 +66,17 @@ export class GameEngine {
      * Spawns a new hero controlled by a player
      * @param controllerId The controller's ID (player session or bot strategy)
      * @param team The hero's team
+     * @param position Optional position for the hero
+     * @param abilityType Optional ability type for the hero
      */
-    spawnControlledHero(controllerId: ControllerId, team: 'blue' | 'red', position?: { x: number, y: number }): void {
+    spawnControlledHero(controllerId: ControllerId, team: 'blue' | 'red', position?: { x: number, y: number }, abilityType?: string): void {
         this.processAction({
             type: 'SPAWN_PLAYER',
             payload: { 
                 playerId: controllerId, 
                 team,
-                ...(position && { x: position.x, y: position.y })
+                ...(position && { x: position.x, y: position.y }),
+                ...(abilityType && { abilityType })
             }
         });
     }
@@ -119,20 +122,23 @@ export class GameEngine {
 
         const currentTime = Date.now();
         
+        // Cast ability to DefaultAbility to access specific properties
+        const ability = heroCombatant.ability as any;
+        
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (heroCombatant.ability.lastUsedTime === 0) {
-            heroCombatant.ability.lastUsedTime = currentTime;
+        if (ability.lastUsedTime === 0) {
+            ability.lastUsedTime = currentTime;
             this.createProjectile(heroId, x, y);
             return;
         }
         
-        const timeSinceLastUse = currentTime - heroCombatant.ability.lastUsedTime;
+        const timeSinceLastUse = currentTime - ability.lastUsedTime;
   
-        if (timeSinceLastUse < heroCombatant.ability.cooldown) {
+        if (timeSinceLastUse < ability.cooldown) {
             return; // Ability is on cooldown
         }
 
-        heroCombatant.ability.lastUsedTime = currentTime;
+        ability.lastUsedTime = currentTime;
         this.createProjectile(heroId, x, y);
     }
 
@@ -160,7 +166,7 @@ export class GameEngine {
         projectile.y = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.HERO.ABILITY.SPEED;
+        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES['default'].SPEED;
         projectile.strength = (hero as any).ability.strength;
         projectile.team = hero.team;
         

@@ -37,11 +37,11 @@ export interface RoundStats {
 
 export interface Ability {
     type: AbilityType;
+    cooldown: number;
+    lastUsedTime: number;
 }
 
 export interface DefaultAbility extends Ability {
-    cooldown: number;
-    lastUsedTime: number;
     strength: number;
 }
 
@@ -70,7 +70,7 @@ export interface HeroCombatant extends BaseCombatant {
     experience: number;
     level: number;
     roundStats: RoundStats;
-    ability: DefaultAbility;
+    ability: Ability;
     controller: ControllerId; // client ID for players, bot strategy for bots
 }
 

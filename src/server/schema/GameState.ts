@@ -51,6 +51,8 @@ export class RoundStats extends Schema {
 
 export class Ability extends Schema {
     @type('string') type!: AbilityType;
+    @type('number') cooldown!: number; // cooldown duration in ms
+    @type('number') lastUsedTime!: number; // timestamp when ability was last used
 }
 
 export class DefaultAbility extends Ability {
@@ -58,9 +60,6 @@ export class DefaultAbility extends Ability {
         super();
         this.type = ABILITY_TYPES.DEFAULT;
     }
-    
-    @type('number') cooldown!: number; // cooldown duration in ms
-    @type('number') lastUsedTime!: number; // timestamp when ability was last used
     @type('number') strength!: number; // damage dealt by ability
 }
 
@@ -101,7 +100,7 @@ export class Hero extends Combatant {
     @type('number') experience!: number;
     @type('number') level!: number;
     @type(RoundStats) roundStats!: RoundStats;
-    @type(DefaultAbility) ability!: DefaultAbility;
+    @type(Ability) ability!: Ability;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
 }
 

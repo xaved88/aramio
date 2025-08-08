@@ -44,12 +44,13 @@ export const GAMEPLAY_CONFIG = {
             WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
             RESPAWN_TIME_MS: 6000,
             SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
-            ABILITY: {
-                TYPE: 'projectile',
+        },
+        ABILITIES: {
+            'default': {
                 COOLDOWN_MS: 1000,
                 STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
-            },
+            }
         },
         CRADLE: {
             HEALTH: 2000,
@@ -130,7 +131,7 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        SPAWN_COUNT_PER_TEAM: 5, // Number of bots to spawn per team
+        ABILITY_TYPES: ['default', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again

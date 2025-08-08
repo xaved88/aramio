@@ -17,6 +17,7 @@ export interface SpawnPlayerAction extends GameAction {
         team: 'blue' | 'red';
         x?: number;
         y?: number;
+        abilityType?: string;
     };
 }
 
