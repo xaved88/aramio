@@ -53,19 +53,19 @@ export const GAMEPLAY_CONFIG = {
         },
         CRADLE: {
             HEALTH: 2000,
-            ATTACK_RADIUS: 120,
+            ATTACK_RADIUS: 125,
             ATTACK_STRENGTH: 40,
-            ATTACK_SPEED: 1, // attacks per second
+            ATTACK_SPEED: 2, // attacks per second
             WIND_UP: 0.1, // 0.1 seconds wind-up time for cradles
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
-            HEALTH: 500,
-            ATTACK_RADIUS: 70,
+            HEALTH: 1000,
+            ATTACK_RADIUS: 80,
             ATTACK_STRENGTH: 25,
             ATTACK_SPEED: 2, // attacks per second
             WIND_UP: 0.5, // 0.5 seconds wind-up time for turrets
-            SIZE: 20, // collision radius (average of width/height)
+            SIZE: 25, // collision radius matches width
         },
         MINION: {
             WARRIOR: {
@@ -93,7 +93,7 @@ export const GAMEPLAY_CONFIG = {
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.20,
         MINION_KILLED: 2,
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
-        TOWER_DESTROYED: 20,
+        TOWER_DESTROYED: 50,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
         LAST_HIT_BONUS_PERCENTAGE: 0.25, // bonus experience for getting the last hit on a unit
         XP_EVENT_DURATION_MS: 2000, // how long XP events stay in state (matches client animation)
@@ -149,7 +149,7 @@ export const CLIENT_CONFIG = {
     GAME_CANVAS_HEIGHT: 600,
     PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
     CRADLE_SIZE: 25, // 25x25 square
-    TURRET_SIZE: { width: 20, height: 30 }, // tall rectangle
+    TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
     PROJECTILE: {
         RADIUS: 6,

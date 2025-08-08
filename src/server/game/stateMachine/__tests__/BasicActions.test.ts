@@ -274,9 +274,9 @@ describe('GameStateMachine', () => {
             });
             
             // Player should have gained experience and leveled up
-            // 20 experience granted, 10 needed for level 1, so 10 remaining
+            // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
             expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(player?.level).toBe(2); // Should have leveled up
+            expect(player?.level).toBe(3); // Should have leveled up
         });
 
         it('should grant experience to players', () => {
@@ -428,9 +428,9 @@ describe('GameStateMachine', () => {
             });
             
             // Player should have gained experience and leveled up
-            // 20 experience granted, 10 needed for level 1, so 10 remaining
+            // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
             expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(player?.level).toBe(2); // Should have leveled up
+            expect(player?.level).toBe(3); // Should have leveled up
         });
 
         it('should debug level up issue', () => {
@@ -515,10 +515,10 @@ describe('GameStateMachine', () => {
             const newRedTurret = newState.combatants.get('red-turret');
             
             // Verify that our manual changes are preserved, accounting for turret destruction
-            // Player starts with 50, gets 20 from turret destruction (total 70)
-            // Level 1->2: consumes 15 XP, leaving 55
-            // Level 2->3: consumes 30 XP, leaving 25
-            expect(newPlayer?.roundStats.totalExperience).toBe(70);
+            // Player starts with 50, gets 50 from turret destruction (total 100)
+            // Level 1->2: consumes 15 XP, leaving 85
+            // Level 2->3: consumes 30 XP, leaving 55
+            expect(newPlayer?.roundStats.totalExperience).toBe(100);
             expect(newRedTurret).toBeUndefined(); // Turret was destroyed and removed
         });
     });
@@ -761,6 +761,106 @@ describe('GameStateMachine', () => {
             expect(blueTurret?.type).toBe(COMBATANT_TYPES.TURRET);
             expect(redTurret?.type).toBe(COMBATANT_TYPES.TURRET);
             expect(player?.type).toBe(COMBATANT_TYPES.HERO);
+        });
+    });
+
+    describe('Multiple Level-ups', () => {
+        it('should correctly increase player stats when multiple level-ups occur simultaneously', () => {
+            // Setup game and spawn player
+            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player1', team: 'blue' }
+            });
+            
+            // Find the player by controller
+            let player: Hero | undefined;
+            spawnResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    player = combatant as Hero;
+                }
+            });
+            
+            expect(player).toBeDefined();
+            
+            // Store initial stats
+            const initialLevel = player!.level;
+            const initialMaxHealth = player!.maxHealth;
+            const initialAttackStrength = player!.attackStrength;
+            const initialAttackRadius = player!.attackRadius;
+            const initialAttackSpeed = player!.attackSpeed;
+            const initialRespawnDuration = player!.respawnDuration;
+            const initialAbilityStrength = player!.ability.strength;
+            
+            // Grant enough experience to level up multiple times
+            // Level 1->2: needs 15 XP
+            // Level 2->3: needs 30 XP  
+            // Level 3->4: needs 45 XP
+            // Total needed: 15 + 30 + 45 = 90 XP
+            // Grant 100 XP to ensure multiple level-ups
+            const experienceToGrant = 100;
+            
+            // Update game to grant experience
+            const result = GameStateMachine.processAction(spawnResult.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Manually grant experience to the player
+            player!.experience += experienceToGrant;
+            player!.roundStats.totalExperience += experienceToGrant;
+            
+            // Update game again to trigger level-ups
+            const finalResult = GameStateMachine.processAction(result.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Find the updated player
+            let updatedPlayer: Hero | undefined;
+            finalResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    updatedPlayer = combatant as Hero;
+                }
+            });
+            
+            expect(updatedPlayer).toBeDefined();
+            
+            // Verify level increased
+            expect(updatedPlayer!.level).toBeGreaterThan(initialLevel);
+            
+            // Calculate expected stat increases based on configuration
+            const statBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
+            const rangeBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
+            const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE; // 1.20
+            
+            // Calculate expected stats after multiple level-ups
+            // Level 1->2: multiply by 1.15
+            // Level 2->3: multiply by 1.15 again
+            // Level 3->4: multiply by 1.15 again
+            const levelIncrease = updatedPlayer!.level - initialLevel;
+            const expectedStatMultiplier = Math.pow(statBoostMultiplier, levelIncrease);
+            const expectedRangeMultiplier = Math.pow(rangeBoostMultiplier, levelIncrease);
+            const expectedAbilityMultiplier = Math.pow(abilityBoostMultiplier, levelIncrease);
+            
+            // Verify stats increased correctly
+            expect(updatedPlayer!.maxHealth).toBe(Math.round(initialMaxHealth * expectedStatMultiplier));
+            expect(updatedPlayer!.attackStrength).toBe(Math.round(initialAttackStrength * expectedStatMultiplier));
+            expect(updatedPlayer!.attackRadius).toBe(Math.round(initialAttackRadius * expectedRangeMultiplier));
+            expect(updatedPlayer!.attackSpeed).toBe(initialAttackSpeed * expectedStatMultiplier);
+            expect(updatedPlayer!.respawnDuration).toBe(Math.round(initialRespawnDuration * expectedStatMultiplier));
+            expect(updatedPlayer!.ability.strength).toBe(Math.round(initialAbilityStrength * expectedAbilityMultiplier));
+            
+            // Calculate expected experience consumption based on actual level-ups
+            let totalExperienceNeeded = 0;
+            for (let level = initialLevel; level < updatedPlayer!.level; level++) {
+                totalExperienceNeeded += level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+            }
+            const expectedRemainingExperience = experienceToGrant - totalExperienceNeeded;
+            expect(updatedPlayer!.experience).toBe(expectedRemainingExperience);
+            
+            // Verify total experience tracking
+            expect(updatedPlayer!.roundStats.totalExperience).toBe(experienceToGrant);
         });
     });
 }); 

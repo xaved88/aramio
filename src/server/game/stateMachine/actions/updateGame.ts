@@ -465,10 +465,14 @@ function grantExperience(player: Hero, amount: number, state: GameState, xpX?: n
         state.xpEvents.push(xpEvent);
     }
     
-    // Check for level up immediately when experience is granted
-    const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
-    if (player.experience >= experienceNeeded) {
-        levelUpPlayer(player, state);
+    // Check for level up(s) - loop to handle multiple level-ups
+    while (true) {
+        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        if (player.experience >= experienceNeeded) {
+            levelUpPlayer(player, state);
+        } else {
+            break; // No more level-ups possible
+        }
     }
 }
 

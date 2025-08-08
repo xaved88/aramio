@@ -35,7 +35,7 @@ describe('TurretDestruction', () => {
             
             // Position hero next to turret (within attack radius)
             if (hero && redTurret) {
-                hero.x = redTurret.x + 30; // Within attack radius (50)
+                hero.x = redTurret.x + 30; // Within attack radius (80)
                 hero.y = redTurret.y;
                 
                             // Set turret to 1 HP so it can be destroyed in one hit
@@ -70,7 +70,7 @@ describe('TurretDestruction', () => {
             
             // Hero should have gained experience and leveled up
             expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero?.level).toBe(2);
+            expect(updatedHero?.level).toBe(3);
             
             // Hero stats should be boosted
             expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.PLAYER.HEALTH);
@@ -99,7 +99,7 @@ describe('TurretDestruction', () => {
             
                         // Position hero far from turret (outside attack radius)
             if (hero && redTurret) {
-                hero.x = redTurret.x + 100; // Outside attack radius (50)
+                hero.x = redTurret.x + 100; // Outside attack radius (80)
                 hero.y = redTurret.y;
             }
             
@@ -214,8 +214,8 @@ describe('TurretDestruction', () => {
             expect(updatedHero2?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Check that both heroes leveled up
-            expect(updatedHero1?.level).toBe(2);
-            expect(updatedHero2?.level).toBe(2);
+            expect(updatedHero1?.level).toBe(3);
+            expect(updatedHero2?.level).toBe(3);
         });
 
         it('should not grant experience to players on opposing team', () => {
@@ -269,8 +269,8 @@ describe('TurretDestruction', () => {
                 }
             });
             
-            // Hero should be level 2 with remaining experience
-            expect(updatedHero?.level).toBe(2);
+            // Hero should be level 3 with remaining experience
+            expect(updatedHero?.level).toBe(3);
             expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
         });
 
@@ -294,8 +294,8 @@ describe('TurretDestruction', () => {
 
             // Give player enough experience to be close to leveling up
             if (player && redTurret) {
-                player.experience = 8; // Just 2 short of level 2
-            player.roundStats.totalExperience = 8;
+                player.experience = 13; // Just 2 short of level 2
+            player.roundStats.totalExperience = 13;
                 player.x = redTurret.x + 30;
                 player.y = redTurret.y;
                 redTurret.health = 1;
@@ -324,10 +324,10 @@ describe('TurretDestruction', () => {
                 }
             });
 
-            // Player should be level 2 with remaining experience
-            // 8 + 20 = 28 experience, 15 needed for level 2, so 13 remaining
-            expect(updatedPlayer?.level).toBe(2);
-            expect(updatedPlayer?.roundStats.totalExperience).toBe(28);
+            // Player should be level 3 with remaining experience
+            // 13 + 50 = 63 experience, 15 needed for level 2, 30 needed for level 3, so 18 remaining
+            expect(updatedPlayer?.level).toBe(3);
+            expect(updatedPlayer?.roundStats.totalExperience).toBe(63);
         });
 
         it('should only grant minion XP to heroes within range', () => {
