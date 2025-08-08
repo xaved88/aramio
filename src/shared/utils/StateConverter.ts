@@ -126,7 +126,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         attackReadyAt: colyseusCombatant.attackReadyAt,
         effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => ({
             type: effect.type,
-            duration: effect.duration
+            duration: effect.duration,
+            appliedAt: effect.appliedAt || Date.now()
         })) : []
     };
     

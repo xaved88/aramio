@@ -101,6 +101,14 @@ function processCombat(state: GameState): void {
  * Processes wind-up attack logic for a combatant
  */
 function processWindUpAttack(attacker: any, allCombatants: any[], state: GameState, currentTime: number): void {
+    // Check if attacker is stunned - stunned combatants cannot attack
+    if (isCombatantStunned(attacker)) {
+        // Clear target and reset attack ready time when stunned
+        attacker.target = undefined;
+        attacker.attackReadyAt = 0;
+        return;
+    }
+    
     // Check if attacker has a target and can start wind-up
     if (attacker.target && attacker.attackReadyAt === 0) {
         // Check if attack is off cooldown
@@ -139,6 +147,17 @@ function processWindUpAttack(attacker: any, allCombatants: any[], state: GameSta
             attacker.attackReadyAt = 0;
         }
     }
+}
+
+/**
+ * Checks if a combatant is stunned
+ * @param combatant The combatant to check
+ * @returns True if the combatant is stunned, false otherwise
+ */
+function isCombatantStunned(combatant: any): boolean {
+    if (!combatant.effects || combatant.effects.length === 0) return false;
+    
+    return combatant.effects.some((effect: any) => effect.type === 'stun');
 }
 
 /**

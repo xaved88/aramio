@@ -17,6 +17,11 @@ export class MinionManager {
     }
     
     private static moveMinion(minion: Minion, allCombatants: any[]): void {
+        // Check if minion is stunned - stunned minions cannot move
+        if (this.isCombatantStunned(minion)) {
+            return;
+        }
+        
         // Check if minion has enemies in attack range
         const enemiesInRange = allCombatants.filter(target => {
             if (!CombatantUtils.isCombatantAlive(target)) return false;
@@ -34,6 +39,17 @@ export class MinionManager {
         if (!enemyCradle) return;
         
         this.moveTowardsTarget(minion, enemyCradle.x, enemyCradle.y);
+    }
+    
+    /**
+     * Checks if a combatant is stunned
+     * @param combatant The combatant to check
+     * @returns True if the combatant is stunned, false otherwise
+     */
+    private static isCombatantStunned(combatant: any): boolean {
+        if (!combatant.effects || combatant.effects.length === 0) return false;
+        
+        return combatant.effects.some((effect: any) => effect.type === 'stun');
     }
     
     private static findEnemyCradle(minionTeam: string, allCombatants: any[]): any | null {

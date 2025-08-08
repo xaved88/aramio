@@ -74,6 +74,7 @@ export class HookshotAbility extends Ability {
 export class CombatantEffect extends Schema {
     @type('string') type!: CombatantEffectType;
     @type('number') duration!: number; // Duration in milliseconds, 0 = permanent
+    @type('number') appliedAt!: number; // Timestamp when effect was applied
 }
 
 export class ProjectileEffect extends Schema {

@@ -54,6 +54,9 @@ export class GameEngine {
         // Update projectiles
         this.updateProjectiles(deltaTime);
         
+        // Update effects (remove expired ones)
+        this.updateEffects();
+        
         return result;
     }
 
@@ -92,6 +95,18 @@ export class GameEngine {
      * @param targetY Target Y coordinate
      */
     moveHero(heroId: CombatantId, targetX: number, targetY: number): void {
+        // Find hero by ID
+        const hero = this.state.combatants.get(heroId);
+        
+        if (!hero || hero.type !== 'hero') {
+            return;
+        }
+
+        // Check if hero is stunned
+        if (this.isCombatantStunned(hero)) {
+            return; // Stunned heroes cannot move
+        }
+
         this.processAction({
             type: 'MOVE_HERO',
             payload: { heroId, targetX, targetY }
@@ -120,6 +135,11 @@ export class GameEngine {
         // Prevent respawning entities from firing projectiles
         if (heroCombatant.state === 'respawning') {
             return;
+        }
+
+        // Check if hero is stunned
+        if (this.isCombatantStunned(hero)) {
+            return; // Stunned heroes cannot use abilities
         }
 
         // Use the AbilityUseManager to handle the ability usage
@@ -217,9 +237,54 @@ export class GameEngine {
         const combatantEffect = new CombatantEffect();
         combatantEffect.type = effect.type;
         combatantEffect.duration = effect.duration;
+        combatantEffect.appliedAt = Date.now();
         
         // Add it to the target's effects
         target.effects.push(combatantEffect);
+        
+        // Handle stun effect specifically
+        if (effect.type === 'stun') {
+            this.handleStunEffect(target);
+        }
+    }
+    
+    /**
+     * Handles the application of a stun effect
+     */
+    private handleStunEffect(target: any): void {
+        // Remove target when stunned
+        target.target = undefined;
+        
+        // Reset attack ready time to prevent immediate attacks
+        target.attackReadyAt = 0;
+    }
+
+    /**
+     * Updates effects by removing expired ones
+     */
+    private updateEffects(): void {
+        const currentTime = Date.now();
+        
+        this.state.combatants.forEach((combatant: any) => {
+            if (!combatant.effects || combatant.effects.length === 0) return;
+            
+            const effectsToRemove: number[] = [];
+            
+            combatant.effects.forEach((effect: any, index: number) => {
+                // Skip permanent effects (duration = 0)
+                if (effect.duration === 0) return;
+                
+                const timeSinceApplied = currentTime - effect.appliedAt;
+                if (timeSinceApplied >= effect.duration) {
+                    effectsToRemove.push(index);
+                }
+            });
+            
+            // Remove expired effects (in reverse order to maintain indices)
+            effectsToRemove.reverse().forEach(index => {
+                combatant.effects.splice(index, 1);
+            });
+        });
     }
 
     /**
@@ -253,5 +318,16 @@ export class GameEngine {
                     console.log('Unknown event type:', event.type);
             }
         });
+    }
+
+    /**
+     * Checks if a combatant is stunned
+     * @param combatant The combatant to check
+     * @returns True if the combatant is stunned, false otherwise
+     */
+    private isCombatantStunned(combatant: any): boolean {
+        if (!combatant.effects || combatant.effects.length === 0) return false;
+        
+        return combatant.effects.some((effect: any) => effect.type === 'stun');
     }
 } 

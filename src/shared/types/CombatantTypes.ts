@@ -49,6 +49,7 @@ export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COM
 export interface CombatantEffect {
     type: CombatantEffectType;
     duration: number; // Duration in milliseconds, 0 = permanent
+    appliedAt: number; // Timestamp when effect was applied
 }
 
 // Projectile effect types

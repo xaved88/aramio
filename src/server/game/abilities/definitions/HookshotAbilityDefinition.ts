@@ -1,4 +1,4 @@
-import { HookshotAbility, Projectile, ProjectileEffect } from '../../../schema/GameState';
+import { HookshotAbility, Projectile, ProjectileEffect, CombatantEffect } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
@@ -85,6 +85,14 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         damageEffect.effectType = 'applyDamage';
         damageEffect.damage = ability.strength;
         projectile.effects.push(damageEffect);
+        
+        // Add stun effect
+        const stunEffect = new ProjectileEffect();
+        stunEffect.effectType = 'applyEffect';
+        stunEffect.combatantEffect = new CombatantEffect();
+        stunEffect.combatantEffect.type = 'stun';
+        stunEffect.combatantEffect.duration = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot.DURATION_MS;
+        projectile.effects.push(stunEffect);
         
         state.projectiles.set(projectile.id, projectile);
     }
