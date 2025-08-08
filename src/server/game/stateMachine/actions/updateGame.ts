@@ -268,6 +268,18 @@ function resolveCollision(combatant1: any, combatant2: any, distance: number, co
     const dy = combatant2.y - combatant1.y;
     const length = Math.sqrt(dx * dx + dy * dy);
     
+    // Handle zero length (combatants at exact same position) to prevent NaN
+    if (length === 0) {
+        // Use a small random offset to separate them
+        const offsetX = (Math.random() - 0.5) * 2;
+        const offsetY = (Math.random() - 0.5) * 2;
+        combatant1.x += offsetX;
+        combatant1.y += offsetY;
+        combatant2.x -= offsetX;
+        combatant2.y -= offsetY;
+        return;
+    }
+    
     // Normalize direction vector
     const dirX = dx / length;
     const dirY = dy / length;

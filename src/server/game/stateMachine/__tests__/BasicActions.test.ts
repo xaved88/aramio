@@ -588,7 +588,7 @@ describe('GameStateMachine', () => {
         });
     });
 
-    describe('MOVE_PLAYER', () => {
+    describe('MOVE_HERO', () => {
         it('should move player towards target', () => {
             // Spawn a player
             const spawnResult = GameStateMachine.processAction(initialState, {
@@ -609,9 +609,9 @@ describe('GameStateMachine', () => {
             
             // Move player
             const result = GameStateMachine.processAction(spawnResult.newState, {
-                type: 'MOVE_PLAYER',
+                type: 'MOVE_HERO',
                 payload: { 
-                    playerId: 'player1', 
+                    heroId: hero!.id, 
                     targetX: initialX + 100, 
                     targetY: initialY + 100 
                 }
@@ -669,9 +669,9 @@ describe('GameStateMachine', () => {
             
             // Try to move respawning hero
             const result = GameStateMachine.processAction(respawnResult.newState, {
-                type: 'MOVE_PLAYER',
+                type: 'MOVE_HERO',
                 payload: { 
-                    playerId: 'player1', 
+                    heroId: hero!.id, 
                     targetX: respawnX + 100, 
                     targetY: respawnY + 100 
                 }
@@ -698,10 +698,18 @@ describe('GameStateMachine', () => {
                 payload: { playerId: 'player1', team: 'blue' }
             });
             
+            // Find the hero by controller
+            let hero: Hero | undefined;
+            spawnResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    hero = combatant as Hero;
+                }
+            });
+            
             // Move player
             const result = GameStateMachine.processAction(spawnResult.newState, {
-                type: 'MOVE_PLAYER',
-                payload: { playerId: 'player1', targetX: 100, targetY: 100 }
+                type: 'MOVE_HERO',
+                payload: { heroId: hero!.id, targetX: 100, targetY: 100 }
             });
             
             // Verify that all combatants still have correct types

@@ -1,4 +1,4 @@
-import { HookshotAbility, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect } from '../../../schema/GameState';
+import { HookshotAbility, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect, GameState, Hero } from '../../../schema/GameState';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 
@@ -55,29 +55,18 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         return true;
     }
 
-    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: HookshotAbility): void {
+    private createProjectile(heroId: string, targetX: number, targetY: number, state: GameState, ability: HookshotAbility): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) {
             console.warn(`Hookshot: Hero ${heroId} not found in state`);
-            return;
+            return
         }
-
-        // Validate hero position - if hero is at 0,0 or invalid position, don't create projectile
-        if (!hero.x || !hero.y || hero.x === 0 || hero.y === 0) {
-            console.warn(`Hookshot: Hero ${heroId} has invalid position (${hero.x}, ${hero.y}), skipping projectile creation`);
-            return;
-        }
-
-        // Log hero position for debugging
-        console.log(`Hookshot: Creating projectile for hero ${heroId} at position (${hero.x}, ${hero.y}) targeting (${targetX}, ${targetY})`);
 
         // Calculate direction from hero to target
         const dx = targetX - hero.x;
         const dy = targetY - hero.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance === 0) return; // Can't shoot at self
         
         // Normalize direction
         const directionX = dx / distance;
@@ -85,7 +74,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         
         // Get config and calculate scaled values based on hero level
         const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
-        const heroLevel = hero.level || 1;
+        const heroLevel = (hero as Hero).level || 1;
         
         // Calculate scaled speed (base speed + 10% per level)
         const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));

@@ -28,15 +28,6 @@ export interface RemovePlayerAction extends GameAction {
     };
 }
 
-export interface MovePlayerAction extends GameAction {
-    type: 'MOVE_PLAYER';
-    payload: {
-        playerId: ControllerId;
-        targetX: number;
-        targetY: number;
-    };
-}
-
 export interface MoveHeroAction extends GameAction {
     type: 'MOVE_HERO';
     payload: {
@@ -64,7 +55,6 @@ export type GameActionTypes =
     | SetupGameAction 
     | SpawnPlayerAction 
     | RemovePlayerAction 
-    | MovePlayerAction 
     | MoveHeroAction 
     | UpdateGameAction 
     | EndGameAction;
