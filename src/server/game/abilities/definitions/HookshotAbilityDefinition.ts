@@ -33,6 +33,10 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
     useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any): boolean {
         const currentTime = Date.now();
         
+        // Find hero by ID
+        const hero = state.combatants.get(heroId);
+        if (!hero) return false;
+        
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
             ability.lastUsedTime = currentTime;

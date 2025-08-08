@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { GameState } from '../../server/schema/GameState';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { type SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';
@@ -25,6 +25,8 @@ export class GameScene extends Phaser.Scene {
     private moveTarget: { x: number, y: number } | null = null;
     private isClickHeld: boolean = false;
     private isRestarting: boolean = false;
+    private rangeIndicator: Phaser.GameObjects.Graphics | null = null;
+    private currentPlayerHero: any = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -52,6 +54,11 @@ export class GameScene extends Phaser.Scene {
         this.entityManager = new EntityManager(this);
         this.animationManager = new AnimationManager(this);
         this.uiManager = new UIManager(this);
+        
+        // Create range indicator
+        this.rangeIndicator = this.add.graphics();
+        this.rangeIndicator.setDepth(10); // High depth to appear above other elements
+        this.rangeIndicator.setVisible(false);
         
         try {
             this.room = await this.client.joinOrCreate('game');
@@ -81,6 +88,11 @@ export class GameScene extends Phaser.Scene {
 
     update() {
         if (!this.room || !this.room.state) return;
+        
+        // Update range indicator position if visible
+        if (this.rangeIndicator && this.rangeIndicator.visible) {
+            this.updateRangeIndicatorPosition();
+        }
         
         if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
             // Control scheme A: point to move (original behavior)
@@ -297,11 +309,17 @@ export class GameScene extends Phaser.Scene {
                 if (this.room) {
                     this.isClickHeld = true;
                     this.moveTarget = { x: pointer.x, y: pointer.y };
+                    
+                    // Show range indicator for hookshot ability
+                    this.showRangeIndicator(pointer.x, pointer.y);
                 }
             });
 
             this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
                 if (this.room && this.isClickHeld) {
+                    // Hide range indicator
+                    this.hideRangeIndicator();
+                    
                     // Use ability at release position
                     this.room.send('useAbility', {
                         x: pointer.x,
@@ -378,6 +396,120 @@ export class GameScene extends Phaser.Scene {
                 this.entityManager.forceCleanupTexts();
             }
         });
+    }
+
+    /**
+     * Shows the range indicator for hookshot ability
+     */
+    private showRangeIndicator(x: number, y: number): void {
+        if (!this.rangeIndicator || !this.lastState) return;
+        
+        // Find the current player's hero
+        const sharedState = convertToSharedGameState(this.lastState);
+        let currentHero: any = null;
+        
+        for (const combatant of sharedState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+                currentHero = combatant;
+                break;
+            }
+        }
+        
+        if (!currentHero || currentHero.ability.type !== 'hookshot') {
+            return; // Not a hookshot ability
+        }
+        
+        // Calculate cast range from speed and duration
+        const castRange = this.calculateHookshotCastRange(currentHero);
+        
+        // Determine color based on ability cooldown status
+        const rangeColor = this.getRangeIndicatorColor(currentHero);
+        
+        // Clear and draw the range indicator
+        this.rangeIndicator.clear();
+        this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
+        this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
+        
+        this.rangeIndicator.setVisible(true);
+    }
+
+    /**
+     * Calculates the cast range for hookshot based on speed and duration
+     */
+    private calculateHookshotCastRange(hero: any): number {
+        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+        const heroLevel = hero.level || 1;
+        
+        // Calculate scaled speed (base speed + 10% per level)
+        const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
+        const scaledSpeed = config.SPEED * speedMultiplier;
+        
+        // Calculate range: speed (pixels/second) * duration (seconds)
+        const durationInSeconds = config.DURATION_MS / 1000;
+        const castRange = scaledSpeed * durationInSeconds;
+        
+        return castRange;
+    }
+
+    /**
+     * Gets the appropriate color for the range indicator based on ability cooldown status
+     */
+    private getRangeIndicatorColor(hero: any): number {
+        const currentTime = Date.now();
+        const ability = hero.ability as any;
+        const timeSinceLastUse = currentTime - ability.lastUsedTime;
+        const isAbilityReady = timeSinceLastUse >= ability.cooldown;
+        
+        if (isAbilityReady) {
+            return CLIENT_CONFIG.HUD.ABILITY_BAR.READY_COLOR; // Light purple when ready
+        } else {
+            return CLIENT_CONFIG.HUD.ABILITY_BAR.COOLDOWN_COLOR; // Darker purple when on cooldown
+        }
+    }
+
+    /**
+     * Hides the range indicator
+     */
+    private hideRangeIndicator(): void {
+        if (this.rangeIndicator) {
+            this.rangeIndicator.setVisible(false);
+        }
+    }
+
+    /**
+     * Updates the position of the range indicator based on the current player's hero position
+     */
+    private updateRangeIndicatorPosition(): void {
+        if (!this.rangeIndicator || !this.lastState) return;
+
+        // Find the current player's hero
+        const sharedState = convertToSharedGameState(this.lastState);
+        let currentHero: any = null;
+        
+        for (const combatant of sharedState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+                currentHero = combatant;
+                break;
+            }
+        }
+        
+        if (!currentHero || currentHero.ability.type !== 'hookshot') {
+            this.hideRangeIndicator(); // Hide if not a hookshot ability
+            return;
+        }
+
+        // Calculate cast range from speed and duration
+        const castRange = this.calculateHookshotCastRange(currentHero);
+        
+        // Determine color based on ability cooldown status
+        const rangeColor = this.getRangeIndicatorColor(currentHero);
+        
+        // Clear and draw the range indicator centered on the hero
+        this.rangeIndicator.clear();
+        this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
+        this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
+        
+        this.rangeIndicator.setVisible(true);
     }
 
     /**
