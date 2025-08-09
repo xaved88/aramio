@@ -480,6 +480,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
+     * Calculates the cast range for thorndive ability
+     */
+    private calculateThorndiveCastRange(hero: any): number {
+        // Get the range directly from the hero's ability (which includes level scaling)
+        return hero.ability.range;
+    }
+
+    /**
      * Gets the appropriate color for the range indicator based on ability cooldown status
      */
     private getRangeIndicatorColor(hero: any): number {
@@ -521,8 +529,8 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer')) {
-            this.hideRangeIndicator(); // Hide if not a hookshot, mercenary, or pyromancer ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            this.hideRangeIndicator(); // Hide if not a hookshot, mercenary, pyromancer, or thorndive ability
             return;
         }
 
@@ -534,6 +542,8 @@ export class GameScene extends Phaser.Scene {
             castRange = this.calculateMercenaryRageRange(currentHero);
         } else if (currentHero.ability.type === 'pyromancer') {
             castRange = this.calculatePyromancerCastRange(currentHero);
+        } else if (currentHero.ability.type === 'thorndive') {
+            castRange = this.calculateThorndiveCastRange(currentHero);
         } else {
             this.hideRangeIndicator();
             return;

@@ -3,6 +3,7 @@ import { DefaultAbilityDefinition } from './definitions/DefaultAbilityDefinition
 import { HookshotAbilityDefinition } from './definitions/HookshotAbilityDefinition';
 import { MercenaryAbilityDefinition } from './definitions/MercenaryAbilityDefinition';
 import { PyromancerAbilityDefinition } from './definitions/PyromancerAbilityDefinition';
+import { ThorndiveAbilityDefinition } from './definitions/ThorndiveAbilityDefinition';
 
 export class AbilityFactory {
     static create(abilityType: string): Ability {
@@ -15,6 +16,8 @@ export class AbilityFactory {
                 return MercenaryAbilityDefinition.instance.create();
             case 'pyromancer':
                 return PyromancerAbilityDefinition.instance.create();
+            case 'thorndive':
+                return ThorndiveAbilityDefinition.instance.create();
             default:
                 throw new Error(`Unsupported ability type: ${abilityType}`);
         }

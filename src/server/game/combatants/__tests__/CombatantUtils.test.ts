@@ -144,4 +144,90 @@ describe('CombatantUtils', () => {
             expect(Math.round(hero.health)).toBe(67); // 100 - 33.33 ≈ 67
         });
     });
+
+    describe('reflect effect', () => {
+        let attacker: Hero;
+
+        beforeEach(() => {
+            attacker = new Hero();
+            attacker.id = 'attacker-hero';
+            attacker.type = 'hero';
+            attacker.team = 'red';
+            attacker.health = 100;
+            attacker.maxHealth = 100;
+            attacker.attackRadius = 50;
+            attacker.attackStrength = 20;
+            attacker.attackSpeed = 1;
+            attacker.windUp = 0.5;
+            attacker.moveSpeed = 100;
+            attacker.bulletArmor = 0;
+            attacker.abilityArmor = 0;
+            attacker.attackReadyAt = 0;
+            attacker.lastAttackTime = 0;
+            attacker.size = 15;
+            attacker.controller = 'test-attacker';
+            attacker.experience = 0;
+            attacker.level = 1;
+            attacker.state = 'alive';
+            attacker.respawnTime = 0;
+            attacker.respawnDuration = 5000;
+            attacker.roundStats = new RoundStats();
+            attacker.roundStats.totalExperience = 0;
+            attacker.roundStats.minionKills = 0;
+            attacker.roundStats.heroKills = 0;
+            attacker.roundStats.turretKills = 0;
+            attacker.roundStats.damageTaken = 0;
+            attacker.roundStats.damageDealt = 0;
+
+            gameState.combatants.set(attacker.id, attacker);
+        });
+
+        it('should reflect damage back to the attacker', () => {
+            // Add reflect effect to hero
+            const reflectEffect = {
+                type: 'reflect',
+                reflectPercentage: 50, // 50% reflect
+                duration: 3000,
+                appliedAt: 0
+            } as any;
+            hero.effects.push(reflectEffect);
+
+            // Attacker deals 60 damage to hero
+            CombatantUtils.damageCombatant(hero, 60, gameState, attacker.id, 'auto-attack');
+
+            // Hero should take 60 damage (no armor)
+            expect(hero.health).toBe(40); // 100 - 60 = 40
+
+            // Attacker should take reflect damage: 60 * 50% = 30
+            expect(attacker.health).toBe(70); // 100 - 30 = 70
+        });
+
+        it('should not create infinite reflect loops', () => {
+            // Add reflect effect to both combatants
+            const reflectEffect1 = {
+                type: 'reflect',
+                reflectPercentage: 100, // 100% reflect
+                duration: 3000,
+                appliedAt: 0
+            } as any;
+            const reflectEffect2 = {
+                type: 'reflect',
+                reflectPercentage: 100, // 100% reflect
+                duration: 3000,
+                appliedAt: 0
+            } as any;
+
+            hero.effects.push(reflectEffect1);
+            attacker.effects.push(reflectEffect2);
+
+            // Attacker deals 50 damage to hero
+            CombatantUtils.damageCombatant(hero, 50, gameState, attacker.id, 'auto-attack');
+
+            // Hero should take 50 damage and reflect 50 back
+            expect(hero.health).toBe(50); // 100 - 50 = 50
+            
+            // Attacker should take 50 reflect damage but NOT reflect it back
+            expect(attacker.health).toBe(50); // 100 - 50 = 50
+        });
+    });
 });

@@ -175,8 +175,8 @@ export class GameEngine {
                 }
             }
             
-            // Handle destination-based projectiles (like fireball)
-            if (projectile.type === 'fireball' && projectile.targetX !== undefined && projectile.targetY !== undefined) {
+            // Handle destination-based projectiles (like fireball and thorndive)
+            if ((projectile.type === 'fireball' || projectile.type === 'thorndive') && projectile.targetX !== undefined && projectile.targetY !== undefined) {
                 const targetDistance = Math.sqrt(
                     Math.pow(projectile.x - projectile.targetX, 2) + 
                     Math.pow(projectile.y - projectile.targetY, 2)

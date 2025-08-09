@@ -11,6 +11,8 @@ export class AbilityIconManager {
                 return '/';
             case 'pyromancer':
                 return '&';
+            case 'thorndive':
+                return '#';
             default:
                 return '?';
         }

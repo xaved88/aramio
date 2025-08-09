@@ -39,3 +39,11 @@ export class PyromancerAbility extends Ability {
     @type('number') radius!: number; // AOE radius
     @type('number') range!: number; // projectile range
 }
+
+export class ThorndiveAbility extends Ability {
+    constructor() {
+        super();
+        this.type = ABILITY_TYPES.THORNDIVE;
+    }
+    @type('number') range!: number; // dash range
+}

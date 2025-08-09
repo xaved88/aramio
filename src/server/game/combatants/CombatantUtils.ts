@@ -1,6 +1,7 @@
 import { GameState } from '../../schema/GameState';
 import { Combatant } from '../../schema/Combatants';
 import { DamageEvent, KillEvent } from '../../schema/Events';
+import { ReflectEffect } from '../../schema/Effects';
 
 export type DamageSource = 'auto-attack' | 'ability';
 
@@ -12,8 +13,9 @@ export class CombatantUtils {
      * @param gameState The game state for event dispatching
      * @param sourceId The ID of the combatant causing the damage
      * @param damageSource The source of damage for armor calculation
+     * @param isReflectDamage Whether this damage is from a reflect effect (prevents infinite loops)
      */
-    static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string, damageSource: DamageSource = 'auto-attack'): void {
+    static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string, damageSource: DamageSource = 'auto-attack', isReflectDamage: boolean = false): void {
         // Apply armor reduction
         const reducedDamage = this.calculateArmorReduction(combatant, damage, damageSource);
         
@@ -45,6 +47,11 @@ export class CombatantUtils {
             damageEvent.amount = actualDamage;
             damageEvent.timestamp = gameState.gameTime;
             gameState.damageEvents.push(damageEvent);
+
+            // Check for reflect effects and apply reflect damage (only if this isn't already reflect damage)
+            if (!isReflectDamage) {
+                this.handleReflectDamage(combatant, actualDamage, gameState, sourceId, damageSource);
+            }
         }
         
         // Dispatch kill event and update kill stats if combatant was killed
@@ -158,5 +165,42 @@ export class CombatantUtils {
      */
     static isInRange(source: Combatant, target: Combatant, range: number): boolean {
         return this.getDistance(source, target) <= range;
+    }
+
+    /**
+     * Handles reflect damage effects
+     * @param combatant The combatant that took damage and might have reflect
+     * @param actualDamage The damage taken (after armor reduction)
+     * @param gameState The game state for applying reflect damage
+     * @param sourceId The ID of the original attacker
+     * @param damageSource The type of damage source
+     */
+    private static handleReflectDamage(combatant: Combatant, actualDamage: number, gameState: GameState, sourceId: string, damageSource: DamageSource): void {
+        const sourceCombatant = gameState.combatants.get(sourceId);
+        if (!sourceCombatant) return;
+
+        // Only reflect damage to heroes and minions, not structures
+        if (sourceCombatant.type !== 'hero' && sourceCombatant.type !== 'minion') {
+            return;
+        }
+
+        // Find all reflect effects on the combatant that took damage
+        const reflectEffects = Array.from(combatant.effects).filter(effect => 
+            effect != null && effect.type === 'reflect'
+        ) as ReflectEffect[];
+
+        for (const reflectEffect of reflectEffects) {
+            if (reflectEffect.reflectPercentage && reflectEffect.reflectPercentage > 0) {
+                // Calculate reflect damage (percentage of actual damage taken)
+                const reflectDamage = (actualDamage * reflectEffect.reflectPercentage) / 100;
+                
+                // Apply reflect damage back to the attacker (same damage type)
+                if (reflectDamage > 0 && sourceId !== combatant.id) {
+                    console.log("reflecting", reflectDamage)
+                    // Mark as reflect damage to prevent infinite loops
+                    this.damageCombatant(sourceCombatant, reflectDamage, gameState, combatant.id, damageSource, true);
+                }
+            }
+        }
     }
 } 

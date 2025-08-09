@@ -24,11 +24,15 @@ export class StatModEffect extends CombatantEffect {
 }
 
 export class ReflectEffect extends CombatantEffect {
-    // type is inherited from base class
+    @type('number') reflectPercentage!: number; // Percentage of damage to reflect
 }
 
 export class HunterEffect extends CombatantEffect {
     // type is inherited from base class
+}
+
+export class TauntEffect extends CombatantEffect {
+    @type('string') taunterCombatantId!: string; // ID of the combatant that applied the taunt
 }
 
 export class MoveEffect extends CombatantEffect {

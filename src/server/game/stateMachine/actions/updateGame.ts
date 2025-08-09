@@ -179,6 +179,36 @@ function isCombatantStunned(combatant: any): boolean {
  * Updates targeting for a combatant based on available enemies in range
  */
 function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
+    // Check for taunt effects first - they override normal targeting
+    const tauntEffects = attacker.effects?.filter((effect: any) => effect.type === 'taunt') || [];
+    if (tauntEffects.length > 0) {
+        // Clean up taunt effects where the taunter is dead or missing
+        const validTauntEffects = tauntEffects.filter((effect: any) => {
+            const taunter = allCombatants.find(c => c.id === effect.taunterCombatantId);
+            return taunter && CombatantUtils.isCombatantAlive(taunter) && 
+                   CombatantUtils.areOpposingTeams(attacker, taunter);
+        });
+        
+        // Remove invalid taunt effects immediately
+        if (validTauntEffects.length !== tauntEffects.length) {
+            attacker.effects = attacker.effects.filter((effect: any) => {
+                if (effect.type !== 'taunt') return true;
+                const taunter = allCombatants.find(c => c.id === effect.taunterCombatantId);
+                return taunter && CombatantUtils.isCombatantAlive(taunter) && 
+                       CombatantUtils.areOpposingTeams(attacker, taunter);
+            });
+        }
+        
+        // If we still have valid taunt effects, use the most recent one
+        if (validTauntEffects.length > 0) {
+            const latestTaunt = validTauntEffects[validTauntEffects.length - 1];
+            const taunter = allCombatants.find(c => c.id === latestTaunt.taunterCombatantId);
+            attacker.target = taunter.id;
+            // Don't reset attackReadyAt - let the attack continue if already in progress
+            return;
+        }
+    }
+
     // Check if attacker has hunter effect (ignores minions)
     const hasHunterEffect = attacker.effects?.some((effect: any) => effect.type === 'hunter');
     

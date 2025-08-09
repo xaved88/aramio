@@ -25,7 +25,8 @@ export const ABILITY_TYPES = {
     DEFAULT: 'default',
     HOOKSHOT: 'hookshot',
     MERCENARY: 'mercenary',
-    PYROMANCER: 'pyromancer'
+    PYROMANCER: 'pyromancer',
+    THORNDIVE: 'thorndive'
 } as const;
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
@@ -34,7 +35,8 @@ export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
 export const PROJECTILE_TYPES = {
     DEFAULT: 'default',
     HOOK: 'hook',
-    FIREBALL: 'fireball'
+    FIREBALL: 'fireball',
+    THORNDIVE: 'thorndive'
 } as const;
 
 export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];
@@ -46,7 +48,8 @@ export const COMBATANT_EFFECT_TYPES = {
     NOCOLLISION: 'nocollision',
     STATMOD: 'statmod',
     REFLECT: 'reflect',
-    HUNTER: 'hunter'
+    HUNTER: 'hunter',
+    TAUNT: 'taunt'
 } as const;
 
 export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COMBATANT_EFFECT_TYPES];
@@ -77,10 +80,16 @@ export interface StatModEffect extends CombatantEffect {
 
 export interface ReflectEffect extends CombatantEffect {
     type: 'reflect';
+    reflectPercentage: number; // Percentage of damage to reflect (e.g., 100 for 100%)
 }
 
 export interface HunterEffect extends CombatantEffect {
     type: 'hunter';
+}
+
+export interface TauntEffect extends CombatantEffect {
+    type: 'taunt';
+    taunterCombatantId: string; // ID of the combatant that applied the taunt
 }
 
 export interface MoveEffect extends CombatantEffect {
@@ -144,7 +153,12 @@ export interface PyromancerAbility extends Ability {
     range: number;
 }
 
-export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect;
+export interface ThorndiveAbility extends Ability {
+    type: typeof ABILITY_TYPES.THORNDIVE;
+    range: number;
+}
+
+export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect;
 
 export interface BaseCombatant {
     id: CombatantId;

@@ -73,6 +73,17 @@ export const GAMEPLAY_CONFIG = {
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15,
             },
+            'thorndive': {
+                HEALTH: 80, // High HP tank
+                ATTACK_RADIUS: 30, // Low range (melee tank)
+                ATTACK_STRENGTH: 0, // High damage
+                ATTACK_SPEED: 0.6, // Low attack speed
+                WIND_UP: 0.3, // Moderate wind-up
+                RESPAWN_TIME_MS: 6000,
+                SIZE: 15, 
+                BULLET_ARMOR: 20, // Base bullet armor
+                ABILITY_ARMOR: 20, // Base ability armor
+            },
         },
         ABILITIES: {
             'default': {
@@ -112,6 +123,23 @@ export const GAMEPLAY_CONFIG = {
                 RANGE_PER_LEVEL: 20,
                 SPEED: 200, 
                 SPEED_PER_LEVEL: 20
+            },
+            'thorndive': {
+                COOLDOWN_MS: 11000, // High cooldown (11 seconds)
+                DASH_SPEED: 400, // Dash movement speed (pixels per second)
+                RANGE: 150, // Base dash range
+                RANGE_PER_LEVEL: 10, // Additional range per level
+                LANDING_DAMAGE: 15, // Base landing damage
+                LANDING_DAMAGE_PER_LEVEL: 10, // Additional damage per level
+                LANDING_RADIUS: 70, // AOE radius for landing damage
+                TAUNT_RADIUS: 80, // Radius for taunt effect
+                TAUNT_DURATION_MS: 100, // Base taunt duration (1 second)
+                TAUNT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
+                REFLECT_DURATION_MS: 3000, // Base reflect duration (3 seconds)
+                REFLECT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
+                REFLECT_PERCENTAGE: 100, // 100% damage reflection
+                ARMOR_BONUS_BULLET: 50, // Additional bullet armor during effect
+                ARMOR_BONUS_ABILITY: 50, // Additional ability armor during effect
             }
         },
         CRADLE: {
@@ -193,7 +221,7 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        ABILITY_TYPES: ['pyromancer', 'mercenary', 'hookshot', 'default', 'default'], // Array of ability types for bots to spawn with
+        ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot',  'default'], // Array of ability types for bots to spawn with
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again

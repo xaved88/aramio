@@ -1,8 +1,9 @@
-import { Ability, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility } from '../../schema/Abilities';
+import { Ability, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility } from '../../schema/Abilities';
 import { DefaultAbilityDefinition } from './definitions/DefaultAbilityDefinition';
 import { HookshotAbilityDefinition } from './definitions/HookshotAbilityDefinition';
 import { MercenaryAbilityDefinition } from './definitions/MercenaryAbilityDefinition';
 import { PyromancerAbilityDefinition } from './definitions/PyromancerAbilityDefinition';
+import { ThorndiveAbilityDefinition } from './definitions/ThorndiveAbilityDefinition';
 
 export class AbilityLevelUpManager {
     static levelUpAbility(ability: Ability): void {
@@ -18,6 +19,9 @@ export class AbilityLevelUpManager {
                 break;
             case 'pyromancer':
                 PyromancerAbilityDefinition.instance.onLevelUp(ability as PyromancerAbility);
+                break;
+            case 'thorndive':
+                ThorndiveAbilityDefinition.instance.onLevelUp(ability as ThorndiveAbility);
                 break;
             default:
                 // No level-up logic for unknown ability types
