@@ -1,9 +1,10 @@
-import { GameState, Hero, XPEvent, LevelUpEvent, Combatant, DefaultAbility } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Hero, Combatant } from '../../../schema/Combatants';
+import { XPEvent, LevelUpEvent, AttackEvent } from '../../../schema/Events';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
-import { AttackEvent } from '../../../schema/GameState';
 import { MinionManager } from '../../combatants/MinionManager';
 import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 
@@ -113,11 +114,11 @@ function processWindUpAttack(attacker: any, allCombatants: any[], state: GameSta
     if (attacker.target && attacker.attackReadyAt === 0) {
         // Check if attack is off cooldown
         const timeSinceLastAttack = currentTime - attacker.lastAttackTime;
-        const attackCooldown = 1000 / attacker.attackSpeed; // Convert to milliseconds
+        const attackCooldown = 1000 / attacker.getAttackSpeed(); // Convert to milliseconds
         
         if (timeSinceLastAttack >= attackCooldown) {
             // Start wind-up period
-            attacker.attackReadyAt = currentTime + (attacker.windUp * 1000); // Convert windUp to milliseconds
+            attacker.attackReadyAt = currentTime + (attacker.getWindUp() * 1000); // Convert windUp to milliseconds
         }
     }
     
@@ -129,10 +130,10 @@ function processWindUpAttack(attacker: any, allCombatants: any[], state: GameSta
         
         if (target && CombatantUtils.isCombatantAlive(target) && 
             CombatantUtils.areOpposingTeams(attacker, target) &&
-            CombatantUtils.isInRange(attacker, target, attacker.attackRadius)) {
+            CombatantUtils.isInRange(attacker, target, attacker.getAttackRadius())) {
             
             // Perform the attack
-            CombatantUtils.damageCombatant(target, attacker.attackStrength, state, attacker.id);
+            CombatantUtils.damageCombatant(target, attacker.getAttackStrength(), state, attacker.id);
             attacker.lastAttackTime = currentTime;
             attacker.attackReadyAt = 0; // Reset wind-up
             
@@ -168,7 +169,7 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
     const enemiesInRange = allCombatants.filter(target => {
         if (!CombatantUtils.isCombatantAlive(target)) return false;
         if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
-        return CombatantUtils.isInRange(attacker, target, attacker.attackRadius);
+        return CombatantUtils.isInRange(attacker, target, attacker.getAttackRadius());
     });
     
     // If no enemies in range, clear target and reset attack ready time
@@ -200,7 +201,7 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
     if (!currentTarget || 
         !CombatantUtils.isCombatantAlive(currentTarget) || 
         !CombatantUtils.areOpposingTeams(attacker, currentTarget) ||
-        !CombatantUtils.isInRange(attacker, currentTarget, attacker.attackRadius)) {
+        !CombatantUtils.isInRange(attacker, currentTarget, attacker.getAttackRadius())) {
         // Current target is invalid, find new nearest target
         let nearestEnemy = enemiesInRange[0];
         let nearestDistance = CombatantUtils.getDistance(attacker, nearestEnemy);
@@ -312,7 +313,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO) {
             const hero = combatant as Hero;
-            if (hero.health <= 0 && hero.state === 'alive') {
+            if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero just died, grant XP to opposing team
                 const heroKillXP = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
                 grantExperienceToTeamForUnitKill(heroKillXP, hero.team, state, hero);
@@ -325,7 +326,7 @@ function handleDeadCombatants(state: GameState): void {
         if (combatant.type === COMBATANT_TYPES.HERO) {
             const hero = combatant as Hero;
             
-            if (hero.health <= 0 && hero.state === 'alive') {
+            if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero died, start respawn
                 startPlayerRespawn(hero, state);
             } else if (hero.state === 'respawning' && currentTime >= hero.respawnTime) {
@@ -410,7 +411,7 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
 
 function completePlayerRespawn(player: Hero): void {
     player.state = 'alive';
-    player.health = player.maxHealth; // Restore to max health, not base health
+    player.health = player.getMaxHealth(); // Restore to max health, not base health
 }
 
 function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number): void {
@@ -533,7 +534,7 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     player.experience -= experienceNeeded;
     
     // Store old max health to calculate health increase
-    const oldMaxHealth = player.maxHealth;
+    const oldMaxHealth = player.getMaxHealth();
     
     // Boost stats by the configured amount
     player.maxHealth = Math.round(player.maxHealth * boostMultiplier);

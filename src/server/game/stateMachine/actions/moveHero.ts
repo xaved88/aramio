@@ -1,4 +1,5 @@
-import { GameState, Hero } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Hero } from '../../../schema/Combatants';
 import { MoveHeroAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';

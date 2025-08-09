@@ -1,4 +1,7 @@
-import { GameState, Combatant, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect } from '../schema/GameState';
+import { GameState } from '../schema/GameState';
+import { Combatant } from '../schema/Combatants';
+import { Projectile, ProjectileEffect } from '../schema/Projectiles';
+import { StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect, CombatantEffect } from '../schema/Effects';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
@@ -6,7 +9,6 @@ import { CLIENT_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
-import { CombatantEffect } from '../schema/GameState';
 
 export class GameEngine {
     private state: GameState;
@@ -178,7 +180,7 @@ export class GameEngine {
             
             this.state.combatants.forEach((combatant: any) => {
                 if (combatant.team === projectile.team) return; // Don't hit allies
-                if (combatant.health <= 0) return; // Don't hit dead entities
+                if (combatant.getHealth() <= 0) return; // Don't hit dead entities
                 
                 const dx = projectile.x - combatant.x;
                 const dy = projectile.y - combatant.y;

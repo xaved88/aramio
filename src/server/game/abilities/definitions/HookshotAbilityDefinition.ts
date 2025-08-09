@@ -1,4 +1,8 @@
-import { HookshotAbility, Projectile, ProjectileEffect, StunEffect, NoCollisionEffect, MoveEffect, GameState, Hero } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { HookshotAbility } from '../../../schema/Abilities';
+import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
+import { StunEffect, NoCollisionEffect, MoveEffect } from '../../../schema/Effects';
+import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 

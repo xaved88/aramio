@@ -1,4 +1,5 @@
-import { GameState, Hero } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Hero } from '../../../schema/Combatants';
 import { RemovePlayerAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES, CombatantId } from '../../../../shared/types/CombatantTypes';
 

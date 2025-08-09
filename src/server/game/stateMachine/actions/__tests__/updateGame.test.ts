@@ -1,5 +1,8 @@
 import { handleUpdateGame } from '../updateGame';
-import { GameState, Hero, Minion, Combatant, AttackEvent, RoundStats, DefaultAbility } from '../../../../schema/GameState';
+import { GameState } from '../../../../schema/GameState';
+import { Hero, Minion, Combatant } from '../../../../schema/Combatants';
+import { AttackEvent, RoundStats } from '../../../../schema/Events';
+import { DefaultAbility } from '../../../../schema/Abilities';
 import { UpdateGameAction, StateMachineResult } from '../../types';
 import { GAMEPLAY_CONFIG } from '../../../../../Config';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';

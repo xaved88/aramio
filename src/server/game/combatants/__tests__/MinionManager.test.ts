@@ -1,5 +1,6 @@
 import { MinionManager } from '../MinionManager';
-import { GameState, Minion, Combatant } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Minion, Combatant } from '../../../schema/Combatants';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES, MINION_TYPES } from '../../../../shared/types/CombatantTypes';
 

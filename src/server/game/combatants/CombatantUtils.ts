@@ -1,4 +1,6 @@
-import { Combatant, GameState, DamageEvent, KillEvent } from '../../schema/GameState';
+import { GameState } from '../../schema/GameState';
+import { Combatant } from '../../schema/Combatants';
+import { DamageEvent, KillEvent } from '../../schema/Events';
 
 export class CombatantUtils {
     /**
@@ -9,9 +11,9 @@ export class CombatantUtils {
      * @param sourceId The ID of the combatant causing the damage
      */
     static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string): void {
-        const previousHealth = combatant.health;
+        const previousHealth = combatant.getHealth();
         combatant.health = Math.max(0, combatant.health - damage);
-        const actualDamage = previousHealth - combatant.health;
+        const actualDamage = previousHealth - combatant.getHealth();
         
         // Find the source combatant
         const sourceCombatant = gameState.combatants.get(sourceId);
@@ -40,7 +42,7 @@ export class CombatantUtils {
         }
         
         // Dispatch kill event and update kill stats if combatant was killed
-        if (combatant.health <= 0) {
+        if (combatant.getHealth() <= 0) {
             const killEvent = new KillEvent();
             killEvent.sourceId = sourceId;
             killEvent.targetId = combatant.id;
@@ -72,7 +74,7 @@ export class CombatantUtils {
      * @param healAmount Amount of healing to apply
      */
     static healCombatant(combatant: Combatant, healAmount: number): void {
-        combatant.health = Math.min(combatant.maxHealth, combatant.health + healAmount);
+        combatant.health = Math.min(combatant.getMaxHealth(), combatant.health + healAmount);
     }
 
     /**
@@ -81,7 +83,7 @@ export class CombatantUtils {
      * @returns true if the combatant is alive
      */
     static isCombatantAlive(combatant: Combatant): boolean {
-        return combatant.health > 0;
+        return combatant.getHealth() > 0;
     }
 
     /**
@@ -90,7 +92,7 @@ export class CombatantUtils {
      * @returns Health percentage as a decimal (0.0 to 1.0)
      */
     static getCombatantHealthPercentage(combatant: Combatant): number {
-        return combatant.health / combatant.maxHealth;
+        return combatant.getHealth() / combatant.getMaxHealth();
     }
 
     /**

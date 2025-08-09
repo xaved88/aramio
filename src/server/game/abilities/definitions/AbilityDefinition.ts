@@ -1,4 +1,4 @@
-import { Ability } from '../../../schema/GameState';
+import { Ability } from '../../../schema/Abilities';
 
 export interface AbilityDefinition<T extends Ability = Ability> {
     create(): T;

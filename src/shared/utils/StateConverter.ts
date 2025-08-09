@@ -1,4 +1,5 @@
-import { GameState as ColyseusGameState, Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/GameState';
+import { GameState as ColyseusGameState } from '../../server/schema/GameState';
+import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
 import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, HookshotAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId, CombatantEffect } from '../types/CombatantTypes';
 

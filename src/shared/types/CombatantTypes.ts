@@ -60,8 +60,14 @@ export interface NoCollisionEffect extends CombatantEffect {
     type: 'nocollision';
 }
 
+export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp';
+export type StatOperator = 'relative' | 'absolute' | 'percent';
+
 export interface StatModEffect extends CombatantEffect {
     type: 'statmod';
+    stat: StatType;
+    operator: StatOperator;
+    amount: number;
 }
 
 export interface ReflectEffect extends CombatantEffect {

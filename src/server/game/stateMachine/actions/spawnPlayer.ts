@@ -1,4 +1,6 @@
-import { GameState, Hero, RoundStats } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Hero } from '../../../schema/Combatants';
+import { RoundStats } from '../../../schema/Events';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';

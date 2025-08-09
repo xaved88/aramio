@@ -1,4 +1,5 @@
-import { DefaultAbility, Projectile, ProjectileEffect as ProjectileEffect } from '../../../schema/GameState';
+import { DefaultAbility } from '../../../schema/Abilities';
+import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 

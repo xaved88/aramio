@@ -1,4 +1,5 @@
-import { GameState, Combatant } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Combatant } from '../../../schema/Combatants';
 import { SetupGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';

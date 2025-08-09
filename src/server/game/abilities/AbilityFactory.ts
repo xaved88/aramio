@@ -1,4 +1,4 @@
-import { Ability } from '../../schema/GameState';
+import { Ability } from '../../schema/Abilities';
 import { DefaultAbilityDefinition } from './definitions/DefaultAbilityDefinition';
 import { HookshotAbilityDefinition } from './definitions/HookshotAbilityDefinition';
 

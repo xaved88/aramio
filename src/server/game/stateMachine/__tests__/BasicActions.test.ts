@@ -1,4 +1,6 @@
-import { DefaultAbility, GameState, Hero } from '../../../schema/GameState';
+import { GameState } from '../../../schema/GameState';
+import { Hero } from '../../../schema/Combatants';
+import { DefaultAbility } from '../../../schema/Abilities';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { GAMEPLAY_CONFIG } from '../../../../Config';

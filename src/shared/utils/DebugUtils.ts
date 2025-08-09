@@ -1,4 +1,5 @@
-import { GameState, Hero } from '../../server/schema/GameState';
+import { GameState } from '../../server/schema/GameState';
+import { Hero } from '../../server/schema/Combatants';
 
 export function gameStateToString(gameState: GameState): string {
     const lines: string[] = [];
