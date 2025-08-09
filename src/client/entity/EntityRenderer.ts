@@ -260,6 +260,10 @@ export class EntityRenderer {
                 // Render hookshot projectile as a question mark
                 this.renderHookProjectile(graphics, projectileColor, radius);
                 break;
+            case 'fireball':
+                // Render fireball projectile as an ampersand (&)
+                this.renderFireballProjectile(graphics, projectileColor, radius);
+                break;
             case 'default':
             default:
                 // Render default projectile as a star
@@ -297,6 +301,38 @@ export class EntityRenderer {
         // Draw the dot at the bottom
         graphics.moveTo(0, centerY + qRadius * 1.3);
         graphics.lineTo(0, centerY + qRadius * 1.5);
+        
+        graphics.strokePath();
+    }
+    
+    /**
+     * Renders a fireball projectile as an ampersand (&)
+     */
+    private renderFireballProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
+        // Draw a circle with an ampersand inside
+        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        graphics.strokeCircle(0, 0, radius);
+        
+        // Use the provided color (which is already team-specific)
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(0, 0, radius);
+        
+        // Draw ampersand (&) in the center
+        graphics.lineStyle(3, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        graphics.beginPath();
+        
+        const ampRadius = radius * 0.4;
+        
+        // Draw the ampersand shape - simplified version
+        // Top circle part
+        graphics.arc(-ampRadius * 0.3, -ampRadius * 0.5, ampRadius * 0.4, 0, Math.PI * 2);
+        
+        // Bottom circle part
+        graphics.arc(-ampRadius * 0.1, ampRadius * 0.3, ampRadius * 0.3, 0, Math.PI * 2);
+        
+        // Diagonal line connecting them
+        graphics.moveTo(ampRadius * 0.1, -ampRadius * 0.8);
+        graphics.lineTo(ampRadius * 0.5, ampRadius * 0.8);
         
         graphics.strokePath();
     }

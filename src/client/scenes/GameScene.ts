@@ -415,14 +415,21 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary')) {
-            return; // Not a hookshot or mercenary ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer')) {
+            return; // Not a hookshot, mercenary, or pyromancer ability
         }
         
         // Calculate cast range based on ability type
-        const castRange = currentHero.ability.type === 'hookshot' 
-            ? this.calculateHookshotCastRange(currentHero)
-            : this.calculateMercenaryRageRange(currentHero);
+        let castRange: number;
+        if (currentHero.ability.type === 'hookshot') {
+            castRange = this.calculateHookshotCastRange(currentHero);
+        } else if (currentHero.ability.type === 'mercenary') {
+            castRange = this.calculateMercenaryRageRange(currentHero);
+        } else if (currentHero.ability.type === 'pyromancer') {
+            castRange = this.calculatePyromancerCastRange(currentHero);
+        } else {
+            return;
+        }
         
         // Determine color based on ability cooldown status
         const rangeColor = this.getRangeIndicatorColor(currentHero);
@@ -462,6 +469,14 @@ export class GameScene extends Phaser.Scene {
         
         // The mercenary ability reduces attack range to a fixed value during rage
         return config.RAGE_ATTACK_RADIUS;
+    }
+
+    /**
+     * Calculates the cast range for pyromancer ability
+     */
+    private calculatePyromancerCastRange(hero: any): number {
+        // Get the range directly from the hero's ability (which includes level scaling)
+        return hero.ability.range;
     }
 
     /**
@@ -506,15 +521,23 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary')) {
-            this.hideRangeIndicator(); // Hide if not a hookshot or mercenary ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer')) {
+            this.hideRangeIndicator(); // Hide if not a hookshot, mercenary, or pyromancer ability
             return;
         }
 
         // Calculate cast range based on ability type
-        const castRange = currentHero.ability.type === 'hookshot' 
-            ? this.calculateHookshotCastRange(currentHero)
-            : this.calculateMercenaryRageRange(currentHero);
+        let castRange: number;
+        if (currentHero.ability.type === 'hookshot') {
+            castRange = this.calculateHookshotCastRange(currentHero);
+        } else if (currentHero.ability.type === 'mercenary') {
+            castRange = this.calculateMercenaryRageRange(currentHero);
+        } else if (currentHero.ability.type === 'pyromancer') {
+            castRange = this.calculatePyromancerCastRange(currentHero);
+        } else {
+            this.hideRangeIndicator();
+            return;
+        }
         
         // Determine color based on ability cooldown status
         const rangeColor = this.getRangeIndicatorColor(currentHero);

@@ -17,6 +17,14 @@ export interface LevelUpEvent {
     timestamp: number;
 }
 
+export interface AOEDamageEvent {
+    sourceId: CombatantId;
+    x: number;
+    y: number;
+    radius: number;
+    timestamp: number;
+}
+
 export interface SharedGameState {
     gameTime: number;
     gamePhase: string;
@@ -30,4 +38,5 @@ export interface SharedGameState {
     damageEvents: DamageEvent[];
     killEvents: KillEvent[];
     projectiles: Map<ProjectileId, Projectile>;
+    aoeDamageEvents: AOEDamageEvent[];
 } 

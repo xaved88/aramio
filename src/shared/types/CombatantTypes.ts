@@ -14,7 +14,8 @@ export type CombatantType = typeof COMBATANT_TYPES[keyof typeof COMBATANT_TYPES]
 
 export const MINION_TYPES = {
     WARRIOR: 'warrior',
-    ARCHER: 'archer'
+    ARCHER: 'archer',
+    PYROMANCER: 'pyromancer'
 } as const;
 
 export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
@@ -23,7 +24,8 @@ export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 export const ABILITY_TYPES = {
     DEFAULT: 'default',
     HOOKSHOT: 'hookshot',
-    MERCENARY: 'mercenary'
+    MERCENARY: 'mercenary',
+    PYROMANCER: 'pyromancer'
 } as const;
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
@@ -31,7 +33,8 @@ export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
 // Projectile type constants
 export const PROJECTILE_TYPES = {
     DEFAULT: 'default',
-    HOOK: 'hook'
+    HOOK: 'hook',
+    FIREBALL: 'fireball'
 } as const;
 
 export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];
@@ -134,6 +137,13 @@ export interface MercenaryAbility extends Ability {
     type: typeof ABILITY_TYPES.MERCENARY;
 }
 
+export interface PyromancerAbility extends Ability {
+    type: typeof ABILITY_TYPES.PYROMANCER;
+    strength: number;
+    radius: number;
+    range: number;
+}
+
 export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect;
 
 export interface BaseCombatant {
@@ -216,6 +226,9 @@ export interface Projectile {
     duration: number; // Duration in milliseconds, -1 = infinite
     createdAt: number; // Timestamp when projectile was created
     effects: ProjectileEffect[]; // Array of effects that trigger on collision
+    targetX?: number; // For destination-based projectiles
+    targetY?: number; // For destination-based projectiles
+    aoeRadius?: number; // For AOE damage projectiles
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {

@@ -9,6 +9,7 @@ import { CLIENT_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
+import { AOEDamageEvent } from '../schema/Events';
 
 export class GameEngine {
     private state: GameState;
@@ -174,36 +175,59 @@ export class GameEngine {
                 }
             }
             
-            // Check collision with combatants - find the closest enemy
-            let closestCombatant: any = null;
-            let closestDistance = Infinity;
-            
-            this.state.combatants.forEach((combatant: any) => {
-                if (combatant.team === projectile.team) return; // Don't hit allies
-                if (combatant.getHealth() <= 0) return; // Don't hit dead entities
+            // Handle destination-based projectiles (like fireball)
+            if (projectile.type === 'fireball' && projectile.targetX !== undefined && projectile.targetY !== undefined) {
+                const targetDistance = Math.sqrt(
+                    Math.pow(projectile.x - projectile.targetX, 2) + 
+                    Math.pow(projectile.y - projectile.targetY, 2)
+                );
                 
-                const dx = projectile.x - combatant.x;
-                const dy = projectile.y - combatant.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                // Calculate if projectile has passed the target
+                const nextX = projectile.x + projectile.directionX * ((projectile.speed * deltaTime) / 1000);
+                const nextY = projectile.y + projectile.directionY * ((projectile.speed * deltaTime) / 1000);
+                const nextDistance = Math.sqrt(
+                    Math.pow(nextX - projectile.targetX, 2) + 
+                    Math.pow(nextY - projectile.targetY, 2)
+                );
                 
-                // Check if projectile hits the combatant's collision radius (unit size + projectile radius)
-                const collisionRadius = combatant.size + CLIENT_CONFIG.PROJECTILE.RADIUS;
-                if (distance < collisionRadius && distance < closestDistance) {
-                    closestCombatant = combatant;
-                    closestDistance = distance;
+                // If reached destination (close enough OR would overshoot), trigger AOE damage
+                if (targetDistance <= 10 || nextDistance > targetDistance) {
+                    projectilesToRemove.push(projectile.id);
+                    this.applyAOEDamage(projectile, projectile.targetX, projectile.targetY);
+                    return;
                 }
-            });
-            
-            // If we found a target, handle it based on type
-            if (closestCombatant) {
-                projectilesToRemove.push(projectile.id);
+            } else {
+                // Standard collision detection for regular projectiles
+                let closestCombatant: any = null;
+                let closestDistance = Infinity;
                 
-                // Only apply effects to heroes and minions
-                if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
-                    // Apply projectile effects
-                    this.applyProjectileEffects(projectile, closestCombatant);
+                this.state.combatants.forEach((combatant: any) => {
+                    if (combatant.team === projectile.team) return; // Don't hit allies
+                    if (combatant.getHealth() <= 0) return; // Don't hit dead entities
+                    
+                    const dx = projectile.x - combatant.x;
+                    const dy = projectile.y - combatant.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Check if projectile hits the combatant's collision radius (unit size + projectile radius)
+                    const collisionRadius = combatant.size + CLIENT_CONFIG.PROJECTILE.RADIUS;
+                    if (distance < collisionRadius && distance < closestDistance) {
+                        closestCombatant = combatant;
+                        closestDistance = distance;
+                    }
+                });
+                
+                // If we found a target, handle it based on type
+                if (closestCombatant) {
+                    projectilesToRemove.push(projectile.id);
+                    
+                    // Only apply effects to heroes and minions
+                    if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
+                        // Apply projectile effects
+                        this.applyProjectileEffects(projectile, closestCombatant);
+                    }
+                    // For structures (turrets, cradles), just destroy the projectile without applying effects
                 }
-                // For structures (turrets, cradles), just destroy the projectile without applying effects
             }
         });
         
@@ -248,6 +272,39 @@ export class GameEngine {
             // Reset attack ready time to prevent immediate attacks
             target.attackReadyAt = 0;
         }
+    }
+
+    /**
+     * Applies AOE damage at a specific location
+     */
+    private applyAOEDamage(projectile: any, targetX: number, targetY: number): void {
+        if (!projectile.aoeRadius || !projectile.effects || projectile.effects.length === 0) return;
+        
+        // Create AOE damage event for visual effect
+        const aoeEvent = new AOEDamageEvent();
+        aoeEvent.sourceId = projectile.ownerId;
+        aoeEvent.x = targetX;
+        aoeEvent.y = targetY;
+        aoeEvent.radius = projectile.aoeRadius;
+        aoeEvent.timestamp = Date.now();
+        this.state.aoeDamageEvents.push(aoeEvent);
+        
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.team === projectile.team) return; // Don't hit allies
+            if (combatant.getHealth() <= 0) return; // Don't hit dead entities
+            
+            const dx = combatant.x - targetX;
+            const dy = combatant.y - targetY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Check if combatant is within AOE radius
+            if (distance <= projectile.aoeRadius) {
+                // Only apply effects to heroes and minions
+                if (combatant.type === 'hero' || combatant.type === 'minion') {
+                    this.applyProjectileEffects(projectile, combatant);
+                }
+            }
+        });
     }
     
     /**

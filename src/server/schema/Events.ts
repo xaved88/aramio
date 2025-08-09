@@ -39,6 +39,14 @@ export class KillEvent extends Schema {
     @type('number') timestamp!: number; // When the kill occurred
 }
 
+export class AOEDamageEvent extends Schema {
+    @type('string') sourceId!: CombatantId; // ID of the combatant that caused the AOE
+    @type('number') x!: number; // X position of the AOE center
+    @type('number') y!: number; // Y position of the AOE center
+    @type('number') radius!: number; // Radius of the AOE effect
+    @type('number') timestamp!: number; // When the AOE occurred
+}
+
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
     @type('number') minionKills = 0; // number of minions killed

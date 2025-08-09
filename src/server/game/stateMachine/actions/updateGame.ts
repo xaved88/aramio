@@ -55,6 +55,20 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
         state.levelUpEvents.splice(index, 1);
     });
     
+    // Clear old AOE damage events (older than 1 second)
+    const aoeDamageEventsToRemove: number[] = [];
+    
+    state.aoeDamageEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 1000) { // 1 second
+            aoeDamageEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove AOE damage events in reverse order to maintain indices
+    aoeDamageEventsToRemove.reverse().forEach(index => {
+        state.aoeDamageEvents.splice(index, 1);
+    });
+    
     // Process combat
     processCombat(state);
     

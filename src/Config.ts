@@ -64,6 +64,15 @@ export const GAMEPLAY_CONFIG = {
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15,
             },
+            'pyromancer': {
+                HEALTH: 30, // Low HP
+                ATTACK_RADIUS: 40, // Low range
+                ATTACK_STRENGTH: 3, // Low attack
+                ATTACK_SPEED: 0.8, // Low attack speed
+                WIND_UP: 0.4, // Slow wind-up
+                RESPAWN_TIME_MS: 6000,
+                SIZE: 15,
+            },
         },
         ABILITIES: {
             'default': {
@@ -90,6 +99,17 @@ export const GAMEPLAY_CONFIG = {
                 DURATION_BOOST_PER_LEVEL_MS: 100, // +0.1 second per level
                 RAGE_ATTACK_RADIUS: 35,
                 RAGE_WIND_UP: 0.1,
+            },
+            'pyromancer': {
+                COOLDOWN_MS: 1500, // Fast cast time (1.5 seconds)
+                STRENGTH: 12, // High ability damage
+                STRENGTH_PER_LEVEL: 8, // linear scaling (exponent is in the aoe)
+                RADIUS: 20,
+                RADIUS_PER_LEVEL: 5,
+                RANGE: 150,
+                RANGE_PER_LEVEL: 20,
+                SPEED: 200, 
+                SPEED_PER_LEVEL: 20
             }
         },
         CRADLE: {
@@ -171,7 +191,7 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        ABILITY_TYPES: ['mercenary', 'hookshot', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
+        ABILITY_TYPES: ['pyromancer', 'mercenary', 'hookshot', 'default', 'default'], // Array of ability types for bots to spawn with
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again

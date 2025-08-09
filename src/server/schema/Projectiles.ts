@@ -21,4 +21,7 @@ export class Projectile extends Schema {
     @type('number') duration!: number; // Duration in milliseconds, -1 = infinite
     @type('number') createdAt!: number; // Timestamp when projectile was created
     @type([ProjectileEffect]) effects = new ArraySchema<ProjectileEffect>(); // Array of effects that trigger on collision
+    @type('number') targetX?: number; // For destination-based projectiles
+    @type('number') targetY?: number; // For destination-based projectiles
+    @type('number') aoeRadius?: number; // For AOE damage projectiles
 }

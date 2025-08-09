@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
-import { SharedGameState, XPEvent, LevelUpEvent } from '../../shared/types/GameStateTypes';
+import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
@@ -33,6 +33,7 @@ export class EntityManager {
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
+    private processedAOEDamageEvents: Set<string> = new Set();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -75,6 +76,9 @@ export class EntityManager {
         
         // Process level-up events
         this.processLevelUpEvents(state);
+        
+        // Process AOE damage events
+        this.processAOEDamageEvents(state);
         
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
@@ -298,6 +302,73 @@ export class EntityManager {
             
             // Mark as processed
             this.processedLevelUpEvents.add(eventKey);
+        });
+    }
+
+    /**
+     * Processes AOE damage events and creates visual effects
+     */
+    private processAOEDamageEvents(state: SharedGameState): void {
+        state.aoeDamageEvents.forEach(aoeEvent => {
+            const eventKey = `${aoeEvent.sourceId}-${aoeEvent.x}-${aoeEvent.y}-${aoeEvent.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedAOEDamageEvents.has(eventKey)) return;
+            
+            this.processedAOEDamageEvents.add(eventKey);
+            
+            // Create AOE visual effect
+            this.createAOEVisualEffect(aoeEvent, state);
+        });
+    }
+
+    /**
+     * Creates AOE visual effect (circle flash) at the specified position
+     */
+    private createAOEVisualEffect(aoeEvent: AOEDamageEvent, state: SharedGameState): void {
+        // Create a graphics object for the AOE effect
+        const aoeGraphics = this.scene.add.graphics();
+        aoeGraphics.setPosition(aoeEvent.x, aoeEvent.y);
+        aoeGraphics.setDepth(25); // High depth to appear above everything
+        
+        // Determine color based on the source combatant
+        let aoeColor = 0xff6b35; // Default orange
+        
+        // Find the source combatant to get team and player info
+        const sourceCombatant = state.combatants.get(aoeEvent.sourceId);
+        if (sourceCombatant) {
+            // Check if this is the player's controlled hero
+            const isOwnerControlledByPlayer = this.playerSessionId && 
+                sourceCombatant.type === 'hero' && 
+                (sourceCombatant as any).controller === this.playerSessionId;
+            
+            if (isOwnerControlledByPlayer) {
+                aoeColor = CLIENT_CONFIG.SELF_COLORS.PROJECTILE; // Purple for player
+            } else {
+                // Use team colors
+                aoeColor = sourceCombatant.team === 'blue' 
+                    ? CLIENT_CONFIG.PROJECTILE.BLUE_COLOR 
+                    : CLIENT_CONFIG.PROJECTILE.RED_COLOR;
+            }
+        }
+        
+        // Draw a circle with the AOE radius
+        aoeGraphics.lineStyle(3, aoeColor, 0.8); // Team color with some transparency
+        aoeGraphics.fillStyle(aoeColor, 0.3); // Fill with low transparency
+        aoeGraphics.strokeCircle(0, 0, aoeEvent.radius);
+        aoeGraphics.fillCircle(0, 0, aoeEvent.radius);
+        
+        // Animate the AOE effect - scale and fade out
+        this.scene.tweens.add({
+            targets: aoeGraphics,
+            scaleX: 1.3,
+            scaleY: 1.3,
+            alpha: 0,
+            duration: 500, // Half a second
+            ease: 'Power2',
+            onComplete: () => {
+                aoeGraphics.destroy();
+            }
         });
     }
 

@@ -1,7 +1,7 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
-import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
+import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../types/GameStateTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
 import { applyStatModifications } from './StatModification';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
@@ -28,6 +28,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
             type: projectile.type || 'default', // Default to 'default' if not set
             duration: projectile.duration || -1, // Default to -1 (infinite) if not set
             createdAt: projectile.createdAt || Date.now(), // Default to current time if not set
+            targetX: projectile.targetX,
+            targetY: projectile.targetY,
+            aoeRadius: projectile.aoeRadius,
             effects: projectile.effects ? projectile.effects.map((effect: any) => {
                 switch (effect.effectType) {
                     case 'applyDamage':
@@ -93,6 +96,15 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    // Convert AOE damage events
+    const sharedAOEDamageEvents: AOEDamageEvent[] = colyseusState.aoeDamageEvents.map(event => ({
+        sourceId: event.sourceId,
+        x: event.x,
+        y: event.y,
+        radius: event.radius,
+        timestamp: event.timestamp
+    }));
+    
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
@@ -105,7 +117,8 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         levelUpEvents: sharedLevelUpEvents,
         damageEvents: sharedDamageEvents,
         killEvents: sharedKillEvents,
-        projectiles: sharedProjectiles
+        projectiles: sharedProjectiles,
+        aoeDamageEvents: sharedAOEDamageEvents
     };
 }
 
@@ -179,8 +192,10 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     type: hero.ability.type,
                     cooldown: (hero.ability as any).cooldown,
                     lastUsedTime: (hero.ability as any).lastUsedTime,
-                    strength: (hero.ability as any).strength
-                } as DefaultAbility | HookshotAbility | MercenaryAbility,
+                    strength: (hero.ability as any).strength,
+                    radius: (hero.ability as any).radius,
+                    range: (hero.ability as any).range
+                } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility,
                 controller: hero.controller
             } as HeroCombatant;
             

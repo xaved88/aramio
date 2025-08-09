@@ -29,3 +29,13 @@ export class MercenaryAbility extends Ability {
         this.type = ABILITY_TYPES.MERCENARY;
     }
 }
+
+export class PyromancerAbility extends Ability {
+    constructor() {
+        super();
+        this.type = ABILITY_TYPES.PYROMANCER;
+    }
+    @type('number') strength!: number; // damage dealt by ability
+    @type('number') radius!: number; // AOE radius
+    @type('number') range!: number; // projectile range
+}
