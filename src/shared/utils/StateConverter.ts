@@ -134,6 +134,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         attackRadius: applyStatModifications('attackRadius', colyseusCombatant.attackRadius, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         attackStrength: applyStatModifications('attackStrength', colyseusCombatant.attackStrength, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         attackSpeed: applyStatModifications('attackSpeed', colyseusCombatant.attackSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        bulletArmor: applyStatModifications('bulletArmor', colyseusCombatant.bulletArmor, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        abilityArmor: applyStatModifications('abilityArmor', colyseusCombatant.abilityArmor, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         lastAttackTime: colyseusCombatant.lastAttackTime,
         size: colyseusCombatant.size,
         target: colyseusCombatant.target,

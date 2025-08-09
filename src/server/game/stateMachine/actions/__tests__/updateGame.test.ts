@@ -946,6 +946,9 @@ describe('handleUpdateGame', () => {
         let redHero: Hero;
 
         beforeEach(() => {
+            // Clear existing combatants from previous tests
+            gameState.combatants.clear();
+            
             // Create blue heroes
             blueHero1 = new Hero();
             blueHero1.id = 'blue-hero-1';
