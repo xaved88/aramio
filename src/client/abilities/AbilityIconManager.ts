@@ -7,6 +7,8 @@ export class AbilityIconManager {
                 return '*';
             case 'hookshot':
                 return '?';
+            case 'mercenary':
+                return '/';
             default:
                 return '?';
         }

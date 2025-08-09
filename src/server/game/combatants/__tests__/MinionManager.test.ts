@@ -28,6 +28,7 @@ describe('MinionManager', () => {
         blueMinion.attackStrength = 15;
         blueMinion.attackSpeed = 0.8;
         blueMinion.lastAttackTime = 0;
+        blueMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
         blueMinion.minionType = 'warrior';
         
         // Create red minion
@@ -43,6 +44,7 @@ describe('MinionManager', () => {
         redMinion.attackStrength = 15;
         redMinion.attackSpeed = 0.8;
         redMinion.lastAttackTime = 0;
+        redMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
         redMinion.minionType = 'warrior';
         
         // Create blue cradle
@@ -58,6 +60,7 @@ describe('MinionManager', () => {
         blueCradle.attackStrength = 40;
         blueCradle.attackSpeed = 0.3;
         blueCradle.lastAttackTime = 0;
+        blueCradle.moveSpeed = 0;
         
         // Create red cradle
         redCradle = new Combatant();
@@ -72,6 +75,7 @@ describe('MinionManager', () => {
         redCradle.attackStrength = 40;
         redCradle.attackSpeed = 0.3;
         redCradle.lastAttackTime = 0;
+        redCradle.moveSpeed = 0;
         
         // Create blue player
         bluePlayer = new Combatant();
@@ -86,6 +90,7 @@ describe('MinionManager', () => {
         bluePlayer.attackStrength = 100;
         bluePlayer.attackSpeed = 1;
         bluePlayer.lastAttackTime = 0;
+        bluePlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
         
         // Add all combatants to game state
         gameState.combatants.set(blueMinion.id, blueMinion);
@@ -121,6 +126,7 @@ describe('MinionManager', () => {
             redPlayer.attackStrength = 100;
             redPlayer.attackSpeed = 1;
             redPlayer.lastAttackTime = 0;
+            redPlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             

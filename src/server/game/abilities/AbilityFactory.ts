@@ -1,6 +1,7 @@
 import { Ability } from '../../schema/Abilities';
 import { DefaultAbilityDefinition } from './definitions/DefaultAbilityDefinition';
 import { HookshotAbilityDefinition } from './definitions/HookshotAbilityDefinition';
+import { MercenaryAbilityDefinition } from './definitions/MercenaryAbilityDefinition';
 
 export class AbilityFactory {
     static create(abilityType: string): Ability {
@@ -9,6 +10,8 @@ export class AbilityFactory {
                 return DefaultAbilityDefinition.instance.create();
             case 'hookshot':
                 return HookshotAbilityDefinition.instance.create();
+            case 'mercenary':
+                return MercenaryAbilityDefinition.instance.create();
             default:
                 throw new Error(`Unsupported ability type: ${abilityType}`);
         }

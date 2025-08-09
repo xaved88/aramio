@@ -76,6 +76,7 @@ describe('handleUpdateGame', () => {
             blueMinion.attackRadius = 40;
             blueMinion.attackStrength = 15;
             blueMinion.attackSpeed = 0.8;
+            blueMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
             blueMinion.lastAttackTime = 0;
             blueMinion.minionType = 'warrior';
             
@@ -91,6 +92,7 @@ describe('handleUpdateGame', () => {
             redCradle.attackRadius = 30;
             redCradle.attackStrength = 40;
             redCradle.attackSpeed = 0.3;
+            redCradle.moveSpeed = 0;
             redCradle.lastAttackTime = 0;
             
             gameState.combatants.set(blueMinion.id, blueMinion);
@@ -137,6 +139,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.attackRadius = 50;
             bluePlayer.attackStrength = 100;
             bluePlayer.attackSpeed = 1;
+            bluePlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
             bluePlayer.lastAttackTime = 0;
             bluePlayer.state = 'alive';
             bluePlayer.respawnTime = 0;
@@ -159,6 +162,7 @@ describe('handleUpdateGame', () => {
             redPlayer.attackRadius = 50;
             redPlayer.attackStrength = 100;
             redPlayer.attackSpeed = 1;
+            redPlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
             redPlayer.lastAttackTime = 0;
             redPlayer.state = 'alive';
             redPlayer.respawnTime = 0;
@@ -248,6 +252,7 @@ describe('handleUpdateGame', () => {
             deadMinion.attackRadius = 40;
             deadMinion.attackStrength = 15;
             deadMinion.attackSpeed = 0.8;
+            deadMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
             deadMinion.lastAttackTime = 0;
             deadMinion.minionType = 'warrior';
             
@@ -263,6 +268,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.attackRadius = 50;
             bluePlayer.attackStrength = 100;
             bluePlayer.attackSpeed = 1;
+            bluePlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
             bluePlayer.lastAttackTime = 0;
             bluePlayer.state = 'alive';
             bluePlayer.respawnTime = 0;
@@ -305,6 +311,7 @@ describe('handleUpdateGame', () => {
             redPlayer.attackRadius = 50;
             redPlayer.attackStrength = 100;
             redPlayer.attackSpeed = 1;
+            redPlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
             redPlayer.lastAttackTime = 0;
             redPlayer.state = 'alive';
             redPlayer.respawnTime = 0;
@@ -347,6 +354,7 @@ describe('handleUpdateGame', () => {
             blueCradle.attackRadius = 30;
             blueCradle.attackStrength = 40;
             blueCradle.attackSpeed = 0.3;
+            blueCradle.moveSpeed = 0;
             blueCradle.lastAttackTime = 0;
             
             // Create red cradle
@@ -361,6 +369,7 @@ describe('handleUpdateGame', () => {
             redCradle.attackRadius = 30;
             redCradle.attackStrength = 40;
             redCradle.attackSpeed = 0.3;
+            redCradle.moveSpeed = 0;
             redCradle.lastAttackTime = 0;
             
             gameState.combatants.set(blueCradle.id, blueCradle);
@@ -411,6 +420,7 @@ describe('handleUpdateGame', () => {
             blueCradle.attackRadius = 30;
             blueCradle.attackStrength = 40;
             blueCradle.attackSpeed = 0.3;
+            blueCradle.moveSpeed = 0;
             blueCradle.lastAttackTime = 0;
             
             // Create red cradle
@@ -425,6 +435,7 @@ describe('handleUpdateGame', () => {
             redCradle.attackRadius = 30;
             redCradle.attackStrength = 40;
             redCradle.attackSpeed = 0.3;
+            redCradle.moveSpeed = 0;
             redCradle.lastAttackTime = 0;
             
             gameState.combatants.set(blueCradle.id, blueCradle);

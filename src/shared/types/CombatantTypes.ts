@@ -22,7 +22,8 @@ export type MinionType = typeof MINION_TYPES[keyof typeof MINION_TYPES];
 // Ability type constants
 export const ABILITY_TYPES = {
     DEFAULT: 'default',
-    HOOKSHOT: 'hookshot'
+    HOOKSHOT: 'hookshot',
+    MERCENARY: 'mercenary'
 } as const;
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
@@ -60,7 +61,7 @@ export interface NoCollisionEffect extends CombatantEffect {
     type: 'nocollision';
 }
 
-export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp';
+export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed';
 export type StatOperator = 'relative' | 'absolute' | 'percent';
 
 export interface StatModEffect extends CombatantEffect {
@@ -124,6 +125,10 @@ export interface HookshotAbility extends Ability {
     strength: number;
 }
 
+export interface MercenaryAbility extends Ability {
+    type: typeof ABILITY_TYPES.MERCENARY;
+}
+
 export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | MoveEffect;
 
 export interface BaseCombatant {
@@ -141,6 +146,7 @@ export interface BaseCombatant {
     target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
+    moveSpeed: number; // Movement speed in pixels per frame
     effects: CombatantEffectUnion[]; // Array of active effects on this combatant
 }
 

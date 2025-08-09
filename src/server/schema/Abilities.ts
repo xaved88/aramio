@@ -22,3 +22,10 @@ export class HookshotAbility extends Ability {
     }
     @type('number') strength!: number; // damage dealt by ability
 }
+
+export class MercenaryAbility extends Ability {
+    constructor() {
+        super();
+        this.type = ABILITY_TYPES.MERCENARY;
+    }
+}

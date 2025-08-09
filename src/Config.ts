@@ -55,6 +55,15 @@ export const GAMEPLAY_CONFIG = {
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15, // same collision radius
             },
+            'mercenary': {
+                HEALTH: 50,
+                ATTACK_RADIUS: 60,
+                ATTACK_STRENGTH: 5,
+                ATTACK_SPEED: 1,
+                WIND_UP: 0.25,
+                RESPAWN_TIME_MS: 6000,
+                SIZE: 15,
+            },
         },
         ABILITIES: {
             'default': {
@@ -70,6 +79,17 @@ export const GAMEPLAY_CONFIG = {
                 STUN_DURATION_MS: 500, // 500ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
                 SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
+            },
+            'mercenary': {
+                COOLDOWN_MS: 8000,
+                DURATION_MS: 3000, // 3 seconds base duration
+                ATTACK_BOOST_BASE: 6.0, // 600% attack boost
+                ATTACK_BOOST_PER_LEVEL: 0.10, // +10% per level
+                MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost
+                MOVE_SPEED_BOOST_PER_LEVEL: 0.07, // +7% per level
+                DURATION_BOOST_PER_LEVEL_MS: 100, // +0.1 second per level
+                RAGE_ATTACK_RADIUS: 35,
+                RAGE_WIND_UP: 0.1,
             }
         },
         CRADLE: {
@@ -151,7 +171,7 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        ABILITY_TYPES: ['hookshot', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
+        ABILITY_TYPES: ['mercenary', 'hookshot', 'default', 'default', 'default'], // Array of ability types for bots to spawn with
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again

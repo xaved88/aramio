@@ -415,12 +415,14 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || currentHero.ability.type !== 'hookshot') {
-            return; // Not a hookshot ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary')) {
+            return; // Not a hookshot or mercenary ability
         }
         
-        // Calculate cast range from speed and duration
-        const castRange = this.calculateHookshotCastRange(currentHero);
+        // Calculate cast range based on ability type
+        const castRange = currentHero.ability.type === 'hookshot' 
+            ? this.calculateHookshotCastRange(currentHero)
+            : this.calculateMercenaryRageRange(currentHero);
         
         // Determine color based on ability cooldown status
         const rangeColor = this.getRangeIndicatorColor(currentHero);
@@ -449,6 +451,17 @@ export class GameScene extends Phaser.Scene {
         const castRange = scaledSpeed * durationInSeconds;
         
         return castRange;
+    }
+
+    /**
+     * Calculates the rage attack range for mercenary ability (the reduced range during rage)
+     */
+    private calculateMercenaryRageRange(hero: any): number {
+        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.mercenary;
+        // TODO - get this from the combatant ability not the config.
+        
+        // The mercenary ability reduces attack range to a fixed value during rage
+        return config.RAGE_ATTACK_RADIUS;
     }
 
     /**
@@ -493,13 +506,15 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || currentHero.ability.type !== 'hookshot') {
-            this.hideRangeIndicator(); // Hide if not a hookshot ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary')) {
+            this.hideRangeIndicator(); // Hide if not a hookshot or mercenary ability
             return;
         }
 
-        // Calculate cast range from speed and duration
-        const castRange = this.calculateHookshotCastRange(currentHero);
+        // Calculate cast range based on ability type
+        const castRange = currentHero.ability.type === 'hookshot' 
+            ? this.calculateHookshotCastRange(currentHero)
+            : this.calculateMercenaryRageRange(currentHero);
         
         // Determine color based on ability cooldown status
         const rangeColor = this.getRangeIndicatorColor(currentHero);

@@ -31,9 +31,10 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction): StateM
         const normalizedDx = dx / distance;
         const normalizedDy = dy / distance;
         
-        // Calculate new position
-        const newX = hero.x + normalizedDx * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
-        const newY = hero.y + normalizedDy * GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+        // Calculate new position using modified move speed
+        const moveSpeed = hero.getMoveSpeed();
+        const newX = hero.x + normalizedDx * moveSpeed;
+        const newY = hero.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
         hero.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));

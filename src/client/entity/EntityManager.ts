@@ -4,7 +4,6 @@ import { SharedGameState, XPEvent, LevelUpEvent } from '../../shared/types/GameS
 import { CLIENT_CONFIG } from '../../Config';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
-import { GAMEPLAY_CONFIG } from '../../Config';
 
 /**
  * EntityManager handles the lifecycle of all game world entities.

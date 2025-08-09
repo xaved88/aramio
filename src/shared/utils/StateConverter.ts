@@ -1,7 +1,8 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
 import { SharedGameState, XPEvent, LevelUpEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, RoundStats, DefaultAbility, HookshotAbility, COMBATANT_TYPES, CombatantId, ControllerId, ProjectileId, CombatantEffect } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
+import { applyStatModifications } from './StatModification';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
     const sharedCombatants = new Map<CombatantId, Combatant>();
@@ -115,16 +116,17 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         x: colyseusCombatant.x,
         y: colyseusCombatant.y,
         team: colyseusCombatant.team,
-        health: colyseusCombatant.health,
-        maxHealth: colyseusCombatant.maxHealth,
-        attackRadius: colyseusCombatant.attackRadius,
-        attackStrength: colyseusCombatant.attackStrength,
-        attackSpeed: colyseusCombatant.attackSpeed,
+        health: applyStatModifications('health', colyseusCombatant.health, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        maxHealth: applyStatModifications('maxHealth', colyseusCombatant.maxHealth, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        attackRadius: applyStatModifications('attackRadius', colyseusCombatant.attackRadius, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        attackStrength: applyStatModifications('attackStrength', colyseusCombatant.attackStrength, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        attackSpeed: applyStatModifications('attackSpeed', colyseusCombatant.attackSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         lastAttackTime: colyseusCombatant.lastAttackTime,
         size: colyseusCombatant.size,
         target: colyseusCombatant.target,
-        windUp: colyseusCombatant.windUp,
+        windUp: applyStatModifications('windUp', colyseusCombatant.windUp, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         attackReadyAt: colyseusCombatant.attackReadyAt,
+        moveSpeed: applyStatModifications('moveSpeed', colyseusCombatant.moveSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => {
             const baseEffect = {
                 type: effect.type,
@@ -177,7 +179,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     cooldown: (hero.ability as any).cooldown,
                     lastUsedTime: (hero.ability as any).lastUsedTime,
                     strength: (hero.ability as any).strength
-                } as DefaultAbility | HookshotAbility,
+                } as DefaultAbility | HookshotAbility | MercenaryAbility,
                 controller: hero.controller
             } as HeroCombatant;
             

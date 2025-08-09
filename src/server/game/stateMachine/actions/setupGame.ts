@@ -33,6 +33,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueCradle.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     blueCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     blueCradle.lastAttackTime = 0;
+    blueCradle.moveSpeed = 0; // Cradles don't move
     state.combatants.set(blueCradle.id, blueCradle);
     
     // Create red cradle (top right)
@@ -51,6 +52,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redCradle.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     redCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
     redCradle.lastAttackTime = 0;
+    redCradle.moveSpeed = 0; // Cradles don't move
     state.combatants.set(redCradle.id, redCradle);
     
     // Create blue turret
@@ -69,6 +71,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     blueTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     blueTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     blueTurret.lastAttackTime = 0;
+    blueTurret.moveSpeed = 0; // Turrets don't move
     state.combatants.set(blueTurret.id, blueTurret);
     
     // Create red turret
@@ -87,6 +90,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
     redTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
     redTurret.lastAttackTime = 0;
+    redTurret.moveSpeed = 0; // Turrets don't move
     state.combatants.set(redTurret.id, redTurret);
     
     // Initialize currentWave to 0 (minions will spawn via waves)

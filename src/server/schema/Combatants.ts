@@ -3,6 +3,7 @@ import { CombatantType, MinionType, CombatantId, ControllerId, StatType } from '
 import { CombatantEffect, StatModEffect } from './Effects';
 import { RoundStats } from './Events';
 import { Ability } from './Abilities';
+import { applyStatModifications } from '../../shared/utils/StatModification';
 
 export class Combatant extends Schema {
     @type('string') id!: CombatantId;
@@ -20,6 +21,7 @@ export class Combatant extends Schema {
     @type('string') target?: CombatantId; // ID of the combatant being targeted
     @type('number') windUp!: number; // Time in seconds before attack can be performed
     @type('number') attackReadyAt!: number; // Timestamp when wind-up period ends and attack can be performed
+    @type('number') moveSpeed!: number; // Movement speed in pixels per frame
     @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant - will contain specific effect types
 
     // Stat getters with effect modifications
@@ -47,30 +49,12 @@ export class Combatant extends Schema {
         return this.getModifiedStat('windUp', this.windUp);
     }
 
+    getMoveSpeed(): number {
+        return this.getModifiedStat('moveSpeed', this.moveSpeed);
+    }
+
     private getModifiedStat(statType: StatType, baseStat: number): number {
-        let modifiedValue = baseStat;
-
-        // Find all StatModEffects for this stat type
-        const statModEffects = this.effects.filter(effect => 
-            effect.type === 'statmod' && (effect as StatModEffect).stat === statType
-        ) as StatModEffect[];
-
-        // Apply each effect
-        for (const effect of statModEffects) {
-            switch (effect.operator) {
-                case 'relative':
-                    modifiedValue += effect.amount;
-                    break;
-                case 'absolute':
-                    modifiedValue = effect.amount;
-                    break;
-                case 'percent':
-                    modifiedValue *= effect.amount;
-                    break;
-            }
-        }
-
-        return Math.max(0, modifiedValue); // Ensure non-negative values
+        return applyStatModifications(statType, baseStat, Array.from(this.effects).filter(e => e != null));
     }
 }
 

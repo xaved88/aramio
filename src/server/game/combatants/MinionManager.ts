@@ -77,9 +77,10 @@ export class MinionManager {
         const normalizedDx = dx / distance;
         const normalizedDy = dy / distance;
         
-        // Calculate new position
-        const newX = minion.x + normalizedDx * GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
-        const newY = minion.y + normalizedDy * GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
+        // Calculate new position using modified move speed
+        const moveSpeed = minion.getMoveSpeed();
+        const newX = minion.x + normalizedDx * moveSpeed;
+        const newY = minion.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
         minion.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
@@ -145,6 +146,7 @@ export class MinionManager {
         minion.attackStrength = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_STRENGTH;
         minion.attackSpeed = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_SPEED;
         minion.windUp = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].WIND_UP;
+        minion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
         minion.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
         minion.size = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].SIZE;
         minion.lastAttackTime = 0;

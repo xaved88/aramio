@@ -254,7 +254,7 @@ export class GameEngine {
      * Updates effects by removing expired ones and processing active effects
      */
     private updateEffects(deltaTime: number): void {
-        const currentTime = Date.now();
+        const currentTime = this.state.gameTime;
         
         this.state.combatants.forEach((combatant: Combatant) => {
             if (!combatant.effects || combatant.effects.length === 0) return;
