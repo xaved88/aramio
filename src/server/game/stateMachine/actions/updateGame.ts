@@ -165,10 +165,17 @@ function isCombatantStunned(combatant: any): boolean {
  * Updates targeting for a combatant based on available enemies in range
  */
 function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
+    // Check if attacker has hunter effect (ignores minions)
+    const hasHunterEffect = attacker.effects?.some((effect: any) => effect.type === 'hunter');
+    
     // Find alive enemies in attack range
     const enemiesInRange = allCombatants.filter(target => {
         if (!CombatantUtils.isCombatantAlive(target)) return false;
         if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
+        
+        // If attacker has hunter effect, ignore minions
+        if (hasHunterEffect && target.type === 'minion') return false;
+        
         return CombatantUtils.isInRange(attacker, target, attacker.getAttackRadius());
     });
     

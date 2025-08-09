@@ -1,5 +1,5 @@
 import { MercenaryAbility } from '../../../schema/Abilities';
-import { StatModEffect, NoCollisionEffect } from '../../../schema/Effects';
+import { StatModEffect, NoCollisionEffect, HunterEffect } from '../../../schema/Effects';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -109,11 +109,18 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         noCollisionEffect.duration = duration;
         noCollisionEffect.appliedAt = currentTime;
 
+        // Hunter effect (ignore minions when targeting)
+        const hunterEffect = new HunterEffect();
+        hunterEffect.type = COMBATANT_EFFECT_TYPES.HUNTER;
+        hunterEffect.duration = duration;
+        hunterEffect.appliedAt = currentTime;
+
         // Apply all effects
         hero.effects.push(attackStrengthEffect);
         hero.effects.push(moveSpeedEffect);
         hero.effects.push(attackRadiusEffect);
         hero.effects.push(windUpEffect);
         hero.effects.push(noCollisionEffect);
+        hero.effects.push(hunterEffect);
     }
 }

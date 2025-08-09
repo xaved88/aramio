@@ -148,6 +148,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                 case 'nocollision':
                 case 'statmod':
                 case 'reflect':
+                case 'hunter':
                     return baseEffect;
                 default:
                     return baseEffect;

@@ -42,7 +42,8 @@ export const COMBATANT_EFFECT_TYPES = {
     MOVE: 'move',
     NOCOLLISION: 'nocollision',
     STATMOD: 'statmod',
-    REFLECT: 'reflect'
+    REFLECT: 'reflect',
+    HUNTER: 'hunter'
 } as const;
 
 export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COMBATANT_EFFECT_TYPES];
@@ -73,6 +74,10 @@ export interface StatModEffect extends CombatantEffect {
 
 export interface ReflectEffect extends CombatantEffect {
     type: 'reflect';
+}
+
+export interface HunterEffect extends CombatantEffect {
+    type: 'hunter';
 }
 
 export interface MoveEffect extends CombatantEffect {
@@ -129,7 +134,7 @@ export interface MercenaryAbility extends Ability {
     type: typeof ABILITY_TYPES.MERCENARY;
 }
 
-export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | MoveEffect;
+export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect;
 
 export interface BaseCombatant {
     id: CombatantId;

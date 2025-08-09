@@ -27,6 +27,10 @@ export class ReflectEffect extends CombatantEffect {
     // type is inherited from base class
 }
 
+export class HunterEffect extends CombatantEffect {
+    // type is inherited from base class
+}
+
 export class MoveEffect extends CombatantEffect {
     // type is inherited from base class
     @type('number') moveTargetX!: number; // Target X for move effect
