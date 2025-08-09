@@ -99,6 +99,8 @@ export const GAMEPLAY_CONFIG = {
                 DURATION_BOOST_PER_LEVEL_MS: 100, // +0.1 second per level
                 RAGE_ATTACK_RADIUS: 35,
                 RAGE_WIND_UP: 0.1,
+                RAGE_BULLET_ARMOR: 200, // Bullet armor granted during rage
+                RAGE_ABILITY_ARMOR: 50, // Ability armor granted during rage
             },
             'pyromancer': {
                 COOLDOWN_MS: 1500, // Fast cast time (1.5 seconds)

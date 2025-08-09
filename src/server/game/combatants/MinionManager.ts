@@ -150,6 +150,8 @@ export class MinionManager {
         minion.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
         minion.size = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].SIZE;
         minion.lastAttackTime = 0;
+        minion.bulletArmor = 0;
+        minion.abilityArmor = 0;
 
         // Random position near cradle
         const angle = Math.random() * 2 * Math.PI;

@@ -2,6 +2,8 @@ import { GameState } from '../../schema/GameState';
 import { Combatant } from '../../schema/Combatants';
 import { DamageEvent, KillEvent } from '../../schema/Events';
 
+export type DamageSource = 'auto-attack' | 'ability';
+
 export class CombatantUtils {
     /**
      * Applies damage to a combatant and dispatches events
@@ -9,10 +11,14 @@ export class CombatantUtils {
      * @param damage Amount of damage to apply
      * @param gameState The game state for event dispatching
      * @param sourceId The ID of the combatant causing the damage
+     * @param damageSource The source of damage for armor calculation
      */
-    static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string): void {
+    static damageCombatant(combatant: Combatant, damage: number, gameState: GameState, sourceId: string, damageSource: DamageSource = 'auto-attack'): void {
+        // Apply armor reduction
+        const reducedDamage = this.calculateArmorReduction(combatant, damage, damageSource);
+        
         const previousHealth = combatant.getHealth();
-        combatant.health = Math.max(0, combatant.health - damage);
+        combatant.health = Math.max(0, combatant.health - reducedDamage);
         const actualDamage = previousHealth - combatant.getHealth();
         
         // Find the source combatant
@@ -66,6 +72,22 @@ export class CombatantUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Calculates damage reduction based on armor
+     * @param combatant The combatant taking damage
+     * @param damage Original damage amount
+     * @param damageSource Source of the damage for armor type selection
+     * @returns Reduced damage after armor calculation
+     */
+    private static calculateArmorReduction(combatant: Combatant, damage: number, damageSource: DamageSource): number {
+        const armor = damageSource === 'auto-attack' ? combatant.getBulletArmor() : combatant.getAbilityArmor();
+        
+        // Formula: damage dealt = damage * (1 - armor / (armor + 100))
+        const damageMultiplier = 1 - (armor / (armor + 100));
+        
+        return damage * damageMultiplier;
     }
 
     /**

@@ -247,7 +247,7 @@ export class GameEngine {
             switch (effect.effectType) {
                 case 'applyDamage':
                     if (effect.damage && (target.type === 'hero' || target.type === 'minion')) {
-                        CombatantUtils.damageCombatant(target, effect.damage, this.state, projectile.ownerId);
+                        CombatantUtils.damageCombatant(target, effect.damage, this.state, projectile.ownerId, 'ability');
                     }
                     break;
                 case 'applyEffect':

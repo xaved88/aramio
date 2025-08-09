@@ -41,6 +41,8 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.size = heroConfig.SIZE;
     hero.windUp = heroConfig.WIND_UP;
     hero.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+    hero.bulletArmor = 0;
+    hero.abilityArmor = 0;
     hero.attackReadyAt = 0;
     hero.controller = playerId;
     hero.experience = 0;

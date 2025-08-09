@@ -65,7 +65,7 @@ export interface NoCollisionEffect extends CombatantEffect {
     type: 'nocollision';
 }
 
-export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed';
+export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed' | 'bulletArmor' | 'abilityArmor';
 export type StatOperator = 'relative' | 'absolute' | 'percent';
 
 export interface StatModEffect extends CombatantEffect {
@@ -162,6 +162,8 @@ export interface BaseCombatant {
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
     moveSpeed: number; // Movement speed in pixels per frame
+    bulletArmor: number; // Armor against auto-attacks
+    abilityArmor: number; // Armor against abilities
     effects: CombatantEffectUnion[]; // Array of active effects on this combatant
 }
 

@@ -32,5 +32,9 @@ export function applyStatModifications(
         }
     }
 
-    return Math.max(0, modifiedValue); // Ensure non-negative values
+    // Allow negative values for armor stats (they amplify damage)
+    if (statType === 'bulletArmor' || statType === 'abilityArmor') {
+        return modifiedValue;
+    }
+    return Math.max(0, modifiedValue); // Ensure non-negative values for other stats
 }

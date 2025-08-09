@@ -115,6 +115,24 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         hunterEffect.duration = duration;
         hunterEffect.appliedAt = currentTime;
 
+        // Bullet armor boost
+        const bulletArmorEffect = new StatModEffect();
+        bulletArmorEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
+        bulletArmorEffect.stat = 'bulletArmor';
+        bulletArmorEffect.operator = 'relative';
+        bulletArmorEffect.amount = config.RAGE_BULLET_ARMOR;
+        bulletArmorEffect.duration = duration;
+        bulletArmorEffect.appliedAt = currentTime;
+
+        // Ability armor boost
+        const abilityArmorEffect = new StatModEffect();
+        abilityArmorEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
+        abilityArmorEffect.stat = 'abilityArmor';
+        abilityArmorEffect.operator = 'relative';
+        abilityArmorEffect.amount = config.RAGE_ABILITY_ARMOR;
+        abilityArmorEffect.duration = duration;
+        abilityArmorEffect.appliedAt = currentTime;
+
         // Apply all effects
         hero.effects.push(attackStrengthEffect);
         hero.effects.push(moveSpeedEffect);
@@ -122,5 +140,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         hero.effects.push(windUpEffect);
         hero.effects.push(noCollisionEffect);
         hero.effects.push(hunterEffect);
+        hero.effects.push(bulletArmorEffect);
+        hero.effects.push(abilityArmorEffect);
     }
 }

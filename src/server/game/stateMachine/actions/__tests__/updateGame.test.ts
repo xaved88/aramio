@@ -149,6 +149,8 @@ describe('handleUpdateGame', () => {
             bluePlayer.roundStats.totalExperience = 0;
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
+            bluePlayer.bulletArmor = 0;
+            bluePlayer.abilityArmor = 0;
             
                     // Create red player
         redPlayer = new Hero();
@@ -172,6 +174,8 @@ describe('handleUpdateGame', () => {
             redPlayer.roundStats.totalExperience = 0;
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
+            redPlayer.bulletArmor = 0;
+            redPlayer.abilityArmor = 0;
             
             gameState.combatants.set(bluePlayer.id, bluePlayer);
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -504,6 +508,8 @@ describe('handleUpdateGame', () => {
             attacker.roundStats.totalExperience = 0;
             attacker.level = 1;
             attacker.attackReadyAt = 0; // Initialize wind-up field
+            attacker.bulletArmor = 0;
+            attacker.abilityArmor = 0;
             attacker.ability = AbilityFactory.create('default');
             attacker.ability.cooldown = 5000;
             (attacker.ability as DefaultAbility).strength = 50;
@@ -529,6 +535,8 @@ describe('handleUpdateGame', () => {
             nearEnemy.roundStats.totalExperience = 0;
             nearEnemy.level = 1;
             nearEnemy.attackReadyAt = 0; // Initialize wind-up field
+            nearEnemy.bulletArmor = 0;
+            nearEnemy.abilityArmor = 0;
             nearEnemy.ability = AbilityFactory.create('default');
             nearEnemy.ability.cooldown = 5000;
             (nearEnemy.ability as DefaultAbility).strength = 50;
@@ -554,6 +562,8 @@ describe('handleUpdateGame', () => {
             farEnemy.roundStats.totalExperience = 0;
             farEnemy.level = 1;
             farEnemy.attackReadyAt = 0; // Initialize wind-up field
+            farEnemy.bulletArmor = 0;
+            farEnemy.abilityArmor = 0;
             farEnemy.ability = AbilityFactory.create('default');
             farEnemy.ability.cooldown = 5000;
             (farEnemy.ability as DefaultAbility).strength = 50;
