@@ -30,6 +30,7 @@ describe('MinionManager', () => {
         blueMinion.lastAttackTime = 0;
         blueMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
         blueMinion.minionType = 'warrior';
+        blueMinion.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
         
         // Create red minion
         redMinion = new Minion();
@@ -46,6 +47,7 @@ describe('MinionManager', () => {
         redMinion.lastAttackTime = 0;
         redMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
         redMinion.minionType = 'warrior';
+        redMinion.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
         
         // Create blue cradle
         blueCradle = new Combatant();
@@ -61,6 +63,7 @@ describe('MinionManager', () => {
         blueCradle.attackSpeed = 0.3;
         blueCradle.lastAttackTime = 0;
         blueCradle.moveSpeed = 0;
+        blueCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
         
         // Create red cradle
         redCradle = new Combatant();
@@ -76,6 +79,7 @@ describe('MinionManager', () => {
         redCradle.attackSpeed = 0.3;
         redCradle.lastAttackTime = 0;
         redCradle.moveSpeed = 0;
+        redCradle.size = GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
         
         // Create blue player
         bluePlayer = new Combatant();
@@ -91,6 +95,7 @@ describe('MinionManager', () => {
         bluePlayer.attackSpeed = 1;
         bluePlayer.lastAttackTime = 0;
         bluePlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+        bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
         
         // Add all combatants to game state
         gameState.combatants.set(blueMinion.id, blueMinion);
@@ -118,8 +123,8 @@ describe('MinionManager', () => {
             redPlayer.id = 'red-player';
             redPlayer.type = COMBATANT_TYPES.HERO;
             redPlayer.team = 'red';
-            redPlayer.x = blueMinion.x + 20; // Within 40 radius
-            redPlayer.y = blueMinion.y + 20;
+            redPlayer.x = blueMinion.x + 30; // Within 40 radius + 15 player size = 55 effective range
+            redPlayer.y = blueMinion.y + 30;
             redPlayer.health = 10;
             redPlayer.maxHealth = 10;
             redPlayer.attackRadius = 50;
@@ -127,6 +132,7 @@ describe('MinionManager', () => {
             redPlayer.attackSpeed = 1;
             redPlayer.lastAttackTime = 0;
             redPlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+            redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             

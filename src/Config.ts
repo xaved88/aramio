@@ -39,7 +39,7 @@ export const GAMEPLAY_CONFIG = {
         HEROES: {
             'default': {
                 HEALTH: 50,
-                ATTACK_RADIUS: 60, // Increased from 45 for better early game range
+                ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1, // attacks per second
                 WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
@@ -48,7 +48,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'hookshot': {
                 HEALTH: 70, // A bit tanky
-                ATTACK_RADIUS: 35, // Melee
+                ATTACK_RADIUS: 25, // Melee
                 ATTACK_STRENGTH: 10, // Higher attack
                 ATTACK_SPEED: 0.5, // Low attack speed
                 WIND_UP: 0.1, // Fast wind-up time
@@ -57,7 +57,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'mercenary': {
                 HEALTH: 50,
-                ATTACK_RADIUS: 60,
+                ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1,
                 WIND_UP: 0.25,
@@ -66,7 +66,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'pyromancer': {
                 HEALTH: 30, // Low HP
-                ATTACK_RADIUS: 40, // Low range
+                ATTACK_RADIUS: 35, // Low range
                 ATTACK_STRENGTH: 3, // Low attack
                 ATTACK_SPEED: 0.8, // Low attack speed
                 WIND_UP: 0.4, // Slow wind-up
@@ -75,7 +75,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'thorndive': {
                 HEALTH: 90, // High HP tank
-                ATTACK_RADIUS: 30, // Low range (melee tank)
+                ATTACK_RADIUS: 25, // Low range (melee tank)
                 ATTACK_STRENGTH: 8, // High damage
                 ATTACK_SPEED: 0.6, // Low attack speed
                 WIND_UP: 0.3, // Moderate wind-up
@@ -87,19 +87,19 @@ export const GAMEPLAY_CONFIG = {
         },
         ABILITIES: {
               'default': {
-    COOLDOWN_MS: 1000,
-    STRENGTH: 7, // damage dealt by projectile
-    SPEED: 200, // pixels per second
-  },
+                    COOLDOWN_MS: 1000,
+                    STRENGTH: 7, // damage dealt by projectile
+                    SPEED: 200, // pixels per second
+                },
               'hookshot': {
-    COOLDOWN_MS: 5000,
-    STRENGTH: 3, // damage dealt by projectile
-    SPEED: 250, // pixels per second (base speed)
-    DURATION_MS: 500, // 500ms projectile duration
-    STUN_DURATION_MS: 500, // 500ms base stun duration
-    STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
-    SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
-  },
+                COOLDOWN_MS: 5000,
+                STRENGTH: 3, // damage dealt by projectile
+                SPEED: 250, // pixels per second (base speed)
+                DURATION_MS: 500, // 500ms projectile duration
+                STUN_DURATION_MS: 500, // 500ms base stun duration
+                STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
+                SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
+            },
             'mercenary': {
                 COOLDOWN_MS: 8000,
                 DURATION_MS: 3000, // 3 seconds base duration
@@ -108,7 +108,7 @@ export const GAMEPLAY_CONFIG = {
                 MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost
                 MOVE_SPEED_BOOST_PER_LEVEL: 0.07, // +7% per level
                 DURATION_BOOST_PER_LEVEL_MS: 100, // +0.1 second per level
-                RAGE_ATTACK_RADIUS: 35,
+                RAGE_ATTACK_RADIUS: 25,
                 RAGE_WIND_UP: 0.1,
                 RAGE_BULLET_ARMOR: 200, // Bullet armor granted during rage
                 RAGE_ABILITY_ARMOR: 50, // Ability armor granted during rage
@@ -132,8 +132,8 @@ export const GAMEPLAY_CONFIG = {
                 RANGE_PER_LEVEL: 10, // Additional range per level
                 LANDING_DAMAGE: 15, // Base landing damage
                 LANDING_DAMAGE_PER_LEVEL: 10, // Additional damage per level
-                LANDING_RADIUS: 80, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
-                TAUNT_RADIUS: 80, // Radius for taunt effect
+                LANDING_RADIUS: 65, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
+                TAUNT_RADIUS: 65, // Radius for taunt effect
                 TAUNT_DURATION_MS: 100, // Base taunt duration (1 second)
                 TAUNT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
                 REFLECT_DURATION_MS: 3000, // Base reflect duration (3 seconds)
@@ -145,7 +145,7 @@ export const GAMEPLAY_CONFIG = {
         },
         CRADLE: {
             HEALTH: 2000,
-            ATTACK_RADIUS: 125,
+            ATTACK_RADIUS: 115,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 2, // attacks per second
             WIND_UP: 0.1, // 0.1 seconds wind-up time for cradles
@@ -153,7 +153,7 @@ export const GAMEPLAY_CONFIG = {
         },
         TURRET: {
             HEALTH: 1000,
-            ATTACK_RADIUS: 80,
+            ATTACK_RADIUS: 70,
             ATTACK_STRENGTH: 25,
             ATTACK_SPEED: 2, // attacks per second
             WIND_UP: 0.5, // 0.5 seconds wind-up time for turrets
@@ -162,7 +162,7 @@ export const GAMEPLAY_CONFIG = {
         MINION: {
             WARRIOR: {
                 HEALTH: 50,
-                ATTACK_RADIUS: 25,
+                ATTACK_RADIUS: 20,
                 ATTACK_STRENGTH: 10,
                 ATTACK_SPEED: 0.8, // attacks per second
                 WIND_UP: 0.3, // 0.3 seconds wind-up time for warrior minions
@@ -170,7 +170,7 @@ export const GAMEPLAY_CONFIG = {
             },
             ARCHER: {
                 HEALTH: 25,
-                ATTACK_RADIUS: 70,
+                ATTACK_RADIUS: 60,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1.2, // attacks per second
                 WIND_UP: 0.25, // 0.25 seconds wind-up time for archer minions

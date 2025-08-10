@@ -164,7 +164,9 @@ export class CombatantUtils {
      * @returns true if target is within range of source
      */
     static isInRange(source: Combatant, target: Combatant, range: number): boolean {
-        return this.getDistance(source, target) <= range;
+        const distance = this.getDistance(source, target);
+        // Account for target's size - check if any part of target is within range
+        return distance <= range + target.size;
     }
 
     /**

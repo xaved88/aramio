@@ -297,8 +297,8 @@ export class GameEngine {
             const dy = combatant.y - targetY;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            // Check if combatant is within AOE radius
-            if (distance <= projectile.aoeRadius) {
+            // Check if combatant is within AOE radius (accounting for combatant size)
+            if (distance <= projectile.aoeRadius + combatant.size) {
                 // Only apply effects to heroes and minions
                 if (combatant.type === 'hero' || combatant.type === 'minion') {
                     this.applyProjectileEffects(projectile, combatant);

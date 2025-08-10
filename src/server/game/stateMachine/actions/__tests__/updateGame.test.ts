@@ -151,6 +151,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             bluePlayer.bulletArmor = 0;
             bluePlayer.abilityArmor = 0;
+            bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
                     // Create red player
         redPlayer = new Hero();
@@ -176,6 +177,7 @@ describe('handleUpdateGame', () => {
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
             redPlayer.bulletArmor = 0;
             redPlayer.abilityArmor = 0;
+            redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(bluePlayer.id, bluePlayer);
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -259,6 +261,7 @@ describe('handleUpdateGame', () => {
             deadMinion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
             deadMinion.lastAttackTime = 0;
             deadMinion.minionType = 'warrior';
+            deadMinion.size = GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
             
                     // Create blue player to receive experience
         bluePlayer = new Hero();
@@ -282,6 +285,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.roundStats.totalExperience = 0;
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
+            bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(deadMinion.id, deadMinion);
             gameState.combatants.set(bluePlayer.id, bluePlayer);
@@ -325,6 +329,7 @@ describe('handleUpdateGame', () => {
             redPlayer.roundStats.totalExperience = 0;
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
+            redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             
@@ -513,6 +518,7 @@ describe('handleUpdateGame', () => {
             attacker.ability = AbilityFactory.create('default');
             attacker.ability.cooldown = 5000;
             (attacker.ability as DefaultAbility).strength = 50;
+            attacker.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             // Create a near enemy (closer to attacker)
             nearEnemy = new Hero();
@@ -540,6 +546,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.ability = AbilityFactory.create('default');
             nearEnemy.ability.cooldown = 5000;
             (nearEnemy.ability as DefaultAbility).strength = 50;
+            nearEnemy.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             // Create a far enemy (further from attacker)
             farEnemy = new Hero();
@@ -567,6 +574,7 @@ describe('handleUpdateGame', () => {
             farEnemy.ability = AbilityFactory.create('default');
             farEnemy.ability.cooldown = 5000;
             (farEnemy.ability as DefaultAbility).strength = 50;
+            farEnemy.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(attacker.id, attacker);
             gameState.combatants.set(nearEnemy.id, nearEnemy);

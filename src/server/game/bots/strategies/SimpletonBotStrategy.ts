@@ -159,8 +159,8 @@ export class SimpletonBotStrategy {
             const dy = combatant.y - bot.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Check if in attack range
-            if (distance <= bot.attackRadius) {
+            // Check if in attack range (accounting for combatant size)
+            if (distance <= bot.attackRadius + combatant.size) {
                 enemies.push({ ...combatant, distance });
             }
         });
