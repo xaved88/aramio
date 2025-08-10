@@ -136,7 +136,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         projectile.team = hero.team;
         projectile.type = 'thorndive';
         projectile.speed = config.DASH_SPEED;
-        projectile.duration = moveEffect.duration;
+        projectile.duration = moveEffect.duration + 50; // there is a race condition where the projectile expires too quickly
         projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
@@ -175,9 +175,16 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         
         tauntProjectileEffect.combatantEffect = tauntEffect;
         projectile.effects.push(tauntProjectileEffect);
+        
+        // Validate projectile effects
+        console.log(`[Thorndive] Projectile ${projectile.id} has ${projectile.effects.length} effects:`, 
+            projectile.effects.map(e => ({ type: e.effectType, damage: e.damage, effect: e.combatantEffect?.type })));
 
         // Add projectile to state
         state.projectiles.set(projectile.id, projectile);
+        
+        // Debug logging for Thorndive projectile creation
+        console.log(`[Thorndive] Created projectile ${projectile.id} from (${hero.x}, ${hero.y}) to (${targetX}, ${targetY}), duration: ${projectile.duration}ms, speed: ${projectile.speed}`);
 
         // 4. Apply self-buffs (armor and reflect) - these start immediately and last longer than taunt
         const bulletArmorEffect = new StatModEffect();
