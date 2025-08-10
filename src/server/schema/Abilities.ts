@@ -8,19 +8,19 @@ export class Ability extends Schema {
 }
 
 export class DefaultAbility extends Ability {
-    constructor() {
-        super();
-        this.type = ABILITY_TYPES.DEFAULT;
-    }
-    @type('number') strength!: number; // damage dealt by ability
+  constructor() {
+    super();
+    this.type = ABILITY_TYPES.DEFAULT;
+  }
+  @type('number') strength!: number; // damage dealt by ability
 }
 
 export class HookshotAbility extends Ability {
-    constructor() {
-        super();
-        this.type = ABILITY_TYPES.HOOKSHOT;
-    }
-    @type('number') strength!: number; // damage dealt by ability
+  constructor() {
+    super();
+    this.type = ABILITY_TYPES.HOOKSHOT;
+  }
+  @type('number') strength!: number; // damage dealt by ability
 }
 
 export class MercenaryAbility extends Ability {

@@ -128,7 +128,7 @@ export class GameRoom extends Room<GameState> {
         }
         
         // Update game engine with time delta
-        const currentTime = Date.now();
+        const currentTime = this.state.gameTime;
         const deltaTime = this.lastUpdateTime === 0 ? SERVER_CONFIG.UPDATE_RATE_MS : currentTime - this.lastUpdateTime;
         this.lastUpdateTime = currentTime;
         const result = this.gameEngine.update(deltaTime);

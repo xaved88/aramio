@@ -500,10 +500,19 @@ export class GameScene extends Phaser.Scene {
      * Gets the appropriate color for the range indicator based on ability cooldown status
      */
     private getRangeIndicatorColor(hero: any): number {
-        const currentTime = Date.now();
+        if (!this.lastState) return CLIENT_CONFIG.HUD.ABILITY_BAR.COOLDOWN_COLOR;
+        
+        const currentTime = this.lastState.gameTime;
         const ability = hero.ability as any;
-        const timeSinceLastUse = currentTime - ability.lastUsedTime;
-        const isAbilityReady = timeSinceLastUse >= ability.cooldown;
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
+        let isAbilityReady = false;
+        if (ability.lastUsedTime === 0) {
+            isAbilityReady = true;
+        } else {
+            const timeSinceLastUse = currentTime - ability.lastUsedTime;
+            isAbilityReady = timeSinceLastUse >= ability.cooldown;
+        }
         
         if (isAbilityReady) {
             return CLIENT_CONFIG.HUD.ABILITY_BAR.READY_COLOR; // Light purple when ready

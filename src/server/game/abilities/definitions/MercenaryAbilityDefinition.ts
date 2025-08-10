@@ -30,7 +30,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
     }
 
     useAbility(ability: MercenaryAbility, heroId: string, x: number, y: number, state: any): boolean {
-        const currentTime = Date.now();
+        const currentTime = state.gameTime;
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {

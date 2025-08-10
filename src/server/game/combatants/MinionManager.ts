@@ -136,7 +136,7 @@ export class MinionManager {
 
     private static spawnMinion(state: GameState, team: string, minionType: MinionType, cradlePosition: { x: number, y: number }): void {
         const minion = new Minion();
-        minion.id = `${team}-${minionType}-${Date.now()}-${Math.random()}`;
+        minion.id = `${team}-${minionType}-${state.gameTime}-${Math.random()}`;
         minion.type = COMBATANT_TYPES.MINION;
         minion.team = team;
         minion.minionType = minionType;

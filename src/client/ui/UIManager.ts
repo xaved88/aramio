@@ -176,7 +176,8 @@ export class UIManager {
                 heroKillText: this.hudHeroKillText,
                 minionKillIcon: this.hudMinionKillIcon,
                 minionKillText: this.hudMinionKillText
-            }
+            },
+            state.gameTime
         );
         
         // Update stats overlay if visible

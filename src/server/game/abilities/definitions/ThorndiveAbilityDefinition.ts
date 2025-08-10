@@ -41,16 +41,37 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
     }
 
     useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any): boolean {
-        const currentTime = Date.now();
+        const currentTime = state.gameTime;
+        
+        // Find hero by ID
+        const hero = state.combatants.get(heroId);
+        if (!hero) return false;
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
+        if (ability.lastUsedTime === 0) {
+            ability.lastUsedTime = currentTime;
+            // Apply range clamping even on first use
+            const dx = x - hero.x;
+            const dy = y - hero.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            let targetX = x;
+            let targetY = y;
+            if (distance > ability.range) {
+                const directionX = dx / distance;
+                const directionY = dy / distance;
+                targetX = hero.x + directionX * ability.range;
+                targetY = hero.y + directionY * ability.range;
+            }
+            
+            this.executeThornDive(heroId, targetX, targetY, state, 1); // Level 1 for new hero
+            return true;
+        }
         
         // Check cooldown
         if (currentTime - ability.lastUsedTime < ability.cooldown) {
             return false;
         }
-        
-        // Find hero by ID
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         // Calculate distance to target
         const dx = x - hero.x;
@@ -108,7 +129,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
 
         // 3. Create invisible projectile for landing damage (like pyromancer fireball but invisible)
         const projectile = new Projectile();
-        projectile.id = `thorndive-${heroId}-${Date.now()}`;
+        projectile.id = `thorndive-${heroId}-${state.gameTime}`;
         projectile.ownerId = heroId;
         projectile.x = hero.x;
         projectile.y = hero.y;
@@ -116,7 +137,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         projectile.type = 'thorndive';
         projectile.speed = config.DASH_SPEED;
         projectile.duration = moveEffect.duration;
-        projectile.createdAt = Date.now();
+        projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
         projectile.aoeRadius = config.LANDING_RADIUS;

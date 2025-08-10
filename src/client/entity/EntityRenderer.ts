@@ -69,7 +69,7 @@ export class EntityRenderer {
         if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
             // Only show ability indicator for the current player
             if (playerSessionId && combatant.controller === playerSessionId) {
-                this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator);
+                this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator, state);
             } else {
                 // Clear the indicator if this hero is not controlled by the current player
                 abilityReadyIndicator.clear();
@@ -566,13 +566,20 @@ export class EntityRenderer {
     /**
      * Renders the ability ready indicator for heroes only
      */
-    private renderAbilityReadyIndicator(hero: HeroCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics): void {
+    private renderAbilityReadyIndicator(hero: HeroCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics, state?: SharedGameState): void {
         abilityReadyIndicator.clear();
         
         // Check if ability is ready
-        const currentTime = Date.now();
-        const timeSinceLastUse = currentTime - hero.ability.lastUsedTime;
-        const isAbilityReady = timeSinceLastUse >= hero.ability.cooldown;
+        const currentTime = state?.gameTime || 0;
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
+        let isAbilityReady = false;
+        if (hero.ability.lastUsedTime === 0) {
+            isAbilityReady = true;
+        } else {
+            const timeSinceLastUse = currentTime - hero.ability.lastUsedTime;
+            isAbilityReady = timeSinceLastUse >= hero.ability.cooldown;
+        }
         
         if (isAbilityReady && hero.state === 'alive') {
             abilityReadyIndicator.lineStyle(

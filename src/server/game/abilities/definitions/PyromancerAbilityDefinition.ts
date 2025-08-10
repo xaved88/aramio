@@ -35,7 +35,14 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
     }
 
     useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any): boolean {
-        const currentTime = Date.now();
+        const currentTime = state.gameTime;
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
+        if (ability.lastUsedTime === 0) {
+            ability.lastUsedTime = currentTime;
+            this.createFireball(heroId, x, y, state, ability);
+            return true;
+        }
         
         // Check cooldown
         if (currentTime - ability.lastUsedTime < ability.cooldown) {
@@ -94,7 +101,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         
         // Create projectile
         const projectile = new Projectile();
-        projectile.id = `fireball_${Date.now()}_${Math.random()}`;
+        projectile.id = `fireball_${state.gameTime}_${Math.random()}`;
         projectile.ownerId = hero.id;
         projectile.x = hero.x;
         projectile.y = hero.y;
@@ -106,7 +113,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         // Calculate max duration based on range and speed (with safety margin)
         const maxTravelTime = (ability.range / speed) * 1000; // Convert to milliseconds
         projectile.duration = maxTravelTime * 2; // Double the expected time as safety margin
-        projectile.createdAt = Date.now();
+        projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
         projectile.aoeRadius = ability.radius;

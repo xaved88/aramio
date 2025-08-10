@@ -27,8 +27,8 @@ export class SimpletonBotStrategy {
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length > 0) {
-            // Check if it's time to use ability based on deterministic cooldown
-            if (this.shouldUseAbility(bot)) {
+                    // Check if it's time to use ability based on deterministic cooldown
+        if (this.shouldUseAbility(bot, state)) {
                 const targetEnemy = this.selectTargetEnemy(allEnemies);
                 if (targetEnemy) {
                     commands.push({
@@ -57,8 +57,8 @@ export class SimpletonBotStrategy {
         return commands;
     }
 
-    private shouldUseAbility(bot: any): boolean {
-        const currentTime = Date.now();
+    private shouldUseAbility(bot: any, state: SharedGameState): boolean {
+        const currentTime = state.gameTime;
         const lastUsedTime = bot.ability.lastUsedTime;
         const baseCooldown = bot.ability.cooldown;
 

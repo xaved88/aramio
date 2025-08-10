@@ -167,7 +167,7 @@ export class GameEngine {
             
             // Check duration (expiration)
             if (projectile.duration !== -1) { // -1 means infinite duration
-                const currentTime = Date.now();
+                const currentTime = this.state.gameTime;
                 const timeSinceCreation = currentTime - projectile.createdAt;
                 if (timeSinceCreation >= projectile.duration) {
                     projectilesToRemove.push(projectile.id);
@@ -263,7 +263,7 @@ export class GameEngine {
      * Applies a combatant effect to a target
      */
     private applyCombatantEffect(target: any, effect: CombatantEffect): void {
-        effect.appliedAt = Date.now();
+        effect.appliedAt = this.state.gameTime;
         target.effects.push(effect);
         // Handle specific effects that need immediate processing
         if (effect.type === 'stun') {
@@ -286,7 +286,7 @@ export class GameEngine {
         aoeEvent.x = targetX;
         aoeEvent.y = targetY;
         aoeEvent.radius = projectile.aoeRadius;
-        aoeEvent.timestamp = Date.now();
+        aoeEvent.timestamp = this.state.gameTime;
         this.state.aoeDamageEvents.push(aoeEvent);
         
         this.state.combatants.forEach((combatant: any) => {

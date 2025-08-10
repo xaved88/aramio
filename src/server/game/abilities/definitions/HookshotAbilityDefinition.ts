@@ -35,7 +35,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
     }
 
     useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any): boolean {
-        const currentTime = Date.now();
+        const currentTime = state.gameTime;
         
         // Find hero by ID
         const hero = state.combatants.get(heroId);
@@ -89,7 +89,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         
         // Create projectile
         const projectile = new Projectile();
-        projectile.id = `projectile_${Date.now()}_${Math.random()}`;
+        projectile.id = `projectile_${state.gameTime}_${Math.random()}`;
         projectile.ownerId = hero.id;
         projectile.x = hero.x;
         projectile.y = hero.y;
@@ -99,7 +99,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.team = hero.team;
         projectile.type = 'hook';
         projectile.duration = config.DURATION_MS;
-        projectile.createdAt = Date.now();
+        projectile.createdAt = state.gameTime;
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();
@@ -113,7 +113,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         stunEffect.combatantEffect = new StunEffect();
         stunEffect.combatantEffect.type = 'stun';
         stunEffect.combatantEffect.duration = scaledStunDuration;
-        stunEffect.combatantEffect.appliedAt = Date.now();
+        stunEffect.combatantEffect.appliedAt = state.gameTime;
 
         // Create nocollision effect
         const nocollisionEffect = new ProjectileEffect();
@@ -121,7 +121,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         nocollisionEffect.combatantEffect = new NoCollisionEffect();
         nocollisionEffect.combatantEffect.type = 'nocollision';
         nocollisionEffect.combatantEffect.duration = config.DURATION_MS;
-        nocollisionEffect.combatantEffect.appliedAt = Date.now();
+        nocollisionEffect.combatantEffect.appliedAt = state.gameTime;
 
         // Create move effect
         const moveEffect = new ProjectileEffect();
@@ -132,7 +132,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         moveCombatantEffect.moveTargetX = hero.x; // Current hero position
         moveCombatantEffect.moveTargetY = hero.y; // Current hero position
         moveCombatantEffect.moveSpeed = scaledSpeed; // Use same scaled speed as projectile
-        moveCombatantEffect.appliedAt = Date.now();
+        moveCombatantEffect.appliedAt = state.gameTime;
         moveEffect.combatantEffect = moveCombatantEffect;
 
         projectile.effects.push(stunEffect);

@@ -10,7 +10,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     const { playerId, team, x, y, abilityType = 'default' } = action.payload;
     
     const hero = new Hero();
-    hero.id = `hero-${Date.now()}-${Math.random()}`;
+    hero.id = `hero-${state.gameTime}-${Math.random()}`;
     hero.type = COMBATANT_TYPES.HERO;
     hero.team = team;
     hero.controller = playerId; // client ID becomes the controller

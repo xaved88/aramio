@@ -86,20 +86,20 @@ export const GAMEPLAY_CONFIG = {
             },
         },
         ABILITIES: {
-            'default': {
-                COOLDOWN_MS: 1000,
-                STRENGTH: 7, // damage dealt by projectile
-                SPEED: 200, // pixels per second
-            },
-            'hookshot': {
-                COOLDOWN_MS: 5000,
-                STRENGTH: 3, // damage dealt by projectile
-                SPEED: 250, // pixels per second (base speed)
-                DURATION_MS: 500, // 500ms projectile duration
-                STUN_DURATION_MS: 500, // 500ms base stun duration
-                STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
-                SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
-            },
+              'default': {
+    COOLDOWN_MS: 1000,
+    STRENGTH: 7, // damage dealt by projectile
+    SPEED: 200, // pixels per second
+  },
+              'hookshot': {
+    COOLDOWN_MS: 5000,
+    STRENGTH: 3, // damage dealt by projectile
+    SPEED: 250, // pixels per second (base speed)
+    DURATION_MS: 500, // 500ms projectile duration
+    STUN_DURATION_MS: 500, // 500ms base stun duration
+    STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
+    SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
+  },
             'mercenary': {
                 COOLDOWN_MS: 8000,
                 DURATION_MS: 3000, // 3 seconds base duration
@@ -128,7 +128,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
                 COOLDOWN_REDUCTION_PER_LEVEL: 0.08, // Reduce cooldown by 8% per level
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
-                RANGE: 150, // Base dash range
+                RANGE: 130, // Base dash range
                 RANGE_PER_LEVEL: 10, // Additional range per level
                 LANDING_DAMAGE: 15, // Base landing damage
                 LANDING_DAMAGE_PER_LEVEL: 10, // Additional damage per level

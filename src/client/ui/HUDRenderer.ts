@@ -164,7 +164,8 @@ export class HUDRenderer {
             heroKillText: Phaser.GameObjects.Text;
             minionKillIcon: Phaser.GameObjects.Graphics;
             minionKillText: Phaser.GameObjects.Text;
-        }
+        },
+        gameTime: number
     ): void {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
@@ -209,10 +210,19 @@ export class HUDRenderer {
         hudElements.minionKillText.setText(player.roundStats.minionKills.toString());
 
         // Update ability bar
-        const currentTime = Date.now();
+        const currentTime = gameTime;
         const ability = player.ability as any;
-        const timeSinceLastUse = currentTime - ability.lastUsedTime;
-        const isAbilityReady = timeSinceLastUse >= ability.cooldown;
+        
+        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
+        let isAbilityReady = false;
+        let timeSinceLastUse = 0;
+        if (ability.lastUsedTime === 0) {
+            isAbilityReady = true;
+            timeSinceLastUse = ability.cooldown; // Show as fully ready
+        } else {
+            timeSinceLastUse = currentTime - ability.lastUsedTime;
+            isAbilityReady = timeSinceLastUse >= ability.cooldown;
+        }
         
         hudElements.abilityBar.clear();
         

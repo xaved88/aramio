@@ -31,7 +31,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
     }
 
     useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any): boolean {
-        const currentTime = Date.now();
+        const currentTime = state.gameTime;
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
@@ -45,6 +45,10 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         if (timeSinceLastUse < ability.cooldown) {
             return false; // Ability is on cooldown
         }
+
+        // Find hero by ID
+        const hero = state.combatants.get(heroId);
+        if (!hero) return false;
 
         ability.lastUsedTime = currentTime;
         this.createProjectile(heroId, x, y, state, ability);
@@ -69,7 +73,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         
         // Create projectile
         const projectile = new Projectile();
-        projectile.id = `projectile_${Date.now()}_${Math.random()}`;
+        projectile.id = `projectile_${state.gameTime}_${Math.random()}`;
         projectile.ownerId = hero.id;
         projectile.x = hero.x;
         projectile.y = hero.y;
@@ -79,7 +83,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.team = hero.team;
         projectile.type = 'default';
         projectile.duration = -1; // Infinite duration
-        projectile.createdAt = Date.now();
+        projectile.createdAt = state.gameTime;
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();
