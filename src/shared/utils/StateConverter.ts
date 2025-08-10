@@ -1,7 +1,7 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
 import { applyStatModifications } from './StatModification';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
@@ -196,8 +196,9 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     lastUsedTime: (hero.ability as any).lastUsedTime,
                     strength: (hero.ability as any).strength,
                     radius: (hero.ability as any).radius,
-                    range: (hero.ability as any).range
-                } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility,
+                    range: (hero.ability as any).range,
+                    landingRadius: (hero.ability as any).landingRadius
+                } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility,
                 controller: hero.controller
             } as HeroCombatant;
             

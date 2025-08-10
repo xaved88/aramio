@@ -24,6 +24,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
         ability.range = config.RANGE;
+        ability.landingRadius = config.LANDING_RADIUS;
         
         return ability;
     }

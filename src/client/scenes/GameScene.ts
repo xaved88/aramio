@@ -415,8 +415,8 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer')) {
-            return; // Not a hookshot, mercenary, or pyromancer ability
+        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            return; // Not a supported ability type
         }
         
         // Calculate cast range based on ability type
@@ -427,6 +427,8 @@ export class GameScene extends Phaser.Scene {
             castRange = this.calculateMercenaryRageRange(currentHero);
         } else if (currentHero.ability.type === 'pyromancer') {
             castRange = this.calculatePyromancerCastRange(currentHero);
+        } else if (currentHero.ability.type === 'thorndive') {
+            castRange = this.calculateThorndiveCastRange(currentHero);
         } else {
             return;
         }
@@ -438,6 +440,13 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.clear();
         this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
+        
+        // Draw AOE circles for thorndive and pyromancer
+        if (currentHero.ability.type === 'thorndive') {
+            this.drawThorndiveAOECircle(currentHero, x, y, rangeColor);
+        } else if (currentHero.ability.type === 'pyromancer') {
+            this.drawPyromancerAOECircle(currentHero, x, y, rangeColor);
+        }
         
         this.rangeIndicator.setVisible(true);
     }
@@ -530,7 +539,7 @@ export class GameScene extends Phaser.Scene {
         }
         
         if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
-            this.hideRangeIndicator(); // Hide if not a hookshot, mercenary, pyromancer, or thorndive ability
+            this.hideRangeIndicator(); // Hide if not a supported ability type
             return;
         }
 
@@ -557,7 +566,66 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
         
+        // Get mouse position and calculate target position (sticking to cast range if beyond)
+        const mouseX = this.input.mousePointer.x;
+        const mouseY = this.input.mousePointer.y;
+        const dx = mouseX - currentHero.x;
+        const dy = mouseY - currentHero.y;
+        const mouseDistance = Math.sqrt(dx * dx + dy * dy);
+        
+        let targetX: number, targetY: number;
+        if (mouseDistance <= castRange) {
+            // Mouse is within range, use mouse position
+            targetX = mouseX;
+            targetY = mouseY;
+        } else {
+            // Mouse is beyond range, stick to cast range boundary
+            const directionX = dx / mouseDistance;
+            const directionY = dy / mouseDistance;
+            targetX = currentHero.x + directionX * castRange;
+            targetY = currentHero.y + directionY * castRange;
+        }
+        
+        // Draw AOE circles for thorndive and pyromancer at target position
+        if (currentHero.ability.type === 'thorndive') {
+            this.drawThorndiveAOECircle(currentHero, targetX, targetY, rangeColor);
+        } else if (currentHero.ability.type === 'pyromancer') {
+            this.drawPyromancerAOECircle(currentHero, targetX, targetY, rangeColor);
+        }
+        
         this.rangeIndicator.setVisible(true);
+    }
+
+    /**
+     * Draws the AOE circle for thorndive ability at the target location
+     */
+    private drawThorndiveAOECircle(hero: any, targetX: number, targetY: number, color: number): void {
+        // Get AOE radius from the hero's ability (which includes level scaling)
+        const aoeRadius = (hero.ability as any).landingRadius || 70; // fallback to default if not available
+        
+        // Draw AOE circle at target location
+        this.rangeIndicator!.lineStyle(1, color, 0.3);
+        this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
+        
+        // Fill with very light color
+        this.rangeIndicator!.fillStyle(color, 0.1);
+        this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
+    }
+
+    /**
+     * Draws the AOE circle for pyromancer ability at the target location
+     */
+    private drawPyromancerAOECircle(hero: any, targetX: number, targetY: number, color: number): void {
+        // Get AOE radius from the hero's ability (which includes level scaling)
+        const aoeRadius = (hero.ability as any).radius || 20; // fallback to default if not available
+        
+        // Draw AOE circle at target location
+        this.rangeIndicator!.lineStyle(1, color, 0.3);
+        this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
+        
+        // Fill with very light color
+        this.rangeIndicator!.fillStyle(color, 0.1);
+        this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
     }
 
     /**

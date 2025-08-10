@@ -46,4 +46,5 @@ export class ThorndiveAbility extends Ability {
         this.type = ABILITY_TYPES.THORNDIVE;
     }
     @type('number') range!: number; // dash range
+    @type('number') landingRadius!: number; // AOE radius for landing damage
 }

@@ -156,6 +156,7 @@ export interface PyromancerAbility extends Ability {
 export interface ThorndiveAbility extends Ability {
     type: typeof ABILITY_TYPES.THORNDIVE;
     range: number;
+    landingRadius: number; // AOE radius for landing damage
 }
 
 export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect;
