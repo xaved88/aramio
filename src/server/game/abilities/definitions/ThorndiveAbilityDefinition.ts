@@ -32,6 +32,12 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
     onLevelUp(ability: ThorndiveAbility): void {
         const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.thorndive;
         ability.range += config.RANGE_PER_LEVEL;
+        
+        // Reduce cooldown by configured percentage per level
+        const cooldownReduction = config.COOLDOWN_REDUCTION_PER_LEVEL || 0;
+        if (cooldownReduction > 0) {
+            ability.cooldown = Math.max(1000, ability.cooldown * (1 - cooldownReduction)); // Minimum 1 second cooldown
+        }
     }
 
     useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any): boolean {

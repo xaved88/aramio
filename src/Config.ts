@@ -74,9 +74,9 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'thorndive': {
-                HEALTH: 80, // High HP tank
+                HEALTH: 90, // High HP tank
                 ATTACK_RADIUS: 30, // Low range (melee tank)
-                ATTACK_STRENGTH: 0, // High damage
+                ATTACK_STRENGTH: 8, // High damage
                 ATTACK_SPEED: 0.6, // Low attack speed
                 WIND_UP: 0.3, // Moderate wind-up
                 RESPAWN_TIME_MS: 6000,
@@ -126,12 +126,13 @@ export const GAMEPLAY_CONFIG = {
             },
             'thorndive': {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
+                COOLDOWN_REDUCTION_PER_LEVEL: 0.08, // Reduce cooldown by 8% per level
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
                 RANGE: 150, // Base dash range
                 RANGE_PER_LEVEL: 10, // Additional range per level
                 LANDING_DAMAGE: 15, // Base landing damage
                 LANDING_DAMAGE_PER_LEVEL: 10, // Additional damage per level
-                LANDING_RADIUS: 70, // AOE radius for landing damage
+                LANDING_RADIUS: 80, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
                 TAUNT_RADIUS: 80, // Radius for taunt effect
                 TAUNT_DURATION_MS: 100, // Base taunt duration (1 second)
                 TAUNT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
