@@ -7,6 +7,7 @@ interface PlayerStats {
     id: string;
     controller: ControllerId;
     team: string;
+    abilityType: string;
     level: number;
     experience: number;
     totalExperience: number; // total XP earned throughout the match
@@ -44,6 +45,7 @@ export class StatsOverlay {
         private readonly COLUMN_WIDTHS = {
         arrow: 60,
         heroId: 120,
+        abilityType: 100,
         level: 30,
         totalXp: 50,
         minionKills: 60,
@@ -196,7 +198,7 @@ export class StatsOverlay {
         cells.push(arrowHeader);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Hero ID header - left aligned (keep as is)
+        // Hero ID header - left aligned
         const playerIdHeader = this.scene.add.text(currentX, startY, 'Hero', {
             fontSize: '14px',
             color: teamColor,
@@ -205,6 +207,16 @@ export class StatsOverlay {
         playerIdHeader.setDepth(1001);
         cells.push(playerIdHeader);
         currentX += this.COLUMN_WIDTHS.heroId;
+
+        // Ability Type header - left aligned
+        const abilityTypeHeader = this.scene.add.text(currentX, startY, 'Ability', {
+            fontSize: '14px',
+            color: teamColor,
+            fontFamily: 'monospace'
+        });
+        abilityTypeHeader.setDepth(1001);
+        cells.push(abilityTypeHeader);
+        currentX += this.COLUMN_WIDTHS.abilityType;
 
         // Level header - right aligned
         const levelHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, 'Lvl', {
@@ -316,7 +328,7 @@ export class StatsOverlay {
         cells.push(arrowCell);
         currentX += this.COLUMN_WIDTHS.arrow;
 
-        // Hero ID cell - left aligned (keep as is)
+        // Hero ID cell - left aligned
         const heroId = player.id.length > 14 
             ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5)
             : player.id;
@@ -328,6 +340,16 @@ export class StatsOverlay {
         playerIdCell.setDepth(1001);
         cells.push(playerIdCell);
         currentX += this.COLUMN_WIDTHS.heroId;
+
+        // Ability Type cell - left aligned
+        const abilityTypeCell = this.scene.add.text(currentX, startY, player.abilityType, {
+            fontSize: '14px',
+            color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
+            fontFamily: 'monospace'
+        });
+        abilityTypeCell.setDepth(1001);
+        cells.push(abilityTypeCell);
+        currentX += this.COLUMN_WIDTHS.abilityType;
 
         // Level cell - right aligned
         const levelCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, player.level.toString(), {
@@ -447,6 +469,7 @@ export class StatsOverlay {
                     id: combatant.id,
                     controller: combatant.controller,
                     team: combatant.team,
+                    abilityType: combatant.ability.type,
                     level: combatant.level,
                     experience: combatant.experience,
                     totalExperience: combatant.roundStats.totalExperience,
