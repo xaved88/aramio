@@ -60,6 +60,9 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.setDepth(10); // High depth to appear above other elements
         this.rangeIndicator.setVisible(false);
         
+        // Create spawn indicators
+        this.createSpawnIndicators();
+        
         try {
             this.room = await this.client.joinOrCreate('game');
             console.log('Connected to server');
@@ -635,6 +638,56 @@ export class GameScene extends Phaser.Scene {
         // Fill with very light color
         this.rangeIndicator!.fillStyle(color, 0.1);
         this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
+    }
+
+    /**
+     * Creates visual indicators at spawn locations
+     */
+    private createSpawnIndicators(): void {
+        // Check if spawn indicators are enabled in config
+        if (!CLIENT_CONFIG.DEBUG.SPAWN_LOCATION_INDICATORS_ENABLED) {
+            return;
+        }
+
+        // Create spawn indicators for blue team using hardcoded positions
+        GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
+            const indicator = this.add.graphics();
+            indicator.setDepth(5); // Below entities but above background
+            
+            // Draw a small circle with team color
+            indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.BLUE, 0.6);
+            indicator.fillStyle(CLIENT_CONFIG.TEAM_COLORS.BLUE, 0.2);
+            indicator.fillCircle(position.x, position.y, 8);
+            indicator.strokeCircle(position.x, position.y, 8);
+            
+            // Add spawn number text
+            const text = this.add.text(position.x, position.y, `${index + 1}`, {
+                fontSize: '12px',
+                color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
+                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+            }).setOrigin(0.5);
+            text.setDepth(5);
+        });
+        
+        // Create spawn indicators for red team using hardcoded positions
+        GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED.forEach((position, index) => {
+            const indicator = this.add.graphics();
+            indicator.setDepth(5); // Below entities but above background
+            
+            // Draw a small circle with team color
+            indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.RED, 0.6);
+            indicator.fillStyle(CLIENT_CONFIG.TEAM_COLORS.RED, 0.2);
+            indicator.fillCircle(position.x, position.y, 8);
+            indicator.strokeCircle(position.x, position.y, 8);
+            
+            // Add spawn number text
+            const text = this.add.text(position.x, position.y, `${index + 1}`, {
+                fontSize: '12px',
+                color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
+                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+            }).setOrigin(0.5);
+            text.setDepth(5);
+        });
     }
 
     /**

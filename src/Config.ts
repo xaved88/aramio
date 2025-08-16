@@ -21,12 +21,12 @@ export const GAMEPLAY_CONFIG = {
     GAME_BOUND_BUFFER: 20, // buffer between canvas edge and playable area
 
     CRADLE_POSITIONS: {
-        BLUE: { x: 50, y: 550 }, // bottom left
-        RED: { x: 550, y: 50 },  // top right
+        BLUE: { x: 100, y: 600 }, // bottom left
+        RED: { x: 600, y: 100 },  // top right
     },
     TURRET_POSITIONS: {
-        BLUE: { x: 200, y: 400 }, // 1/3 way from blue cradle to red cradle
-        RED: { x: 400, y: 200 },  // 2/3 way from red cradle to blue cradle
+        BLUE: { x: 250, y: 450 }, // 1/3 way from blue cradle to red cradle
+        RED: { x: 450, y: 250 },  // 2/3 way from red cradle to blue cradle
     },
 
     COMBAT: {
@@ -202,18 +202,18 @@ export const GAMEPLAY_CONFIG = {
     },
     PLAYER_SPAWN_POSITIONS: {
         BLUE: [
-            { x: 20, y: 520 }, 
-            { x: 50, y: 510 },
-            { x: 80, y: 520 },
-            { x: 90, y: 550 },
-            { x: 80, y: 580 }
+            { x: 100, y: 675 }, // Spawn 1: 75 units below blue cradle
+            { x: 62, y: 675 },  // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 62, y: 637 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 25, y: 637 },  // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 25, y: 600 }   // Spawn 5: 75 units left of blue cradle
         ],
         RED: [
-            { x: 580, y: 80 },
-            { x: 550, y: 90 },
-            { x: 520, y: 80 },
-            { x: 510, y: 50 },
-            { x: 520, y: 20 }
+            { x: 600, y: 25 },  // Spawn 1: 75 units above red cradle
+            { x: 637, y: 25 },  // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 637, y: 62 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 675, y: 62 },  // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 675, y: 100 }  // Spawn 5: 75 units right of red cradle
         ],
     },
     BOTS: {
@@ -233,12 +233,15 @@ export const CLIENT_CONFIG = {
     CONTROLS: {
         SCHEME: 'C' as 'A' | 'B' | 'C' | 'D', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability, D: point-to-move + click-down-to-stop-moving + click-up-for-ability
     },
-    GAME_CANVAS_WIDTH: 600,
-    GAME_CANVAS_HEIGHT: 600,
+    GAME_CANVAS_WIDTH: 700,
+    GAME_CANVAS_HEIGHT: 700,
     PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
+    DEBUG: {
+        SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
+    },
     PROJECTILE: {
         RADIUS: 6,
         BLUE_COLOR: 0x2980b9, // darker blue team color
