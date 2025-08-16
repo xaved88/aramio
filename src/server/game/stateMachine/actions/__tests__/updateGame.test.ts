@@ -954,8 +954,10 @@ describe('handleUpdateGame', () => {
         let redHero: Hero;
 
         beforeEach(() => {
-            // Clear existing combatants from previous tests
-            gameState.combatants.clear();
+            // Create a completely fresh game state for each test
+            gameState = new GameState();
+            gameState.gameTime = 1000;
+            gameState.gamePhase = 'playing';
             
             // Create blue heroes
             blueHero1 = new Hero();
