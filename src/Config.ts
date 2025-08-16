@@ -18,12 +18,7 @@ export const GAMEPLAY_CONFIG = {
     PLAYER_MOVE_SPEED: 3.5, // pixels per frame
     MINION_MOVE_SPEED: 2.5, // pixels per frame - slower than players
     PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
-    GAME_BOUNDS: {
-        MIN_X: 20,
-        MIN_Y: 20,
-        MAX_X: 580,
-        MAX_Y: 580,
-    },
+    GAME_BOUND_BUFFER: 20, // buffer between canvas edge and playable area
 
     CRADLE_POSITIONS: {
         BLUE: { x: 50, y: 550 }, // bottom left

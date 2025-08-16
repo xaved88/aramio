@@ -3,6 +3,7 @@ import { GameState } from '../../../schema/GameState';
 import { Minion, Combatant } from '../../../schema/Combatants';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES, MINION_TYPES } from '../../../../shared/types/CombatantTypes';
+import { getMinX, getMaxX, getMinY, getMaxY } from '../../../../shared/utils/GameBounds';
 
 describe('MinionManager', () => {
     let gameState: GameState;
@@ -181,15 +182,15 @@ describe('MinionManager', () => {
 
         it('should respect game bounds when moving', () => {
             // Place blue minion at edge of bounds
-            blueMinion.x = GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X;
-            blueMinion.y = GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y;
+            blueMinion.x = getMinX();
+            blueMinion.y = getMinY();
             
             MinionManager.moveMinions(gameState);
             
-            expect(blueMinion.x).toBeGreaterThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X);
-            expect(blueMinion.y).toBeGreaterThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y);
-            expect(blueMinion.x).toBeLessThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X);
-            expect(blueMinion.y).toBeLessThanOrEqual(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y);
+            expect(blueMinion.x).toBeGreaterThanOrEqual(getMinX());
+            expect(blueMinion.y).toBeGreaterThanOrEqual(getMinY());
+            expect(blueMinion.x).toBeLessThanOrEqual(getMaxX());
+            expect(blueMinion.y).toBeLessThanOrEqual(getMaxY());
         });
 
         it('should not move when close to target', () => {

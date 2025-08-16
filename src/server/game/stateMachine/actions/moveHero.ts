@@ -3,6 +3,7 @@ import { Hero } from '../../../schema/Combatants';
 import { MoveHeroAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { getMinX, getMaxX, getMinY, getMaxY } from '../../../../shared/utils/GameBounds';
 
 export function handleMoveHero(state: GameState, action: MoveHeroAction): StateMachineResult {
     // Find hero by ID
@@ -37,8 +38,8 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction): StateM
         const newY = hero.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
-        hero.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
-        hero.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
+        hero.x = Math.max(getMinX(), Math.min(getMaxX(), newX));
+        hero.y = Math.max(getMinY(), Math.min(getMaxY(), newY));
     }
     
     return { newState: state };

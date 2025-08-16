@@ -3,6 +3,7 @@ import { Minion } from '../../schema/Combatants';
 import { GAMEPLAY_CONFIG } from '../../../Config';
 import { COMBATANT_TYPES, MINION_TYPES, MinionType } from '../../../shared/types/CombatantTypes';
 import { CombatantUtils } from './CombatantUtils';
+import { getMinX, getMaxX, getMinY, getMaxY } from '../../../shared/utils/GameBounds';
 
 export class MinionManager {
     static moveMinions(state: GameState): void {
@@ -83,8 +84,8 @@ export class MinionManager {
         const newY = minion.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
-        minion.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, newX));
-        minion.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, newY));
+        minion.x = Math.max(getMinX(), Math.min(getMaxX(), newX));
+        minion.y = Math.max(getMinY(), Math.min(getMaxY(), newY));
     }
 
     static spawnMinionWave(state: GameState): void {
@@ -160,8 +161,8 @@ export class MinionManager {
         minion.y = cradlePosition.y + Math.sin(angle) * distance;
 
         // Clamp to game bounds
-        minion.x = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_X, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_X, minion.x));
-        minion.y = Math.max(GAMEPLAY_CONFIG.GAME_BOUNDS.MIN_Y, Math.min(GAMEPLAY_CONFIG.GAME_BOUNDS.MAX_Y, minion.y));
+        minion.x = Math.max(getMinX(), Math.min(getMaxX(), minion.x));
+        minion.y = Math.max(getMinY(), Math.min(getMaxY(), minion.y));
 
         state.combatants.set(minion.id, minion);
     }
