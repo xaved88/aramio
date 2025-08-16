@@ -650,7 +650,7 @@ export class GameScene extends Phaser.Scene {
         }
 
         // Create spawn indicators for blue team using hardcoded positions
-        GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
+        GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
             const indicator = this.add.graphics();
             indicator.setDepth(5); // Below entities but above background
             
@@ -670,7 +670,7 @@ export class GameScene extends Phaser.Scene {
         });
         
         // Create spawn indicators for red team using hardcoded positions
-        GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED.forEach((position, index) => {
+        GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED.forEach((position, index) => {
             const indicator = this.add.graphics();
             indicator.setDepth(5); // Below entities but above background
             

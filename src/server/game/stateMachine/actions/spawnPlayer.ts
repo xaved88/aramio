@@ -22,11 +22,11 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     } else {
         // Default spawn at first spawn position for team
         if (team === 'blue') {
-            hero.x = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE[0].x;
-            hero.y = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE[0].y;
+            hero.x = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE[0].x;
+            hero.y = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE[0].y;
         } else {
-            hero.x = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED[0].x;
-            hero.y = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED[0].y;
+            hero.x = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED[0].x;
+            hero.y = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED[0].y;
         }
     }
     
@@ -40,7 +40,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.attackSpeed = heroConfig.ATTACK_SPEED;
     hero.size = heroConfig.SIZE;
     hero.windUp = heroConfig.WIND_UP;
-    hero.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+    hero.moveSpeed = GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
     hero.bulletArmor = (heroConfig as any).BULLET_ARMOR || 0;
     hero.abilityArmor = (heroConfig as any).ABILITY_ARMOR || 0;
     hero.attackReadyAt = 0;

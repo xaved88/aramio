@@ -446,13 +446,13 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     
     // Move player to spawn location based on their position in the team
     if (player.team === 'blue') {
-        const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
+        const blueSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE;
         const spawnIndex = Math.min(heroIndex, blueSpawnPositions.length - 1);
         const spawnPosition = blueSpawnPositions[spawnIndex];
         player.x = spawnPosition.x;
         player.y = spawnPosition.y;
     } else {
-        const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
+        const redSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED;
         const spawnIndex = Math.min(heroIndex, redSpawnPositions.length - 1);
         const spawnPosition = redSpawnPositions[spawnIndex];
         player.x = spawnPosition.x;

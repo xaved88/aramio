@@ -208,8 +208,8 @@ export class GameRoom extends Room<GameState> {
 
     private spawnBots() {
         // Spawn bots at different positions around the cradles
-        const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
-        const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
+        const blueSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE;
+        const redSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED;
         const botAbilityTypes = GAMEPLAY_CONFIG.BOTS.ABILITY_TYPES;
         const botsPerTeam = GAMEPLAY_CONFIG.BOTS.BOTS_PER_TEAM;
         

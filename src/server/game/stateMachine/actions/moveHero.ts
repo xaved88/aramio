@@ -24,7 +24,7 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction): StateM
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // If we're close enough, don't move
-        if (distance < GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE) {
+        if (distance < GAMEPLAY_CONFIG.HERO_STOP_DISTANCE) {
             return { newState: state };
         }
         

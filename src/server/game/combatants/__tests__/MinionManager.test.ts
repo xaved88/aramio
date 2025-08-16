@@ -95,7 +95,7 @@ describe('MinionManager', () => {
         bluePlayer.attackStrength = 100;
         bluePlayer.attackSpeed = 1;
         bluePlayer.lastAttackTime = 0;
-        bluePlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+        bluePlayer.moveSpeed = GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
         bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
         
         // Add all combatants to game state
@@ -132,7 +132,7 @@ describe('MinionManager', () => {
             redPlayer.attackStrength = 100;
             redPlayer.attackSpeed = 1;
             redPlayer.lastAttackTime = 0;
-            redPlayer.moveSpeed = GAMEPLAY_CONFIG.PLAYER_MOVE_SPEED;
+            redPlayer.moveSpeed = GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
             redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -195,8 +195,8 @@ describe('MinionManager', () => {
 
         it('should not move when close to target', () => {
             // Place blue minion very close to red cradle
-            blueMinion.x = redCradle.x + GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE - 1;
-            blueMinion.y = redCradle.y + GAMEPLAY_CONFIG.PLAYER_STOP_DISTANCE - 1;
+            blueMinion.x = redCradle.x + GAMEPLAY_CONFIG.HERO_STOP_DISTANCE - 1;
+            blueMinion.y = redCradle.y + GAMEPLAY_CONFIG.HERO_STOP_DISTANCE - 1;
             
             const originalX = blueMinion.x;
             const originalY = blueMinion.y;

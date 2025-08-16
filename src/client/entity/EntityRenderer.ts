@@ -382,7 +382,7 @@ export class EntityRenderer {
      * Renders player graphics (circle) with draining glass effect
      */
     private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
-        const radius = CLIENT_CONFIG.PLAYER_CIRCLE_RADIUS;
+        const radius = CLIENT_CONFIG.HERO_CIRCLE_RADIUS;
         
         if (healthPercentage < 1) {
             // Draw the larger, lighter circle representing missing health

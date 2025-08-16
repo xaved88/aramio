@@ -15,9 +15,9 @@ export const SERVER_CONFIG = {
 
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
-    PLAYER_MOVE_SPEED: 3.5, // pixels per frame
-    MINION_MOVE_SPEED: 2.5, // pixels per frame - slower than players
-    PLAYER_STOP_DISTANCE: 5, // pixels - how close to target before stopping
+    HERO_MOVE_SPEED: 3.5, // pixels per frame
+    MINION_MOVE_SPEED: 2.5, // pixels per frame - slower than heroes
+    HERO_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUND_BUFFER: 20, // buffer between canvas edge and playable area
 
     CRADLE_POSITIONS: {
@@ -39,7 +39,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_SPEED: 1, // attacks per second
                 WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
                 RESPAWN_TIME_MS: 6000,
-                SIZE: 15, // collision radius (matches PLAYER_CIRCLE_RADIUS)
+                SIZE: 15, // collision radius (matches HERO_CIRCLE_RADIUS)
             },
             'hookshot': {
                 HEALTH: 70, // A bit tanky
@@ -200,7 +200,7 @@ export const GAMEPLAY_CONFIG = {
         FADE_OUT_DURATION_MS: 1000, // 1 second fade out
         BACKGROUND_ALPHA: 0.5, // 50% alpha black background
     },
-    PLAYER_SPAWN_POSITIONS: {
+    HERO_SPAWN_POSITIONS: {
         BLUE: [
             { x: 100, y: 675 }, // Spawn 1: 75 units below blue cradle
             { x: 62, y: 675 },  // Spawn 2: between 1 and 3, same y as 1 and 3
@@ -235,7 +235,7 @@ export const CLIENT_CONFIG = {
     },
     GAME_CANVAS_WIDTH: 700,
     GAME_CANVAS_HEIGHT: 700,
-    PLAYER_CIRCLE_RADIUS: 15, // smaller than cradle (25)
+    HERO_CIRCLE_RADIUS: 15, // smaller than cradle (25)
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
