@@ -28,7 +28,7 @@ export const GAMEPLAY_CONFIG = {
         BLUE: { x: 200, y: 400 }, // 1/3 way from blue cradle to red cradle
         RED: { x: 400, y: 200 },  // 2/3 way from red cradle to blue cradle
     },
-    PLAYER_SPAWN_OFFSET: 40, // distance from cradle to spawn player
+
     COMBAT: {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         HEROES: {
@@ -217,7 +217,8 @@ export const GAMEPLAY_CONFIG = {
         ],
     },
     BOTS: {
-        ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot',  'default'], // Array of ability types for bots to spawn with
+        BOTS_PER_TEAM: 5, // Number of bots to spawn per team
+        ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again

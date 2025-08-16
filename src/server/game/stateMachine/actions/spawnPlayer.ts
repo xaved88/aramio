@@ -20,13 +20,13 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
         hero.x = x;
         hero.y = y;
     } else {
-        // Default spawn near cradle
+        // Default spawn at first spawn position for team
         if (team === 'blue') {
-            hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-            hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            hero.x = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE[0].x;
+            hero.y = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE[0].y;
         } else {
-            hero.x = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x - GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
-            hero.y = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y + GAMEPLAY_CONFIG.PLAYER_SPAWN_OFFSET;
+            hero.x = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED[0].x;
+            hero.y = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED[0].y;
         }
     }
     

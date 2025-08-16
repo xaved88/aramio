@@ -211,18 +211,19 @@ export class GameRoom extends Room<GameState> {
         const blueSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.BLUE;
         const redSpawnPositions = GAMEPLAY_CONFIG.PLAYER_SPAWN_POSITIONS.RED;
         const botAbilityTypes = GAMEPLAY_CONFIG.BOTS.ABILITY_TYPES;
+        const botsPerTeam = GAMEPLAY_CONFIG.BOTS.BOTS_PER_TEAM;
         
         // Spawn blue bots
-        for (let i = 0; i < botAbilityTypes.length; i++) {
-            const spawnPosition = blueSpawnPositions[i];
-            const abilityType = botAbilityTypes[i];
+        for (let i = 0; i < botsPerTeam; i++) {
+            const spawnPosition = blueSpawnPositions[i % blueSpawnPositions.length];
+            const abilityType = botAbilityTypes[i % botAbilityTypes.length];
             this.gameEngine.spawnControlledHero('bot-simpleton', 'blue', spawnPosition, abilityType);
         }
         
         // Spawn red bots
-        for (let i = 0; i < botAbilityTypes.length; i++) {
-            const spawnPosition = redSpawnPositions[i];
-            const abilityType = botAbilityTypes[i];
+        for (let i = 0; i < botsPerTeam; i++) {
+            const spawnPosition = redSpawnPositions[i % redSpawnPositions.length];
+            const abilityType = botAbilityTypes[i % botAbilityTypes.length];
             this.gameEngine.spawnControlledHero('bot-simpleton', 'red', spawnPosition, abilityType);
         }
     }
