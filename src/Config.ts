@@ -123,13 +123,13 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
                 COOLDOWN_REDUCTION_PER_LEVEL: 0.08, // Reduce cooldown by 8% per level
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
-                RANGE: 130, // Base dash range
-                RANGE_PER_LEVEL: 10, // Additional range per level
-                LANDING_DAMAGE: 15, // Base landing damage
-                LANDING_DAMAGE_PER_LEVEL: 10, // Additional damage per level
-                LANDING_RADIUS: 65, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
-                TAUNT_RADIUS: 65, // Radius for taunt effect
-                TAUNT_DURATION_MS: 100, // Base taunt duration (1 second)
+                RANGE: 100, // Base dash range
+                RANGE_PER_LEVEL: 5, // Additional range per level
+                LANDING_DAMAGE: 10, // Base landing damage
+                LANDING_DAMAGE_PER_LEVEL: 6, // Additional damage per level
+                LANDING_RADIUS: 50, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
+                TAUNT_RADIUS: 50, // Radius for taunt effect
+                TAUNT_DURATION_MS: 1000, // Base taunt duration (1 second)
                 TAUNT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
                 REFLECT_DURATION_MS: 3000, // Base reflect duration (3 seconds)
                 REFLECT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
