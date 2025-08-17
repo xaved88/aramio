@@ -204,7 +204,6 @@ export class GameEngine {
                 this.state.combatants.forEach((combatant: any) => {
                     if (combatant.team === projectile.team) return; // Don't hit allies
                     if (combatant.getHealth() <= 0) return; // Don't hit dead entities
-                    if (combatant.state === 'respawning') return; // Don't hit respawning entities
                     
                     const dx = projectile.x - combatant.x;
                     const dy = projectile.y - combatant.y;
@@ -304,7 +303,6 @@ export class GameEngine {
         this.state.combatants.forEach((combatant: any) => {
             if (combatant.team === projectile.team) return; // Don't hit allies
             if (combatant.getHealth() <= 0) return; // Don't hit dead entities
-            if (combatant.state === 'respawning') return; // Don't hit respawning entities
             
             const dx = combatant.x - targetX;
             const dy = combatant.y - targetY;
