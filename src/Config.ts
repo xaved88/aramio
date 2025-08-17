@@ -37,9 +37,9 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1, // attacks per second
-                RESPAWN_TIME_MS: 6000,
-                SIZE: 15, // collision radius (matches HERO_CIRCLE_RADIUS)
                 WIND_UP: 0.25, // same wind-up time for all heroes
+                RESPAWN_TIME_MS: 6000, // same respawn time for all heroes
+                SIZE: 15, // visual & collision radius
             },
             'hookshot': {
                 HEALTH: 70, // A bit tanky
@@ -48,7 +48,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_SPEED: 0.5, // Low attack speed
                 WIND_UP: 0.25,
                 RESPAWN_TIME_MS: 6000,
-                SIZE: 15, // same collision radius
+                SIZE: 15,
             },
             'mercenary': {
                 HEALTH: 50,
@@ -60,7 +60,7 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'pyromancer': {
-                HEALTH: 30, // Low HP
+                HEALTH: 40, // Low HP
                 ATTACK_RADIUS: 35, // Low range
                 ATTACK_STRENGTH: 3, // Low attack
                 ATTACK_SPEED: 0.8, // Low attack speed
@@ -109,11 +109,11 @@ export const GAMEPLAY_CONFIG = {
                 RAGE_ABILITY_ARMOR: 50, // Ability armor granted during rage
             },
             'pyromancer': {
-                COOLDOWN_MS: 1500, // Fast cast time (1.5 seconds)
-                STRENGTH: 12, // High ability damage
-                STRENGTH_PER_LEVEL: 8, // linear scaling (exponent is in the aoe)
-                RADIUS: 20,
-                RADIUS_PER_LEVEL: 5,
+                COOLDOWN_MS: 2000,
+                STRENGTH: 10,
+                STRENGTH_PER_LEVEL: 5, // linear scaling (exponent is in the aoe)
+                RADIUS: 30,
+                RADIUS_PER_LEVEL: 2.5,
                 RANGE: 150,
                 RANGE_PER_LEVEL: 20,
                 SPEED: 200, 
