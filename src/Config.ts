@@ -33,7 +33,7 @@ export const GAMEPLAY_CONFIG = {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
         HEROES: {
             'default': {
-                HEALTH: 50,
+                HEALTH: 75,
                 ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1, // attacks per second
@@ -42,7 +42,7 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15, // visual & collision radius
             },
             'hookshot': {
-                HEALTH: 70, // A bit tanky
+                HEALTH: 105, // A bit tanky
                 ATTACK_RADIUS: 25, // Melee
                 ATTACK_STRENGTH: 10, // Higher attack
                 ATTACK_SPEED: 0.5, // Low attack speed
@@ -51,7 +51,7 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'mercenary': {
-                HEALTH: 50,
+                HEALTH: 75,
                 ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1,
@@ -60,7 +60,7 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'pyromancer': {
-                HEALTH: 40, // Low HP
+                HEALTH: 60, // Low HP
                 ATTACK_RADIUS: 35, // Low range
                 ATTACK_STRENGTH: 3, // Low attack
                 ATTACK_SPEED: 0.8, // Low attack speed
@@ -69,7 +69,7 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'thorndive': {
-                HEALTH: 90, // High HP tank
+                HEALTH: 120, // High HP tank
                 ATTACK_RADIUS: 25, // Low range (melee tank)
                 ATTACK_STRENGTH: 8, // High damage
                 ATTACK_SPEED: 0.6, // Low attack speed
