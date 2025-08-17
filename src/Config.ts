@@ -148,7 +148,7 @@ export const GAMEPLAY_CONFIG = {
         },
         TURRET: {
             HEALTH: 1000,
-            ATTACK_RADIUS: 70,
+            ATTACK_RADIUS: 75,
             ATTACK_STRENGTH: 25,
             ATTACK_SPEED: 2, // attacks per second
             WIND_UP: 0.5, // 0.5 seconds wind-up time for turrets
