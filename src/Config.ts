@@ -37,16 +37,16 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 50,
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1, // attacks per second
-                WIND_UP: 0.25, // 0.25 seconds wind-up time for heroes
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15, // collision radius (matches HERO_CIRCLE_RADIUS)
+                WIND_UP: 0.25, // same wind-up time for all heroes
             },
             'hookshot': {
                 HEALTH: 70, // A bit tanky
                 ATTACK_RADIUS: 25, // Melee
                 ATTACK_STRENGTH: 10, // Higher attack
                 ATTACK_SPEED: 0.5, // Low attack speed
-                WIND_UP: 0.1, // Fast wind-up time
+                WIND_UP: 0.25,
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15, // same collision radius
             },
@@ -64,7 +64,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 35, // Low range
                 ATTACK_STRENGTH: 3, // Low attack
                 ATTACK_SPEED: 0.8, // Low attack speed
-                WIND_UP: 0.4, // Slow wind-up
+                WIND_UP: 0.25,
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15,
             },
@@ -73,7 +73,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_RADIUS: 25, // Low range (melee tank)
                 ATTACK_STRENGTH: 8, // High damage
                 ATTACK_SPEED: 0.6, // Low attack speed
-                WIND_UP: 0.3, // Moderate wind-up
+                WIND_UP: 0.25,
                 RESPAWN_TIME_MS: 6000,
                 SIZE: 15, 
                 BULLET_ARMOR: 20, // Base bullet armor
@@ -82,9 +82,9 @@ export const GAMEPLAY_CONFIG = {
         },
         ABILITIES: {
               'default': {
-                    COOLDOWN_MS: 1000,
-                    STRENGTH: 7, // damage dealt by projectile
-                    SPEED: 200, // pixels per second
+                COOLDOWN_MS: 1000,
+                STRENGTH: 7, // damage dealt by projectile
+                SPEED: 200, // pixels per second
                 },
               'hookshot': {
                 COOLDOWN_MS: 5000,
