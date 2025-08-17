@@ -202,8 +202,7 @@ export class GameEngine {
                 let closestDistance = Infinity;
                 
                 this.state.combatants.forEach((combatant: any) => {
-                    if (combatant.team === projectile.team) return; // Don't hit allies
-                    if (combatant.getHealth() <= 0) return; // Don't hit dead entities
+                    if (!this.isValidProjectileTarget(combatant, projectile)) return;
                     
                     const dx = projectile.x - combatant.x;
                     const dy = projectile.y - combatant.y;
@@ -222,7 +221,7 @@ export class GameEngine {
                     projectilesToRemove.push(projectile.id);
                     
                     // Only apply effects to heroes and minions
-                    if (closestCombatant.type === 'hero' || closestCombatant.type === 'minion') {
+                    if (this.canReceiveProjectileEffects(closestCombatant)) {
                         // Apply projectile effects
                         this.applyProjectileEffects(projectile, closestCombatant);
                     }
@@ -246,7 +245,7 @@ export class GameEngine {
         projectile.effects.forEach((effect: ProjectileEffect) => {
             switch (effect.effectType) {
                 case 'applyDamage':
-                    if (effect.damage && (target.type === 'hero' || target.type === 'minion')) {
+                    if (effect.damage && this.canReceiveProjectileEffects(target)) {
                         CombatantUtils.damageCombatant(target, effect.damage, this.state, projectile.ownerId, 'ability');
                     }
                     break;
@@ -272,6 +271,30 @@ export class GameEngine {
             // Reset attack ready time to prevent immediate attacks
             target.attackReadyAt = 0;
         }
+    }
+
+    /**
+     * Checks if a combatant is a valid target for a projectile
+     * @param combatant The combatant to check
+     * @param projectile The projectile checking the target
+     * @returns true if the combatant is a valid target
+     */
+    private isValidProjectileTarget(combatant: any, projectile: any): boolean {
+        // Don't hit allies
+        if (combatant.team === projectile.team) return false;
+        // Don't hit dead entities
+        if (combatant.getHealth() <= 0) return false;
+        
+        return true;
+    }
+
+    /**
+     * Checks if a combatant can receive projectile effects
+     * @param combatant The combatant to check
+     * @returns true if the combatant can receive effects
+     */
+    private canReceiveProjectileEffects(combatant: any): boolean {
+        return combatant.type === 'hero' || combatant.type === 'minion';
     }
 
     /**
@@ -301,8 +324,7 @@ export class GameEngine {
         this.state.aoeDamageEvents.push(aoeEvent);
         
         this.state.combatants.forEach((combatant: any) => {
-            if (combatant.team === projectile.team) return; // Don't hit allies
-            if (combatant.getHealth() <= 0) return; // Don't hit dead entities
+            if (!this.isValidProjectileTarget(combatant, projectile)) return;
             
             const dx = combatant.x - targetX;
             const dy = combatant.y - targetY;
@@ -311,7 +333,7 @@ export class GameEngine {
             // Check if combatant is within AOE radius (accounting for combatant size)
             if (distance <= projectile.aoeRadius + combatant.size) {
                 // Only apply effects to heroes and minions
-                if (combatant.type === 'hero' || combatant.type === 'minion') {
+                if (this.canReceiveProjectileEffects(combatant)) {
                     this.applyProjectileEffects(projectile, combatant);
                 }
             }
@@ -431,10 +453,10 @@ export class GameEngine {
                     break;
                 case 'GAME_OVER':
                     // This event will be handled by the room
-                    console.log(`Game over event triggered with winning team: ${event.payload.winningTeam}`);
                     break;
                 default:
-                    console.log('Unknown event type:', event.type);
+                    // Unknown event type - could log in development if needed
+                    break;
             }
         });
     }
