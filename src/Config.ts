@@ -235,7 +235,6 @@ export const CLIENT_CONFIG = {
     },
     GAME_CANVAS_WIDTH: 700,
     GAME_CANVAS_HEIGHT: 700,
-    HERO_CIRCLE_RADIUS: 15, // smaller than cradle (25)
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes

@@ -216,7 +216,7 @@ export class EntityRenderer {
         // Render based on type
         switch (combatant.type) {
             case COMBATANT_TYPES.HERO:
-                this.renderPlayerGraphics(graphics, primaryColor, respawnColor, healthPercentage);
+                this.renderHeroGraphics(graphics, primaryColor, respawnColor, healthPercentage, combatant.size);
                 break;
             case COMBATANT_TYPES.CRADLE:
                 this.renderCradleGraphics(graphics, primaryColor, respawnColor, healthPercentage);
@@ -379,10 +379,10 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders player graphics (circle) with draining glass effect
+     * Renders hero graphics (circle) with draining glass effect
      */
-    private renderPlayerGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number): void {
-        const radius = CLIENT_CONFIG.HERO_CIRCLE_RADIUS;
+    private renderHeroGraphics(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, size: number): void {
+        const radius = size;
         
         if (healthPercentage < 1) {
             // Draw the larger, lighter circle representing missing health

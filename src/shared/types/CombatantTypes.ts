@@ -173,6 +173,7 @@ export interface BaseCombatant {
     attackStrength: number;
     attackSpeed: number;
     lastAttackTime: number;
+    size: number; // visual & collision radius
     target?: CombatantId; // ID of the combatant being targeted
     windUp: number; // Time in seconds before attack can be performed
     attackReadyAt: number; // Timestamp when wind-up period ends and attack can be performed
