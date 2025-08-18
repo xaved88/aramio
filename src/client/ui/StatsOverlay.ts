@@ -125,14 +125,24 @@ export class StatsOverlay {
             fontStyle: 'bold'
         };
 
-        const redHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 50, 'Red Team', {
+        // Add game time display above team headers
+        const gameTimeText = this.scene.add.text(centerX, 20, `Game Time: ${this.formatGameTime(state.gameTime)}`, {
+            fontSize: '20px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        });
+        gameTimeText.setOrigin(0.5, 0);
+        gameTimeText.setDepth(1001);
+        this.overlayElements.push(gameTimeText);
+
+        const redHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', {
             ...headerStyle,
             color: '#e74c3c'
         });
         redHeader.setDepth(1001);
         this.overlayElements.push(redHeader);
 
-        const blueHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 350, 'Blue Team', {
+        const blueHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', {
             ...headerStyle,
             color: '#3498db'
         });
@@ -140,10 +150,10 @@ export class StatsOverlay {
         this.overlayElements.push(blueHeader);
 
         // Create red team table
-        this.createTeamTable(redTeamStats, tableX, 100, '#e74c3c');
+        this.createTeamTable(redTeamStats, tableX, 120, '#e74c3c');
         
         // Create blue team table
-        this.createTeamTable(blueTeamStats, tableX, 400, '#3498db');
+        this.createTeamTable(blueTeamStats, tableX, 420, '#3498db');
     }
 
     /**
@@ -508,5 +518,15 @@ export class StatsOverlay {
      */
     destroy(): void {
         this.hide();
+    }
+
+    /**
+     * Formats the game time in minutes and seconds
+     */
+    private formatGameTime(milliseconds: number): string {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const remainingSeconds = totalSeconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     }
 } 
