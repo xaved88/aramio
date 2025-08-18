@@ -142,12 +142,34 @@ export class StatsOverlay {
         redHeader.setDepth(1001);
         this.overlayElements.push(redHeader);
 
+        // Add red team totals
+        const redTotals = this.calculateTeamTotals(redTeamStats);
+        const redTotalsText = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow + 200, 70, 
+            `XP: ${Math.round(redTotals.xp)} | K: ${redTotals.kills} | D: ${redTotals.deaths}`, {
+            fontSize: '16px',
+            color: '#e74c3c',
+            fontStyle: 'bold'
+        });
+        redTotalsText.setDepth(1001);
+        this.overlayElements.push(redTotalsText);
+
         const blueHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', {
             ...headerStyle,
             color: '#3498db'
         });
         blueHeader.setDepth(1001);
         this.overlayElements.push(blueHeader);
+
+        // Add blue team totals
+        const blueTotals = this.calculateTeamTotals(blueTeamStats);
+        const blueTotalsText = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow + 200, 370, 
+            `XP: ${Math.round(blueTotals.xp)} | K: ${blueTotals.kills} | D: ${blueTotals.deaths}`, {
+            fontSize: '16px',
+            color: '#3498db',
+            fontStyle: 'bold'
+        });
+        blueTotalsText.setDepth(1001);
+        this.overlayElements.push(blueTotalsText);
 
         // Create red team table
         this.createTeamTable(redTeamStats, tableX, 120, '#e74c3c');
@@ -502,6 +524,16 @@ export class StatsOverlay {
             }
             return a.id.localeCompare(b.id);
         });
+    }
+
+    /**
+     * Calculates team totals for kills, deaths, and XP
+     */
+    private calculateTeamTotals(stats: PlayerStats[]): { kills: number, deaths: number, xp: number } {
+        const kills = stats.reduce((sum, player) => sum + player.heroKills, 0);
+        const deaths = stats.reduce((sum, player) => sum + player.deaths, 0);
+        const xp = stats.reduce((sum, player) => sum + player.totalExperience, 0);
+        return { kills, deaths, xp };
     }
 
     /**
