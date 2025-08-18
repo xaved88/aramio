@@ -51,9 +51,9 @@ export const GAMEPLAY_CONFIG = {
                 SIZE: 15,
             },
             'mercenary': {
-                HEALTH: 75,
+                HEALTH: 60,
                 ATTACK_RADIUS: 50,
-                ATTACK_STRENGTH: 5,
+                ATTACK_STRENGTH: 4,
                 ATTACK_SPEED: 1,
                 WIND_UP: 0.25,
                 RESPAWN_TIME_MS: 6000,
@@ -91,9 +91,9 @@ export const GAMEPLAY_CONFIG = {
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
                 DURATION_MS: 500, // 500ms projectile duration
-                STUN_DURATION_MS: 500, // 500ms base stun duration
+                STUN_DURATION_MS: 700, // 700ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
-                SPEED_BOOST_PERCENTAGE: 0.10, // +10% speed per level
+                SPEED_BOOST_PERCENTAGE: 0.07, // +7% speed per level
             },
             'mercenary': {
                 COOLDOWN_MS: 8000,
