@@ -97,11 +97,6 @@ export class EntityRenderer {
      * Applies visual effects to an entity based on its active effects
      */
     private applyEffectsToEntity(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
-        if (!combatant.effects || combatant.effects.length === 0) {
-            // Reset alpha to default if no effects
-            graphics.setAlpha(1);
-            return;
-        }
 
         // Check for nocollision effect
         const hasNoCollision = combatant.effects.some(effect => effect.type === 'nocollision');
@@ -122,19 +117,40 @@ export class EntityRenderer {
             
             // Add stun icon above the hero
             graphics.lineStyle(2, 0x999972); // Yellowish lines for icon
-            graphics.beginPath();
+
             
-            // Draw a simple lightning bolt/star shape for stun icon
+            // Draw a simple lightning bolt shape for stun icon
             const iconSize = 8;
             const iconY = -combatant.size - 15; // Position above the hero
-            
-            // Lightning bolt shape: /\
             graphics.moveTo(0, iconY - iconSize);
             graphics.lineTo(-iconSize/2, iconY);
             graphics.lineTo(0, iconY);
             graphics.lineTo(-iconSize/2, iconY + iconSize);
             
             graphics.strokePath();
+        }
+
+        // Check for reflect effect - add pulsing spiky border effect
+        const hasReflect = combatant.effects.some(effect => effect.type === 'reflect');
+        if (hasReflect) {            
+            graphics.lineStyle(3, 0xFFD700); // Orange-red for danger, thicker line
+            
+            // Draw spiky border right on the entity's edge
+            const numSpikes = 12;
+            const entityRadius = combatant.size + 1;
+            
+            for (let i = 0; i < numSpikes; i++) {
+                const angle = (i / numSpikes) * Math.PI * 2;
+                const spikeAngle = angle + (Math.PI / numSpikes); // Offset to center spikes between points
+                
+                // Draw each spike as a small line segment on the entity's edge
+                const startAngle = spikeAngle - 0.07;
+                const endAngle = spikeAngle + 0.07;
+                
+                graphics.beginPath();
+                graphics.arc(0, 0, entityRadius, startAngle, endAngle);
+                graphics.strokePath();
+            }
         }
     }
 
