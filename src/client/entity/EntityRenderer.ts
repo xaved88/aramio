@@ -110,6 +110,32 @@ export class EntityRenderer {
         } else {
             graphics.setAlpha(1);
         }
+
+        // Check for stun effect - add pulsing yellowish border and stun icon
+        const isStunned = combatant.effects.some(effect => effect.type === 'stun');
+        if (isStunned) {
+            // Add pulsing yellowish grey border for stun effect
+            const pulseIntensity = Math.sin(Date.now() * 0.01) * 0.5 + 0.5; // Pulsing between 0.5 and 1.0
+            const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px
+            graphics.lineStyle(borderThickness, 0x999972); // Yellowish grey border
+            graphics.strokeCircle(0, 0, combatant.size + 2); // Slightly larger than entity
+            
+            // Add stun icon above the hero
+            graphics.lineStyle(2, 0x999972); // Yellowish lines for icon
+            graphics.beginPath();
+            
+            // Draw a simple lightning bolt/star shape for stun icon
+            const iconSize = 8;
+            const iconY = -combatant.size - 15; // Position above the hero
+            
+            // Lightning bolt shape: /\
+            graphics.moveTo(0, iconY - iconSize);
+            graphics.lineTo(-iconSize/2, iconY);
+            graphics.lineTo(0, iconY);
+            graphics.lineTo(-iconSize/2, iconY + iconSize);
+            
+            graphics.strokePath();
+        }
     }
 
     /**
