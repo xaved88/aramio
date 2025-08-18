@@ -25,6 +25,7 @@ export class Combatant extends Schema {
     @type('number') bulletArmor!: number; // Armor against auto-attacks
     @type('number') abilityArmor!: number; // Armor against abilities
     @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant - will contain specific effect types
+    @type('number') lastDamageTime!: number; // Timestamp when the combatant last took damage
 
     // Stat getters with effect modifications
     getHealth(): number {

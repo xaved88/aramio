@@ -53,6 +53,7 @@ describe('Projectile Collision Detection', () => {
         blueHero.roundStats.turretKills = 0;
         blueHero.roundStats.damageTaken = 0;
         blueHero.roundStats.damageDealt = 0;
+        blueHero.lastDamageTime = 0;
         blueHero.getHealth = () => blueHero.health;
 
         redHero = new Hero();
@@ -72,6 +73,7 @@ describe('Projectile Collision Detection', () => {
         redHero.roundStats.turretKills = 0;
         redHero.roundStats.damageTaken = 0;
         redHero.roundStats.damageDealt = 0;
+        redHero.lastDamageTime = 0;
         redHero.getHealth = () => redHero.health;
 
         blueMinion = new Minion();

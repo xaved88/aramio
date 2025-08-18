@@ -38,6 +38,7 @@ describe('CombatantUtils', () => {
         hero.roundStats.turretKills = 0;
         hero.roundStats.damageTaken = 0;
         hero.roundStats.damageDealt = 0;
+        hero.lastDamageTime = 0;
         
         gameState.combatants.set(hero.id, hero);
     });

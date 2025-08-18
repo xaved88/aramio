@@ -142,6 +142,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         windUp: applyStatModifications('windUp', colyseusCombatant.windUp, Array.from(colyseusCombatant.effects).filter(e => e != null)),
         attackReadyAt: colyseusCombatant.attackReadyAt,
         moveSpeed: applyStatModifications('moveSpeed', colyseusCombatant.moveSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        lastDamageTime: colyseusCombatant.lastDamageTime || 0,
         effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => {
             const baseEffect = {
                 type: effect.type,
@@ -159,12 +160,16 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                         moveTargetY: (effect as any).moveTargetY,
                         moveSpeed: (effect as any).moveSpeed
                     };
+                case 'passive_healing':
+                    return {
+                        ...baseEffect,
+                        healPercentPerSecond: (effect as any).healPercentPerSecond || 0
+                    };
                 case 'stun':
                 case 'nocollision':
                 case 'statmod':
                 case 'reflect':
                 case 'hunter':
-                    return baseEffect;
                 default:
                     return baseEffect;
             }

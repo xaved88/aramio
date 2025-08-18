@@ -35,6 +35,10 @@ export class TauntEffect extends CombatantEffect {
     @type('string') taunterCombatantId!: string; // ID of the combatant that applied the taunt
 }
 
+export class PassiveHealingEffect extends CombatantEffect {
+    @type('number') healPercentPerSecond!: number; // Percentage of max health to heal per second
+}
+
 export class MoveEffect extends CombatantEffect {
     // type is inherited from base class
     @type('number') moveTargetX!: number; // Target X for move effect

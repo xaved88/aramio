@@ -152,6 +152,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.bulletArmor = 0;
             bluePlayer.abilityArmor = 0;
             bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            bluePlayer.lastDamageTime = 0;
             
                     // Create red player
         redPlayer = new Hero();
@@ -178,6 +179,7 @@ describe('handleUpdateGame', () => {
             redPlayer.bulletArmor = 0;
             redPlayer.abilityArmor = 0;
             redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redPlayer.lastDamageTime = 0;
             
             gameState.combatants.set(bluePlayer.id, bluePlayer);
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -286,6 +288,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             bluePlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            bluePlayer.lastDamageTime = 0;
             
             gameState.combatants.set(deadMinion.id, deadMinion);
             gameState.combatants.set(bluePlayer.id, bluePlayer);
@@ -330,6 +333,7 @@ describe('handleUpdateGame', () => {
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
             redPlayer.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redPlayer.lastDamageTime = 0;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             
@@ -519,6 +523,7 @@ describe('handleUpdateGame', () => {
             attacker.ability.cooldown = 5000;
             (attacker.ability as DefaultAbility).strength = 50;
             attacker.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            attacker.lastDamageTime = 0;
             
             // Create a near enemy (closer to attacker)
             nearEnemy = new Hero();
@@ -547,6 +552,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.ability.cooldown = 5000;
             (nearEnemy.ability as DefaultAbility).strength = 50;
             nearEnemy.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            nearEnemy.lastDamageTime = 0;
             
             // Create a far enemy (further from attacker)
             farEnemy = new Hero();
@@ -575,6 +581,7 @@ describe('handleUpdateGame', () => {
             farEnemy.ability.cooldown = 5000;
             (farEnemy.ability as DefaultAbility).strength = 50;
             farEnemy.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            farEnemy.lastDamageTime = 0;
             
             gameState.combatants.set(attacker.id, attacker);
             gameState.combatants.set(nearEnemy.id, nearEnemy);
@@ -667,6 +674,7 @@ describe('handleUpdateGame', () => {
             player1.ability.cooldown = 1000;
             (player1.ability as DefaultAbility).strength = 5;
             player1.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            player1.lastDamageTime = 0;
 
             // Create player 2
             player2 = new Hero();
@@ -693,6 +701,7 @@ describe('handleUpdateGame', () => {
             player2.ability.cooldown = 1000;
             (player2.ability as DefaultAbility).strength = 5;
             player2.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            player2.lastDamageTime = 0;
 
             // Create minion
             minion = new Minion();
@@ -984,6 +993,7 @@ describe('handleUpdateGame', () => {
             blueHero1.ability.cooldown = 1000;
             (blueHero1.ability as DefaultAbility).strength = 5;
             blueHero1.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero1.lastDamageTime = 0;
 
             blueHero2 = new Hero();
             blueHero2.id = 'blue-hero-2';
@@ -1008,6 +1018,7 @@ describe('handleUpdateGame', () => {
             blueHero2.ability.cooldown = 1000;
             (blueHero2.ability as DefaultAbility).strength = 5;
             blueHero2.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero2.lastDamageTime = 0;
 
             blueHero3 = new Hero();
             blueHero3.id = 'blue-hero-3';
@@ -1032,6 +1043,7 @@ describe('handleUpdateGame', () => {
             blueHero3.ability.cooldown = 1000;
             (blueHero3.ability as DefaultAbility).strength = 5;
             blueHero3.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero3.lastDamageTime = 0;
 
             // Create red minion to be killed
             redMinion = new Minion();
@@ -1073,6 +1085,7 @@ describe('handleUpdateGame', () => {
             redHero.ability.cooldown = 1000;
             (redHero.ability as DefaultAbility).strength = 5;
             redHero.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redHero.lastDamageTime = 0;
 
             gameState.combatants.set(blueHero1.id, blueHero1);
             gameState.combatants.set(blueHero2.id, blueHero2);
@@ -1212,6 +1225,83 @@ describe('handleUpdateGame', () => {
 
             expect(finalHero1.roundStats.totalExperience).toBe(originalXP1 + expectedXP);
             expect(finalHero2.roundStats.totalExperience).toBe(originalXP2 + expectedXP);
+        });
+    });
+
+    describe('passive healing', () => {
+        let hero: Hero;
+
+        beforeEach(() => {
+            // Create a hero for testing passive healing
+            hero = new Hero();
+            hero.id = 'test-hero';
+            hero.type = COMBATANT_TYPES.HERO;
+            hero.team = 'blue';
+            hero.controller = 'test-controller';
+            hero.x = 100;
+            hero.y = 100;
+            hero.health = 50; // Start with damaged health
+            hero.maxHealth = 100;
+            hero.level = 1;
+            hero.state = 'alive';
+            hero.lastDamageTime = 0;
+            hero.attackRadius = 50;
+            hero.attackReadyAt = 0;
+            hero.bulletArmor = 0;
+            hero.abilityArmor = 0;
+            hero.size = GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            hero.roundStats = new RoundStats();
+            hero.roundStats.damageTaken = 0;
+            hero.roundStats.damageDealt = 0;
+
+            // Create default ability
+            const ability = new DefaultAbility();
+            ability.type = 'default';
+            ability.strength = 10;
+            ability.cooldown = 1000;
+            ability.lastUsedTime = 0;
+            hero.ability = ability;
+
+            gameState.combatants.set(hero.id, hero);
+        });
+
+        it('should apply passive healing effect after no-damage threshold', () => {
+            // Set last damage time to be past the threshold
+            const thresholdMs = GAMEPLAY_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
+            hero.lastDamageTime = gameState.gameTime - thresholdMs - 1000; // 1 second past threshold
+
+            result = handleUpdateGame(gameState, action);
+
+            // Check that passive healing effect was applied
+            const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
+            expect(hasPassiveHealing).toBe(true);
+        });
+
+        it('should not apply passive healing effect before no-damage threshold', () => {
+            // Set last damage time to be before the threshold
+            const thresholdMs = GAMEPLAY_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
+            hero.lastDamageTime = gameState.gameTime - thresholdMs + 1000; // 1 second before threshold
+
+            result = handleUpdateGame(gameState, action);
+
+            // Check that passive healing effect was not applied
+            const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
+            expect(hasPassiveHealing).toBe(false);
+        });
+
+        it('should not apply passive healing effect when hero is at max health', () => {
+            // Set hero to max health
+            hero.health = hero.maxHealth;
+
+            // Set last damage time to be past the threshold
+            const thresholdMs = GAMEPLAY_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
+            hero.lastDamageTime = gameState.gameTime - thresholdMs - 1000;
+
+            result = handleUpdateGame(gameState, action);
+
+            // Check that passive healing effect was not applied
+            const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
+            expect(hasPassiveHealing).toBe(false);
         });
     });
 }); 

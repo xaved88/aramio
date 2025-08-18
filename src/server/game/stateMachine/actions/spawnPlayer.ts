@@ -51,6 +51,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.state = 'alive';
     hero.respawnTime = 0;
     hero.respawnDuration = heroConfig.RESPAWN_TIME_MS;
+    hero.lastDamageTime = 0; // Initialize last damage time
     
     // Initialize round stats
     hero.roundStats = new RoundStats();

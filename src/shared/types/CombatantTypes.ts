@@ -49,7 +49,8 @@ export const COMBATANT_EFFECT_TYPES = {
     STATMOD: 'statmod',
     REFLECT: 'reflect',
     HUNTER: 'hunter',
-    TAUNT: 'taunt'
+    TAUNT: 'taunt',
+    PASSIVE_HEALING: 'passive_healing'
 } as const;
 
 export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COMBATANT_EFFECT_TYPES];
@@ -90,6 +91,11 @@ export interface HunterEffect extends CombatantEffect {
 export interface TauntEffect extends CombatantEffect {
     type: 'taunt';
     taunterCombatantId: string; // ID of the combatant that applied the taunt
+}
+
+export interface PassiveHealingEffect extends CombatantEffect {
+    type: 'passive_healing';
+    healPercentPerSecond: number; // Percentage of max health to heal per second
 }
 
 export interface MoveEffect extends CombatantEffect {
@@ -159,7 +165,7 @@ export interface ThorndiveAbility extends Ability {
     landingRadius: number; // AOE radius for landing damage
 }
 
-export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect;
+export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect | PassiveHealingEffect;
 
 export interface BaseCombatant {
     id: CombatantId;
@@ -181,6 +187,7 @@ export interface BaseCombatant {
     bulletArmor: number; // Armor against auto-attacks
     abilityArmor: number; // Armor against abilities
     effects: CombatantEffectUnion[]; // Array of active effects on this combatant
+    lastDamageTime: number; // Timestamp when the combatant last took damage
 }
 
 export interface HeroCombatant extends BaseCombatant {

@@ -20,6 +20,12 @@ export const GAMEPLAY_CONFIG = {
     HERO_STOP_DISTANCE: 5, // pixels - how close to target before stopping
     GAME_BOUND_BUFFER: 20, // buffer between canvas edge and playable area
 
+    // Passive healing configuration
+    PASSIVE_HEALING: {
+        NO_DAMAGE_THRESHOLD_SECONDS: 5, // Seconds without damage to trigger healing
+        HEAL_PERCENT_PER_SECOND: 1, // Percentage of max health to heal per second
+    },
+
     CRADLE_POSITIONS: {
         BLUE: { x: 100, y: 600 }, // bottom left
         RED: { x: 600, y: 100 },  // top right

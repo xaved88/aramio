@@ -157,7 +157,7 @@ export class EntityRenderer {
         const isTaunted = combatant.effects.some(effect => effect.type === 'taunt');
         if (isTaunted) {
             // Add taunt icon above the entity
-            graphics.lineStyle(1, 0xFF0000); // Red lines for icon with reduced thickness
+            graphics.lineStyle(1, 0xFFFF00); // Yellow lines for icon with reduced thickness
             
             // Draw a simple target/eye shape for taunt icon
             const iconSize = 8; // Slightly smaller icon
@@ -167,13 +167,42 @@ export class EntityRenderer {
             graphics.strokeCircle(0, iconY, iconSize);
             
             // Draw inner target dot
-            graphics.fillStyle(0xFF0000, 0.8);
+            graphics.fillStyle(0xFFFF00, 0.8);
             graphics.fillCircle(0, iconY, iconSize * 0.5);
             graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillCircle(0, iconY, iconSize * 0.3);
             
             // Reset fill style
             graphics.fillStyle(0x000000, 0);
+        }
+
+        // Check for passive healing effect - add pulsing green border and healing icon
+        const hasPassiveHealing = combatant.effects.some(effect => effect.type === 'passive_healing');
+        if (hasPassiveHealing) {
+            // Add pulsing green border for passive healing effect (matching stun style)
+            const pulseIntensity = Math.sin(Date.now() * 0.006) * 0.3 + 0.7; // Pulsing between 0.4 and 1.0 (slower, ~1 per second)
+            const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px (matching stun)
+            
+            // Draw border matching stun style
+            graphics.lineStyle(borderThickness, 0x228B22, 0.4); // Darker green border with transparency
+            graphics.strokeCircle(0, 0, combatant.size + 2); // Same positioning as stun
+            
+            // Add healing icon above the entity (matching stun icon style)
+            graphics.lineStyle(2, 0x228B22); // Darker green lines for icon
+            
+            // Draw a simple cross/plus shape for healing icon
+            const iconSize = 6; // Slightly smaller icon
+            const iconY = -combatant.size - 15;
+            
+            // Draw horizontal line
+            graphics.moveTo(-iconSize, iconY);
+            graphics.lineTo(iconSize, iconY);
+            
+            // Draw vertical line
+            graphics.moveTo(0, iconY - iconSize);
+            graphics.lineTo(0, iconY + iconSize);
+            
+            graphics.strokePath();
         }
     }
 

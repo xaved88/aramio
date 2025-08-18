@@ -40,6 +40,10 @@ export class CombatantUtils {
         
         // Dispatch damage event if damage was dealt
         if (actualDamage > 0) {
+            // Update last damage time and remove passive healing effects
+            combatant.lastDamageTime = gameState.gameTime;
+            this.removePassiveHealingEffects(combatant);
+            
             const damageEvent = new DamageEvent();
             damageEvent.sourceId = sourceId;
             damageEvent.targetId = combatant.id;
@@ -113,6 +117,22 @@ export class CombatantUtils {
      */
     static isCombatantAlive(combatant: Combatant): boolean {
         return combatant.getHealth() > 0;
+    }
+
+    /**
+     * Removes passive healing effects from a combatant
+     * @param combatant The combatant to remove effects from
+     */
+    static removePassiveHealingEffects(combatant: Combatant): void {
+        if (!combatant.effects) return;
+        
+        // Remove passive healing effects by index (in reverse order to maintain indices)
+        for (let i = combatant.effects.length - 1; i >= 0; i--) {
+            const effect = combatant.effects[i];
+            if (effect && effect.type === 'passive_healing') {
+                combatant.effects.splice(i, 1);
+            }
+        }
     }
 
     /**

@@ -2,7 +2,7 @@ import { GameState } from '../../../schema/GameState';
 import { Hero, Combatant } from '../../../schema/Combatants';
 import { XPEvent, LevelUpEvent, AttackEvent } from '../../../schema/Events';
 import { UpdateGameAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG, SERVER_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { MinionManager } from '../../combatants/MinionManager';
@@ -68,6 +68,9 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     aoeDamageEventsToRemove.reverse().forEach(index => {
         state.aoeDamageEvents.splice(index, 1);
     });
+    
+    // Handle passive healing
+    handlePassiveHealing(state);
     
     // Process combat
     processCombat(state);
@@ -463,6 +466,8 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
 function completePlayerRespawn(player: Hero): void {
     player.state = 'alive';
     player.health = player.getMaxHealth(); // Restore to max health, not base health
+    player.lastDamageTime = 0; // Reset last damage time
+    CombatantUtils.removePassiveHealingEffects(player); // Remove any existing passive healing effects
 }
 
 function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number): void {
@@ -638,6 +643,54 @@ function checkGameEndConditions(state: GameState): StateMachineResult | null {
     }
     
     return null;
+} 
+
+/**
+ * Handles passive healing for heroes based on the no-damage threshold
+ */
+function handlePassiveHealing(state: GameState): void {
+    const currentTime = state.gameTime;
+    const { PASSIVE_HEALING } = GAMEPLAY_CONFIG;
+    
+    state.combatants.forEach((combatant, id) => {
+        // Only apply passive healing to heroes
+        if (combatant.type !== COMBATANT_TYPES.HERO) return;
+        
+        const hero = combatant as Hero;
+        
+        // Skip if hero is dead, respawning, or at max health
+        if (hero.getHealth() <= 0 || hero.state === 'respawning' || hero.getHealth() >= hero.getMaxHealth()) {
+            // Remove passive healing effect if it exists
+            CombatantUtils.removePassiveHealingEffects(hero);
+            return;
+        }
+        
+        // Check if enough time has passed since last damage
+        const timeSinceLastDamage = currentTime - (hero.lastDamageTime || 0);
+        const thresholdMs = PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
+        
+        if (timeSinceLastDamage >= thresholdMs) {
+            // Check if passive healing effect already exists
+            const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
+            
+            if (!hasPassiveHealing) {
+                // Apply passive healing effect
+                const passiveHealingEffect = new (require('../../../schema/Effects').PassiveHealingEffect)();
+                passiveHealingEffect.type = 'passive_healing';
+                passiveHealingEffect.duration = 0; // Permanent until removed
+                passiveHealingEffect.appliedAt = currentTime;
+                passiveHealingEffect.healPercentPerSecond = PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND;
+                hero.effects.push(passiveHealingEffect);
+            }
+            
+            // Apply healing (percentage of max health per second, adjusted for update rate)
+            const healAmount = (hero.getMaxHealth() * PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND / 100) * (SERVER_CONFIG.UPDATE_RATE_MS / 1000);
+            CombatantUtils.healCombatant(hero, healAmount);
+        } else {
+            // Remove passive healing effect if not enough time has passed
+            CombatantUtils.removePassiveHealingEffects(hero);
+        }
+    });
 } 
 
 
