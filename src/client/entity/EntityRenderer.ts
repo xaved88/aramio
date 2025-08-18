@@ -152,6 +152,29 @@ export class EntityRenderer {
                 graphics.strokePath();
             }
         }
+
+        // Check for taunt effect - add taunt icon above the entity
+        const isTaunted = combatant.effects.some(effect => effect.type === 'taunt');
+        if (isTaunted) {
+            // Add taunt icon above the entity
+            graphics.lineStyle(1, 0xFF0000); // Red lines for icon with reduced thickness
+            
+            // Draw a simple target/eye shape for taunt icon
+            const iconSize = 8; // Slightly smaller icon
+            const iconY = -combatant.size - 15; // Position above the entity
+            
+            // Draw outer circle
+            graphics.strokeCircle(0, iconY, iconSize);
+            
+            // Draw inner target dot
+            graphics.fillStyle(0xFF0000, 0.8);
+            graphics.fillCircle(0, iconY, iconSize * 0.5);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(0, iconY, iconSize * 0.3);
+            
+            // Reset fill style
+            graphics.fillStyle(0x000000, 0);
+        }
     }
 
     /**
