@@ -213,18 +213,37 @@ export class GameRoom extends Room<GameState> {
         const botAbilityTypes = GAMEPLAY_CONFIG.BOTS.ABILITY_TYPES;
         const botsPerTeam = GAMEPLAY_CONFIG.BOTS.BOTS_PER_TEAM;
         
-        // Spawn blue bots
+        // Spawn bots for each team
+        this.spawnBotsForTeam('blue', blueSpawnPositions, botAbilityTypes, botsPerTeam);
+        this.spawnBotsForTeam('red', redSpawnPositions, botAbilityTypes, botsPerTeam);
+    }
+
+    private spawnBotsForTeam(team: 'blue' | 'red', spawnPositions: readonly any[], botAbilityTypes: readonly string[], botsPerTeam: number) {
         for (let i = 0; i < botsPerTeam; i++) {
-            const spawnPosition = blueSpawnPositions[i % blueSpawnPositions.length];
+            const spawnPosition = spawnPositions[i % spawnPositions.length];
             const abilityType = botAbilityTypes[i % botAbilityTypes.length];
-            this.gameEngine.spawnControlledHero('bot-simpleton', 'blue', spawnPosition, abilityType);
+            
+            // Choose bot strategy based on ability type
+            const botStrategy = this.selectBotStrategy(abilityType);
+            
+            this.gameEngine.spawnControlledHero(botStrategy, team, spawnPosition, abilityType);
         }
-        
-        // Spawn red bots
-        for (let i = 0; i < botsPerTeam; i++) {
-            const spawnPosition = redSpawnPositions[i % redSpawnPositions.length];
-            const abilityType = botAbilityTypes[i % botAbilityTypes.length];
-            this.gameEngine.spawnControlledHero('bot-simpleton', 'red', spawnPosition, abilityType);
+    }
+
+    private selectBotStrategy(abilityType: string): string {
+        switch (abilityType) {
+            case 'hookshot':
+                return 'bot-hookshot';
+            case 'pyromancer':
+                return 'bot-simpleton';
+            case 'thorndive':
+                return 'bot-simpleton';
+            case 'mercenary':
+                return 'bot-simpleton';
+            case 'default':
+                return 'bot-simpleton';
+            default:
+                return 'bot-simpleton';
         }
     }
 
@@ -260,11 +279,17 @@ export class GameRoom extends Room<GameState> {
         });
         
         if (playerHero) {
+            // Determine bot strategy based on ability type
+            const abilityType = playerHero.ability?.type || 'default';
+            const botStrategy = this.selectBotStrategy(abilityType);
+            
             // Replace the player's controller with a bot
-            playerHero.controller = 'bot-simpleton';
+            playerHero.controller = botStrategy;
             console.log(`Replaced player ${playerId} with bot on hero ${playerHero.id}`);
         }
     }
+
+
 
     private handleToggleHero(playerId: ControllerId): void {
         // Find current hero controlled by the player

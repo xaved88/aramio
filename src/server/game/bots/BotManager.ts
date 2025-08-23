@@ -1,5 +1,6 @@
 import { GameState } from '../../schema/GameState';
 import { SimpletonBotStrategy } from './strategies/SimpletonBotStrategy';
+import { HookshotBotStrategy } from './strategies/HookshotBotStrategy';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
 import { GameCommand } from '../../../shared/types/GameCommands';
 
@@ -9,6 +10,7 @@ export class BotManager {
     constructor() {
         // Register bot strategies
         this.strategies.set('bot-simpleton', new SimpletonBotStrategy());
+        this.strategies.set('bot-hookshot', new HookshotBotStrategy());
     }
 
     /**
