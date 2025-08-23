@@ -677,7 +677,7 @@ function handlePassiveHealing(state: GameState): void {
                 // Apply passive healing effect
                 const passiveHealingEffect = new (require('../../../schema/Effects').PassiveHealingEffect)();
                 passiveHealingEffect.type = 'passive_healing';
-                passiveHealingEffect.duration = 0; // Permanent until removed
+                passiveHealingEffect.duration = -1; // Permanent until removed
                 passiveHealingEffect.appliedAt = currentTime;
                 passiveHealingEffect.healPercentPerSecond = PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND;
                 hero.effects.push(passiveHealingEffect);
