@@ -239,7 +239,7 @@ export class GameRoom extends Room<GameState> {
             case 'thorndive':
                 return 'bot-simpleton';
             case 'mercenary':
-                return 'bot-simpleton';
+                return 'bot-mercenary';
             case 'default':
                 return 'bot-simpleton';
             default:

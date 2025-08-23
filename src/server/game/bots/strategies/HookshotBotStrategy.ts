@@ -93,15 +93,16 @@ export class HookshotBotStrategy {
                 return false;
             }
             
-            // Don't hookshot enemies that are too close (Hookshot needs distance)
-            const distance = enemy.distance;
-            if (distance < 50) {
-                return false;
-            }
+
             
             // Don't hookshot enemies that are too far (outside Hookshot range)
-            const hookshotRange = this.calculateHookshotRange(bot);
-            if (distance > hookshotRange) {
+            const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+            const heroLevel = bot.level || 1;
+            const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
+            const scaledSpeed = config.SPEED * speedMultiplier;
+            const hookshotRange = scaledSpeed * (config.DURATION_MS / 1000);
+            
+            if (enemy.distance > hookshotRange) {
                 return false;
             }
 
@@ -118,11 +119,6 @@ export class HookshotBotStrategy {
             
             // Higher score for lower health enemies (easier to kill)
             score += (100 - enemy.health) * 2;
-            
-            // Bonus for targets at optimal Hookshot range
-            if (enemy.distance >= 100 && enemy.distance <= 200) {
-                score += 20;
-            }
             
             return { ...enemy, score };
         });
@@ -335,22 +331,11 @@ export class HookshotBotStrategy {
                 return;
             }
 
-            // Skip if too close (Hookshot needs some distance to be useful)
-            const distance = Math.sqrt((enemy.x - bot.x) ** 2 + (enemy.y - bot.y) ** 2);
-            if (distance < 50) {
-                return;
-            }
-
             // Calculate target score
             let score = 0;
             
             // Health bonus: lower health = higher score (easier to kill)
             score += (100 - enemy.health) * 2;
-            
-            // Distance bonus: prefer targets at optimal Hookshot range
-            if (distance >= 100 && distance <= 200) {
-                score += 20;
-            }
 
             if (score > bestScore) {
                 bestScore = score;
@@ -385,20 +370,7 @@ export class HookshotBotStrategy {
         return enemies.sort((a, b) => a.distance - b.distance);
     }
 
-    private calculateHookshotRange(bot: any): number {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
-        const heroLevel = bot.level || 1;
-        
-        // Calculate scaled speed (base speed + 7% per level)
-        const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
-        const scaledSpeed = config.SPEED * speedMultiplier;
-        
-        // Calculate range: speed (pixels/second) * duration (seconds)
-        const durationInSeconds = config.DURATION_MS / 1000;
-        const castRange = scaledSpeed * durationInSeconds;
-        
-        return castRange;
-    }
+
 
     private shouldStayToFight(bot: any, state: SharedGameState): boolean {
         const currentTime = state.gameTime;
