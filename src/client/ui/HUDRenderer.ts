@@ -52,7 +52,7 @@ export class HUDRenderer {
         healthBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         
         // Create health text
-        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100%', {
+        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100/100', {
             fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
             color: hexToColorString(healthConfig.TEXT_COLOR)
         }).setOrigin(0.5);
@@ -196,8 +196,7 @@ export class HUDRenderer {
         );
         
         // Update health text
-        const healthPercentText = Math.round(healthPercent * 100);
-        hudElements.healthText.setText(`${healthPercentText}%`);
+        hudElements.healthText.setText(`${Math.round(player.health)}/${Math.round(player.maxHealth)}`);
         
         // Update experience bar
         const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
