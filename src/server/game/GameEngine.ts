@@ -302,17 +302,11 @@ export class GameEngine {
      */
     private applyAOEDamage(projectile: any, targetX: number, targetY: number): void {
         if (!projectile.aoeRadius || !projectile.effects || projectile.effects.length === 0) {
-            // Debug logging for missing effects
-            if (projectile.type === 'thorndive') {
-                console.log(`[Thorndive] AOE damage failed - missing effects: aoeRadius=${projectile.aoeRadius}, effects=${projectile.effects?.length || 0}`);
-            }
+
             return;
         }
         
-        // Debug logging for Thorndive AOE
-        if (projectile.type === 'thorndive') {
-            console.log(`[Thorndive] Applying AOE damage at (${targetX}, ${targetY}), radius: ${projectile.aoeRadius}, effects: ${projectile.effects.length}`);
-        }
+
         
         // Create AOE damage event for visual effect
         const aoeEvent = new AOEDamageEvent();

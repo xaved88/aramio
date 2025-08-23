@@ -218,7 +218,6 @@ export class CombatantUtils {
                 
                 // Apply reflect damage back to the attacker (same damage type)
                 if (reflectDamage > 0 && sourceId !== combatant.id) {
-                    console.log("reflecting", reflectDamage)
                     // Mark as reflect damage to prevent infinite loops
                     this.damageCombatant(sourceCombatant, reflectDamage, gameState, combatant.id, damageSource, true);
                 }
