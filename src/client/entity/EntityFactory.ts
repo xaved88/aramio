@@ -37,7 +37,7 @@ export class EntityFactory {
      */
     createRadiusIndicator(): Phaser.GameObjects.Graphics {
         const indicator = this.scene.add.graphics();
-        indicator.setDepth(-1); // Put behind other elements
+        indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
         return indicator;
     }
 
@@ -46,7 +46,7 @@ export class EntityFactory {
      */
     createRespawnRing(): Phaser.GameObjects.Graphics {
         const ring = this.scene.add.graphics();
-        ring.setDepth(-2); // Put behind radius indicators
+        ring.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
         return ring;
     }
 
@@ -55,7 +55,7 @@ export class EntityFactory {
      */
     createAbilityReadyIndicator(): Phaser.GameObjects.Graphics {
         const indicator = this.scene.add.graphics();
-        indicator.setDepth(1); // Put in front of other elements
+        indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
         return indicator;
     }
 } 

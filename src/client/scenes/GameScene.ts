@@ -57,7 +57,7 @@ export class GameScene extends Phaser.Scene {
         
         // Create range indicator
         this.rangeIndicator = this.add.graphics();
-        this.rangeIndicator.setDepth(10); // High depth to appear above other elements
+        this.rangeIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS); // Above heroes, below effects
         this.rangeIndicator.setVisible(false);
         
         // Create spawn indicators
@@ -85,7 +85,7 @@ export class GameScene extends Phaser.Scene {
             this.add.text(300, 300, 'Failed to connect to server', {
                 fontSize: CLIENT_CONFIG.UI.FONTS.ERROR,
                 color: hexToColorString(CLIENT_CONFIG.UI.COLORS.ERROR)
-            }).setOrigin(0.5);
+            }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI);
         }
     }
 
@@ -652,7 +652,7 @@ export class GameScene extends Phaser.Scene {
         // Create spawn indicators for blue team using hardcoded positions
         GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
             const indicator = this.add.graphics();
-            indicator.setDepth(5); // Below entities but above background
+            indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Background layer
             
             // Draw a small circle with team color
             indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.BLUE, 0.6);
@@ -666,13 +666,13 @@ export class GameScene extends Phaser.Scene {
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
             }).setOrigin(0.5);
-            text.setDepth(5);
+            text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
         });
         
         // Create spawn indicators for red team using hardcoded positions
         GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED.forEach((position, index) => {
             const indicator = this.add.graphics();
-            indicator.setDepth(5); // Below entities but above background
+            indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Background layer
             
             // Draw a small circle with team color
             indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.RED, 0.6);
@@ -686,7 +686,7 @@ export class GameScene extends Phaser.Scene {
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
             }).setOrigin(0.5);
-            text.setDepth(5);
+            text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
         });
     }
 

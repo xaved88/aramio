@@ -42,7 +42,7 @@ export class StatsOverlay {
     // Table configuration
     private readonly CELL_HEIGHT = 20;
     private readonly CELL_PADDING = 5;
-        private readonly COLUMN_WIDTHS = {
+    private readonly COLUMN_WIDTHS = {
         arrow: 60,
         heroId: 120,
         abilityType: 100,
@@ -55,6 +55,49 @@ export class StatsOverlay {
         damageTaken: 60,
         damageDealt: 60
     };
+
+    // Column definitions for consistent table structure
+    private readonly COLUMNS = [
+        { key: 'arrow', width: 'arrow', header: '', align: 'right', getValue: (player: PlayerStats) => player.isCurrentPlayer ? '▶' : '' },
+        { key: 'heroId', width: 'heroId', header: 'Hero', align: 'left', getValue: (player: PlayerStats) => player.id.length > 14 ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5) : player.id },
+        { key: 'abilityType', width: 'abilityType', header: 'Ability', align: 'left', getValue: (player: PlayerStats) => player.abilityType },
+        { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.level.toString() },
+        { key: 'totalXp', width: 'totalXp', header: 'XP', align: 'right', getValue: (player: PlayerStats) => Math.round(player.totalExperience).toString() },
+        { key: 'heroKills', width: 'heroKills', header: 'Kills', align: 'right', getValue: (player: PlayerStats) => Math.round(player.heroKills).toString() },
+        { key: 'deaths', width: 'deaths', header: 'Deaths', align: 'right', getValue: (player: PlayerStats) => player.deaths.toString() },
+        { key: 'minionKills', width: 'minionKills', header: 'Minions', align: 'right', getValue: (player: PlayerStats) => Math.round(player.minionKills).toString() },
+        { key: 'turretKills', width: 'turretKills', header: 'Turrets', align: 'right', getValue: (player: PlayerStats) => Math.round(player.turretKills).toString() },
+        { key: 'damageDealt', width: 'damageDealt', header: 'Dealt', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageDealt).toString() },
+        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() }
+    ] as const;
+
+    // Depth configuration for consistent layering
+    private readonly DEPTHS = {
+        BACKGROUND: CLIENT_CONFIG.RENDER_DEPTH.GAME_UI,
+        UI_CONTENT: CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 1
+    } as const;
+
+    // Text styles for consistent appearance
+    private readonly TEXT_STYLES = {
+        HEADER: {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        },
+        GAME_TIME: {
+            fontSize: '20px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        },
+        TEAM_TOTALS: {
+            fontSize: '16px',
+            fontStyle: 'bold'
+        },
+        NO_PLAYERS: {
+            fontSize: '14px',
+            color: '#888888'
+        }
+    } as const;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -98,83 +141,46 @@ export class StatsOverlay {
     }
 
     /**
+     * Creates team header and totals with consistent styling
+     */
+    private createTeamInfo(x: number, y: number, teamName: string, teamColor: string, totals: { kills: number, deaths: number, xp: number }): void {
+        const header = this.scene.add.text(x, y, teamName, { ...this.TEXT_STYLES.HEADER, color: teamColor });
+        header.setDepth(this.DEPTHS.UI_CONTENT);
+        this.overlayElements.push(header);
+
+        const totalsText = this.scene.add.text(x + 200, y, `XP: ${Math.round(totals.xp)} | K: ${totals.kills} | D: ${totals.deaths}`, 
+            { ...this.TEXT_STYLES.TEAM_TOTALS, color: teamColor });
+        totalsText.setDepth(this.DEPTHS.UI_CONTENT);
+        this.overlayElements.push(totalsText);
+    }
+
+    /**
      * Creates the overlay elements
      */
     private createOverlay(state: SharedGameState): void {
-        // Create semi-transparent background
         const background = this.scene.add.graphics();
         background.fillStyle(0x000000, 0.7);
         background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
-        background.setDepth(1000);
+        background.setDepth(this.DEPTHS.BACKGROUND);
         this.overlayElements.push(background);
 
-        // Get player stats
         const playerStats = this.getPlayerStats(state);
         const blueTeamStats = playerStats.filter(p => p.team === 'blue');
         const redTeamStats = playerStats.filter(p => p.team === 'red');
 
-        // Calculate center positions
         const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
         const tableWidth = this.getTotalTableWidth();
-        const tableX = centerX - tableWidth / 2 - 30; // Center the table horizontally, offset more to the left
+        const tableX = centerX - tableWidth / 2 - 30;
 
-        // Create team headers
-        const headerStyle = {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontStyle: 'bold'
-        };
-
-        // Add game time display above team headers
-        const gameTimeText = this.scene.add.text(centerX, 20, `Game Time: ${this.formatGameTime(state.gameTime)}`, {
-            fontSize: '20px',
-            color: '#ffffff',
-            fontStyle: 'bold'
-        });
+        const gameTimeText = this.scene.add.text(centerX, 20, `Game Time: ${this.formatGameTime(state.gameTime)}`, this.TEXT_STYLES.GAME_TIME);
         gameTimeText.setOrigin(0.5, 0);
-        gameTimeText.setDepth(1001);
+        gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
         this.overlayElements.push(gameTimeText);
 
-        const redHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', {
-            ...headerStyle,
-            color: '#e74c3c'
-        });
-        redHeader.setDepth(1001);
-        this.overlayElements.push(redHeader);
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', '#e74c3c', this.calculateTeamTotals(redTeamStats));
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', '#3498db', this.calculateTeamTotals(blueTeamStats));
 
-        // Add red team totals
-        const redTotals = this.calculateTeamTotals(redTeamStats);
-        const redTotalsText = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow + 200, 70, 
-            `XP: ${Math.round(redTotals.xp)} | K: ${redTotals.kills} | D: ${redTotals.deaths}`, {
-            fontSize: '16px',
-            color: '#e74c3c',
-            fontStyle: 'bold'
-        });
-        redTotalsText.setDepth(1001);
-        this.overlayElements.push(redTotalsText);
-
-        const blueHeader = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', {
-            ...headerStyle,
-            color: '#3498db'
-        });
-        blueHeader.setDepth(1001);
-        this.overlayElements.push(blueHeader);
-
-        // Add blue team totals
-        const blueTotals = this.calculateTeamTotals(blueTeamStats);
-        const blueTotalsText = this.scene.add.text(tableX + this.COLUMN_WIDTHS.arrow + 200, 370, 
-            `XP: ${Math.round(blueTotals.xp)} | K: ${blueTotals.kills} | D: ${blueTotals.deaths}`, {
-            fontSize: '16px',
-            color: '#3498db',
-            fontStyle: 'bold'
-        });
-        blueTotalsText.setDepth(1001);
-        this.overlayElements.push(blueTotalsText);
-
-        // Create red team table
         this.createTeamTable(redTeamStats, tableX, 120, '#e74c3c');
-        
-        // Create blue team table
         this.createTeamTable(blueTeamStats, tableX, 420, '#3498db');
     }
 
@@ -183,293 +189,67 @@ export class StatsOverlay {
      */
     private createTeamTable(stats: PlayerStats[], startX: number, startY: number, teamColor: string): void {
         if (stats.length === 0) {
-            const noPlayersText = this.scene.add.text(startX, startY, 'No players', {
-                fontSize: '14px',
-                color: '#888888'
-            });
-            noPlayersText.setDepth(1001);
+            const noPlayersText = this.scene.add.text(startX, startY, 'No players', this.TEXT_STYLES.NO_PLAYERS);
+            noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
             this.overlayElements.push(noPlayersText);
             return;
         }
 
-        // Create table header
-        const headerCells = this.createHeaderRow(startX, startY, teamColor);
-        this.overlayElements.push(...headerCells);
+        this.overlayElements.push(...this.createTableRow(startX, startY, teamColor));
 
-        // Create separator line
         const separator = this.scene.add.graphics();
         separator.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
-        separator.lineBetween(startX, startY + this.CELL_HEIGHT + 5, 
-                            startX + this.getTotalTableWidth(), startY + this.CELL_HEIGHT + 5);
-        separator.setDepth(1001);
+        separator.lineBetween(startX, startY + this.CELL_HEIGHT + 5, startX + this.getTotalTableWidth(), startY + this.CELL_HEIGHT + 5);
+        separator.setDepth(this.DEPTHS.UI_CONTENT);
         this.overlayElements.push(separator);
 
-        // Create player rows
         stats.forEach((player, index) => {
             const rowY = startY + (index + 1) * (this.CELL_HEIGHT + this.CELL_PADDING) + 10;
-            const playerCells = this.createPlayerRow(player, startX, rowY, teamColor);
-            this.overlayElements.push(...playerCells);
+            this.overlayElements.push(...this.createTableRow(startX, rowY, teamColor, player));
         });
     }
 
     /**
-     * Creates the header row cells
+     * Creates a table cell with consistent styling
      */
-    private createHeaderRow(startX: number, startY: number, teamColor: string): Phaser.GameObjects.Text[] {
-        const cells: Phaser.GameObjects.Text[] = [];
-        let currentX = startX;
-
-        // Arrow column header (empty) - right aligned
-        const arrowHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 5, startY, '', {
+    private createCell(
+        x: number, 
+        y: number, 
+        text: string, 
+        color: string, 
+        width: number, 
+        align: 'left' | 'right' = 'left',
+        isHighlighted: boolean = false
+    ): Phaser.GameObjects.Text {
+        const cell = this.scene.add.text(x, y, text, {
             fontSize: '14px',
-            color: teamColor,
+            color: isHighlighted ? '#ffff00' : color,
             fontFamily: 'monospace'
         });
-        arrowHeader.setOrigin(1, 0);
-        arrowHeader.setDepth(1001);
-        cells.push(arrowHeader);
-        currentX += this.COLUMN_WIDTHS.arrow;
-
-        // Hero ID header - left aligned
-        const playerIdHeader = this.scene.add.text(currentX, startY, 'Hero', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        playerIdHeader.setDepth(1001);
-        cells.push(playerIdHeader);
-        currentX += this.COLUMN_WIDTHS.heroId;
-
-        // Ability Type header - left aligned
-        const abilityTypeHeader = this.scene.add.text(currentX, startY, 'Ability', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        abilityTypeHeader.setDepth(1001);
-        cells.push(abilityTypeHeader);
-        currentX += this.COLUMN_WIDTHS.abilityType;
-
-        // Level header - right aligned
-        const levelHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, 'Lvl', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        levelHeader.setOrigin(1, 0);
-        levelHeader.setDepth(1001);
-        cells.push(levelHeader);
-        currentX += this.COLUMN_WIDTHS.level;
-
-        // Total XP header - right aligned
-        const xpHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.totalXp - 5, startY, 'XP', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        xpHeader.setOrigin(1, 0);
-        xpHeader.setDepth(1001);
-        cells.push(xpHeader);
-        currentX += this.COLUMN_WIDTHS.totalXp;
-
-        // Hero Kills header - right aligned
-        const heroKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.heroKills - 5, startY, 'Kills', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        heroKillsHeader.setOrigin(1, 0);
-        heroKillsHeader.setDepth(1001);
-        cells.push(heroKillsHeader);
-        currentX += this.COLUMN_WIDTHS.heroKills;
-
-        // Deaths header - right aligned
-        const deathsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.deaths - 5, startY, 'Deaths', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        deathsHeader.setOrigin(1, 0);
-        deathsHeader.setDepth(1001);
-        cells.push(deathsHeader);
-        currentX += this.COLUMN_WIDTHS.deaths;
-
-        // Minion Kills header - right aligned
-        const minionKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.minionKills - 5, startY, 'Minions', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        minionKillsHeader.setOrigin(1, 0);
-        minionKillsHeader.setDepth(1001);
-        cells.push(minionKillsHeader);
-        currentX += this.COLUMN_WIDTHS.minionKills;
-
-        // Turret Kills header - right aligned
-        const turretKillsHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.turretKills - 5, startY, 'Turrets', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        turretKillsHeader.setOrigin(1, 0);
-        turretKillsHeader.setDepth(1001);
-        cells.push(turretKillsHeader);
-        currentX += this.COLUMN_WIDTHS.turretKills;
-
-        // Damage Dealt header - right aligned
-        const damageDealtHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageDealt - 5, startY, 'Dealt', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        damageDealtHeader.setOrigin(1, 0);
-        damageDealtHeader.setDepth(1001);
-        cells.push(damageDealtHeader);
-        currentX += this.COLUMN_WIDTHS.damageDealt;
-
-        // Damage Taken header - right aligned
-        const damageTakenHeader = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageTaken - 5, startY, 'Taken', {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        damageTakenHeader.setOrigin(1, 0);
-        damageTakenHeader.setDepth(1001);
-        cells.push(damageTakenHeader);
-        currentX += this.COLUMN_WIDTHS.damageTaken;
-
-        return cells;
+        
+        if (align === 'right') {
+            cell.setOrigin(1, 0);
+        }
+        
+        cell.setDepth(this.DEPTHS.UI_CONTENT);
+        return cell;
     }
 
     /**
-     * Creates a player row with individual cells
+     * Creates a table row (header or player data)
      */
-    private createPlayerRow(player: PlayerStats, startX: number, startY: number, teamColor: string): Phaser.GameObjects.Text[] {
+    private createTableRow(startX: number, startY: number, teamColor: string, player?: PlayerStats): Phaser.GameObjects.Text[] {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
-        // Arrow cell pointing at currently controlled hero - right aligned
-        const arrowText = player.isCurrentPlayer ? '▶' : '';
-        const arrowCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.arrow - 5, startY, arrowText, {
-            fontSize: '14px',
-            color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
-            fontFamily: 'monospace'
+        this.COLUMNS.forEach(column => {
+            const x = column.align === 'right' ? currentX + this.COLUMN_WIDTHS[column.width] - 5 : currentX;
+            const text = player ? column.getValue(player) : column.header;
+            const isHighlighted = player && (column.key === 'arrow' || column.key === 'heroId' || column.key === 'abilityType') ? player.isCurrentPlayer : false;
+            
+            cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted));
+            currentX += this.COLUMN_WIDTHS[column.width];
         });
-        arrowCell.setOrigin(1, 0);
-        arrowCell.setDepth(1001);
-        cells.push(arrowCell);
-        currentX += this.COLUMN_WIDTHS.arrow;
-
-        // Hero ID cell - left aligned
-        const heroId = player.id.length > 14 
-            ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5)
-            : player.id;
-        const playerIdCell = this.scene.add.text(currentX, startY, heroId, {
-            fontSize: '14px',
-            color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
-            fontFamily: 'monospace'
-        });
-        playerIdCell.setDepth(1001);
-        cells.push(playerIdCell);
-        currentX += this.COLUMN_WIDTHS.heroId;
-
-        // Ability Type cell - left aligned
-        const abilityTypeCell = this.scene.add.text(currentX, startY, player.abilityType, {
-            fontSize: '14px',
-            color: player.isCurrentPlayer ? '#ffff00' : teamColor, // Yellow for current player
-            fontFamily: 'monospace'
-        });
-        abilityTypeCell.setDepth(1001);
-        cells.push(abilityTypeCell);
-        currentX += this.COLUMN_WIDTHS.abilityType;
-
-        // Level cell - right aligned
-        const levelCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.level - 5, startY, player.level.toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        levelCell.setOrigin(1, 0);
-        levelCell.setDepth(1001);
-        cells.push(levelCell);
-        currentX += this.COLUMN_WIDTHS.level;
-
-        // Total XP cell - right aligned
-        const xpCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.totalXp - 5, startY, Math.round(player.totalExperience).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        xpCell.setOrigin(1, 0);
-        xpCell.setDepth(1001);
-        cells.push(xpCell);
-        currentX += this.COLUMN_WIDTHS.totalXp;
-
-        // Hero Kills cell - right aligned
-        const heroKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.heroKills - 5, startY, Math.round(player.heroKills).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        heroKillsCell.setOrigin(1, 0);
-        heroKillsCell.setDepth(1001);
-        cells.push(heroKillsCell);
-        currentX += this.COLUMN_WIDTHS.heroKills;
-
-        // Deaths cell - right aligned
-        const deathsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.deaths - 5, startY, player.deaths.toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        deathsCell.setOrigin(1, 0);
-        deathsCell.setDepth(1001);
-        cells.push(deathsCell);
-        currentX += this.COLUMN_WIDTHS.deaths;
-
-        // Minion Kills cell - right aligned
-        const minionKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.minionKills - 5, startY, Math.round(player.minionKills).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        minionKillsCell.setOrigin(1, 0);
-        minionKillsCell.setDepth(1001);
-        cells.push(minionKillsCell);
-        currentX += this.COLUMN_WIDTHS.minionKills;
-
-        // Turret Kills cell - right aligned
-        const turretKillsCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.turretKills - 5, startY, Math.round(player.turretKills).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        turretKillsCell.setOrigin(1, 0);
-        turretKillsCell.setDepth(1001);
-        cells.push(turretKillsCell);
-        currentX += this.COLUMN_WIDTHS.turretKills;
-
-        // Damage Dealt cell - right aligned
-        const damageDealtCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageDealt - 5, startY, Math.round(player.damageDealt).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        damageDealtCell.setOrigin(1, 0);
-        damageDealtCell.setDepth(1001);
-        cells.push(damageDealtCell);
-        currentX += this.COLUMN_WIDTHS.damageDealt;
-
-        // Damage Taken cell - right aligned
-        const damageTakenCell = this.scene.add.text(currentX + this.COLUMN_WIDTHS.damageTaken - 5, startY, Math.round(player.damageTaken).toString(), {
-            fontSize: '14px',
-            color: teamColor,
-            fontFamily: 'monospace'
-        });
-        damageTakenCell.setOrigin(1, 0);
-        damageTakenCell.setDepth(1001);
-        cells.push(damageTakenCell);
-        currentX += this.COLUMN_WIDTHS.damageTaken;
 
         return cells;
     }
@@ -486,13 +266,8 @@ export class StatsOverlay {
      */
     private getPlayerStats(state: SharedGameState): PlayerStats[] {
         const stats: PlayerStats[] = [];
-
         state.combatants.forEach((combatant) => {
             if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
-                const isBot = combatant.controller.startsWith('bot');
-                const isCurrentPlayer = this.playerSessionId === combatant.controller;
-                
-                // Calculate deaths by counting kill events where this hero was the target
                 const deaths = state.killEvents.filter(killEvent => 
                     killEvent.targetId === combatant.id && killEvent.targetType === 'hero'
                 ).length;
@@ -511,36 +286,29 @@ export class StatsOverlay {
                     deaths: deaths,
                     damageTaken: combatant.roundStats.damageTaken,
                     damageDealt: combatant.roundStats.damageDealt,
-                    isBot,
-                    isCurrentPlayer
+                    isBot: combatant.controller.startsWith('bot'),
+                    isCurrentPlayer: this.playerSessionId === combatant.controller
                 });
             }
         });
-
-        // Sort by team, then by hero ID for consistent ordering
-        return stats.sort((a, b) => {
-            if (a.team !== b.team) {
-                return a.team.localeCompare(b.team);
-            }
-            return a.id.localeCompare(b.id);
-        });
+        return stats.sort((a, b) => a.team !== b.team ? a.team.localeCompare(b.team) : a.id.localeCompare(b.id));
     }
 
     /**
      * Calculates team totals for kills, deaths, and XP
      */
     private calculateTeamTotals(stats: PlayerStats[]): { kills: number, deaths: number, xp: number } {
-        const kills = stats.reduce((sum, player) => sum + player.heroKills, 0);
-        const deaths = stats.reduce((sum, player) => sum + player.deaths, 0);
-        const xp = stats.reduce((sum, player) => sum + player.totalExperience, 0);
-        return { kills, deaths, xp };
+        return {
+            kills: stats.reduce((sum, player) => sum + player.heroKills, 0),
+            deaths: stats.reduce((sum, player) => sum + player.deaths, 0),
+            xp: stats.reduce((sum, player) => sum + player.totalExperience, 0)
+        };
     }
 
     /**
      * Destroys the overlay elements
      */
     private destroyOverlay(): void {
-        // Destroy all overlay elements
         this.overlayElements.forEach(element => element.destroy());
         this.overlayElements = [];
     }

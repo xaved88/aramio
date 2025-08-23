@@ -26,7 +26,7 @@ export class VictoryScreen {
         
         // Create stylish background overlay with translucent black
         this.background = this.scene.add.graphics();
-        this.background.setDepth(1000); // Set high depth to appear above game entities and UI
+        this.background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS); // Set high depth to appear above game entities and UI
         this.background.fillStyle(0x000000, 0.7); // 70% opacity black
         this.background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
         this.background.setAlpha(0); // Start transparent for fade in
@@ -53,7 +53,7 @@ export class VictoryScreen {
                     fill: true
                 }
             }
-        ).setOrigin(0.5).setDepth(1000).setAlpha(0); // Set high depth to appear above other UI
+        ).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS).setAlpha(0); // Set high depth to appear above other UI
         
         // Fade in animation
         this.fadeInTween = this.scene.tweens.add({

@@ -247,6 +247,20 @@ export const CLIENT_CONFIG = {
     DEBUG: {
         SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
     },
+    // Render depth layers - lower = behind, higher = foreground
+    RENDER_DEPTH: {
+        BACKGROUND: -5,         // Radius indicators, respawn rings
+        STRUCTURES: 0,          // Turrets, cradles
+        TARGETING_LINES: 1,     // Targeting lines between combatants
+        MINIONS: 5,             // Minion entities
+        HEROES: 10,             // Hero entities
+        ABILITY_INDICATORS: 15, // Ability ready indicators, range indicators
+        EFFECTS: 20,            // AOE effects, explosions
+        OVERLAY: 25,            // XP text, level up text
+        HUD: 500,               // Health bars, experience bars, ability bars
+        GAME_UI: 1000,          // Stats overlay, game interface
+        MODALS: 2000            // Victory screen, modals
+    } as const,
     PROJECTILE: {
         RADIUS: 6,
         BLUE_COLOR: 0x2980b9, // darker blue team color

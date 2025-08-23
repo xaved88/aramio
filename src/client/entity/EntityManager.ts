@@ -103,14 +103,16 @@ export class EntityManager {
             entityGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             entityGraphics.setPosition(combatantData.x, combatantData.y);
+            
             // Set depth based on entity type
             if (combatantData.type === COMBATANT_TYPES.HERO) {
-                entityGraphics.setDepth(10); // Heroes on top
+                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
             } else if (combatantData.type === COMBATANT_TYPES.MINION) {
-                entityGraphics.setDepth(5); // Minions in middle
+                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
             } else {
-                entityGraphics.setDepth(0); // Buildings at bottom
+                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
             }
+            
             this.entityGraphics.set(entityId, entityGraphics);
         }
         
@@ -118,14 +120,16 @@ export class EntityManager {
             entityText = this.entityFactory.createEntityText();
             // Set initial position immediately to avoid spawning at (0,0)
             entityText.setPosition(combatantData.x, combatantData.y);
-            // Set depth to match entity graphics
+            
+            // Set depth based on entity type
             if (combatantData.type === COMBATANT_TYPES.HERO) {
-                entityText.setDepth(10); // Heroes on top
+                entityText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
             } else if (combatantData.type === COMBATANT_TYPES.MINION) {
-                entityText.setDepth(5); // Minions in middle
+                entityText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
             } else {
-                entityText.setDepth(0); // Buildings at bottom
+                entityText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
             }
+            
             this.entityTexts.set(entityId, entityText);
         }
         
@@ -134,7 +138,7 @@ export class EntityManager {
             entityAbilityIconText = this.entityFactory.createEntityText();
             // Set initial position immediately to avoid spawning at (0,0)
             entityAbilityIconText.setPosition(combatantData.x, combatantData.y);
-            entityAbilityIconText.setDepth(10); // Heroes on top
+            entityAbilityIconText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
             this.entityAbilityIconTexts.set(entityId, entityAbilityIconText);
         }
         
@@ -142,6 +146,7 @@ export class EntityManager {
             radiusIndicator = this.entityFactory.createRadiusIndicator();
             // Set initial position immediately to avoid spawning at (0,0)
             radiusIndicator.setPosition(combatantData.x, combatantData.y);
+            radiusIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Behind combatants
             this.entityRadiusIndicators.set(entityId, radiusIndicator);
         }
         
@@ -153,12 +158,14 @@ export class EntityManager {
                 respawnRing = this.entityFactory.createRespawnRing();
                 // Set initial position immediately to avoid spawning at (0,0)
                 respawnRing.setPosition(combatantData.x, combatantData.y);
+                respawnRing.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
                 this.entityRespawnRings.set(entityId, respawnRing);
             }
             if (!abilityReadyIndicator) {
                 abilityReadyIndicator = this.entityFactory.createAbilityReadyIndicator();
                 // Set initial position immediately to avoid spawning at (0,0)
                 abilityReadyIndicator.setPosition(combatantData.x, combatantData.y);
+                abilityReadyIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
                 this.entityAbilityReadyIndicators.set(entityId, abilityReadyIndicator);
             }
         }
@@ -269,7 +276,7 @@ export class EntityManager {
             fontSize: fontSize,
             color: color,
             fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
-        }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
+        }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
@@ -329,7 +336,7 @@ export class EntityManager {
         // Create a graphics object for the AOE effect
         const aoeGraphics = this.scene.add.graphics();
         aoeGraphics.setPosition(aoeEvent.x, aoeEvent.y);
-        aoeGraphics.setDepth(25); // High depth to appear above everything
+        aoeGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS); // High depth to appear above everything
         
         // Determine color based on the source combatant
         let aoeColor = 0xff6b35; // Default orange
@@ -380,7 +387,7 @@ export class EntityManager {
             fontSize: CLIENT_CONFIG.LEVEL_UP_EVENTS.FONT_SIZE,
             color: CLIENT_CONFIG.LEVEL_UP_EVENTS.COLOR,
             fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
-        }).setOrigin(0.5).setDepth(20); // High depth to appear above everything
+        }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
@@ -564,7 +571,7 @@ export class EntityManager {
         // Create targeting lines graphics if it doesn't exist
         if (!this.targetingLinesGraphics) {
             this.targetingLinesGraphics = this.scene.add.graphics();
-            this.targetingLinesGraphics.setDepth(1); // Above buildings, below units
+            this.targetingLinesGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.TARGETING_LINES); // Above everything, below UI
         }
         
         // Clear the graphics before rendering new targeting lines
@@ -617,7 +624,7 @@ export class EntityManager {
         // Force clear any remaining graphics by recreating the targeting lines graphics
         // This ensures a completely fresh state
         this.targetingLinesGraphics = this.scene.add.graphics();
-        this.targetingLinesGraphics.setDepth(1);
+        this.targetingLinesGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.TARGETING_LINES);
         
         // Ensure all tweens are stopped for this scene
         this.scene.tweens.killAll();
