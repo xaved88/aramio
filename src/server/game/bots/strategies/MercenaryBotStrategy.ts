@@ -5,16 +5,17 @@ import { GAMEPLAY_CONFIG } from '../../../../Config';
 /**
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability
  * 
- * This strategy focuses on three distinct phases:
+ * This strategy operates in two distinct modes:
  * 1. RAGE MODE: Aggressive pursuit of enemies, ignoring minions, maximizing damage output
- * 2. RAGE COOLDOWN: Defensive positioning in backlines, sneaking around for optimal engagement
- * 3. TRANSITION: Strategic positioning to set up the next rage engagement
+ * 2. NORMAL MODE: Calculated assassin positioning - seeks enemies within auto-attack range
+ *    while avoiding positions targeted by multiple enemies
  * 
  * Key behaviors:
  * - Uses rage when enemies are nearby and it's off cooldown
  * - During rage: aggressively chases enemies, ignores minions, maximizes damage
- * - After rage: retreats to backline, positions behind teammates for safety
+ * - After rage: positions aggressively for auto-attack opportunities while maintaining safety
  * - Always aware of reduced attack range during rage mode
+ * - Avoids areas with multiple attackers for strategic positioning
  */
 export class MercenaryBotStrategy {
 
