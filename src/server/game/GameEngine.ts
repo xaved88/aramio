@@ -360,12 +360,18 @@ export class GameEngine {
                     }
                 }
                 
-                // Check for expired effects (skip permanent effects and infinite duration effects)
-                if (effect.duration === 0 || effect.duration === -1) return;
-                
-                const timeSinceApplied = currentTime - effect.appliedAt;
-                if (timeSinceApplied >= effect.duration) {
+                // Check for expired effects (only skip truly infinite duration effects)
+                if (effect.duration === -1) return; // Only skip infinite effects
+
+                // Effects with duration 0 should expire immediately
+                if (effect.duration === 0) {
                     effectsToRemove.push(index);
+                } else {
+                    // Check if effect has expired based on time
+                    const timeSinceApplied = currentTime - effect.appliedAt;
+                    if (timeSinceApplied >= effect.duration) {
+                        effectsToRemove.push(index);
+                    }
                 }
             });
             

@@ -357,9 +357,160 @@ describe('Projectile Collision Detection', () => {
             expect(redHero.effects).toHaveLength(1);
             expect(redHero.effects[0]?.type).toBe('stun');
         });
-
-
     });
+
+    describe('Effect Cleanup and Duration', () => {
+            it('should remove effects with duration 0 immediately', () => {
+                // Create a taunt effect with duration 0
+                const tauntEffect = new StunEffect(); // Using StunEffect as a proxy for TauntEffect
+                tauntEffect.type = 'stun';
+                tauntEffect.duration = 0; // Duration 0 should expire immediately
+                tauntEffect.appliedAt = gameState.gameTime;
+
+                // Add effect to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(tauntEffect);
+
+                // Update effects (this should trigger cleanup)
+                gameEngine['updateEffects'](16);
+
+                // Effect with duration 0 should be removed immediately
+                expect(redHero.effects).toHaveLength(0);
+            });
+
+            it('should remove expired effects based on duration', () => {
+                // Create a stun effect with 100ms duration
+                const stunEffect = new StunEffect();
+                stunEffect.type = 'stun';
+                stunEffect.duration = 100; // 100ms duration
+                stunEffect.appliedAt = gameState.gameTime - 150; // Applied 150ms ago (expired)
+
+                // Add effect to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(stunEffect);
+
+                // Update effects
+                gameEngine['updateEffects'](16);
+
+                // Expired effect should be removed
+                expect(redHero.effects).toHaveLength(0);
+            });
+
+            it('should keep active effects that have not expired', () => {
+                // Create a stun effect with 1000ms duration
+                const stunEffect = new StunEffect();
+                stunEffect.type = 'stun';
+                stunEffect.duration = 1000; // 1000ms duration
+                stunEffect.appliedAt = gameState.gameTime - 500; // Applied 500ms ago (still active)
+
+                // Add effect to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(stunEffect);
+
+                // Update effects
+                gameEngine['updateEffects'](16);
+
+                // Active effect should remain
+                expect(redHero.effects).toHaveLength(1);
+                expect(redHero.effects[0]?.type).toBe('stun');
+            });
+
+            it('should keep effects with infinite duration (-1)', () => {
+                // Create a passive healing effect with infinite duration
+                const passiveHealingEffect = new StunEffect(); // Using StunEffect as proxy
+                passiveHealingEffect.type = 'stun';
+                passiveHealingEffect.duration = -1; // Infinite duration
+                passiveHealingEffect.appliedAt = gameState.gameTime - 1000; // Applied 1000ms ago
+
+                // Add effect to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(passiveHealingEffect);
+
+                // Update effects
+                gameEngine['updateEffects'](16);
+
+                // Infinite duration effect should remain
+                expect(redHero.effects).toHaveLength(1);
+                expect(redHero.effects[0]?.type).toBe('stun');
+            });
+
+            it('should handle multiple effects with different durations correctly', () => {
+                // Create multiple effects with different durations
+                const immediateEffect = new StunEffect();
+                immediateEffect.type = 'stun';
+                immediateEffect.duration = 0; // Expires immediately
+                immediateEffect.appliedAt = gameState.gameTime;
+
+                const shortEffect = new StunEffect();
+                shortEffect.type = 'stun';
+                shortEffect.duration = 100; // Expires in 100ms
+                shortEffect.appliedAt = gameState.gameTime - 150; // Already expired
+
+                const longEffect = new StunEffect();
+                longEffect.type = 'stun';
+                longEffect.duration = 1000; // Expires in 1000ms
+                longEffect.appliedAt = gameState.gameTime - 500; // Still active
+
+                const infiniteEffect = new StunEffect();
+                infiniteEffect.type = 'stun';
+                infiniteEffect.duration = -1; // Never expires
+                infiniteEffect.appliedAt = gameState.gameTime - 1000; // Applied long ago
+
+                // Add all effects to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(immediateEffect, shortEffect, longEffect, infiniteEffect);
+
+                // Update effects
+                gameEngine['updateEffects'](16);
+
+                // Only long and infinite effects should remain
+                expect(redHero.effects).toHaveLength(2);
+                expect(redHero.effects[0]?.duration).toBe(1000); // Long effect
+                expect(redHero.effects[1]?.duration).toBe(-1); // Infinite effect
+            });
+
+            it('should handle effects with no effects array gracefully', () => {
+                // Set effects to undefined
+                (redHero as any).effects = undefined;
+
+                // This should not crash
+                expect(() => {
+                    gameEngine['updateEffects'](16);
+                }).not.toThrow();
+            });
+
+            it('should handle effects with empty effects array gracefully', () => {
+                // Set effects to empty array
+                redHero.effects = new ArraySchema();
+
+                // This should not crash
+                expect(() => {
+                    gameEngine['updateEffects'](16);
+                }).not.toThrow();
+            });
+
+            it('should process move effects and remove them when complete', () => {
+                // Create a move effect
+                const moveEffect = new StunEffect(); // Using StunEffect as proxy for MoveEffect
+                moveEffect.type = 'move';
+                moveEffect.duration = 1000;
+                moveEffect.appliedAt = gameState.gameTime;
+
+                // Add effect to red hero
+                redHero.effects = new ArraySchema();
+                redHero.effects.push(moveEffect);
+
+                // Mock the processMoveEffect method to return true (should remove)
+                jest.spyOn(gameEngine as any, 'processMoveEffect').mockReturnValue(true);
+
+                // Update effects
+                gameEngine['updateEffects'](16);
+
+                // Move effect should be processed and removed
+                expect(redHero.effects).toHaveLength(0);
+                expect(gameEngine['processMoveEffect']).toHaveBeenCalledWith(redHero, moveEffect, 16);
+            });
+        });
 });
 
 // Helper functions to create test projectiles
