@@ -279,14 +279,16 @@ export class GameRoom extends Room<GameState> {
         });
         
         if (playerHero) {
-            // Determine bot strategy based on ability type
-            const abilityType = playerHero.ability?.type || 'default';
-            const botStrategy = this.selectBotStrategy(abilityType);
-            
             // Replace the player's controller with a bot
-            playerHero.controller = botStrategy;
-            console.log(`Replaced player ${playerId} with bot on hero ${playerHero.id}`);
+            this.assignBotStrategyToHero(playerHero);
+            console.log(`Replaced player ${playerId} with bot on hero ${playerHero.id} (${playerHero.ability?.type || 'default'})`);
         }
+    }
+
+    private assignBotStrategyToHero(hero: any): void {
+        const abilityType = hero.ability?.type || 'default';
+        const botStrategy = this.selectBotStrategy(abilityType);
+        hero.controller = botStrategy;
     }
 
 
@@ -327,12 +329,14 @@ export class GameRoom extends Room<GameState> {
         const nextIndex = (currentIndex + 1) % teamHeroes.length;
         const nextHero = teamHeroes[nextIndex];
 
-        // Swap controllers
-        const nextHeroOriginalController = nextHero.controller;
+        // Give the next hero to the player
         nextHero.controller = playerId;
-        currentHero.controller = nextHeroOriginalController;
+        
+        // Give the current hero back to bot control with the appropriate strategy for its ability type
+        this.assignBotStrategyToHero(currentHero);
 
-        console.log(`Player ${playerId} switched from hero ${currentHero.id} to hero ${nextHero.id}`);
+        console.log(`Player ${playerId} switched from hero ${currentHero.id} (${currentHero.ability?.type || 'default'}) to hero ${nextHero.id} (${nextHero.ability?.type || 'default'})`);
+        console.log(`Previous hero now controlled by ${currentHero.controller}`);
     }
 
 
