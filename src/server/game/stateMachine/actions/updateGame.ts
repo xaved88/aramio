@@ -1,6 +1,6 @@
 import { GameState } from '../../../schema/GameState';
 import { Hero, Combatant } from '../../../schema/Combatants';
-import { XPEvent, LevelUpEvent, AttackEvent } from '../../../schema/Events';
+import { XPEvent, LevelUpEvent, AttackEvent, KillEvent } from '../../../schema/Events';
 import { UpdateGameAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG, SERVER_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -489,14 +489,14 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
     let killerHero: Hero | null = null;
     const recentKillEvents = [...state.killEvents].sort((a, b) => b.timestamp - a.timestamp);
     
-    for (const killEvent of recentKillEvents) {
-        if (killEvent.targetId === dyingUnit.id) {
-            // Found the kill event for this unit, now find the killer
-            const killer = state.combatants.get(killEvent.sourceId);
-            if (killer && killer.type === COMBATANT_TYPES.HERO && killer.team === opposingTeam) {
-                killerHero = killer as Hero;
-                break;
-            }
+    // Find the most recent kill event for this specific unit
+    const mostRecentKillEvent = recentKillEvents.find(killEvent => killEvent.targetId === dyingUnit.id);
+    
+    if (mostRecentKillEvent) {
+        // Found the kill event for this unit, now find the killer
+        const killer = state.combatants.get(mostRecentKillEvent.sourceId);
+        if (killer && killer.type === COMBATANT_TYPES.HERO && killer.team === opposingTeam) {
+            killerHero = killer as Hero;
         }
     }
     
@@ -514,7 +514,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         }
     });
     
-    // If killer is not in range, add them to the list
+    // If killer hero is not in range, add them to the list
     if (killerHero && !heroesInRange.find(hero => hero.id === killerHero!.id)) {
         heroesInRange.push(killerHero);
     }
@@ -534,7 +534,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         let bonusExperience = 0;
         let xpType: string | undefined = undefined;
         
-        // Grant additional bonus to the killer
+        // Grant additional bonus to the killer (ONLY if killer is a hero)
         if (killerHero && hero.id === killerHero.id) {
             bonusExperience = amount * GAMEPLAY_CONFIG.EXPERIENCE.LAST_HIT_BONUS_PERCENTAGE;
             
