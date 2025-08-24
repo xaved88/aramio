@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
-import { ControllerId } from '../../shared/types/CombatantTypes';
 
 /**
  * AnimationManager handles all animations and tweens for entities

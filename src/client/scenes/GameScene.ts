@@ -26,7 +26,6 @@ export class GameScene extends Phaser.Scene {
     private isClickHeld: boolean = false;
     private isRestarting: boolean = false;
     private rangeIndicator: Phaser.GameObjects.Graphics | null = null;
-    private currentPlayerHero: any = null;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -204,11 +203,6 @@ export class GameScene extends Phaser.Scene {
     private updateHUD(state: SharedGameState) {
         // Delegate HUD updates to the UIManager
         this.uiManager.updateHUD(state, this.playerTeam, this.playerSessionId);
-    }
-
-    private restartGame(): void {
-        // This method is no longer needed since restart is handled by the server
-        console.log('Restart triggered by server');
     }
 
 
