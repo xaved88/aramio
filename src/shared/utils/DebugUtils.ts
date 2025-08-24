@@ -17,6 +17,7 @@ export function gameStateToString(gameState: GameState): string {
         const combatants = Array.from(gameState.combatants.values());
         const heroes = combatants.filter(c => c.type === 'hero');
         const turrets = combatants.filter(c => c.type === 'turret');
+        const cradles = combatants.filter(c => c.type === 'cradle');
         
         if (heroes.length > 0) {
             lines.push(`  HEROES (${heroes.length}):`);
@@ -30,6 +31,13 @@ export function gameStateToString(gameState: GameState): string {
             lines.push(`  TURRETS (${turrets.length}):`);
             turrets.forEach(turret => {
                 lines.push(`    ${turret.id} (${turret.team}) - HP: ${turret.health}/${turret.maxHealth} - Pos: (${turret.x}, ${turret.y})`);
+            });
+        }
+        
+        if (cradles.length > 0) {
+            lines.push(`  CRADLES (${cradles.length}):`);
+            cradles.forEach(cradle => {
+                lines.push(`    ${cradle.id} (${cradle.team}) - HP: ${cradle.health}/${cradle.maxHealth} - Pos: (${cradle.x}, ${cradle.y})`);
             });
         }
     }
@@ -66,16 +74,6 @@ export function gameStateToString(gameState: GameState): string {
             lines.push(`  ${event.sourceId} killed ${event.targetId} (${event.targetType}) at ${event.timestamp}ms`);
         });
     }
-    
-    // Summary stats
-    lines.push(``);
-    const totalHealth = Array.from(gameState.combatants.values())
-        .reduce((total, c) => total + c.health, 0);
-    const totalMaxHealth = Array.from(gameState.combatants.values())
-        .reduce((total, c) => total + c.maxHealth, 0);
-    lines.push(`SUMMARY:`);
-    lines.push(`  Total Health: ${totalHealth}/${totalMaxHealth}`);
-    lines.push(`  Health Percentage: ${totalMaxHealth > 0 ? Math.round((totalHealth / totalMaxHealth) * 100) : 0}%`);
     
     return lines.join('\n');
 }

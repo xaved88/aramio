@@ -49,8 +49,7 @@ export class GameRoom extends Room<GameState> {
         // Spawn bots
         this.spawnBots();
 
-        console.log("Game Initialized:", gameStateToString(this.state))
-        console.log(`Room created with ${this.state.combatants.size} initial combatants`);
+        console.log("Game Initialized:", gameStateToString(this.state));
         
         // Set up fixed update rate
         this.setSimulationInterval(() => this.update(), SERVER_CONFIG.UPDATE_RATE_MS);
