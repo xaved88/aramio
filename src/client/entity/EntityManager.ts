@@ -238,8 +238,9 @@ export class EntityManager {
      * Processes XP events and creates XP text animations
      */
     private processXPEvents(state: SharedGameState): void {
-        state.xpEvents.forEach(xpEvent => {
-            const eventKey = `${xpEvent.playerId}-${xpEvent.amount}-${xpEvent.timestamp}`;
+        state.xpEvents.forEach((xpEvent, index) => {
+            // Use a more robust event key that includes position to prevent duplicates
+            const eventKey = `${xpEvent.playerId}-${xpEvent.amount}-${xpEvent.x}-${xpEvent.y}-${xpEvent.timestamp}`;
             
             // Skip if we've already processed this event
             if (this.processedXPEvents.has(eventKey)) return;
@@ -295,8 +296,9 @@ export class EntityManager {
      * Processes level-up events and creates level-up text animations
      */
     private processLevelUpEvents(state: SharedGameState): void {
-        state.levelUpEvents.forEach(levelUpEvent => {
-            const eventKey = `${levelUpEvent.playerId}-${levelUpEvent.newLevel}-${levelUpEvent.timestamp}`;
+        state.levelUpEvents.forEach((levelUpEvent, index) => {
+            // Use a more robust event key that includes position to prevent duplicates
+            const eventKey = `${levelUpEvent.playerId}-${levelUpEvent.newLevel}-${levelUpEvent.x}-${levelUpEvent.y}-${levelUpEvent.timestamp}`;
             
             // Skip if we've already processed this event
             if (this.processedLevelUpEvents.has(eventKey)) return;
@@ -316,8 +318,9 @@ export class EntityManager {
      * Processes AOE damage events and creates visual effects
      */
     private processAOEDamageEvents(state: SharedGameState): void {
-        state.aoeDamageEvents.forEach(aoeEvent => {
-            const eventKey = `${aoeEvent.sourceId}-${aoeEvent.x}-${aoeEvent.y}-${aoeEvent.timestamp}`;
+        state.aoeDamageEvents.forEach((aoeEvent, index) => {
+            // Use a more robust event key that includes radius to prevent duplicates
+            const eventKey = `${aoeEvent.sourceId}-${aoeEvent.x}-${aoeEvent.y}-${aoeEvent.radius}-${aoeEvent.timestamp}`;
             
             // Skip if we've already processed this event
             if (this.processedAOEDamageEvents.has(eventKey)) return;
