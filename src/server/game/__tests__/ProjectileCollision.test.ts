@@ -10,10 +10,11 @@ import { ArraySchema } from '@colyseus/schema';
 import { COMBATANT_TYPES, PROJECTILE_TYPES } from '../../../shared/types/CombatantTypes';
 
 // Mock the Config to avoid import issues
+// These are TEST values. Do not use these as reference for how the game is configured.
 jest.mock('../../../Config', () => ({
     CLIENT_CONFIG: {
-        GAME_CANVAS_WIDTH: 800,
-        GAME_CANVAS_HEIGHT: 600,
+        GAME_CANVAS_WIDTH: 700,
+        GAME_CANVAS_HEIGHT: 700,
         PROJECTILE: {
             RADIUS: 5
         }
