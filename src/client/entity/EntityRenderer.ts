@@ -116,7 +116,7 @@ export class EntityRenderer {
             graphics.strokeCircle(0, 0, combatant.size + 2); // Slightly larger than entity
             
             // Add stun icon above the hero
-            graphics.lineStyle(2, 0x999972); // Yellowish lines for icon
+            graphics.lineStyle(3, 0x999972); // Yellowish lines for icon
 
             
             // Draw a simple lightning bolt shape for stun icon
@@ -188,7 +188,7 @@ export class EntityRenderer {
             graphics.strokeCircle(0, 0, combatant.size + 2); // Same positioning as stun
             
             // Add healing icon above the entity (matching stun icon style)
-            graphics.lineStyle(2, 0x228B22); // Darker green lines for icon
+            graphics.lineStyle(3, 0x228B22); // Darker green lines for icon
             
             // Draw a simple cross/plus shape for healing icon
             const iconSize = 6; // Slightly smaller icon
