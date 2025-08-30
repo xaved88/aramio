@@ -7,6 +7,7 @@ import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
+import { PathRenderer } from '../PathRenderer';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 
@@ -16,6 +17,7 @@ export class GameScene extends Phaser.Scene {
     private entityManager!: EntityManager;
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
+    private pathRenderer!: PathRenderer;
     private processedAttackEvents: Set<string> = new Set();
     private processedDamageEvents: Set<string> = new Set();
     private lastState: GameState|null = null
@@ -53,6 +55,7 @@ export class GameScene extends Phaser.Scene {
         this.entityManager = new EntityManager(this);
         this.animationManager = new AnimationManager(this);
         this.uiManager = new UIManager(this);
+        this.pathRenderer = new PathRenderer(this);
         
         // Create range indicator
         this.rangeIndicator = this.add.graphics();
@@ -61,6 +64,9 @@ export class GameScene extends Phaser.Scene {
         
         // Create spawn indicators
         this.createSpawnIndicators();
+        
+        // Create path highlight from corner to corner
+        this.pathRenderer.createPathHighlight();
         
         try {
             this.room = await this.client.joinOrCreate('game');
@@ -633,6 +639,14 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator!.fillStyle(color, 0.1);
         this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
     }
+
+
+    
+
+    
+
+    
+
 
     /**
      * Creates visual indicators at spawn locations
