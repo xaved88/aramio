@@ -46,10 +46,12 @@ export class HUDRenderer {
             healthConfig.HEIGHT
         );
         healthBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        healthBarBackground.setScrollFactor(0, 0); // Fixed to screen
         
         // Create health bar
         const healthBar = this.scene.add.graphics();
         healthBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        healthBar.setScrollFactor(0, 0); // Fixed to screen
         
         // Create health text
         const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100/100', {
@@ -57,6 +59,7 @@ export class HUDRenderer {
             color: hexToColorString(healthConfig.TEXT_COLOR)
         }).setOrigin(0.5);
         healthText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        healthText.setScrollFactor(0, 0); // Fixed to screen
         
         // Create experience bar background
         const experienceBarBackground = this.scene.add.graphics();
@@ -68,10 +71,12 @@ export class HUDRenderer {
             expConfig.HEIGHT
         );
         experienceBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        experienceBarBackground.setScrollFactor(0, 0); // Fixed to screen
         
         // Create experience bar
         const experienceBar = this.scene.add.graphics();
         experienceBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        experienceBar.setScrollFactor(0, 0); // Fixed to screen
         
         // Create experience text
         const experienceText = this.scene.add.text(expConfig.X + expConfig.WIDTH / 2, expConfig.Y + expConfig.HEIGHT / 2, '0/10 XP', {
@@ -79,6 +84,7 @@ export class HUDRenderer {
             color: hexToColorString(expConfig.TEXT_COLOR)
         }).setOrigin(0.5);
         experienceText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        experienceText.setScrollFactor(0, 0); // Fixed to screen
         
         // Create level text
         const levelText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH + 10, healthConfig.Y + healthConfig.HEIGHT / 2, 'Lv.1', {
@@ -86,6 +92,7 @@ export class HUDRenderer {
             color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR)
         }).setOrigin(0, 0.5);
         levelText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        levelText.setScrollFactor(0, 0); // Fixed to screen
 
         // Create ability bar background
         const abilityBarBackground = this.scene.add.graphics();
@@ -97,16 +104,19 @@ export class HUDRenderer {
             abilityConfig.HEIGHT
         );
         abilityBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        abilityBarBackground.setScrollFactor(0, 0); // Fixed to screen
 
         // Create ability bar
         const abilityBar = this.scene.add.graphics();
         abilityBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        abilityBar.setScrollFactor(0, 0); // Fixed to screen
 
         // Create hero kill icon (white circle)
         const heroKillIcon = this.scene.add.graphics();
         heroKillIcon.fillStyle(0xffffff, 1);
         heroKillIcon.fillCircle(killConfig.X, killConfig.Y, killConfig.ICON_SIZE / 2);
         heroKillIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        heroKillIcon.setScrollFactor(0, 0); // Fixed to screen
 
         // Create hero kill text
         const heroKillText = this.scene.add.text(killConfig.X + killConfig.SPACING, killConfig.Y, '0', {
@@ -114,6 +124,7 @@ export class HUDRenderer {
             color: hexToColorString(killConfig.TEXT_COLOR)
         }).setOrigin(0, 0.5);
         heroKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        heroKillText.setScrollFactor(0, 0); // Fixed to screen
 
         // Create minion kill icon (diamond) - positioned horizontally next to hero counter
         const minionKillIcon = this.scene.add.graphics();
@@ -133,6 +144,7 @@ export class HUDRenderer {
         minionKillIcon.closePath();
         minionKillIcon.fillPath();
         minionKillIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        minionKillIcon.setScrollFactor(0, 0); // Fixed to screen
 
         // Create minion kill text
         const minionKillText = this.scene.add.text(minionX + killConfig.SPACING, minionY, '0', {
@@ -140,6 +152,7 @@ export class HUDRenderer {
             color: hexToColorString(killConfig.TEXT_COLOR)
         }).setOrigin(0, 0.5);
         minionKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        minionKillText.setScrollFactor(0, 0); // Fixed to screen
 
         return {
             healthBar,
