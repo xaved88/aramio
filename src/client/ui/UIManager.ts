@@ -98,7 +98,24 @@ export class UIManager {
         const currentPlayer = this.findCurrentPlayer(state, playerSessionId);
         if (!currentPlayer || !isHeroCombatant(currentPlayer)) return;
         
-        this.hudRenderer.updateHUD(currentPlayer, this.hudElements, state.gameTime);
+        // At this point, we know all HUD elements are non-null due to the guard clause above
+        const nonNullHudElements = {
+            healthBar: this.hudElements.healthBar!,
+            healthBarBackground: this.hudElements.healthBarBackground!,
+            healthText: this.hudElements.healthText!,
+            experienceBar: this.hudElements.experienceBar!,
+            experienceBarBackground: this.hudElements.experienceBarBackground!,
+            experienceText: this.hudElements.experienceText!,
+            levelText: this.hudElements.levelText!,
+            abilityBar: this.hudElements.abilityBar!,
+            abilityBarBackground: this.hudElements.abilityBarBackground!,
+            heroKillIcon: this.hudElements.heroKillIcon!,
+            heroKillText: this.hudElements.heroKillText!,
+            minionKillIcon: this.hudElements.minionKillIcon!,
+            minionKillText: this.hudElements.minionKillText!
+        };
+        
+        this.hudRenderer.updateHUD(currentPlayer, nonNullHudElements, state.gameTime);
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
         

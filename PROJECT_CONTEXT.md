@@ -4,14 +4,6 @@
 *Describe your MOBA game concept here - what makes it unique, target audience, core gameplay mechanics*
 This is an IO MOBA game - the idea is to boil down the core essence of a MOBA for quick and simple online matches that are still engaging and high-action! Matches will be about 5 minutes, it's single lane, and mouse only!
 
-## Core Features
-- [x] Real-time multiplayer gameplay
-- [x] Browser-based (no downloads required)
-- [x] Team-based combat
-- [x] Basic combat system with respawning
-- [ ] Map with lanes and objectives
-- [ ] Item system
-- [ ] Experience and leveling
 
 ## Technical Stack
 *List your preferred technologies here*
@@ -24,15 +16,6 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 ## Development Priorities
 1. Phase 1: Core gameplay mechanics, locally hosted
 2. Phase 2: Multiplayer - online hosting
-
-## Current Status
-**August 2nd, 2025** - Core multiplayer combat system implemented with:
-- Real-time player movement and combat
-- Team-based gameplay (Blue vs Red)
-- Turret defensive structures
-- Player respawning system with visual timer
-- Dynamic respawn duration system (ready for leveling)
-- Attack radius indicators and combat feedback
 
 ## Design Decisions
 - **Server-authoritative**: All game logic runs on server, client only handles rendering
@@ -52,10 +35,13 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 
 ---
 
+## Development Workflow
+- **Testing**: Run tests with `npm test` to verify functionality before committing
+- **TypeScript Checking**: Run `npx tsc --noEmit` to check for TypeScript errors before committing
+- **Code Quality**: Fix any TypeScript errors or test failures before pushing changes
+
 ## How to Use This File
 - Update this file as you think of new features or make design decisions
 - Add context about specific implementation challenges
 - Document any external resources or inspiration
 - Keep track of what we've built and what's next
-
-Last updated: August 2nd, 2025 
