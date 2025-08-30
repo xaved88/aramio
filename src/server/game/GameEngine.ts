@@ -159,8 +159,8 @@ export class GameEngine {
             projectile.y += projectile.directionY * distance;
             
             // Check bounds
-            if (projectile.x < 0 || projectile.x > CLIENT_CONFIG.GAME_CANVAS_WIDTH || 
-                projectile.y < 0 || projectile.y > CLIENT_CONFIG.GAME_CANVAS_HEIGHT) {
+            if (projectile.x < 0 || projectile.x > CLIENT_CONFIG.MAP_WIDTH || 
+                projectile.y < 0 || projectile.y > CLIENT_CONFIG.MAP_HEIGHT) {
                 projectilesToRemove.push(projectile.id);
                 return;
             }

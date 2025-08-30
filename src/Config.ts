@@ -239,8 +239,12 @@ export const CLIENT_CONFIG = {
     CONTROLS: {
         SCHEME: 'C' as 'A' | 'B' | 'C' | 'D', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability, D: point-to-move + click-down-to-stop-moving + click-up-for-ability
     },
-    GAME_CANVAS_WIDTH: 700,
-    GAME_CANVAS_HEIGHT: 700,
+    // Canvas/Viewport size (what the player sees)
+    GAME_CANVAS_WIDTH: 400,
+    GAME_CANVAS_HEIGHT: 400,
+    // Map size (actual game world size)
+    MAP_WIDTH: 700,
+    MAP_HEIGHT: 700,
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes

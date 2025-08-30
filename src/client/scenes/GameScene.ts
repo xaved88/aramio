@@ -8,6 +8,7 @@ import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
 import { PathRenderer } from '../PathRenderer';
+import { CameraManager } from '../CameraManager';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 
@@ -18,6 +19,7 @@ export class GameScene extends Phaser.Scene {
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
     private pathRenderer!: PathRenderer;
+    private cameraManager!: CameraManager;
     private processedAttackEvents: Set<string> = new Set();
     private processedDamageEvents: Set<string> = new Set();
     private lastState: GameState|null = null
@@ -26,6 +28,7 @@ export class GameScene extends Phaser.Scene {
     private spaceKeyPressed: boolean = false;
     private moveTarget: { x: number, y: number } | null = null;
     private isClickHeld: boolean = false;
+    private clickDownPosition: { x: number, y: number } | null = null;
     private isRestarting: boolean = false;
     private rangeIndicator: Phaser.GameObjects.Graphics | null = null;
 
@@ -56,6 +59,7 @@ export class GameScene extends Phaser.Scene {
         this.animationManager = new AnimationManager(this);
         this.uiManager = new UIManager(this);
         this.pathRenderer = new PathRenderer(this);
+        this.cameraManager = new CameraManager(this);
         
         // Create range indicator
         this.rangeIndicator = this.add.graphics();
@@ -78,6 +82,9 @@ export class GameScene extends Phaser.Scene {
             
             // Set the player session ID in the entity manager
             this.entityManager.setPlayerSessionId(this.playerSessionId);
+            
+            // Set the player session ID in the camera manager
+            this.cameraManager.setPlayerSessionId(this.playerSessionId);
             
             this.setupRoomHandlers();
             this.setupInputHandlers();
@@ -105,9 +112,10 @@ export class GameScene extends Phaser.Scene {
         if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
             // Control scheme A: point to move (original behavior)
             const pointer = this.input.activePointer;
+            const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
             this.room.send('move', { 
-                targetX: pointer.x, 
-                targetY: pointer.y 
+                targetX: worldPos.x, 
+                targetY: worldPos.y 
             });
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
             // Control scheme B: send continuous movement to target if we have one
@@ -121,9 +129,10 @@ export class GameScene extends Phaser.Scene {
             // Control scheme C: point to move when not clicking, hold position when clicking
             if (!this.isClickHeld) {
                 const pointer = this.input.activePointer;
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                 this.room.send('move', { 
-                    targetX: pointer.x, 
-                    targetY: pointer.y 
+                    targetX: worldPos.x, 
+                    targetY: worldPos.y 
                 });
             } else if (this.moveTarget) {
                 // When click is held, keep moving to the click-down position
@@ -136,9 +145,10 @@ export class GameScene extends Phaser.Scene {
             // Control scheme D: point to move when not clicking, stop moving when clicking
             if (!this.isClickHeld) {
                 const pointer = this.input.activePointer;
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                 this.room.send('move', { 
-                    targetX: pointer.x, 
-                    targetY: pointer.y 
+                    targetX: worldPos.x, 
+                    targetY: worldPos.y 
                 });
             }
             // When click is held, don't send any move commands (stop moving)
@@ -231,6 +241,9 @@ export class GameScene extends Phaser.Scene {
             this.processAttackEvents(sharedState);
             this.processDamageEvents(sharedState);
             this.updateHUD(sharedState);
+            
+            // Update camera to follow player
+            this.cameraManager.updateCamera(sharedState);
         });
         
         this.room.onMessage('gameRestarted', () => {
@@ -244,6 +257,9 @@ export class GameScene extends Phaser.Scene {
             this.lastState = null;
             this.processedAttackEvents.clear();
             this.processedDamageEvents.clear();
+            this.moveTarget = null;
+            this.clickDownPosition = null;
+            this.isClickHeld = false;
             
             // Clear all entities and animations
             this.entityManager.clearAllEntities();
@@ -292,9 +308,10 @@ export class GameScene extends Phaser.Scene {
             // Scheme A: point to move, click to use ability
             this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
                 if (this.room) {
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                     this.room.send('useAbility', {
-                        x: pointer.x,
-                        y: pointer.y
+                        x: worldPos.x,
+                        y: worldPos.y
                     });
                 }
             });
@@ -303,7 +320,8 @@ export class GameScene extends Phaser.Scene {
             this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
                 if (this.room && !this.spaceKeyPressed) {
                     // Click without space: set move target
-                    this.moveTarget = { x: pointer.x, y: pointer.y };
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                    this.moveTarget = { x: worldPos.x, y: worldPos.y };
                 }
             });
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
@@ -311,10 +329,12 @@ export class GameScene extends Phaser.Scene {
             this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
                 if (this.room) {
                     this.isClickHeld = true;
-                    this.moveTarget = { x: pointer.x, y: pointer.y };
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                    this.moveTarget = { x: worldPos.x, y: worldPos.y };
+                    this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
                     
                     // Show range indicator for hookshot ability
-                    this.showRangeIndicator(pointer.x, pointer.y);
+                    this.showRangeIndicator(worldPos.x, worldPos.y);
                 }
             });
 
@@ -323,13 +343,15 @@ export class GameScene extends Phaser.Scene {
                     // Hide range indicator
                     this.hideRangeIndicator();
                     
-                    // Use ability at release position
+                    // Use ability at release position (converted to world coordinates)
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                     this.room.send('useAbility', {
-                        x: pointer.x,
-                        y: pointer.y
+                        x: worldPos.x,
+                        y: worldPos.y
                     });
                     this.isClickHeld = false;
                     this.moveTarget = null; // Clear move target to resume point-to-move
+                    this.clickDownPosition = null; // Clear click-down position
                 }
             });
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
@@ -344,9 +366,10 @@ export class GameScene extends Phaser.Scene {
             this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
                 if (this.room && this.isClickHeld) {
                     // Use ability at release position
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                     this.room.send('useAbility', {
-                        x: pointer.x,
-                        y: pointer.y
+                        x: worldPos.x,
+                        y: worldPos.y
                     });
                     this.isClickHeld = false;
                 }
@@ -359,9 +382,10 @@ export class GameScene extends Phaser.Scene {
             // Fire ability at current pointer position when space is pressed
             if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B' && this.room) {
                 const pointer = this.input.activePointer;
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                 this.room.send('useAbility', {
-                    x: pointer.x,
-                    y: pointer.y
+                    x: worldPos.x,
+                    y: worldPos.y
                 });
             }
         });
@@ -579,17 +603,16 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
         
         // Get mouse position and calculate target position (sticking to cast range if beyond)
-        const mouseX = this.input.mousePointer.x;
-        const mouseY = this.input.mousePointer.y;
-        const dx = mouseX - currentHero.x;
-        const dy = mouseY - currentHero.y;
+        const mouseWorldPos = this.screenToWorldCoordinates(this.input.mousePointer.x, this.input.mousePointer.y);
+        const dx = mouseWorldPos.x - currentHero.x;
+        const dy = mouseWorldPos.y - currentHero.y;
         const mouseDistance = Math.sqrt(dx * dx + dy * dy);
         
         let targetX: number, targetY: number;
         if (mouseDistance <= castRange) {
             // Mouse is within range, use mouse position
-            targetX = mouseX;
-            targetY = mouseY;
+            targetX = mouseWorldPos.x;
+            targetY = mouseWorldPos.y;
         } else {
             // Mouse is beyond range, stick to cast range boundary
             const directionX = dx / mouseDistance;
@@ -696,6 +719,18 @@ export class GameScene extends Phaser.Scene {
             }).setOrigin(0.5);
             text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
         });
+    }
+
+    /**
+     * Converts screen coordinates to world coordinates
+     */
+    private screenToWorldCoordinates(screenX: number, screenY: number): { x: number, y: number } {
+        // Use the CameraManager to get the current camera offset
+        const cameraOffset = this.cameraManager.getCameraOffset();
+        return {
+            x: cameraOffset.x + screenX,
+            y: cameraOffset.y + screenY
+        };
     }
 
     /**
