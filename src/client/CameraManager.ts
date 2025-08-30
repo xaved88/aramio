@@ -1,0 +1,90 @@
+import Phaser from 'phaser';
+import { CLIENT_CONFIG } from '../Config';
+import { ControllerId } from '../shared/types/CombatantTypes';
+import { SharedGameState } from '../shared/types/GameStateTypes';
+
+export class CameraManager {
+    private scene: Phaser.Scene;
+    private camera: Phaser.Cameras.Scene2D.Camera;
+    private playerSessionId: ControllerId | null = null;
+    private viewportWidth: number;
+    private viewportHeight: number;
+    private mapWidth: number;
+    private mapHeight: number;
+
+    constructor(scene: Phaser.Scene) {
+        this.scene = scene;
+        this.camera = scene.cameras.main;
+        
+        // Viewport size (what the player sees)
+        this.viewportWidth = CLIENT_CONFIG.GAME_CANVAS_WIDTH;
+        this.viewportHeight = CLIENT_CONFIG.GAME_CANVAS_HEIGHT;
+        
+        // Map size (actual game world size)
+        this.mapWidth = CLIENT_CONFIG.MAP_WIDTH;
+        this.mapHeight = CLIENT_CONFIG.MAP_HEIGHT;
+        
+        this.setupCamera();
+    }
+
+    private setupCamera(): void {
+        // Set camera bounds to the full map size (700x700)
+        // This allows the camera to move around the entire game world
+        this.camera.setBounds(0, 0, this.mapWidth, this.mapHeight);
+        
+        // Set viewport size to our smaller viewport
+        this.camera.setViewport(0, 0, this.viewportWidth, this.viewportHeight);
+        
+        // Center camera on map initially
+        this.camera.centerOn(this.mapWidth / 2, this.mapHeight / 2);
+    }
+
+    setPlayerSessionId(sessionId: ControllerId | null): void {
+        this.playerSessionId = sessionId;
+    }
+
+    updateCamera(state: SharedGameState): void {
+        if (!this.playerSessionId) return;
+
+        // Find the player's hero
+        let playerHero = null;
+        for (const combatant of state.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+                playerHero = combatant;
+                break;
+            }
+        }
+
+        if (playerHero) {
+            // Center camera on player
+            this.camera.centerOn(playerHero.x, playerHero.y);
+        }
+    }
+
+    getCameraOffset(): { x: number, y: number } {
+        return {
+            x: this.camera.scrollX,
+            y: this.camera.scrollY
+        };
+    }
+
+    getViewportSize(): { width: number, height: number } {
+        return {
+            width: this.viewportWidth,
+            height: this.viewportHeight
+        };
+    }
+
+    getMapSize(): { width: number, height: number } {
+        return {
+            width: this.mapWidth,
+            height: this.mapHeight
+        };
+    }
+
+    setViewportSize(width: number, height: number): void {
+        this.viewportWidth = width;
+        this.viewportHeight = height;
+        this.camera.setViewport(0, 0, width, height);
+    }
+}

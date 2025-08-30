@@ -37,7 +37,7 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 
 ## Development Workflow
 - **Testing**: Run tests with `npm test` to verify functionality before committing
-- **TypeScript Checking**: Run `npx tsc --noEmit` to check for TypeScript errors before committing
+- **TypeScript Checking**: Run `npx tsc` to check for TypeScript errors before committing
 - **Code Quality**: Fix any TypeScript errors or test failures before pushing changes
 
 ## How to Use This File
