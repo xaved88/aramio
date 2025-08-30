@@ -146,11 +146,13 @@ export class StatsOverlay {
     private createTeamInfo(x: number, y: number, teamName: string, teamColor: string, totals: { kills: number, deaths: number, xp: number }): void {
         const header = this.scene.add.text(x, y, teamName, { ...this.TEXT_STYLES.HEADER, color: teamColor });
         header.setDepth(this.DEPTHS.UI_CONTENT);
+        header.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(header);
 
         const totalsText = this.scene.add.text(x + 200, y, `XP: ${Math.round(totals.xp)} | K: ${totals.kills} | D: ${totals.deaths}`, 
             { ...this.TEXT_STYLES.TEAM_TOTALS, color: teamColor });
         totalsText.setDepth(this.DEPTHS.UI_CONTENT);
+        totalsText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(totalsText);
     }
 
@@ -162,6 +164,7 @@ export class StatsOverlay {
         background.fillStyle(0x000000, 0.7);
         background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
         background.setDepth(this.DEPTHS.BACKGROUND);
+        background.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(background);
 
         const playerStats = this.getPlayerStats(state);
@@ -175,6 +178,7 @@ export class StatsOverlay {
         const gameTimeText = this.scene.add.text(centerX, 20, `Game Time: ${this.formatGameTime(state.gameTime)}`, this.TEXT_STYLES.GAME_TIME);
         gameTimeText.setOrigin(0.5, 0);
         gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
+        gameTimeText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(gameTimeText);
 
         this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', '#e74c3c', this.calculateTeamTotals(redTeamStats));
@@ -191,6 +195,7 @@ export class StatsOverlay {
         if (stats.length === 0) {
             const noPlayersText = this.scene.add.text(startX, startY, 'No players', this.TEXT_STYLES.NO_PLAYERS);
             noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
+            noPlayersText.setScrollFactor(0, 0); // Fixed to screen
             this.overlayElements.push(noPlayersText);
             return;
         }
@@ -201,6 +206,7 @@ export class StatsOverlay {
         separator.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
         separator.lineBetween(startX, startY + this.CELL_HEIGHT + 5, startX + this.getTotalTableWidth(), startY + this.CELL_HEIGHT + 5);
         separator.setDepth(this.DEPTHS.UI_CONTENT);
+        separator.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(separator);
 
         stats.forEach((player, index) => {
@@ -232,6 +238,7 @@ export class StatsOverlay {
         }
         
         cell.setDepth(this.DEPTHS.UI_CONTENT);
+        cell.setScrollFactor(0, 0); // Fixed to screen
         return cell;
     }
 

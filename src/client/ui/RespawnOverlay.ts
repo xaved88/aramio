@@ -19,6 +19,7 @@ export class RespawnOverlay {
     private createOverlay(): void {
         this.overlay = this.scene.add.graphics();
         this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.overlay.setScrollFactor(0, 0); // Fixed to screen
         
         this.text = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -35,6 +36,7 @@ export class RespawnOverlay {
         );
         this.text.setOrigin(0.5);
         this.text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.text.setScrollFactor(0, 0); // Fixed to screen
         
         this.timer = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -51,6 +53,7 @@ export class RespawnOverlay {
         );
         this.timer.setOrigin(0.5);
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.timer.setScrollFactor(0, 0); // Fixed to screen
         
         this.hide();
     }

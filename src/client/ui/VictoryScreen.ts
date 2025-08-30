@@ -30,6 +30,7 @@ export class VictoryScreen {
         this.background.fillStyle(0x000000, 0.7); // 70% opacity black
         this.background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
         this.background.setAlpha(0); // Start transparent for fade in
+        this.background.setScrollFactor(0, 0); // Fixed to screen
         
         // Create victory/defeat text with better styling
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
@@ -53,7 +54,7 @@ export class VictoryScreen {
                     fill: true
                 }
             }
-        ).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS).setAlpha(0); // Set high depth to appear above other UI
+        ).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS).setAlpha(0).setScrollFactor(0, 0); // Set high depth to appear above other UI, fixed to screen
         
         // Fade in animation
         this.fadeInTween = this.scene.tweens.add({
