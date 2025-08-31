@@ -230,7 +230,8 @@ export const GAMEPLAY_CONFIG = {
     },
     BOTS: {
         BOTS_PER_TEAM: 5, // Number of bots to spawn per team
-        ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
+        // ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
+        ABILITY_TYPES: ['default', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again
