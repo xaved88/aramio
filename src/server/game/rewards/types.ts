@@ -15,9 +15,15 @@ export interface StatReward {
     stats: StatRewardConfig[];
 }
 
+export interface AbilityReward {
+    type: 'ability';
+    abilityType: string;
+}
+
 export interface RewardDefinition {
-    type: string;
+    type: 'stat' | 'ability';
     stats?: StatRewardConfig[];
+    abilityType?: string;
 }
 
 export interface ChestReward {

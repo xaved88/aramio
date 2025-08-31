@@ -2,6 +2,7 @@ import { Hero } from '../../schema/Combatants';
 import { GAMEPLAY_CONFIG } from '../../../Config';
 import { StatModEffect } from '../../schema/Effects';
 import { COMBATANT_EFFECT_TYPES } from '../../../shared/types/CombatantTypes';
+import { AbilityFactory } from '../abilities/AbilityFactory';
 
 export class RewardManager {
     /**
@@ -43,32 +44,39 @@ export class RewardManager {
      */
     static applyReward(hero: Hero, rewardId: string, gameTime: number): boolean {
         const rewardType = GAMEPLAY_CONFIG.REWARDS.REWARD_TYPES[rewardId as keyof typeof GAMEPLAY_CONFIG.REWARDS.REWARD_TYPES];
-        if (!rewardType || rewardType.type !== 'stat') {
-            console.warn(`Unknown or invalid reward type: ${rewardId}`);
+        if (!rewardType) {
+            console.warn(`Unknown reward type: ${rewardId}`);
             return false;
         }
 
-        // Apply all stats in the reward
-        rewardType.stats.forEach((statConfig: any) => {
-            const statEffect = new StatModEffect();
-            statEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
-            statEffect.stat = statConfig.stat;
-            statEffect.operator = statConfig.modifier.type === 'flat' ? 'relative' : 'percent';
-            statEffect.amount = statConfig.modifier.value;
-            statEffect.duration = -1; // Permanent effect
-            statEffect.appliedAt = gameTime;
-            hero.effects.push(statEffect);
-        });
+        if (rewardType.type === 'stat') {
+            // Apply all stats in the reward
+            rewardType.stats.forEach((statConfig: any) => {
+                const statEffect = new StatModEffect();
+                statEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
+                statEffect.stat = statConfig.stat;
+                statEffect.operator = statConfig.modifier.type === 'flat' ? 'relative' : 'percent';
+                statEffect.amount = statConfig.modifier.value;
+                statEffect.duration = -1; // Permanent effect
+                statEffect.appliedAt = gameTime;
+                hero.effects.push(statEffect);
+            });
+            return true;
+        } else if (rewardType.type === 'ability') {
+            // Replace the hero's ability with a new one that has all the proper stats
+            hero.ability = AbilityFactory.create(rewardType.abilityType);
+            return true;
+        }
 
-        return true;
+        // This should never be reached since we handle all known reward types above
+        return false;
     }
 
     /**
      * Determines which chest type to give based on player level
      */
     static getChestTypeForLevel(level: number): string {
-        // For now, all levels get common chest
-        // In the future, this could be expanded to give different chests at different levels
-        return 'common';
+        const levelChests = GAMEPLAY_CONFIG.REWARDS.LEVEL_CHESTS;
+        return levelChests[level as keyof typeof levelChests] || 'common';
     }
 }

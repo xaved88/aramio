@@ -238,6 +238,9 @@ export const GAMEPLAY_CONFIG = {
         },
     },
     REWARDS: {
+        LEVEL_CHESTS: {
+            3: "ability_chest" // At level 3, give ability chest instead of common
+        },
         CHESTS: {
             common: {
                 rewards: [
@@ -246,6 +249,14 @@ export const GAMEPLAY_CONFIG = {
                     { id: "stat:damage", weight: 2 },
                     { id: "stat:attack_speed", weight: 1 },
                     { id: "stat:attack_range", weight: 0.5 },
+                ]
+            },
+            ability_chest: {
+                rewards: [
+                    { id: "ability:thorndive", weight: 1 },
+                    { id: "ability:pyromancer", weight: 1 },
+                    { id: "ability:hookshot", weight: 1 },
+                    { id: "ability:mercenary", weight: 1 },
                 ]
             }
         },
@@ -286,6 +297,22 @@ export const GAMEPLAY_CONFIG = {
                 stats: [
                     { stat: "moveSpeed", modifier: { type: "percent", value: 1.15 } }
                 ]
+            },
+            "ability:thorndive": {
+                type: "ability",
+                abilityType: "thorndive"
+            },
+            "ability:pyromancer": {
+                type: "ability", 
+                abilityType: "pyromancer"
+            },
+            "ability:hookshot": {
+                type: "ability",
+                abilityType: "hookshot"
+            },
+            "ability:mercenary": {
+                type: "ability",
+                abilityType: "mercenary"
             }
         }
     },
@@ -508,6 +535,30 @@ export const CLIENT_CONFIG = {
                 description: "+15% movement speed",
                 icon: "boots",
                 rarity: "common"
+            },
+            "ability:thorndive": {
+                title: "Thorndive",
+                description: "Tank with dash and taunt",
+                icon: "shield",
+                rarity: "ability"
+            },
+            "ability:pyromancer": {
+                title: "Pyromancer",
+                description: "AOE fire damage",
+                icon: "fire",
+                rarity: "ability"
+            },
+            "ability:hookshot": {
+                title: "Hookshot",
+                description: "Grappling hook stun",
+                icon: "hook",
+                rarity: "ability"
+            },
+            "ability:mercenary": {
+                title: "Mercenary",
+                description: "Rage mode berserker",
+                icon: "sword",
+                rarity: "ability"
             }
         }
     },
