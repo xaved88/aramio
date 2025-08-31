@@ -30,6 +30,8 @@ export class HUDRenderer {
         heroKillText: Phaser.GameObjects.Text;
         minionKillIcon: Phaser.GameObjects.Graphics;
         minionKillText: Phaser.GameObjects.Text;
+        rewardsIcon: Phaser.GameObjects.Graphics;
+        rewardsText: Phaser.GameObjects.Text;
     } {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
@@ -131,7 +133,7 @@ export class HUDRenderer {
         minionKillIcon.fillStyle(0xffffff, 1);
         
         // Position minion icon horizontally to the right of hero text
-        const minionX = killConfig.X + killConfig.SPACING + 60; // Hero text + some extra space
+        const minionX = killConfig.X + killConfig.SPACING + 40; // Reduced from 60 to 40
         const minionY = killConfig.Y; // Same Y as hero icon
         const halfSize = killConfig.ICON_SIZE / 2;
         
@@ -154,6 +156,40 @@ export class HUDRenderer {
         minionKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         minionKillText.setScrollFactor(0, 0); // Fixed to screen
 
+        // Create rewards counter configuration
+        const rewardsConfig = CLIENT_CONFIG.HUD.REWARDS_COUNTER;
+        
+        // Create rewards icon (half-square/half-circle)
+        const rewardsIcon = this.scene.add.graphics();
+        rewardsIcon.fillStyle(rewardsConfig.ICON_COLOR, 1);
+        
+        // Position rewards icon horizontally after minion kill counter
+        const rewardsX = minionX + killConfig.SPACING + 40; // Position after minion text
+        const rewardsY = rewardsConfig.Y; // Same Y as kill counters
+        const rewardsHalfSize = rewardsConfig.ICON_SIZE / 2;
+        
+        // Draw half-square/half-circle shape
+        rewardsIcon.beginPath();
+        // Bottom half (square)
+        rewardsIcon.moveTo(rewardsX - rewardsHalfSize, rewardsY);
+        rewardsIcon.lineTo(rewardsX - rewardsHalfSize, rewardsY + rewardsHalfSize);
+        rewardsIcon.lineTo(rewardsX + rewardsHalfSize, rewardsY + rewardsHalfSize);
+        rewardsIcon.lineTo(rewardsX + rewardsHalfSize, rewardsY);
+        // Top half (circle)
+        rewardsIcon.arc(rewardsX, rewardsY, rewardsHalfSize, 0, Math.PI, true);
+        rewardsIcon.closePath();
+        rewardsIcon.fillPath();
+        rewardsIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        rewardsIcon.setScrollFactor(0, 0); // Fixed to screen
+
+        // Create rewards text
+        const rewardsText = this.scene.add.text(rewardsX + rewardsConfig.SPACING, rewardsY, '0', {
+            fontSize: rewardsConfig.FONT_SIZE,
+            color: hexToColorString(rewardsConfig.TEXT_COLOR)
+        }).setOrigin(0, 0.5);
+        rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        rewardsText.setScrollFactor(0, 0); // Fixed to screen
+
         return {
             healthBar,
             healthBarBackground,
@@ -167,7 +203,9 @@ export class HUDRenderer {
             heroKillIcon,
             heroKillText,
             minionKillIcon,
-            minionKillText
+            minionKillText,
+            rewardsIcon,
+            rewardsText
         };
     }
 
@@ -190,6 +228,8 @@ export class HUDRenderer {
             heroKillText: Phaser.GameObjects.Text;
             minionKillIcon: Phaser.GameObjects.Graphics;
             minionKillText: Phaser.GameObjects.Text;
+            rewardsIcon: Phaser.GameObjects.Graphics;
+            rewardsText: Phaser.GameObjects.Text;
         },
         gameTime: number
     ): void {
@@ -233,6 +273,9 @@ export class HUDRenderer {
         // Update kill counters
         hudElements.heroKillText.setText(player.roundStats.heroKills.toString());
         hudElements.minionKillText.setText(player.roundStats.minionKills.toString());
+
+        // Update rewards counter
+        hudElements.rewardsText.setText(player.levelRewards.length.toString());
 
         // Update ability bar
         const currentTime = gameTime;

@@ -19,6 +19,7 @@ interface PlayerStats {
     damageDealt: number;
     isBot: boolean;
     isCurrentPlayer: boolean;
+    levelRewards: number; // number of level rewards available
 }
 
 interface TableCell {
@@ -53,7 +54,8 @@ export class StatsOverlay {
         turretKills: 60,
         deaths: 60,
         damageTaken: 60,
-        damageDealt: 60
+        damageDealt: 60,
+        rewards: 50
     };
 
     // Column definitions for consistent table structure
@@ -68,7 +70,8 @@ export class StatsOverlay {
         { key: 'minionKills', width: 'minionKills', header: 'Minions', align: 'right', getValue: (player: PlayerStats) => Math.round(player.minionKills).toString() },
         { key: 'turretKills', width: 'turretKills', header: 'Turrets', align: 'right', getValue: (player: PlayerStats) => Math.round(player.turretKills).toString() },
         { key: 'damageDealt', width: 'damageDealt', header: 'Dealt', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageDealt).toString() },
-        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() }
+        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() },
+        { key: 'rewards', width: 'rewards', header: 'Rewards', align: 'right', getValue: (player: PlayerStats) => player.levelRewards.toString() }
     ] as const;
 
     // Depth configuration for consistent layering
@@ -294,7 +297,8 @@ export class StatsOverlay {
                     damageTaken: combatant.roundStats.damageTaken,
                     damageDealt: combatant.roundStats.damageDealt,
                     isBot: combatant.controller.startsWith('bot'),
-                    isCurrentPlayer: this.playerSessionId === combatant.controller
+                    isCurrentPlayer: this.playerSessionId === combatant.controller,
+                    levelRewards: combatant.levelRewards.length
                 });
             }
         });

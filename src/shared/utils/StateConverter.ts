@@ -204,7 +204,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     range: (hero.ability as any).range,
                     landingRadius: (hero.ability as any).landingRadius
                 } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility,
-                controller: hero.controller
+                controller: hero.controller,
+                levelRewards: hero.levelRewards ? Array.from(hero.levelRewards) : []
             } as HeroCombatant;
             
         case COMBATANT_TYPES.CRADLE:

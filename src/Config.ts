@@ -363,9 +363,18 @@ export const CLIENT_CONFIG = {
             X: 20,
             Y: 80, // Below experience bar
             ICON_SIZE: 12,
-            SPACING: 25, // Space between icon and number
+            SPACING: 20, // Reduced spacing between icon and number
             TEXT_COLOR: 0xffffff,
             FONT_SIZE: '14px',
+        },
+        REWARDS_COUNTER: {
+            X: 20,
+            Y: 80, // Same Y as kill counters
+            ICON_SIZE: 12,
+            SPACING: 20, // Reduced spacing between icon and number
+            TEXT_COLOR: 0xf1c40f, // yellow/gold
+            FONT_SIZE: '14px',
+            ICON_COLOR: 0xf1c40f, // yellow/gold
         },
     },
     UI: {

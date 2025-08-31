@@ -5,6 +5,7 @@ import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../abilities/AbilityFactory';
+import { ArraySchema } from '@colyseus/schema';
 
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): StateMachineResult {
     const { playerId, team, x, y, abilityType = 'default' } = action.payload;
@@ -64,6 +65,9 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     
     // Initialize ability
     hero.ability = AbilityFactory.create(abilityType);
+    
+    // Initialize level rewards
+    hero.levelRewards = new ArraySchema<string>();
     
     // Add hero to state
     state.combatants.set(hero.id, hero);
