@@ -6,6 +6,7 @@ import { BotManager } from '../game/bots/BotManager';
 import { gameStateToString } from '../../shared/utils/DebugUtils';
 import { ControllerId, CombatantId, COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 import { GameCommand, GameMoveCommand, GameUseAbilityCommand } from '../../shared/types/GameCommands';
+import { RewardManager } from '../game/rewards/RewardManager';
 
 export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
@@ -215,9 +216,16 @@ export class GameRoom extends Room<GameState> {
         if (hero && hero.type === COMBATANT_TYPES.HERO) {
             const heroCombatant = hero as any; // Cast to access levelRewards
             if (heroCombatant.levelRewards && heroCombatant.levelRewards.length > 0) {
-                // Remove one reward from the player's levelRewards
-                heroCombatant.levelRewards.splice(0, 1);
-                console.log(`Reward chosen: ${command.data.rewardId} by player ${heroCombatant.controller}, remaining rewards: ${heroCombatant.levelRewards.length}`);
+                // Apply the chosen reward
+                const success = RewardManager.applyReward(heroCombatant, command.data.rewardId, this.state.gameTime);
+                if (success) {
+                    // Remove the chest from levelRewards and clear rewardsForChoice
+                    heroCombatant.levelRewards.splice(0, 1);
+                    heroCombatant.rewardsForChoice.clear();
+                    console.log(`Reward applied: ${command.data.rewardId} by player ${heroCombatant.controller}, remaining chests: ${heroCombatant.levelRewards.length}`);
+                } else {
+                    console.warn(`Failed to apply reward: ${command.data.rewardId} by player ${heroCombatant.controller}`);
+                }
             }
         }
     }

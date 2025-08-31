@@ -7,6 +7,7 @@ import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { MinionManager } from '../../combatants/MinionManager';
 import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
+import { RewardManager } from '../../rewards/RewardManager';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
     // Update game time directly on the state
@@ -383,6 +384,15 @@ function handleDeadCombatants(state: GameState): void {
             if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero died, start respawn
                 startPlayerRespawn(hero, state);
+                
+                // Process chests and generate reward choices immediately on death
+                if (hero.levelRewards.length > 0 && hero.rewardsForChoice.length === 0) {
+                    const chestType = hero.levelRewards[0]; // Process the first chest
+                    if (chestType) {
+                        const rewards = RewardManager.generateRewardsFromChest(chestType);
+                        hero.rewardsForChoice.push(...rewards);
+                    }
+                }
             } else if (hero.state === 'respawning' && currentTime >= hero.respawnTime) {
                 // Check if hero has unspent level rewards - if so, don't respawn yet
                 if (hero.levelRewards.length > 0) {
@@ -615,8 +625,9 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     // Boost ability strength using the AbilityLevelUpManager
     AbilityLevelUpManager.levelUpAbility(player.ability);
     
-    // Add level reward
-    player.levelRewards.push("basic");
+    // Add level reward chest
+    const chestType = RewardManager.getChestTypeForLevel(player.level);
+    player.levelRewards.push(chestType);
     
     // Create level-up event
     const levelUpEvent = new LevelUpEvent();

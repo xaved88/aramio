@@ -69,6 +69,9 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     // Initialize level rewards
     hero.levelRewards = new ArraySchema<string>();
     
+    // Initialize rewards for choice
+    hero.rewardsForChoice = new ArraySchema<string>();
+    
     // Add hero to state
     state.combatants.set(hero.id, hero);
     
