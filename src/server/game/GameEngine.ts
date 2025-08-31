@@ -10,6 +10,7 @@ import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
 import { AOEDamageEvent } from '../schema/Events';
+import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
 
 export class GameEngine {
     private state: GameState;
@@ -422,8 +423,8 @@ export class GameEngine {
         combatant.y += normalizedDy * moveDistance;
         
         // Clamp to game bounds
-        combatant.x = Math.max(20, Math.min(580, combatant.x));
-        combatant.y = Math.max(20, Math.min(580, combatant.y));
+        combatant.x = Math.max(getMinX(), Math.min(getMaxX(), combatant.x));
+        combatant.y = Math.max(getMinY(), Math.min(getMaxY(), combatant.y));
         
         return false; // Don't remove the effect yet
     }
