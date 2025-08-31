@@ -237,6 +237,58 @@ export const GAMEPLAY_CONFIG = {
             MAX: 2.2, // The max % of cooldown to wait before firing again
         },
     },
+    REWARDS: {
+        CHESTS: {
+            common: {
+                rewards: [
+                    { id: "stat:health", weight: 2 },
+                    { id: "stat:defense", weight: 1 },
+                    { id: "stat:damage", weight: 2 },
+                    { id: "stat:attack_speed", weight: 1 },
+                    { id: "stat:attack_range", weight: 0.5 },
+                ]
+            }
+        },
+        REWARD_TYPES: {
+            "stat:health": { 
+                type: "stat", 
+                stats: [
+                    { stat: "maxHealth", modifier: { type: "percent", value: 1.15 } }
+                ]
+            },
+            "stat:defense": { 
+                type: "stat", 
+                stats: [
+                    { stat: "bulletArmor", modifier: { type: "flat", value: 15 } },
+                    { stat: "abilityArmor", modifier: { type: "flat", value: 15 } }
+                ]
+            },
+            "stat:damage": { 
+                type: "stat", 
+                stats: [
+                    { stat: "attackStrength", modifier: { type: "percent", value: 1.15 } }
+                ]
+            },
+            "stat:attack_speed": { 
+                type: "stat", 
+                stats: [
+                    { stat: "attackSpeed", modifier: { type: "percent", value: 1.15 } }
+                ]
+            },
+            "stat:attack_range": { 
+                type: "stat", 
+                stats: [
+                    { stat: "attackRadius", modifier: { type: "flat", value: 10 } }
+                ]
+            },
+            "stat:move_speed": { 
+                type: "stat", 
+                stats: [
+                    { stat: "moveSpeed", modifier: { type: "percent", value: 1.15 } }
+                ]
+            }
+        }
+    },
 } as const;
 
 // Client Configuration
@@ -418,5 +470,45 @@ export const CLIENT_CONFIG = {
             FLOAT_DISTANCE: 50, // How far the text floats up
             DURATION_MS: 3000, // Matches GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS
         },
+    },
+    REWARDS: {
+        DISPLAY: {
+            "stat:health": {
+                title: "Health Boost",
+                description: "+15% max health",
+                icon: "heart",
+                rarity: "common"
+            },
+            "stat:defense": {
+                title: "Defense Boost", 
+                description: "+15 bullet & ability armor",
+                icon: "shield",
+                rarity: "common"
+            },
+            "stat:damage": {
+                title: "Damage Boost",
+                description: "+15% attack strength", 
+                icon: "sword",
+                rarity: "common"
+            },
+            "stat:attack_speed": {
+                title: "Attack Speed",
+                description: "+15% attacks per second",
+                icon: "lightning",
+                rarity: "common"
+            },
+            "stat:attack_range": {
+                title: "Attack Range",
+                description: "+10 attack radius",
+                icon: "crosshair",
+                rarity: "common"
+            },
+            "stat:move_speed": {
+                title: "Movement Speed",
+                description: "+15% movement speed",
+                icon: "boots",
+                rarity: "common"
+            }
+        }
     },
 } as const;

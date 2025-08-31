@@ -149,6 +149,12 @@ export class UIManager {
         if (currentPlayer.state === 'respawning') {
             const remainingTime = currentPlayer.respawnTime - state.gameTime;
             const hasUnspentRewards = currentPlayer.levelRewards && currentPlayer.levelRewards.length > 0;
+            
+            // Update rewards if player has unspent rewards
+            if (hasUnspentRewards) {
+                this.respawnOverlay.updateRewards(currentPlayer);
+            }
+            
             this.respawnOverlay.showWithTimer(remainingTime > 0 ? remainingTime : 0, hasUnspentRewards);
         } else {
             this.respawnOverlay.hide();

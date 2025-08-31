@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
 import { RewardCardManager } from './RewardCardManager';
+import { HeroCombatant } from '../../shared/types/CombatantTypes';
 
 /**
  * RespawnOverlay displays a prominent overlay when the player's hero is respawning
@@ -120,6 +121,10 @@ export class RespawnOverlay {
         
         // Show/hide reward cards based on unspent rewards (show immediately when respawning)
         this.rewardCardManager.setVisible(hasUnspentRewards);
+    }
+
+    updateRewards(hero: HeroCombatant): void {
+        this.rewardCardManager.updateRewards(hero);
     }
 
     private updateBackground(): void {
