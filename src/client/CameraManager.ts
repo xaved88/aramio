@@ -11,6 +11,7 @@ export class CameraManager {
     private viewportHeight: number;
     private mapWidth: number;
     private mapHeight: number;
+    private currentTween: Phaser.Tweens.Tween | null = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -56,9 +57,31 @@ export class CameraManager {
         }
 
         if (playerHero) {
-            // Center camera on player
-            this.camera.centerOn(playerHero.x, playerHero.y);
+            this.tweenToPosition(playerHero.x, playerHero.y);
         }
+    }
+
+    private tweenToPosition(targetX: number, targetY: number): void {
+        // Calculate target camera position (center the target in viewport)
+        const targetCameraX = targetX - this.viewportWidth / 2;
+        const targetCameraY = targetY - this.viewportHeight / 2;
+        
+        // Stop any existing tween
+        if (this.currentTween) {
+            this.currentTween.stop();
+        }
+        
+        // Create smooth camera tween
+        this.currentTween = this.scene.tweens.add({
+            targets: this.camera,
+            scrollX: targetCameraX,
+            scrollY: targetCameraY,
+            duration: CLIENT_CONFIG.CAMERA_TWEEN_DURATION_MS,
+            ease: 'Power2',
+            onComplete: () => {
+                this.currentTween = null;
+            }
+        });
     }
 
     getCameraOffset(): { x: number, y: number } {
