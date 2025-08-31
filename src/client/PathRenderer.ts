@@ -33,7 +33,7 @@ export class PathRenderer {
         this.addPathGradient(pathHighlight, blueCradle, redCradle, pathWidth, pathLength, angle);
         
         // Add subtle border
-        pathHighlight.lineStyle(2, 0xffffff, 0.1);
+        pathHighlight.lineStyle(2, 0xffffff, 0.05);
         pathHighlight.strokeCircle(blueCradle.x, blueCradle.y, pathWidth / 2);
         pathHighlight.strokeCircle(redCradle.x, redCradle.y, pathWidth / 2);
     }
@@ -49,13 +49,13 @@ export class PathRenderer {
         length: number,
         angle: number
     ): void {
-        const stoneSize = 12;
-        const stoneSpacing = 16;
+        const stoneSize = 8;
+        const stoneSpacing = 12;
         const rows = Math.ceil(width / stoneSpacing);
         const cols = Math.ceil(length / stoneSpacing);
         
-        // Base path color (cobblestone gray)
-        const baseColor = 0x8B8B8B;
+        // Base path color (more muted gray)
+        const baseColor = 0x6B6B6B;
         
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
@@ -70,7 +70,7 @@ export class PathRenderer {
                 const stoneY = centerY + Math.sin(angle + Math.PI / 2) * offset;
                 
                 // Add some randomness to stone positions
-                const randomOffset = (Math.random() - 0.5) * 4;
+                const randomOffset = (Math.random() - 0.5) * 2;
                 const finalX = stoneX + randomOffset;
                 const finalY = stoneY + randomOffset;
                 
@@ -91,19 +91,19 @@ export class PathRenderer {
         baseColor: number
     ): void {
         // Stone shadow
-        graphics.fillStyle(0x696969, 0.6);
+        graphics.fillStyle(0x5A5A5A, 0.1);
         graphics.fillRect(x - size/2 + 1, y - size/2 + 1, size, size);
         
         // Stone base
-        graphics.fillStyle(baseColor, 0.8);
+        graphics.fillStyle(baseColor, 0.15);
         graphics.fillRect(x - size/2, y - size/2, size, size);
         
         // Stone highlight
-        graphics.fillStyle(0xB8B8B8, 0.4);
+        graphics.fillStyle(0x7A7A7A, 0.08);
         graphics.fillRect(x - size/2, y - size/2, size, size/3);
         
         // Stone border
-        graphics.lineStyle(1, 0x696969, 0.8);
+        graphics.lineStyle(1, 0x5A5A5A, 0.1);
         graphics.strokeRect(x - size/2, y - size/2, size, size);
     }
     
@@ -118,14 +118,14 @@ export class PathRenderer {
         length: number,
         angle: number
     ): void {
-        const gradientSteps = 8;
+        const gradientSteps = 6;
         
         for (let i = 0; i < gradientSteps; i++) {
             const progress = i / (gradientSteps - 1);
-            const currentWidth = width * (1 - progress * 0.3); // Slight taper
+            const currentWidth = width * (1 - progress * 0.2); // Less taper
             
             // Create gradient mask effect by drawing semi-transparent overlays
-            const alpha = 0.1 + (progress * 0.2);
+            const alpha = 0.01 + (progress * 0.03);
             graphics.lineStyle(currentWidth, 0x2c3e50, alpha);
             graphics.beginPath();
             graphics.moveTo(start.x, start.y);
