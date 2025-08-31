@@ -52,12 +52,12 @@ export class UIManager {
         rewardsText: null
     };
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
         this.hudRenderer = new HUDRenderer(scene);
         this.victoryScreen = new VictoryScreen(scene);
         this.statsOverlay = new StatsOverlay(scene);
-        this.respawnOverlay = new RespawnOverlay(scene);
+        this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });

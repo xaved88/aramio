@@ -18,4 +18,12 @@ export interface GameUseAbilityCommand {
     };
 }
 
-export type GameCommand = GameMoveCommand | GameUseAbilityCommand; 
+export interface GameChooseRewardCommand {
+    type: 'choose_reward';
+    data: {
+        heroId: CombatantId;
+        rewardId: string;
+    };
+}
+
+export type GameCommand = GameMoveCommand | GameUseAbilityCommand | GameChooseRewardCommand; 
