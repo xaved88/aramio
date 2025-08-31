@@ -31,9 +31,35 @@ export class BotManager {
                     const botCommands = strategy.generateCommands(combatant, sharedState);
                     commands.push(...botCommands);
                 }
+                
+                // Add reward claiming behavior for bots
+                const rewardCommands = this.generateRewardCommands(combatant);
+                commands.push(...rewardCommands);
             }
         });
 
+        return commands;
+    }
+
+    /**
+     * Generate reward claiming commands for bots
+     */
+    private generateRewardCommands(bot: any): GameCommand[] {
+        const commands: GameCommand[] = [];
+        
+        // Check if bot has reward choices available
+        if (bot.rewardsForChoice && bot.rewardsForChoice.length > 0) {
+            // Bot always chooses the first reward option
+            const firstRewardId = bot.rewardsForChoice[0];
+            commands.push({
+                type: 'choose_reward',
+                data: {
+                    heroId: bot.id,
+                    rewardId: firstRewardId
+                }
+            });
+        }
+        
         return commands;
     }
 } 
