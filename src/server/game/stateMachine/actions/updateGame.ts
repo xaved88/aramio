@@ -609,6 +609,9 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     // Boost ability strength using the AbilityLevelUpManager
     AbilityLevelUpManager.levelUpAbility(player.ability);
     
+    // Add level reward
+    player.levelRewards.push("basic");
+    
     // Create level-up event
     const levelUpEvent = new LevelUpEvent();
     levelUpEvent.playerId = player.id;

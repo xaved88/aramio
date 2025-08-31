@@ -318,6 +318,7 @@ describe('GameStateMachine', () => {
             
             // Hero should have gained experience
             expect(updatedHero?.roundStats.totalExperience).toBe(5);
+            expect(updatedHero?.levelRewards.length).toBe(0); // New heroes should start with no rewards
         });
 
         it('should level up players when they gain enough experience', () => {
@@ -360,6 +361,8 @@ describe('GameStateMachine', () => {
             expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
             expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
             expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            expect(updatedHero?.levelRewards.length).toBe(1); // Should have one "basic" reward
+            expect(updatedHero?.levelRewards[0]).toBe("basic"); // Should be "basic" reward
         });
 
         it('should preserve combatant types during game updates', () => {

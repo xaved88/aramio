@@ -32,6 +32,8 @@ export class UIManager {
         heroKillText: Phaser.GameObjects.Text | null;
         minionKillIcon: Phaser.GameObjects.Graphics | null;
         minionKillText: Phaser.GameObjects.Text | null;
+        rewardsIcon: Phaser.GameObjects.Graphics | null;
+        rewardsText: Phaser.GameObjects.Text | null;
     } = {
         healthBar: null,
         healthBarBackground: null,
@@ -45,7 +47,9 @@ export class UIManager {
         heroKillIcon: null,
         heroKillText: null,
         minionKillIcon: null,
-        minionKillText: null
+        minionKillText: null,
+        rewardsIcon: null,
+        rewardsText: null
     };
 
     constructor(scene: Phaser.Scene) {
@@ -112,7 +116,9 @@ export class UIManager {
             heroKillIcon: this.hudElements.heroKillIcon!,
             heroKillText: this.hudElements.heroKillText!,
             minionKillIcon: this.hudElements.minionKillIcon!,
-            minionKillText: this.hudElements.minionKillText!
+            minionKillText: this.hudElements.minionKillText!,
+            rewardsIcon: this.hudElements.rewardsIcon!,
+            rewardsText: this.hudElements.rewardsText!
         };
         
         this.hudRenderer.updateHUD(currentPlayer, nonNullHudElements, state.gameTime);

@@ -78,6 +78,7 @@ export class Hero extends Combatant {
     @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
+    @type(['string']) levelRewards = new ArraySchema<string>(); // Array of level rewards
 }
 
 export class Minion extends Combatant {

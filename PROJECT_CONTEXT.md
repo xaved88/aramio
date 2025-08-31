@@ -36,9 +36,21 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 ---
 
 ## Development Workflow
+During feature creation, do not create new tests or check tests often - we want fast feedback with the prompter. Only when we're done with the feature should we be actively checking these things - then do the following:
 - **Testing**: Run tests with `npm test` to verify functionality before committing
 - **TypeScript Checking**: Run `npx tsc` to check for TypeScript errors before committing
 - **Code Quality**: Fix any TypeScript errors or test failures before pushing changes
+
+## Other Best Practices and Tips
+- Always extract configurable values to the Config.ts file so they can be adjusted without live code changes.
+- **State Conversion**: When adding new fields to server schemas (Colyseus), always update the `convertToSharedCombatant` function in `src/shared/utils/StateConverter.ts` to ensure proper client synchronization. Missing this step causes "Cannot read properties of undefined" errors.
+- **Schema Synchronization**: New fields added to server-side schemas must be:
+  1. Added to the server schema class (e.g., `Hero` in `Combatants.ts`)
+  2. Added to the shared types interface (e.g., `HeroCombatant` in `CombatantTypes.ts`)
+  3. Added to the state converter function (`StateConverter.ts`)
+  4. Initialized in spawn/creation functions
+- **Array Schema Fields**: When using Colyseus `ArraySchema` fields, use `Array.from(schemaField)` in the state converter to convert to regular arrays for the client.
+- **Type Safety**: Always run `npx tsc --noEmit` after adding new fields to catch type mismatches between server and client.
 
 ## How to Use This File
 - Update this file as you think of new features or make design decisions
