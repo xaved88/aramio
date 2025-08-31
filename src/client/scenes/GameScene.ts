@@ -603,7 +603,7 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
         
         // Get mouse position and calculate target position (sticking to cast range if beyond)
-        const mouseWorldPos = this.screenToWorldCoordinates(this.input.mousePointer.x, this.input.mousePointer.y);
+        const mouseWorldPos = this.screenToWorldCoordinates(this.input.activePointer.x, this.input.activePointer.y);
         const dx = mouseWorldPos.x - currentHero.x;
         const dy = mouseWorldPos.y - currentHero.y;
         const mouseDistance = Math.sqrt(dx * dx + dy * dy);
@@ -725,12 +725,8 @@ export class GameScene extends Phaser.Scene {
      * Converts screen coordinates to world coordinates
      */
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number, y: number } {
-        // Use the CameraManager to get the current camera offset
-        const cameraOffset = this.cameraManager.getCameraOffset();
-        return {
-            x: cameraOffset.x + screenX,
-            y: cameraOffset.y + screenY
-        };
+        // Use the CameraManager's camera for coordinate conversion
+        return this.cameraManager.getWorldPoint(screenX, screenY);
     }
 
     /**

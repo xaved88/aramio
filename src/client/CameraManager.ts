@@ -91,6 +91,18 @@ export class CameraManager {
         };
     }
 
+    getWorldPoint(screenX: number, screenY: number): { x: number, y: number } {
+        // Get the actual camera position after bounds clamping
+        const actualScrollX = Math.max(0, Math.min(this.camera.scrollX, this.mapWidth - this.viewportWidth));
+        const actualScrollY = Math.max(0, Math.min(this.camera.scrollY, this.mapHeight - this.viewportHeight));
+        
+        // Calculate world coordinates using the actual camera position
+        return {
+            x: actualScrollX + screenX,
+            y: actualScrollY + screenY
+        };
+    }
+
     getViewportSize(): { width: number, height: number } {
         return {
             width: this.viewportWidth,
