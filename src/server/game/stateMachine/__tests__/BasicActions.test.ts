@@ -875,5 +875,107 @@ describe('GameStateMachine', () => {
             // Verify total experience tracking
             expect(updatedPlayer!.roundStats.totalExperience).toBe(experienceToGrant);
         });
+
+        it('should block respawn when player has unspent level rewards', () => {
+            // Setup game and spawn player
+            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+                type: 'SPAWN_PLAYER',
+                payload: { playerId: 'player1', team: 'blue' }
+            });
+            
+            // Find the player by controller
+            let player: Hero | undefined;
+            spawnResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    player = combatant as Hero;
+                }
+            });
+            
+            expect(player).toBeDefined();
+            
+            // Grant experience to level up and get a reward
+            player!.experience = 15; // Enough to level up (level 1 * 15 = 15 XP needed)
+            
+            // Update game to trigger level up
+            const levelUpResult = GameStateMachine.processAction(spawnResult.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Find the updated player
+            let leveledPlayer: Hero | undefined;
+            levelUpResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    leveledPlayer = combatant as Hero;
+                }
+            });
+            
+            expect(leveledPlayer).toBeDefined();
+            expect(leveledPlayer!.level).toBe(2);
+            expect(leveledPlayer!.levelRewards.length).toBe(1);
+            
+            // Kill the player to start respawn
+            leveledPlayer!.health = 0;
+            
+            // Update game to trigger respawn
+            const respawnResult = GameStateMachine.processAction(levelUpResult.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Find the respawning player
+            let respawningPlayer: Hero | undefined;
+            respawnResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    respawningPlayer = combatant as Hero;
+                }
+            });
+            
+            expect(respawningPlayer).toBeDefined();
+            expect(respawningPlayer!.state).toBe('respawning');
+            
+            // Set respawn time to be completed (in the past)
+            respawningPlayer!.respawnTime = respawnResult.newState.gameTime - 1000;
+            
+            // Update game - should NOT respawn because of unspent rewards
+            const blockedResult = GameStateMachine.processAction(respawnResult.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Find the still-respawning player
+            let blockedPlayer: Hero | undefined;
+            blockedResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    blockedPlayer = combatant as Hero;
+                }
+            });
+            
+            expect(blockedPlayer).toBeDefined();
+            expect(blockedPlayer!.state).toBe('respawning'); // Should still be respawning
+            expect(blockedPlayer!.levelRewards.length).toBe(1); // Should still have unspent rewards
+            
+            // Now spend the reward (clear the array)
+            blockedPlayer!.levelRewards.clear();
+            
+            // Update game again - should respawn now
+            const finalResult = GameStateMachine.processAction(blockedResult.newState, {
+                type: 'UPDATE_GAME',
+                payload: { deltaTime: 1000 }
+            });
+            
+            // Find the respawned player
+            let finalPlayer: Hero | undefined;
+            finalResult.newState.combatants.forEach((combatant) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
+                    finalPlayer = combatant as Hero;
+                }
+            });
+            
+            expect(finalPlayer).toBeDefined();
+            expect(finalPlayer!.state).toBe('alive'); // Should be alive now
+            expect(finalPlayer!.levelRewards.length).toBe(0); // Should have no unspent rewards
+        });
     });
 }); 
