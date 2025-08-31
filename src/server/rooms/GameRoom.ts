@@ -222,6 +222,14 @@ export class GameRoom extends Room<GameState> {
                     // Remove the chest from levelRewards and clear rewardsForChoice
                     heroCombatant.levelRewards.splice(0, 1);
                     heroCombatant.rewardsForChoice.clear();
+                    
+                    // Generate new reward choices for the next chest if there are more
+                    if (heroCombatant.levelRewards.length > 0) {
+                        const nextChestType = heroCombatant.levelRewards[0];
+                        const rewards = RewardManager.generateRewardsFromChest(nextChestType);
+                        heroCombatant.rewardsForChoice.push(...rewards);
+                    }
+                    
                     console.log(`Reward applied: ${command.data.rewardId} by player ${heroCombatant.controller}, remaining chests: ${heroCombatant.levelRewards.length}`);
                 } else {
                     console.warn(`Failed to apply reward: ${command.data.rewardId} by player ${heroCombatant.controller}`);
