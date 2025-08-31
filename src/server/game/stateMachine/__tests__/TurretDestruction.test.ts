@@ -29,7 +29,7 @@ describe('TurretDestruction', () => {
                 if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
                     hero = combatant as Hero;
                 }
-                if (combatant.id === 'red-turret') {
+                if (combatant.id === 'red-turret-1') {
                     redTurret = combatant;
                 }
             });
@@ -93,7 +93,7 @@ describe('TurretDestruction', () => {
                 if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
                     hero = combatant as Hero;
                 }
-                if (combatant.id === 'red-turret') {
+                if (combatant.id === 'red-turret-1') {
                     redTurret = combatant;
                 }
             });
@@ -157,7 +157,7 @@ describe('TurretDestruction', () => {
                     if (hero.controller === 'player1') hero1 = hero;
                     if (hero.controller === 'player2') hero2 = hero;
                 }
-                if (combatant.id === 'red-turret') {
+                if (combatant.id === 'red-turret-1') {
                     redTurret = combatant;
                 }
             });
@@ -234,7 +234,7 @@ describe('TurretDestruction', () => {
                 if (combatant.type === COMBATANT_TYPES.HERO && (combatant as Hero).controller === 'player1') {
                     hero = combatant as Hero;
                 }
-                if (combatant.id === 'red-turret') {
+                if (combatant.id === 'red-turret-1') {
                     redTurret = combatant;
                 }
             });
@@ -291,7 +291,7 @@ describe('TurretDestruction', () => {
                     player = combatant as Hero;
                 }
             });
-            const redTurret = spawnResult.newState.combatants.get('red-turret');
+            const redTurret = spawnResult.newState.combatants.get('red-turret-1');
 
             // Give player enough experience to be close to leveling up
             if (player && redTurret) {
@@ -531,7 +531,7 @@ describe('TurretDestruction', () => {
             const initialExp2 = hero2?.experience || 0;
             
             // Destroy a turret - both players should get XP
-            const redTurret = spawnResult2.newState.combatants.get('red-turret');
+            const redTurret = spawnResult2.newState.combatants.get('red-turret-1');
             if (redTurret) {
                 redTurret.health = 0; // Destroy the turret
             }

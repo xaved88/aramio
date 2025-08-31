@@ -725,7 +725,7 @@ describe('handleUpdateGame', () => {
             turret.type = COMBATANT_TYPES.TURRET;
             turret.team = 'blue';
             turret.x = 300;
-            turret.y = 300;
+            turret.y = 900;
             turret.health = 500;
             turret.maxHealth = 500;
             turret.attackRadius = 70;
@@ -739,8 +739,8 @@ describe('handleUpdateGame', () => {
             cradle.id = 'cradle1';
             cradle.type = COMBATANT_TYPES.CRADLE;
             cradle.team = 'blue';
-            cradle.x = 400;
-            cradle.y = 400;
+            cradle.x = 100;
+            cradle.y = 1100;
             cradle.health = 2000;
             cradle.maxHealth = 2000;
             cradle.attackRadius = 120;
@@ -782,7 +782,7 @@ describe('handleUpdateGame', () => {
         it('should resolve collision between unit and structure (unit moves, structure stays)', () => {
             // Move minion close to turret
             minion.x = 305; // 5 units away from turret (size 12 + 20 = 32, threshold = 28.8)
-            minion.y = 300;
+            minion.y = 900;
 
             const originalMinionX = minion.x;
             const originalMinionY = minion.y;
@@ -805,8 +805,8 @@ describe('handleUpdateGame', () => {
 
         it('should ignore collision between two structures', () => {
             // Move turret close to cradle
-            turret.x = 410; // 10 units away from cradle (size 20 + 25 = 45, threshold = 40.5)
-            turret.y = 400;
+            turret.x = 110; // 10 units away from cradle (size 20 + 25 = 45, threshold = 40.5)
+            turret.y = 1100;
 
             const originalTurretX = turret.x;
             const originalTurretY = turret.y;
@@ -1159,9 +1159,9 @@ describe('handleUpdateGame', () => {
 
         it('should not give XP to heroes outside range', () => {
             // Move all heroes out of range
-            blueHero1.x = 300;
-            blueHero2.x = 300;
-            blueHero3.x = 300;
+            blueHero1.x = 400; // 290 units away from dead minion at x=110
+            blueHero2.x = 400;
+            blueHero3.x = 400;
             
             // Remove the dead hero to avoid double XP
             gameState.combatants.delete('red-hero');
