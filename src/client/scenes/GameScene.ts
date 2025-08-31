@@ -57,7 +57,9 @@ export class GameScene extends Phaser.Scene {
         // Initialize managers
         this.entityManager = new EntityManager(this);
         this.animationManager = new AnimationManager(this);
-        this.uiManager = new UIManager(this);
+        this.uiManager = new UIManager(this, (rewardId: string) => {
+            this.handleRewardChosen(rewardId);
+        });
         this.pathRenderer = new PathRenderer(this);
         this.cameraManager = new CameraManager(this);
         
@@ -727,6 +729,10 @@ export class GameScene extends Phaser.Scene {
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number, y: number } {
         // Use the CameraManager's camera for coordinate conversion
         return this.cameraManager.getWorldPoint(screenX, screenY);
+    }
+
+    private handleRewardChosen(rewardId: string): void {
+        this.room.send('choose_reward', { rewardId });
     }
 
     /**

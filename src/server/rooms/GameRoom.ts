@@ -4,7 +4,7 @@ import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
 import { gameStateToString } from '../../shared/utils/DebugUtils';
-import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
+import { ControllerId, CombatantId, COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 import { GameCommand, GameMoveCommand, GameUseAbilityCommand } from '../../shared/types/GameCommands';
 
 export class GameRoom extends Room<GameState> {
@@ -84,6 +84,19 @@ export class GameRoom extends Room<GameState> {
             }
         });
 
+        this.onMessage('choose_reward', (client, data) => {
+            const heroId = this.findHeroByController(client.sessionId);
+            if (heroId) {
+                this.commands.push({
+                    type: 'choose_reward',
+                    data: {
+                        heroId: heroId,
+                        rewardId: data.rewardId
+                    }
+                });
+            }
+        });
+
         this.onMessage('toggleHero', (client) => {
             this.handleToggleHero(client.sessionId);
         });
@@ -94,7 +107,7 @@ export class GameRoom extends Room<GameState> {
         
         // Determine team based on current player hero count (excluding bots)
         const currentPlayerHeroCount = Array.from(this.state.combatants.values())
-            .filter(c => c.type === 'hero' && !(c as any).controller.startsWith('bot-')).length;
+            .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot-')).length;
         const team = currentPlayerHeroCount % 2 === 0 
             ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
             : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
@@ -181,6 +194,9 @@ export class GameRoom extends Room<GameState> {
             case 'useAbility':
                 this.handleUseAbilityCommand(command);
                 break;
+            case 'choose_reward':
+                this.handleChooseRewardCommand(command);
+                break;
             default:
                 console.log(`Unknown command type: ${(command as any).type}`);
         }
@@ -194,9 +210,21 @@ export class GameRoom extends Room<GameState> {
         this.gameEngine.useAbility(command.data.heroId, command.data.x, command.data.y);
     }
 
+    private handleChooseRewardCommand(command: any) {
+        const hero = this.state.combatants.get(command.data.heroId);
+        if (hero && hero.type === COMBATANT_TYPES.HERO) {
+            const heroCombatant = hero as any; // Cast to access levelRewards
+            if (heroCombatant.levelRewards && heroCombatant.levelRewards.length > 0) {
+                // Remove one reward from the player's levelRewards
+                heroCombatant.levelRewards.splice(0, 1);
+                console.log(`Reward chosen: ${command.data.rewardId} by player ${heroCombatant.controller}, remaining rewards: ${heroCombatant.levelRewards.length}`);
+            }
+        }
+    }
+
     private findHeroByController(controllerId: ControllerId): CombatantId | null {
         for (const [heroId, combatant] of this.state.combatants.entries()) {
-            if (combatant.type === 'hero' && (combatant as any).controller === controllerId) {
+            if (combatant.type === COMBATANT_TYPES.HERO && (combatant as any).controller === controllerId) {
                 return heroId;
             }
         }
@@ -250,7 +278,7 @@ export class GameRoom extends Room<GameState> {
         // Find a bot on the specified team to replace
         let botToReplace: any = null;
         this.state.combatants.forEach((combatant: any) => {
-            if (combatant.type === 'hero' && 
+            if (combatant.type === COMBATANT_TYPES.HERO && 
                 combatant.controller.startsWith('bot-') && 
                 combatant.team === team && 
                 !botToReplace) {
@@ -272,7 +300,7 @@ export class GameRoom extends Room<GameState> {
         // Find the hero controlled by this player
         let playerHero: any = null;
         this.state.combatants.forEach((combatant: any) => {
-            if (combatant.type === 'hero' && combatant.controller === playerId) {
+            if (combatant.type === COMBATANT_TYPES.HERO && combatant.controller === playerId) {
                 playerHero = combatant;
             }
         });
@@ -296,7 +324,7 @@ export class GameRoom extends Room<GameState> {
         // Find current hero controlled by the player
         let currentHero: any = null;
         this.state.combatants.forEach((combatant: any) => {
-            if (combatant.type === 'hero' && combatant.controller === playerId) {
+            if (combatant.type === COMBATANT_TYPES.HERO && combatant.controller === playerId) {
                 currentHero = combatant;
             }
         });
@@ -309,7 +337,7 @@ export class GameRoom extends Room<GameState> {
         // Get all heroes on the same team
         const teamHeroes: any[] = [];
         this.state.combatants.forEach((combatant: any) => {
-            if (combatant.type === 'hero' && combatant.team === currentHero.team) {
+            if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === currentHero.team) {
                 teamHeroes.push(combatant);
             }
         });

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
+import { RewardCardManager } from './RewardCardManager';
 
 /**
  * RespawnOverlay displays a prominent overlay when the player's hero is respawning
@@ -10,10 +11,14 @@ export class RespawnOverlay {
     private text: Phaser.GameObjects.Text | null = null;
     private timer: Phaser.GameObjects.Text | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
+    private rewardCardManager: RewardCardManager;
     private isVisible: boolean = false;
+    private onRewardChosen?: (rewardId: string) => void;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
+        this.onRewardChosen = onRewardChosen;
+        this.rewardCardManager = new RewardCardManager(scene, onRewardChosen);
         this.createOverlay();
     }
 
@@ -78,10 +83,11 @@ export class RespawnOverlay {
 
     show(): void {
         if (this.overlay && this.text && this.timer && this.rewardsText) {
-            [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el.setAlpha(0).setVisible(true));
+            const elements = [this.overlay, this.text, this.timer, this.rewardsText];
+            elements.forEach(el => el.setAlpha(0).setVisible(true));
             
             this.scene.tweens.add({
-                targets: [this.overlay, this.text, this.timer, this.rewardsText],
+                targets: elements,
                 alpha: 1,
                 duration: 600,
                 ease: 'Power2'
@@ -94,6 +100,7 @@ export class RespawnOverlay {
     hide(): void {
         if (this.overlay && this.text && this.timer && this.rewardsText) {
             [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el.setVisible(false));
+            this.rewardCardManager.setVisible(false);
             this.isVisible = false;
         }
     }
@@ -104,12 +111,15 @@ export class RespawnOverlay {
         }
         
         if (this.rewardsText) {
-            if (remainingTimeMs <= 0 && hasUnspentRewards) {
+            if (hasUnspentRewards) {
                 this.rewardsText.setVisible(true);
             } else {
                 this.rewardsText.setVisible(false);
             }
         }
+        
+        // Show/hide reward cards based on unspent rewards (show immediately when respawning)
+        this.rewardCardManager.setVisible(hasUnspentRewards);
     }
 
     private updateBackground(): void {
@@ -133,6 +143,7 @@ export class RespawnOverlay {
     destroy(): void {
         [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el?.destroy());
         [this.overlay, this.text, this.timer, this.rewardsText] = [null, null, null, null];
+        this.rewardCardManager.destroy();
         this.isVisible = false;
     }
 }
