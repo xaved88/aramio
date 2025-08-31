@@ -9,6 +9,7 @@ export class RespawnOverlay {
     private overlay: Phaser.GameObjects.Graphics | null = null;
     private text: Phaser.GameObjects.Text | null = null;
     private timer: Phaser.GameObjects.Text | null = null;
+    private rewardsText: Phaser.GameObjects.Text | null = null;
     private isVisible: boolean = false;
 
     constructor(scene: Phaser.Scene) {
@@ -55,15 +56,32 @@ export class RespawnOverlay {
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.timer.setScrollFactor(0, 0); // Fixed to screen
         
+        this.rewardsText = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 5 + 100,
+            'Choose your rewards',
+            {
+                fontSize: '24px',
+                color: '#f1c40f',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2,
+                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+            }
+        );
+        this.rewardsText.setOrigin(0.5);
+        this.rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.rewardsText.setScrollFactor(0, 0); // Fixed to screen
+        
         this.hide();
     }
 
     show(): void {
-        if (this.overlay && this.text && this.timer) {
-            [this.overlay, this.text, this.timer].forEach(el => el.setAlpha(0).setVisible(true));
+        if (this.overlay && this.text && this.timer && this.rewardsText) {
+            [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el.setAlpha(0).setVisible(true));
             
             this.scene.tweens.add({
-                targets: [this.overlay, this.text, this.timer],
+                targets: [this.overlay, this.text, this.timer, this.rewardsText],
                 alpha: 1,
                 duration: 600,
                 ease: 'Power2'
@@ -74,15 +92,23 @@ export class RespawnOverlay {
     }
 
     hide(): void {
-        if (this.overlay && this.text && this.timer) {
-            [this.overlay, this.text, this.timer].forEach(el => el.setVisible(false));
+        if (this.overlay && this.text && this.timer && this.rewardsText) {
+            [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el.setVisible(false));
             this.isVisible = false;
         }
     }
 
-    updateTimer(remainingTimeMs: number): void {
+    updateTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
         if (this.timer) {
             this.timer.setText(`${Math.ceil(remainingTimeMs / 1000)}s`);
+        }
+        
+        if (this.rewardsText) {
+            if (remainingTimeMs <= 0 && hasUnspentRewards) {
+                this.rewardsText.setVisible(true);
+            } else {
+                this.rewardsText.setVisible(false);
+            }
         }
     }
 
@@ -94,10 +120,10 @@ export class RespawnOverlay {
         }
     }
 
-    showWithTimer(remainingTimeMs: number): void {
+    showWithTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
         this.show();
         this.updateBackground();
-        this.updateTimer(remainingTimeMs);
+        this.updateTimer(remainingTimeMs, hasUnspentRewards);
     }
 
     isShowing(): boolean {
@@ -105,8 +131,8 @@ export class RespawnOverlay {
     }
 
     destroy(): void {
-        [this.overlay, this.text, this.timer].forEach(el => el?.destroy());
-        [this.overlay, this.text, this.timer] = [null, null, null];
+        [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el?.destroy());
+        [this.overlay, this.text, this.timer, this.rewardsText] = [null, null, null, null];
         this.isVisible = false;
     }
 }

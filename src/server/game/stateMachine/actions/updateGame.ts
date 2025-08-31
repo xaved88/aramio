@@ -384,8 +384,14 @@ function handleDeadCombatants(state: GameState): void {
                 // Hero died, start respawn
                 startPlayerRespawn(hero, state);
             } else if (hero.state === 'respawning' && currentTime >= hero.respawnTime) {
-                // Respawn the hero
-                completePlayerRespawn(hero);
+                // Check if hero has unspent level rewards - if so, don't respawn yet
+                if (hero.levelRewards.length > 0) {
+                    // Keep hero in respawning state until rewards are spent
+                    // The respawn time check will continue to pass, but respawn won't complete
+                } else {
+                    // Respawn the hero
+                    completePlayerRespawn(hero);
+                }
             }
             
             // Check for level up (regardless of how experience was gained)
