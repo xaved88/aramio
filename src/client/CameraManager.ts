@@ -29,8 +29,6 @@ export class CameraManager {
     }
 
     private setupCamera(): void {
-        // Set camera bounds to the full map size (700x700)
-        // This allows the camera to move around the entire game world
         this.camera.setBounds(0, 0, this.mapWidth, this.mapHeight);
         
         // Set viewport size to our smaller viewport

@@ -59,47 +59,51 @@ export function handleSetupGame(state: GameState, action: SetupGameAction): Stat
     redCradle.abilityArmor = 0;
     state.combatants.set(redCradle.id, redCradle);
     
-    // Create blue turret
-    const blueTurret = new Combatant();
-    blueTurret.id = 'blue-turret';
-    blueTurret.type = COMBATANT_TYPES.TURRET;
-    blueTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.x;
-    blueTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.y;
-    blueTurret.team = 'blue';
-    blueTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-    blueTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-    blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
-    blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
-    blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
-    blueTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
-    blueTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
-    blueTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
-    blueTurret.lastAttackTime = 0;
-    blueTurret.moveSpeed = 0; // Turrets don't move
-    blueTurret.bulletArmor = 0;
-    blueTurret.abilityArmor = 0;
-    state.combatants.set(blueTurret.id, blueTurret);
+    // Create blue turrets
+    GAMEPLAY_CONFIG.TURRET_POSITIONS.BLUE.forEach((position, index) => {
+        const blueTurret = new Combatant();
+        blueTurret.id = `blue-turret-${index + 1}`;
+        blueTurret.type = COMBATANT_TYPES.TURRET;
+        blueTurret.x = position.x;
+        blueTurret.y = position.y;
+        blueTurret.team = 'blue';
+        blueTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        blueTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        blueTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
+        blueTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
+        blueTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+        blueTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
+        blueTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
+        blueTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
+        blueTurret.lastAttackTime = 0;
+        blueTurret.moveSpeed = 0; // Turrets don't move
+        blueTurret.bulletArmor = 0;
+        blueTurret.abilityArmor = 0;
+        state.combatants.set(blueTurret.id, blueTurret);
+    });
     
-    // Create red turret
-    const redTurret = new Combatant();
-    redTurret.id = 'red-turret';
-    redTurret.type = COMBATANT_TYPES.TURRET;
-    redTurret.x = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.x;
-    redTurret.y = GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.y;
-    redTurret.team = 'red';
-    redTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-    redTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
-    redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
-    redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
-    redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
-    redTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
-    redTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
-    redTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
-    redTurret.lastAttackTime = 0;
-    redTurret.moveSpeed = 0; // Turrets don't move
-    redTurret.bulletArmor = 0;
-    redTurret.abilityArmor = 0;
-    state.combatants.set(redTurret.id, redTurret);
+    // Create red turrets
+    GAMEPLAY_CONFIG.TURRET_POSITIONS.RED.forEach((position, index) => {
+        const redTurret = new Combatant();
+        redTurret.id = `red-turret-${index + 1}`;
+        redTurret.type = COMBATANT_TYPES.TURRET;
+        redTurret.x = position.x;
+        redTurret.y = position.y;
+        redTurret.team = 'red';
+        redTurret.health = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        redTurret.maxHealth = GAMEPLAY_CONFIG.COMBAT.TURRET.HEALTH;
+        redTurret.attackRadius = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_RADIUS;
+        redTurret.attackStrength = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH;
+        redTurret.attackSpeed = GAMEPLAY_CONFIG.COMBAT.TURRET.ATTACK_SPEED;
+        redTurret.windUp = GAMEPLAY_CONFIG.COMBAT.TURRET.WIND_UP;
+        redTurret.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
+        redTurret.size = GAMEPLAY_CONFIG.COMBAT.TURRET.SIZE;
+        redTurret.lastAttackTime = 0;
+        redTurret.moveSpeed = 0; // Turrets don't move
+        redTurret.bulletArmor = 0;
+        redTurret.abilityArmor = 0;
+        state.combatants.set(redTurret.id, redTurret);
+    });
     
     // Initialize currentWave to 0 (minions will spawn via waves)
     state.currentWave = 0;

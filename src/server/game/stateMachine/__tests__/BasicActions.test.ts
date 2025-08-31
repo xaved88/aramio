@@ -35,8 +35,8 @@ describe('GameStateMachine', () => {
             expect(redCradle?.team).toBe('red');
 
             // Check that turrets are created
-            const blueTurret = newState.combatants.get('blue-turret');
-            const redTurret = newState.combatants.get('red-turret');
+            const blueTurret = newState.combatants.get('blue-turret-1');
+            const redTurret = newState.combatants.get('red-turret-1');
             
             expect(blueTurret).toBeDefined();
             expect(redTurret).toBeDefined();
@@ -115,8 +115,8 @@ describe('GameStateMachine', () => {
             // Verify that existing combatants still have correct types
             const blueCradle = newState.combatants.get('blue-cradle');
             const redCradle = newState.combatants.get('red-cradle');
-            const blueTurret = newState.combatants.get('blue-turret');
-            const redTurret = newState.combatants.get('red-turret');
+            const blueTurret = newState.combatants.get('blue-turret-1');
+            const redTurret = newState.combatants.get('red-turret-1');
             
             expect(blueCradle?.type).toBe(COMBATANT_TYPES.CRADLE);
             expect(redCradle?.type).toBe(COMBATANT_TYPES.CRADLE);
@@ -255,7 +255,7 @@ describe('GameStateMachine', () => {
             });
             
             // Destroy a turret
-            const redTurret = spawnResult.newState.combatants.get('red-turret');
+            const redTurret = spawnResult.newState.combatants.get('red-turret-1');
             if (redTurret) {
                 redTurret.health = 0; // Destroy the turret
             }
@@ -383,8 +383,8 @@ describe('GameStateMachine', () => {
             // Verify that all combatants still have correct types
             const blueCradle = currentState.combatants.get('blue-cradle');
             const redCradle = currentState.combatants.get('red-cradle');
-            const blueTurret = currentState.combatants.get('blue-turret');
-            const redTurret = currentState.combatants.get('red-turret');
+            const blueTurret = currentState.combatants.get('blue-turret-1');
+            const redTurret = currentState.combatants.get('red-turret-1');
             // Find the player by controller
             let player: Hero | undefined;
             currentState.combatants.forEach((combatant) => {
@@ -409,7 +409,7 @@ describe('GameStateMachine', () => {
             });
             
             // Destroy a turret
-            const redTurret = spawnResult.newState.combatants.get('red-turret');
+            const redTurret = spawnResult.newState.combatants.get('red-turret-1');
             if (redTurret) {
                 redTurret.health = 0; // Destroy the turret
             }
@@ -492,7 +492,7 @@ describe('GameStateMachine', () => {
                     player = combatant as Hero;
                 }
             });
-            const redTurret = spawnResult.newState.combatants.get('red-turret');
+            const redTurret = spawnResult.newState.combatants.get('red-turret-1');
             
             if (player) {
                 player.experience = 50;
@@ -514,7 +514,7 @@ describe('GameStateMachine', () => {
                     newPlayer = combatant as Hero;
                 }
             });
-            const newRedTurret = newState.combatants.get('red-turret');
+            const newRedTurret = newState.combatants.get('red-turret-1');
             
             // Verify that our manual changes are preserved, accounting for turret destruction
             // Player starts with 50, gets 50 from turret destruction (total 100)
@@ -580,8 +580,8 @@ describe('GameStateMachine', () => {
             // Verify that remaining combatants still have correct types
             const blueCradle = result.newState.combatants.get('blue-cradle');
             const redCradle = result.newState.combatants.get('red-cradle');
-            const blueTurret = result.newState.combatants.get('blue-turret');
-            const redTurret = result.newState.combatants.get('red-turret');
+            const blueTurret = result.newState.combatants.get('blue-turret-1');
+            const redTurret = result.newState.combatants.get('red-turret-1');
             
             expect(blueCradle?.type).toBe(COMBATANT_TYPES.CRADLE);
             expect(redCradle?.type).toBe(COMBATANT_TYPES.CRADLE);
@@ -717,8 +717,8 @@ describe('GameStateMachine', () => {
             // Verify that all combatants still have correct types
             const blueCradle = result.newState.combatants.get('blue-cradle');
             const redCradle = result.newState.combatants.get('red-cradle');
-            const blueTurret = result.newState.combatants.get('blue-turret');
-            const redTurret = result.newState.combatants.get('red-turret');
+            const blueTurret = result.newState.combatants.get('blue-turret-1');
+            const redTurret = result.newState.combatants.get('red-turret-1');
             // Find the player by controller
             let player: Hero | undefined;
             result.newState.combatants.forEach((combatant) => {
@@ -756,8 +756,8 @@ describe('GameStateMachine', () => {
             // Verify that all combatants still have correct types
             const blueCradle = result.newState.combatants.get('blue-cradle');
             const redCradle = result.newState.combatants.get('red-cradle');
-            const blueTurret = result.newState.combatants.get('blue-turret');
-            const redTurret = result.newState.combatants.get('red-turret');
+            const blueTurret = result.newState.combatants.get('blue-turret-1');
+            const redTurret = result.newState.combatants.get('red-turret-1');
             // Find the player by controller
             let player: Hero | undefined;
             result.newState.combatants.forEach((combatant) => {

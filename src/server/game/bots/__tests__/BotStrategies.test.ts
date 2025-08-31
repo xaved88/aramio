@@ -54,13 +54,13 @@ describe('Bot Strategies', () => {
             const hookshotStrategy = new HookshotBotStrategy();
             
             // Bot is positioned in front of teammate (closer to enemy base)
-            // Blue base: (100, 600), Red base: (600, 100)
+            // Blue base: (100, 1100), Red base: (1100, 100)
             // Bot closer to red base (enemy) = higher X, lower Y
             const mockBot = {
                 id: 'test-bot',
                 team: 'blue',
-                x: 400, // Closer to enemy base (red at 600,100)
-                y: 200, // Closer to enemy base (red at 600,100)
+                x: 800, // Closer to enemy base (red at 1100,100)
+                y: 400, // Closer to enemy base (red at 1100,100)
                 health: 100,
                 state: 'alive',
                 ability: { lastUsedTime: 0, cooldown: 5000 }, // Hookshot available
@@ -72,8 +72,8 @@ describe('Bot Strategies', () => {
             const mockTeammate = {
                 id: 'teammate',
                 team: 'blue',
-                x: 200, // Closer to our base (blue at 100,600)
-                y: 400, // Closer to our base (blue at 100,600)
+                x: 400, // Closer to our base (blue at 100,1100)
+                y: 800, // Closer to our base (blue at 100,1100)
                 type: 'hero',
                 state: 'alive'
             } as any;
@@ -104,9 +104,9 @@ describe('Bot Strategies', () => {
             expect(moveCommand.data.heroId).toBe(mockBot.id);
             
             // The target position should be closer to our base than the bot's current position
-            // Blue base is at (100, 600), so moving towards base means:
-            // - X: move left (targetX < 400)
-            // - Y: move down (targetY > 200)
+            // Blue base is at (100, 1100), so moving towards base means:
+            // - X: move left (targetX < 800)
+            // - Y: move down (targetY > 400)
             expect(moveCommand.data.targetX).toBeLessThan(mockBot.x);
             expect(moveCommand.data.targetY).toBeGreaterThan(mockBot.y);
         });
