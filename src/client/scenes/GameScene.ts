@@ -11,6 +11,7 @@ import { PathRenderer } from '../PathRenderer';
 import { CameraManager } from '../CameraManager';
 import { GameObjectFactory } from '../GameObjectFactory';
 import { hexToColorString } from '../utils/ColorUtils';
+import { IconManager } from '../utils/IconManager';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 
 export class GameScene extends Phaser.Scene {
@@ -43,6 +44,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     async create() {
+        // Load icons
+        await IconManager.getInstance().loadIcons();
+        
         // In development, connect to the Colyseus server on port 2567
         // In production, connect to the same host (since server serves both)
         let serverUrl: string;

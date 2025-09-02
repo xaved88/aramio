@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
 import { HUDContainer } from './HUDContainer';
+import { IconManager } from '../utils/IconManager';
 
 export interface RewardCardConfig {
     x: number;
@@ -25,6 +26,7 @@ export class RewardCard {
     private background!: Phaser.GameObjects.Rectangle;
     private titleText!: Phaser.GameObjects.Text;
     private descriptionText!: Phaser.GameObjects.Text;
+    private iconImage: Phaser.GameObjects.Image | null = null;
     private rewardId: string;
     private onClick?: (rewardId: string) => void;
     private isInteractive: boolean = false;
@@ -68,10 +70,18 @@ export class RewardCard {
         this.background.setStrokeStyle(2, 0xcccccc);
         this.hudContainer.add(this.background);
         
+        // Create icon
+        const iconManager = IconManager.getInstance();
+        this.iconImage = iconManager.createIconImage(this.scene, 0, -config.height / 2 + 45, config.rewardId, 32);
+        if (this.iconImage) {
+            this.iconImage.setScrollFactor(0, 0);
+            this.iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
+        }
+        
         // Title text
         this.titleText = this.scene.add.text(
             0, 
-            -config.height / 2 + 20, 
+            config.height / 2 - 50, 
             config.title || `Reward ${config.rewardId}`,
             {
                 fontSize: '18px',
@@ -86,7 +96,7 @@ export class RewardCard {
         // Description text
         this.descriptionText = this.scene.add.text(
             0, 
-            -config.height / 2 + 50, 
+            config.height / 2 - 20, 
             config.description || 'Click to claim this reward',
             {
                 fontSize: '14px',
@@ -99,7 +109,11 @@ export class RewardCard {
         this.hudContainer.add(this.descriptionText);
         
         // Add all elements to container
-        this.container.add([this.background, this.titleText, this.descriptionText]);
+        const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText];
+        if (this.iconImage) {
+            elements.push(this.iconImage);
+        }
+        this.container.add(elements);
         
         // Set depth for UI rendering
         this.container.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
