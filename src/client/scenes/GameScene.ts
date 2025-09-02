@@ -9,6 +9,7 @@ import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
 import { PathRenderer } from '../PathRenderer';
 import { CameraManager } from '../CameraManager';
+import { GameObjectFactory } from '../GameObjectFactory';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 
@@ -20,6 +21,7 @@ export class GameScene extends Phaser.Scene {
     private uiManager!: UIManager;
     private pathRenderer!: PathRenderer;
     private cameraManager!: CameraManager;
+    private gameObjectFactory!: GameObjectFactory;
     private processedAttackEvents: Set<string> = new Set();
     private processedDamageEvents: Set<string> = new Set();
     private lastState: GameState|null = null
@@ -62,10 +64,23 @@ export class GameScene extends Phaser.Scene {
         });
         this.pathRenderer = new PathRenderer(this);
         this.cameraManager = new CameraManager(this);
+        this.gameObjectFactory = new GameObjectFactory(this);
+        
+        // Set HUD camera for UI components
+        this.uiManager.setHUDCamera(this.cameraManager.getHUDCamera());
+        this.uiManager.setCameraManager(this.cameraManager);
+        
+        // Set camera manager for entity manager
+        this.entityManager.setCameraManager(this.cameraManager);
+        
+        // Set camera manager for path renderer
+        this.pathRenderer.setCameraManager(this.cameraManager);
+        
+        // Set camera manager for game object factory
+        this.gameObjectFactory.setCameraManager(this.cameraManager);
         
         // Create range indicator
-        this.rangeIndicator = this.add.graphics();
-        this.rangeIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS); // Above heroes, below effects
+        this.rangeIndicator = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
         this.rangeIndicator.setVisible(false);
         
         // Create spawn indicators
@@ -96,10 +111,10 @@ export class GameScene extends Phaser.Scene {
             
         } catch (error) {
             console.error('Failed to connect:', error);
-            this.add.text(300, 300, 'Failed to connect to server', {
+            this.gameObjectFactory.createText(300, 300, 'Failed to connect to server', {
                 fontSize: CLIENT_CONFIG.UI.FONTS.ERROR,
                 color: hexToColorString(CLIENT_CONFIG.UI.COLORS.ERROR)
-            }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI);
+            }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0.5);
         }
     }
 
@@ -684,42 +699,38 @@ export class GameScene extends Phaser.Scene {
 
         // Create spawn indicators for blue team using hardcoded positions
         GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
-            const indicator = this.add.graphics();
-            indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Background layer
+            const indicator = this.gameObjectFactory.createGraphics(position.x, position.y, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
             
             // Draw a small circle with team color
             indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.BLUE, 0.6);
             indicator.fillStyle(CLIENT_CONFIG.TEAM_COLORS.BLUE, 0.2);
-            indicator.fillCircle(position.x, position.y, 8);
-            indicator.strokeCircle(position.x, position.y, 8);
+            indicator.fillCircle(0, 0, 8);
+            indicator.strokeCircle(0, 0, 8);
             
             // Add spawn number text
-            const text = this.add.text(position.x, position.y, `${index + 1}`, {
+            const text = this.gameObjectFactory.createText(position.x, position.y, `${index + 1}`, {
                 fontSize: '12px',
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
-            }).setOrigin(0.5);
-            text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
+            }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5);
         });
         
         // Create spawn indicators for red team using hardcoded positions
         GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED.forEach((position, index) => {
-            const indicator = this.add.graphics();
-            indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Background layer
+            const indicator = this.gameObjectFactory.createGraphics(position.x, position.y, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
             
             // Draw a small circle with team color
             indicator.lineStyle(2, CLIENT_CONFIG.TEAM_COLORS.RED, 0.6);
             indicator.fillStyle(CLIENT_CONFIG.TEAM_COLORS.RED, 0.2);
-            indicator.fillCircle(position.x, position.y, 8);
-            indicator.strokeCircle(position.x, position.y, 8);
+            indicator.fillCircle(0, 0, 8);
+            indicator.strokeCircle(0, 0, 8);
             
             // Add spawn number text
-            const text = this.add.text(position.x, position.y, `${index + 1}`, {
+            const text = this.gameObjectFactory.createText(position.x, position.y, `${index + 1}`, {
                 fontSize: '12px',
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
-            }).setOrigin(0.5);
-            text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
+            }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5);
         });
     }
 

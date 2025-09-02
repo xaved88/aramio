@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../Config';
+import { HUDContainer } from './HUDContainer';
 
 interface PlayerStats {
     id: string;
@@ -36,6 +37,9 @@ interface TableCell {
  */
 export class StatsOverlay {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
     private overlayElements: Phaser.GameObjects.GameObject[] = [];
     private isVisible: boolean = false;
     private playerSessionId: ControllerId | null = null;
@@ -106,6 +110,17 @@ export class StatsOverlay {
         this.scene = scene;
     }
 
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
+    }
+
     /**
      * Sets the current player session ID for highlighting
      */
@@ -151,24 +166,35 @@ export class StatsOverlay {
         header.setDepth(this.DEPTHS.UI_CONTENT);
         header.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(header);
+        this.hudContainer!.add(header);
 
         const totalsText = this.scene.add.text(x + 200, y, `XP: ${Math.round(totals.xp)} | K: ${totals.kills} | D: ${totals.deaths}`, 
             { ...this.TEXT_STYLES.TEAM_TOTALS, color: teamColor });
         totalsText.setDepth(this.DEPTHS.UI_CONTENT);
         totalsText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(totalsText);
+        this.hudContainer!.add(totalsText);
     }
 
     /**
      * Creates the overlay elements
      */
     private createOverlay(state: SharedGameState): void {
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(this.DEPTHS.BACKGROUND);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
         const background = this.scene.add.graphics();
         background.fillStyle(0x000000, 0.7);
         background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
         background.setDepth(this.DEPTHS.BACKGROUND);
         background.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(background);
+        this.hudContainer.add(background);
 
         const playerStats = this.getPlayerStats(state);
         const blueTeamStats = playerStats.filter(p => p.team === 'blue');
@@ -183,6 +209,7 @@ export class StatsOverlay {
         gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
         gameTimeText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(gameTimeText);
+        this.hudContainer.add(gameTimeText);
 
         this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', '#e74c3c', this.calculateTeamTotals(redTeamStats));
         this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', '#3498db', this.calculateTeamTotals(blueTeamStats));
@@ -200,6 +227,7 @@ export class StatsOverlay {
             noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
             noPlayersText.setScrollFactor(0, 0); // Fixed to screen
             this.overlayElements.push(noPlayersText);
+            this.hudContainer!.add(noPlayersText);
             return;
         }
 
@@ -211,6 +239,7 @@ export class StatsOverlay {
         separator.setDepth(this.DEPTHS.UI_CONTENT);
         separator.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(separator);
+        this.hudContainer!.add(separator);
 
         stats.forEach((player, index) => {
             const rowY = startY + (index + 1) * (this.CELL_HEIGHT + this.CELL_PADDING) + 10;
@@ -242,6 +271,8 @@ export class StatsOverlay {
         
         cell.setDepth(this.DEPTHS.UI_CONTENT);
         cell.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(cell);
+        
         return cell;
     }
 
@@ -320,7 +351,10 @@ export class StatsOverlay {
      * Destroys the overlay elements
      */
     private destroyOverlay(): void {
-        this.overlayElements.forEach(element => element.destroy());
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
+        }
         this.overlayElements = [];
     }
 

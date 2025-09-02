@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
+import { HUDContainer } from './HUDContainer';
 
 export interface RewardCardConfig {
     x: number;
@@ -17,6 +18,9 @@ export interface RewardCardConfig {
  */
 export class RewardCard {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
     private container: Phaser.GameObjects.Container;
     private background!: Phaser.GameObjects.Rectangle;
     private titleText!: Phaser.GameObjects.Text;
@@ -35,7 +39,26 @@ export class RewardCard {
         this.setupInteraction();
     }
 
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
+    }
+
     private createCard(config: RewardCardConfig): void {
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene, config.x, config.y);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
         // Background rectangle
         this.background = this.scene.add.rectangle(
             0, 0, 
@@ -43,6 +66,7 @@ export class RewardCard {
             0xffffff, 0.9
         );
         this.background.setStrokeStyle(2, 0xcccccc);
+        this.hudContainer.add(this.background);
         
         // Title text
         this.titleText = this.scene.add.text(
@@ -57,6 +81,7 @@ export class RewardCard {
             }
         );
         this.titleText.setOrigin(0.5);
+        this.hudContainer.add(this.titleText);
         
         // Description text
         this.descriptionText = this.scene.add.text(
@@ -71,6 +96,7 @@ export class RewardCard {
             }
         );
         this.descriptionText.setOrigin(0.5);
+        this.hudContainer.add(this.descriptionText);
         
         // Add all elements to container
         this.container.add([this.background, this.titleText, this.descriptionText]);
@@ -120,6 +146,10 @@ export class RewardCard {
     }
 
     destroy(): void {
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
+        }
         this.container.destroy();
     }
 }

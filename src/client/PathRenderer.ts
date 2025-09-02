@@ -3,9 +3,14 @@ import { GAMEPLAY_CONFIG } from '../Config';
 
 export class PathRenderer {
     private scene: Phaser.Scene;
+    private cameraManager: any = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
     }
 
     /**
@@ -14,6 +19,11 @@ export class PathRenderer {
     createPathHighlight(): void {
         const pathHighlight = this.scene.add.graphics();
         pathHighlight.setDepth(-5); // Background depth
+        
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(pathHighlight);
+        }
         
         // Get cradle positions
         const blueCradle = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;

@@ -2,12 +2,16 @@ import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../Config';
 import { RewardCardManager } from './RewardCardManager';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
+import { HUDContainer } from './HUDContainer';
 
 /**
  * RespawnOverlay displays a prominent overlay when the player's hero is respawning
  */
 export class RespawnOverlay {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
     private overlay: Phaser.GameObjects.Graphics | null = null;
     private text: Phaser.GameObjects.Text | null = null;
     private timer: Phaser.GameObjects.Text | null = null;
@@ -23,10 +27,32 @@ export class RespawnOverlay {
         this.createOverlay();
     }
 
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+        this.rewardCardManager.setHUDCamera(hudCamera);
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        this.rewardCardManager.setCameraManager(cameraManager);
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
+    }
+
     private createOverlay(): void {
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
         this.overlay = this.scene.add.graphics();
         this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.overlay.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.overlay);
         
         this.text = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -44,6 +70,7 @@ export class RespawnOverlay {
         this.text.setOrigin(0.5);
         this.text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.text.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.text);
         
         this.timer = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -61,6 +88,7 @@ export class RespawnOverlay {
         this.timer.setOrigin(0.5);
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.timer.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.timer);
         
         this.rewardsText = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -78,6 +106,7 @@ export class RespawnOverlay {
         this.rewardsText.setOrigin(0.5);
         this.rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.rewardsText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.rewardsText);
         
         this.hide();
     }
@@ -146,7 +175,11 @@ export class RespawnOverlay {
     }
 
     destroy(): void {
-        [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el?.destroy());
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
+        }
+        
         [this.overlay, this.text, this.timer, this.rewardsText] = [null, null, null, null];
         this.rewardCardManager.destroy();
         this.isVisible = false;

@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { HUDContainer } from './HUDContainer';
 
 export class VictoryScreen {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
     private background: Phaser.GameObjects.Graphics | null = null;
     private victoryText: Phaser.GameObjects.Text | null = null;
     private isActive = false;
@@ -12,6 +16,17 @@ export class VictoryScreen {
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
     }
 
     setRestartCallback(callback: () => void): void {
@@ -24,6 +39,14 @@ export class VictoryScreen {
         this.isActive = true;
         const isVictory = winningTeam === playerTeam;
         
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
         // Create stylish background overlay with translucent black
         this.background = this.scene.add.graphics();
         this.background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
@@ -31,6 +54,7 @@ export class VictoryScreen {
         this.background.fillStyle(0x000000, 0.7);
         this.background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
         this.background.setAlpha(0);
+        this.hudContainer.add(this.background);
         
         // Create victory/defeat text with better styling
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
@@ -55,6 +79,8 @@ export class VictoryScreen {
                 }
             }
         ).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS).setScrollFactor(0).setAlpha(0); // Make text camera-independent
+        
+        this.hudContainer.add(this.victoryText);
         
         // Fade in animation
         this.fadeInTween = this.scene.tweens.add({
@@ -99,14 +125,13 @@ export class VictoryScreen {
             this.fadeOutTween = null;
         }
         
-        if (this.background) {
-            this.background.destroy();
-            this.background = null;
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
         }
-        if (this.victoryText) {
-            this.victoryText.destroy();
-            this.victoryText = null;
-        }
+        
+        this.background = null;
+        this.victoryText = null;
         
         this.isActive = false;
     }

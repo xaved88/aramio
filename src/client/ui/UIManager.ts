@@ -12,6 +12,8 @@ import { RespawnOverlay } from './RespawnOverlay';
  */
 export class UIManager {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
     private hudRenderer: HUDRenderer;
     private victoryScreen: VictoryScreen;
     private statsOverlay: StatsOverlay;
@@ -61,6 +63,22 @@ export class UIManager {
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
+    }
+
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+        this.hudRenderer.setHUDCamera(hudCamera);
+        this.victoryScreen.setHUDCamera(hudCamera);
+        this.statsOverlay.setHUDCamera(hudCamera);
+        this.respawnOverlay.setHUDCamera(hudCamera);
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        this.hudRenderer.setCameraManager(cameraManager);
+        this.victoryScreen.setCameraManager(cameraManager);
+        this.statsOverlay.setCameraManager(cameraManager);
+        this.respawnOverlay.setCameraManager(cameraManager);
     }
 
     createHUD(): void {

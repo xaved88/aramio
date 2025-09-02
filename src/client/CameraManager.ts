@@ -6,6 +6,7 @@ import { SharedGameState } from '../shared/types/GameStateTypes';
 export class CameraManager {
     private scene: Phaser.Scene;
     private camera: Phaser.Cameras.Scene2D.Camera;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera;
     private playerSessionId: ControllerId | null = null;
     private viewportWidth: number;
     private viewportHeight: number;
@@ -25,17 +26,23 @@ export class CameraManager {
         this.mapWidth = CLIENT_CONFIG.MAP_WIDTH;
         this.mapHeight = CLIENT_CONFIG.MAP_HEIGHT;
         
+        this.hudCamera = scene.cameras.add(0, 0, this.viewportWidth, this.viewportHeight);
+        
         this.setupCamera();
     }
 
     private setupCamera(): void {
+        // Configure main camera for game world
+        this.camera.setZoom(CLIENT_CONFIG.CAMERA.ZOOM);
         this.camera.setBounds(0, 0, this.mapWidth, this.mapHeight);
-        
-        // Set viewport size to our smaller viewport
         this.camera.setViewport(0, 0, this.viewportWidth, this.viewportHeight);
-        
-        // Center camera on map initially
         this.camera.centerOn(this.mapWidth / 2, this.mapHeight / 2);
+        
+        // Configure HUD camera for UI elements only
+        this.hudCamera.setZoom(1.0);
+        this.hudCamera.setBounds(0, 0, this.viewportWidth, this.viewportHeight);
+        this.hudCamera.setViewport(0, 0, this.viewportWidth, this.viewportHeight);
+        this.hudCamera.setScroll(0, 0);
     }
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
@@ -119,5 +126,20 @@ export class CameraManager {
         this.viewportWidth = width;
         this.viewportHeight = height;
         this.camera.setViewport(0, 0, width, height);
+        this.hudCamera.setViewport(0, 0, width, height);
+    }
+
+    getHUDCamera(): Phaser.Cameras.Scene2D.Camera {
+        return this.hudCamera;
+    }
+
+    // Method to assign an object to the HUD camera (and remove it from main camera)
+    assignToHUDCamera(object: Phaser.GameObjects.GameObject): void {
+        this.camera.ignore(object);
+    }
+
+    // Method to assign an object to the main camera (and remove it from HUD camera)
+    assignToMainCamera(object: Phaser.GameObjects.GameObject): void {
+        this.hudCamera.ignore(object);
     }
 }

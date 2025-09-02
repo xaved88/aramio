@@ -2,15 +2,30 @@ import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { hexToColorString } from '../utils/ColorUtils';
+import { HUDContainer } from './HUDContainer';
 
 /**
  * HUDRenderer handles all HUD rendering logic
  */
 export class HUDRenderer {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
     }
 
     /**
@@ -33,6 +48,14 @@ export class HUDRenderer {
         rewardsIcon: Phaser.GameObjects.Graphics;
         rewardsText: Phaser.GameObjects.Text;
     } {
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
         const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
@@ -49,11 +72,13 @@ export class HUDRenderer {
         );
         healthBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         healthBarBackground.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(healthBarBackground);
         
         // Create health bar
         const healthBar = this.scene.add.graphics();
         healthBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         healthBar.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(healthBar);
         
         // Create health text
         const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100/100', {
@@ -62,6 +87,7 @@ export class HUDRenderer {
         }).setOrigin(0.5);
         healthText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         healthText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(healthText);
         
         // Create experience bar background
         const experienceBarBackground = this.scene.add.graphics();
@@ -74,11 +100,13 @@ export class HUDRenderer {
         );
         experienceBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         experienceBarBackground.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(experienceBarBackground);
         
         // Create experience bar
         const experienceBar = this.scene.add.graphics();
         experienceBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         experienceBar.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(experienceBar);
         
         // Create experience text
         const experienceText = this.scene.add.text(expConfig.X + expConfig.WIDTH / 2, expConfig.Y + expConfig.HEIGHT / 2, '0/10 XP', {
@@ -87,6 +115,7 @@ export class HUDRenderer {
         }).setOrigin(0.5);
         experienceText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         experienceText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(experienceText);
         
         // Create level text
         const levelText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH + 10, healthConfig.Y + healthConfig.HEIGHT / 2, 'Lv.1', {
@@ -95,6 +124,7 @@ export class HUDRenderer {
         }).setOrigin(0, 0.5);
         levelText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         levelText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(levelText);
 
         // Create ability bar background
         const abilityBarBackground = this.scene.add.graphics();
@@ -107,11 +137,13 @@ export class HUDRenderer {
         );
         abilityBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         abilityBarBackground.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(abilityBarBackground);
 
         // Create ability bar
         const abilityBar = this.scene.add.graphics();
         abilityBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         abilityBar.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(abilityBar);
 
         // Create hero kill icon (white circle)
         const heroKillIcon = this.scene.add.graphics();
@@ -119,6 +151,7 @@ export class HUDRenderer {
         heroKillIcon.fillCircle(killConfig.X, killConfig.Y, killConfig.ICON_SIZE / 2);
         heroKillIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         heroKillIcon.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(heroKillIcon);
 
         // Create hero kill text
         const heroKillText = this.scene.add.text(killConfig.X + killConfig.SPACING, killConfig.Y, '0', {
@@ -127,6 +160,7 @@ export class HUDRenderer {
         }).setOrigin(0, 0.5);
         heroKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         heroKillText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(heroKillText);
 
         // Create minion kill icon (diamond) - positioned horizontally next to hero counter
         const minionKillIcon = this.scene.add.graphics();
@@ -147,6 +181,7 @@ export class HUDRenderer {
         minionKillIcon.fillPath();
         minionKillIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         minionKillIcon.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(minionKillIcon);
 
         // Create minion kill text
         const minionKillText = this.scene.add.text(minionX + killConfig.SPACING, minionY, '0', {
@@ -155,6 +190,7 @@ export class HUDRenderer {
         }).setOrigin(0, 0.5);
         minionKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         minionKillText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(minionKillText);
 
         // Create rewards counter configuration
         const rewardsConfig = CLIENT_CONFIG.HUD.REWARDS_COUNTER;
@@ -181,6 +217,7 @@ export class HUDRenderer {
         rewardsIcon.fillPath();
         rewardsIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         rewardsIcon.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(rewardsIcon);
 
         // Create rewards text
         const rewardsText = this.scene.add.text(rewardsX + rewardsConfig.SPACING, rewardsY, '0', {
@@ -189,6 +226,7 @@ export class HUDRenderer {
         }).setOrigin(0, 0.5);
         rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         rewardsText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer!.add(rewardsText);
 
         return {
             healthBar,

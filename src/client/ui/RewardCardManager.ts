@@ -8,12 +8,22 @@ import { HeroCombatant } from '../../shared/types/CombatantTypes';
  */
 export class RewardCardManager {
     private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
     private rewardCards: RewardCard[] = [];
     private onRewardChosen?: (rewardId: string) => void;
 
     constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
         this.onRewardChosen = onRewardChosen;
+    }
+
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
     }
 
     updateRewards(hero: HeroCombatant): void {
@@ -50,6 +60,14 @@ export class RewardCardManager {
                     }
                 }
             });
+            
+            if (this.hudCamera) {
+                card.setHUDCamera(this.hudCamera);
+            }
+            
+            if (this.cameraManager) {
+                card.setCameraManager(this.cameraManager);
+            }
             
             this.rewardCards.push(card);
         }

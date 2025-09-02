@@ -21,6 +21,7 @@ export class EntityManager {
     private entityFactory: EntityFactory;
     private entityRenderer: EntityRenderer;
     private playerSessionId: ControllerId | null = null;
+    private cameraManager: any = null;
     
     // Entity storage
     private entityGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -44,6 +45,10 @@ export class EntityManager {
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
         this.entityRenderer.setPlayerSessionId(sessionId);
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
     }
 
     /**
@@ -113,6 +118,11 @@ export class EntityManager {
                 entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
             }
             
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entityGraphics);
+            }
+            
             this.entityGraphics.set(entityId, entityGraphics);
         }
         
@@ -130,6 +140,11 @@ export class EntityManager {
                 entityText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
             }
             
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entityText);
+            }
+            
             this.entityTexts.set(entityId, entityText);
         }
         
@@ -139,6 +154,12 @@ export class EntityManager {
             // Set initial position immediately to avoid spawning at (0,0)
             entityAbilityIconText.setPosition(combatantData.x, combatantData.y);
             entityAbilityIconText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entityAbilityIconText);
+            }
+            
             this.entityAbilityIconTexts.set(entityId, entityAbilityIconText);
         }
         
@@ -147,6 +168,12 @@ export class EntityManager {
             // Set initial position immediately to avoid spawning at (0,0)
             radiusIndicator.setPosition(combatantData.x, combatantData.y);
             radiusIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND); // Behind combatants
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(radiusIndicator);
+            }
+            
             this.entityRadiusIndicators.set(entityId, radiusIndicator);
         }
         
@@ -159,6 +186,12 @@ export class EntityManager {
                 // Set initial position immediately to avoid spawning at (0,0)
                 respawnRing.setPosition(combatantData.x, combatantData.y);
                 respawnRing.setDepth(CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
+                
+                // Assign to main camera
+                if (this.cameraManager) {
+                    this.cameraManager.assignToMainCamera(respawnRing);
+                }
+                
                 this.entityRespawnRings.set(entityId, respawnRing);
             }
             if (!abilityReadyIndicator) {
@@ -166,6 +199,12 @@ export class EntityManager {
                 // Set initial position immediately to avoid spawning at (0,0)
                 abilityReadyIndicator.setPosition(combatantData.x, combatantData.y);
                 abilityReadyIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
+                
+                // Assign to main camera
+                if (this.cameraManager) {
+                    this.cameraManager.assignToMainCamera(abilityReadyIndicator);
+                }
+                
                 this.entityAbilityReadyIndicators.set(entityId, abilityReadyIndicator);
             }
         }
@@ -219,6 +258,12 @@ export class EntityManager {
             projectileGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             projectileGraphics.setPosition(projectileData.x, projectileData.y);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(projectileGraphics);
+            }
+            
             this.projectileGraphics.set(entityId, projectileGraphics);
         }
         
@@ -278,6 +323,11 @@ export class EntityManager {
             color: color,
             fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
+        
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(xpText);
+        }
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
@@ -341,6 +391,11 @@ export class EntityManager {
         aoeGraphics.setPosition(aoeEvent.x, aoeEvent.y);
         aoeGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS); // High depth to appear above everything
         
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(aoeGraphics);
+        }
+        
         // Determine color based on the source combatant
         let aoeColor = 0xff6b35; // Default orange
         
@@ -391,6 +446,11 @@ export class EntityManager {
             color: CLIENT_CONFIG.LEVEL_UP_EVENTS.COLOR,
             fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
+        
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(levelUpText);
+        }
         
         // Animate the text floating up and fading out
         this.scene.tweens.add({
@@ -575,6 +635,11 @@ export class EntityManager {
         if (!this.targetingLinesGraphics) {
             this.targetingLinesGraphics = this.scene.add.graphics();
             this.targetingLinesGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.TARGETING_LINES); // Above everything, below UI
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(this.targetingLinesGraphics);
+            }
         }
         
         // Clear the graphics before rendering new targeting lines
@@ -628,6 +693,11 @@ export class EntityManager {
         // This ensures a completely fresh state
         this.targetingLinesGraphics = this.scene.add.graphics();
         this.targetingLinesGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.TARGETING_LINES);
+        
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(this.targetingLinesGraphics);
+        }
         
         // Ensure all tweens are stopped for this scene
         this.scene.tweens.killAll();
