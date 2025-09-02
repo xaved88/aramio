@@ -452,7 +452,7 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     player.state = 'respawning';
     player.respawnTime = state.gameTime + player.respawnDuration;
     
-    // Clear all effects when hero dies
+    // Clear all temporary effects when hero dies (preserve permanent effects)
     if (player.effects && player.effects.length > 0) {
         player.effects.clear();
     }

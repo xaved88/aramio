@@ -108,6 +108,7 @@ describe('CameraManager', () => {
                 },
                 levelRewards: [],
                 rewardsForChoice: [],
+                permanentEffects: [],
             });
 
             // This should not throw any errors
@@ -163,6 +164,7 @@ describe('CameraManager', () => {
                 },
                 levelRewards: [],
                 rewardsForChoice: [],
+                permanentEffects: [],
             });
 
             // This should not throw any errors
@@ -231,6 +233,7 @@ describe('CameraManager', () => {
                 },
                 levelRewards: [],
                 rewardsForChoice: [],
+                permanentEffects: [],
             });
 
             // This should not throw any errors regardless of threshold

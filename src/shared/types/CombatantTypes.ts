@@ -202,6 +202,7 @@ export interface HeroCombatant extends BaseCombatant {
     controller: ControllerId; // client ID for players, bot strategy for bots
     levelRewards: string[]; // Array of level rewards
     rewardsForChoice: string[]; // Array of reward options to choose from
+    permanentEffects: CombatantEffectUnion[]; // Array of permanent effects (rewards, etc.)
 }
 
 export interface CradleCombatant extends BaseCombatant {

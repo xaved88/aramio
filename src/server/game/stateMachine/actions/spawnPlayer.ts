@@ -1,5 +1,6 @@
 import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
+import { CombatantEffect } from '../../../schema/Effects';
 import { RoundStats } from '../../../schema/Events';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { GAMEPLAY_CONFIG } from '../../../../Config';
@@ -71,6 +72,9 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     
     // Initialize rewards for choice
     hero.rewardsForChoice = new ArraySchema<string>();
+    
+    // Initialize permanent effects
+    hero.permanentEffects = new ArraySchema<CombatantEffect>();
     
     // Add hero to state
     state.combatants.set(hero.id, hero);

@@ -123,25 +123,33 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
 }
 
 function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: CombatantId): Combatant {
+    // For heroes, we need to include permanent effects in stat calculations
+    const allEffects = colyseusCombatant.type === COMBATANT_TYPES.HERO 
+        ? [
+            ...Array.from(colyseusCombatant.effects).filter(e => e != null),
+            ...Array.from((colyseusCombatant as any).permanentEffects || []).filter(e => e != null)
+          ]
+        : Array.from(colyseusCombatant.effects).filter(e => e != null);
+
     const baseCombatant = {
         id: id,
         type: colyseusCombatant.type as any, // We trust the type is correct
         x: colyseusCombatant.x,
         y: colyseusCombatant.y,
         team: colyseusCombatant.team,
-        health: applyStatModifications('health', colyseusCombatant.health, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        maxHealth: applyStatModifications('maxHealth', colyseusCombatant.maxHealth, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        attackRadius: applyStatModifications('attackRadius', colyseusCombatant.attackRadius, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        attackStrength: applyStatModifications('attackStrength', colyseusCombatant.attackStrength, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        attackSpeed: applyStatModifications('attackSpeed', colyseusCombatant.attackSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        bulletArmor: applyStatModifications('bulletArmor', colyseusCombatant.bulletArmor, Array.from(colyseusCombatant.effects).filter(e => e != null)),
-        abilityArmor: applyStatModifications('abilityArmor', colyseusCombatant.abilityArmor, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        health: applyStatModifications('health', colyseusCombatant.health, allEffects),
+        maxHealth: applyStatModifications('maxHealth', colyseusCombatant.maxHealth, allEffects),
+        attackRadius: applyStatModifications('attackRadius', colyseusCombatant.attackRadius, allEffects),
+        attackStrength: applyStatModifications('attackStrength', colyseusCombatant.attackStrength, allEffects),
+        attackSpeed: applyStatModifications('attackSpeed', colyseusCombatant.attackSpeed, allEffects),
+        bulletArmor: applyStatModifications('bulletArmor', colyseusCombatant.bulletArmor, allEffects),
+        abilityArmor: applyStatModifications('abilityArmor', colyseusCombatant.abilityArmor, allEffects),
         lastAttackTime: colyseusCombatant.lastAttackTime,
         size: colyseusCombatant.size,
         target: colyseusCombatant.target,
-        windUp: applyStatModifications('windUp', colyseusCombatant.windUp, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        windUp: applyStatModifications('windUp', colyseusCombatant.windUp, allEffects),
         attackReadyAt: colyseusCombatant.attackReadyAt,
-        moveSpeed: applyStatModifications('moveSpeed', colyseusCombatant.moveSpeed, Array.from(colyseusCombatant.effects).filter(e => e != null)),
+        moveSpeed: applyStatModifications('moveSpeed', colyseusCombatant.moveSpeed, allEffects),
         lastDamageTime: colyseusCombatant.lastDamageTime || 0,
         effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => {
             const baseEffect = {
@@ -206,7 +214,44 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                 } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility,
                 controller: hero.controller,
                 levelRewards: hero.levelRewards ? Array.from(hero.levelRewards) : [],
-                rewardsForChoice: hero.rewardsForChoice ? Array.from(hero.rewardsForChoice) : []
+                rewardsForChoice: hero.rewardsForChoice ? Array.from(hero.rewardsForChoice) : [],
+                permanentEffects: hero.permanentEffects ? hero.permanentEffects.map(effect => {
+                    const baseEffect = {
+                        type: effect.type,
+                        duration: effect.duration,
+                        appliedAt: effect.appliedAt || Date.now()
+                    };
+                    
+                    // Handle specific effect types
+                    switch (effect.type) {
+                        case 'move':
+                            return {
+                                ...baseEffect,
+                                type: 'move',
+                                moveTargetX: (effect as any).moveTargetX,
+                                moveTargetY: (effect as any).moveTargetY,
+                                moveSpeed: (effect as any).moveSpeed
+                            };
+                        case 'passive_healing':
+                            return {
+                                ...baseEffect,
+                                healPercentPerSecond: (effect as any).healPercentPerSecond || 0
+                            };
+                        case 'stun':
+                        case 'nocollision':
+                        case 'statmod':
+                            return {
+                                ...baseEffect,
+                                stat: (effect as any).stat,
+                                operator: (effect as any).operator,
+                                amount: (effect as any).amount
+                            };
+                        case 'reflect':
+                        case 'hunter':
+                        default:
+                            return baseEffect;
+                    }
+                }) : []
             } as HeroCombatant;
             
         case COMBATANT_TYPES.CRADLE:

@@ -59,7 +59,7 @@ export class RewardManager {
                 statEffect.amount = statConfig.modifier.value;
                 statEffect.duration = -1; // Permanent effect
                 statEffect.appliedAt = gameTime;
-                hero.effects.push(statEffect);
+                hero.permanentEffects.push(statEffect);
             });
             return true;
         } else if (rewardType.type === 'ability') {

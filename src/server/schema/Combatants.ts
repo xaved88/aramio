@@ -64,7 +64,7 @@ export class Combatant extends Schema {
         return this.getModifiedStat('abilityArmor', this.abilityArmor);
     }
 
-    private getModifiedStat(statType: StatType, baseStat: number): number {
+    protected getModifiedStat(statType: StatType, baseStat: number): number {
         return applyStatModifications(statType, baseStat, Array.from(this.effects).filter(e => e != null));
     }
 }
@@ -80,6 +80,17 @@ export class Hero extends Combatant {
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
     @type(['string']) levelRewards = new ArraySchema<string>(); // Array of level rewards
     @type(['string']) rewardsForChoice = new ArraySchema<string>(); // Array of reward options to choose from
+    @type([CombatantEffect]) permanentEffects = new ArraySchema<CombatantEffect>(); // Array of permanent effects (rewards, etc.)
+
+    // Override to include permanent effects
+    protected getModifiedStat(statType: StatType, baseStat: number): number {
+        const allEffects = [
+            ...Array.from(this.effects).filter(e => e != null),
+            ...Array.from(this.permanentEffects).filter(e => e != null)
+        ];
+        const result = applyStatModifications(statType, baseStat, allEffects);
+        return result;
+    }
 }
 
 export class Minion extends Combatant {
