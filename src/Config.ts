@@ -27,8 +27,8 @@ export const GAMEPLAY_CONFIG = {
     },
 
     CRADLE_POSITIONS: {
-        BLUE: { x: 50, y: 650 }, // bottom left
-        RED: { x: 650, y: 50 },  // top right
+        BLUE: { x: 100, y: 600 }, // bottom left
+        RED: { x: 600, y: 100 },  // top right
     },
     TURRET_POSITIONS: {
         BLUE: [
@@ -212,18 +212,18 @@ export const GAMEPLAY_CONFIG = {
     },
     HERO_SPAWN_POSITIONS: {
         BLUE: [
-            { x: 50, y: 680 }, // Spawn 1: 75 units below blue cradle (clamped to max Y)
-            { x: 25, y: 680 },  // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 25, y: 680 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 0, y: 680 },   // Spawn 4: between 3 and 5, same y as 3 and 5
-            { x: 0, y: 675 }    // Spawn 5: 75 units left of blue cradle
+            { x: 100, y: 675 }, // Spawn 1: 75 units below blue cradle (clamped to max Y)
+            { x: 62, y: 675 },  // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 62, y: 637 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 25, y: 637 },   // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 25, y: 600 }    // Spawn 5: 75 units left of blue cradle
         ],
         RED: [
-            { x: 650, y: 20 },   // Spawn 1: 75 units above red cradle (clamped to min Y)
-            { x: 675, y: 20 },   // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 675, y: 20 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 700, y: 20 },  // Spawn 4: between 3 and 5, same y as 3 and 5
-            { x: 700, y: 50 }   // Spawn 5: 75 units right of red cradle
+            { x: 600, y: 25 },   // Spawn 1: 75 units above red cradle (clamped to min Y)
+            { x: 637, y: 25 },   // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 637, y: 62 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 675, y: 62 },  // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 675, y: 100 }   // Spawn 5: 75 units right of red cradle
         ],
     },
     BOTS: {
@@ -338,7 +338,7 @@ export const CLIENT_CONFIG = {
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
     DEBUG: {
-        SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
+        SPAWN_LOCATION_INDICATORS_ENABLED: true, // Whether to show spawn position indicators
     },
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
