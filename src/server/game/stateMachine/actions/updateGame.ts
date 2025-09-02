@@ -384,8 +384,8 @@ function handleDeadCombatants(state: GameState): void {
             if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero died, start respawn
                 startPlayerRespawn(hero, state);
-                
-                // Process chests and generate reward choices immediately on death
+            } else if (hero.state === 'respawning') {
+                // Generate reward choices for respawning heroes who have unspent rewards but no choices
                 if (hero.levelRewards.length > 0 && hero.rewardsForChoice.length === 0) {
                     const chestType = hero.levelRewards[0]; // Process the first chest
                     if (chestType) {
@@ -393,14 +393,17 @@ function handleDeadCombatants(state: GameState): void {
                         hero.rewardsForChoice.push(...rewards);
                     }
                 }
-            } else if (hero.state === 'respawning' && currentTime >= hero.respawnTime) {
-                // Check if hero has unspent level rewards - if so, don't respawn yet
-                if (hero.levelRewards.length > 0) {
-                    // Keep hero in respawning state until rewards are spent
-                    // The respawn time check will continue to pass, but respawn won't complete
-                } else {
-                    // Respawn the hero
-                    completePlayerRespawn(hero);
+                
+                // Check if respawn time has passed
+                if (currentTime >= hero.respawnTime) {
+                    // Check if hero has unspent level rewards - if so, don't respawn yet
+                    if (hero.levelRewards.length > 0) {
+                        // Keep hero in respawning state until rewards are spent
+                        // The respawn time check will continue to pass, but respawn won't complete
+                    } else {
+                        // Respawn the hero
+                        completePlayerRespawn(hero);
+                    }
                 }
             }
             
