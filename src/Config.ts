@@ -27,17 +27,15 @@ export const GAMEPLAY_CONFIG = {
     },
 
     CRADLE_POSITIONS: {
-        BLUE: { x: 100, y: 1100 }, // bottom left
-        RED: { x: 1100, y: 100 },  // top right
+        BLUE: { x: 50, y: 650 }, // bottom left
+        RED: { x: 650, y: 50 },  // top right
     },
     TURRET_POSITIONS: {
         BLUE: [
-            { x: 300, y: 900 }, // First blue turret - 20% mark from blue cradle
-            { x: 500, y: 700 }  // Second blue turret - 40% mark from blue cradle
+            { x: 250, y: 450 }  // Blue turret - on diagonal line from bottom-left to top-right
         ],
         RED: [
-            { x: 700, y: 500 }, // First red turret - 60% mark from blue cradle (40% from red)
-            { x: 900, y: 300 }  // Second red turret - 80% mark from blue cradle (20% from red)
+            { x: 450, y: 250 }   // Red turret - on diagonal line from bottom-left to top-right
         ]
     },
 
@@ -214,18 +212,18 @@ export const GAMEPLAY_CONFIG = {
     },
     HERO_SPAWN_POSITIONS: {
         BLUE: [
-            { x: 100, y: 1175 }, // Spawn 1: 75 units below blue cradle
-            { x: 62, y: 1175 },  // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 62, y: 1137 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 25, y: 1137 },  // Spawn 4: between 3 and 5, same y as 3 and 5
-            { x: 25, y: 1100 }   // Spawn 5: 75 units left of blue cradle
+            { x: 50, y: 725 }, // Spawn 1: 75 units below blue cradle
+            { x: 25, y: 725 },  // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 25, y: 700 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 0, y: 700 },   // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 0, y: 675 }    // Spawn 5: 75 units left of blue cradle
         ],
         RED: [
-            { x: 1100, y: 25 },  // Spawn 1: 75 units above red cradle
-            { x: 1137, y: 25 },  // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 1137, y: 62 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 1175, y: 62 },  // Spawn 4: between 3 and 5, same y as 3 and 5
-            { x: 1175, y: 100 }  // Spawn 5: 75 units right of red cradle
+            { x: 650, y: 0 },   // Spawn 1: 75 units above red cradle
+            { x: 675, y: 0 },   // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 675, y: 25 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 700, y: 25 },  // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 700, y: 50 }   // Spawn 5: 75 units right of red cradle
         ],
     },
     BOTS: {
@@ -333,8 +331,8 @@ export const CLIENT_CONFIG = {
     GAME_CANVAS_WIDTH: 700,
     GAME_CANVAS_HEIGHT: 700,
     // Map size (actual game world size)
-    MAP_WIDTH: 1200,
-    MAP_HEIGHT: 1200,
+    MAP_WIDTH: 700,
+    MAP_HEIGHT: 700,
     CRADLE_SIZE: 25, // 25x25 square
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
