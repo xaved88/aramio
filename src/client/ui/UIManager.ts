@@ -5,6 +5,7 @@ import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
 import { RespawnOverlay } from './RespawnOverlay';
+import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
 
 /**
  * UIManager handles all UI elements including HUD, menus, and interface components.
@@ -18,6 +19,7 @@ export class UIManager {
     private victoryScreen: VictoryScreen;
     private statsOverlay: StatsOverlay;
     private respawnOverlay: RespawnOverlay;
+    private permanentEffectsDisplay: PermanentEffectsDisplay;
 
     // HUD elements
     private hudElements: {
@@ -60,6 +62,7 @@ export class UIManager {
         this.victoryScreen = new VictoryScreen(scene);
         this.statsOverlay = new StatsOverlay(scene);
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
+        this.permanentEffectsDisplay = new PermanentEffectsDisplay(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -71,6 +74,7 @@ export class UIManager {
         this.victoryScreen.setHUDCamera(hudCamera);
         this.statsOverlay.setHUDCamera(hudCamera);
         this.respawnOverlay.setHUDCamera(hudCamera);
+        this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
     setCameraManager(cameraManager: any): void {
@@ -79,6 +83,8 @@ export class UIManager {
         this.victoryScreen.setCameraManager(cameraManager);
         this.statsOverlay.setCameraManager(cameraManager);
         this.respawnOverlay.setCameraManager(cameraManager);
+        this.permanentEffectsDisplay.setCameraManager(cameraManager);
+        this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
     createHUD(): void {
@@ -142,6 +148,7 @@ export class UIManager {
         this.hudRenderer.updateHUD(currentPlayer, nonNullHudElements, state.gameTime);
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
+        this.permanentEffectsDisplay.updateDisplay(currentPlayer);
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
             const team = playerTeam || currentPlayer.team;
@@ -184,5 +191,6 @@ export class UIManager {
         this.respawnOverlay.destroy();
         this.victoryScreen.destroy();
         this.statsOverlay.destroy();
+        this.permanentEffectsDisplay.destroy();
     }
 } 

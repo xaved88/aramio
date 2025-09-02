@@ -28,6 +28,10 @@ export class HUDRenderer {
         }
     }
 
+    getHUDContainer(): HUDContainer | null {
+        return this.hudContainer;
+    }
+
     /**
      * Creates all HUD elements
      */

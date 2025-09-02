@@ -243,7 +243,7 @@ describe('GameStateMachine', () => {
             
             // Hero should be alive again with full health
             expect(updatedHero?.state).toBe('alive');
-            expect(updatedHero?.health).toBe(updatedHero?.maxHealth);
+            expect(updatedHero?.getHealth()).toBe(updatedHero?.getMaxHealth());
         });
 
         it('should grant experience when turret is destroyed', () => {

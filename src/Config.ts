@@ -457,6 +457,17 @@ export const CLIENT_CONFIG = {
             FONT_SIZE: '14px',
             ICON_COLOR: 0xf1c40f, // yellow/gold
         },
+        PERMANENT_EFFECTS: {
+            X: 630, // Top right area - moved left to give more space
+            Y: 20,
+            START_X: 680, // Starting X position for the rightmost icon (can be moved farther right)
+            ICON_SIZE: 24,
+            SPACING: 10,
+            MAX_ICONS_PER_ROW: 11, // Changed from 4 to 12
+            BACKGROUND_COLOR: 0x666666,
+            BACKGROUND_ALPHA: 0.7,
+            BACKGROUND_PADDING: 4,
+        },
     },
     UI: {
         FONTS: {
