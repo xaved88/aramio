@@ -320,9 +320,10 @@ export const GAMEPLAY_CONFIG = {
 export const CLIENT_CONFIG = {
     INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
     ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
-    CAMERA_TWEEN_DURATION_MS: 300, // duration of camera movement tween
+    CAMERA_TWEEN_DURATION_MS: 400, // duration of camera movement tween
     CAMERA: {
         ZOOM: 1.3, // 30% zoom (1.0 = no zoom, 1.3 = 30% zoom)
+        LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)
     },
     CONTROLS: {
         SCHEME: 'C' as 'A' | 'B' | 'C' | 'D', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability, D: point-to-move + click-down-to-stop-moving + click-up-for-ability

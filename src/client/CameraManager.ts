@@ -13,6 +13,8 @@ export class CameraManager {
     private mapWidth: number;
     private mapHeight: number;
     private currentTween: Phaser.Tweens.Tween | null = null;
+    private mouseX: number = 0;
+    private mouseY: number = 0;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -49,6 +51,11 @@ export class CameraManager {
         this.playerSessionId = sessionId;
     }
 
+    updateMousePosition(screenX: number, screenY: number): void {
+        this.mouseX = screenX;
+        this.mouseY = screenY;
+    }
+
     updateCamera(state: SharedGameState): void {
         if (!this.playerSessionId) return;
 
@@ -67,9 +74,12 @@ export class CameraManager {
     }
 
     private tweenToPosition(targetX: number, targetY: number): void {
-        // Calculate target camera position (center the target in viewport)
-        const targetCameraX = targetX - this.viewportWidth / 2;
-        const targetCameraY = targetY - this.viewportHeight / 2;
+        // Calculate look-ahead offset based on mouse position
+        const lookAheadOffset = this.calculateLookAheadOffset();
+        
+        // Calculate target camera position (center the target in viewport) with look-ahead offset
+        const targetCameraX = targetX - this.viewportWidth / 2 + lookAheadOffset.x;
+        const targetCameraY = targetY - this.viewportHeight / 2 + lookAheadOffset.y;
         
         // Stop any existing tween
         if (this.currentTween) {
@@ -87,6 +97,30 @@ export class CameraManager {
                 this.currentTween = null;
             }
         });
+    }
+
+    private calculateLookAheadOffset(): { x: number, y: number } {
+        // Calculate normalized mouse position relative to viewport center
+        const centerX = this.viewportWidth / 2;
+        const centerY = this.viewportHeight / 2;
+        
+        const mouseOffsetX = this.mouseX - centerX;
+        const mouseOffsetY = this.mouseY - centerY;
+        
+        // Calculate distance from center (0 to 1)
+        const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+        const currentDistance = Math.sqrt(mouseOffsetX * mouseOffsetX + mouseOffsetY * mouseOffsetY);
+        const normalizedDistance = Math.min(currentDistance / maxDistance, 1);
+        
+        // Apply look-ahead threshold
+        const lookAheadThreshold = CLIENT_CONFIG.CAMERA.LOOK_AHEAD_THRESHOLD;
+        const lookAheadFactor = normalizedDistance * lookAheadThreshold;
+        
+        // Calculate offset based on mouse direction and look-ahead factor
+        const offsetX = (mouseOffsetX / maxDistance) * (this.viewportWidth / 2) * lookAheadFactor;
+        const offsetY = (mouseOffsetY / maxDistance) * (this.viewportHeight / 2) * lookAheadFactor;
+        
+        return { x: offsetX, y: offsetY };
     }
 
     getCameraOffset(): { x: number, y: number } {

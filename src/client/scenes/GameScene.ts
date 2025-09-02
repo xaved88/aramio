@@ -121,6 +121,10 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (!this.room || !this.room.state) return;
         
+        // Update camera with current mouse position
+        const pointer = this.input.activePointer;
+        this.cameraManager.updateMousePosition(pointer.x, pointer.y);
+        
         // Update range indicator position if visible
         if (this.rangeIndicator && this.rangeIndicator.visible) {
             this.updateRangeIndicatorPosition();
