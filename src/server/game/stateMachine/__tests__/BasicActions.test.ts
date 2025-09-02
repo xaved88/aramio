@@ -612,13 +612,13 @@ describe('GameStateMachine', () => {
             const initialX = hero?.x || 0;
             const initialY = hero?.y || 0;
             
-            // Move player
+            // Move player (move up and left to stay within bounds)
             const result = GameStateMachine.processAction(spawnResult.newState, {
                 type: 'MOVE_HERO',
                 payload: { 
                     heroId: hero!.id, 
-                    targetX: initialX + 100, 
-                    targetY: initialY + 100 
+                    targetX: initialX - 50, 
+                    targetY: initialY - 50 
                 }
             });
             
@@ -631,8 +631,8 @@ describe('GameStateMachine', () => {
             });
             
             // Hero should have moved towards target
-            expect(movedHero?.x).toBeGreaterThan(initialX);
-            expect(movedHero?.y).toBeGreaterThan(initialY);
+            expect(movedHero?.x).toBeLessThan(initialX);
+            expect(movedHero?.y).toBeLessThan(initialY);
         });
 
         it('should not move respawning players', () => {

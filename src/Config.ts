@@ -212,17 +212,17 @@ export const GAMEPLAY_CONFIG = {
     },
     HERO_SPAWN_POSITIONS: {
         BLUE: [
-            { x: 50, y: 725 }, // Spawn 1: 75 units below blue cradle
-            { x: 25, y: 725 },  // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 25, y: 700 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 0, y: 700 },   // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 50, y: 680 }, // Spawn 1: 75 units below blue cradle (clamped to max Y)
+            { x: 25, y: 680 },  // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 25, y: 680 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 0, y: 680 },   // Spawn 4: between 3 and 5, same y as 3 and 5
             { x: 0, y: 675 }    // Spawn 5: 75 units left of blue cradle
         ],
         RED: [
-            { x: 650, y: 0 },   // Spawn 1: 75 units above red cradle
-            { x: 675, y: 0 },   // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 675, y: 25 },  // Spawn 3: right angle point of triangle with 2 and 4
-            { x: 700, y: 25 },  // Spawn 4: between 3 and 5, same y as 3 and 5
+            { x: 650, y: 20 },   // Spawn 1: 75 units above red cradle (clamped to min Y)
+            { x: 675, y: 20 },   // Spawn 2: between 1 and 3, same y as 1 and 3
+            { x: 675, y: 20 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 700, y: 20 },  // Spawn 4: between 3 and 5, same y as 3 and 5
             { x: 700, y: 50 }   // Spawn 5: 75 units right of red cradle
         ],
     },

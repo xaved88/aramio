@@ -9,10 +9,19 @@ const mockScene = {
             fillRect: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
             destroy: jest.fn()
         })),
         text: jest.fn(() => ({
             setOrigin: jest.fn().mockReturnThis(),
+            setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
+        })),
+        container: jest.fn(() => ({
+            add: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn()
@@ -114,25 +123,40 @@ describe('VictoryScreen', () => {
             fillRect: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
             destroy: jest.fn() 
         };
         const mockText = { 
             setOrigin: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
             destroy: jest.fn() 
+        };
+        const mockContainer = {
+            add: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setAlpha: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
+            destroy: jest.fn()
         };
         const mockTween = { stop: jest.fn() };
         
+        // Reset mocks and set return values
         mockScene.add.graphics.mockReturnValue(mockGraphics);
         mockScene.add.text.mockReturnValue(mockText);
+        mockScene.add.container.mockReturnValue(mockContainer);
         mockScene.tweens.add.mockReturnValue(mockTween);
         
-        victoryScreen.showVictory('blue', 'blue');
-        victoryScreen.destroy();
+        // Create a new victory screen instance with the mocked scene
+        const testVictoryScreen = new VictoryScreen(mockScene as any);
+        testVictoryScreen.setRestartCallback(jest.fn());
         
-        expect(mockGraphics.destroy).toHaveBeenCalled();
-        expect(mockText.destroy).toHaveBeenCalled();
+        testVictoryScreen.showVictory('blue', 'blue');
+        testVictoryScreen.destroy();
+        
+        // The container should be destroyed, which handles cleanup of child objects
+        expect(mockContainer.destroy).toHaveBeenCalled();
         expect(mockTween.stop).toHaveBeenCalled();
     });
 }); 

@@ -43,6 +43,7 @@ During feature creation, do not create new tests or check tests often - we want 
 
 ## Other Best Practices and Tips
 - Always extract configurable values to the Config.ts file so they can be adjusted without live code changes.
+- Remember that this is a game and 0,0 are coordinates in the upper left corner of the screen (so increasing y makes things lower on the screen).
 - **State Conversion**: When adding new fields to server schemas (Colyseus), always update the `convertToSharedCombatant` function in `src/shared/utils/StateConverter.ts` to ensure proper client synchronization. Missing this step causes "Cannot read properties of undefined" errors.
 - **Schema Synchronization**: New fields added to server-side schemas must be:
   1. Added to the server schema class (e.g., `Hero` in `Combatants.ts`)
