@@ -22,7 +22,6 @@ export class RewardCard {
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
     private hudContainer: HUDContainer | null = null;
-    private container: Phaser.GameObjects.Container;
     private background!: Phaser.GameObjects.Rectangle;
     private titleText!: Phaser.GameObjects.Text;
     private descriptionText!: Phaser.GameObjects.Text;
@@ -36,9 +35,7 @@ export class RewardCard {
         this.rewardId = config.rewardId;
         this.onClick = config.onClick;
         
-        this.container = this.scene.add.container(config.x, config.y);
         this.createCard(config);
-        this.setupInteraction();
     }
 
     setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
@@ -108,55 +105,48 @@ export class RewardCard {
         this.descriptionText.setOrigin(0.5);
         this.hudContainer.add(this.descriptionText);
         
-        // Add all elements to container
+        // Add all elements to HUD container
         const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText];
         if (this.iconImage) {
             elements.push(this.iconImage);
         }
-        this.container.add(elements);
-        
-        // Set depth for UI rendering
-        this.container.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
-        this.container.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.addMultiple(elements);
     }
 
-    private setupInteraction(): void {
-        // Make the entire container interactive instead of just the background
-        this.container.setInteractive(new Phaser.Geom.Rectangle(-60, -80, 120, 160), Phaser.Geom.Rectangle.Contains);
-        
-        this.container.on('pointerover', () => {
-            if (this.isInteractive) {
-                this.background.setFillStyle(0xf0f0f0, 0.9);
-            }
-        });
-        
-        this.container.on('pointerout', () => {
-            if (this.isInteractive) {
-                this.background.setFillStyle(0xffffff, 0.9);
-            }
-        });
-        
-        this.container.on('pointerdown', () => {
-            if (this.isInteractive && this.onClick) {
-                this.onClick(this.rewardId);
-            }
-        });
-    }
+
 
     setInteractive(interactive: boolean): void {
         this.isInteractive = interactive;
         
+        // Remove any existing event listeners first
+        this.hudContainer!.getContainer().removeAllListeners();
+        
         if (interactive) {
-            this.container.setInteractive(new Phaser.Geom.Rectangle(-60, -80, 120, 160), Phaser.Geom.Rectangle.Contains);
+            this.hudContainer!.getContainer().setInteractive(new Phaser.Geom.Rectangle(-60, -80, 120, 160), Phaser.Geom.Rectangle.Contains);
             this.background.setFillStyle(0xffffff, 0.9);
+            
+            // Set up event listeners when becoming interactive
+            this.hudContainer!.getContainer().on('pointerover', () => {
+                this.background.setFillStyle(0xf0f0f0, 0.9);
+            });
+            
+            this.hudContainer!.getContainer().on('pointerout', () => {
+                this.background.setFillStyle(0xffffff, 0.9);
+            });
+            
+            this.hudContainer!.getContainer().on('pointerdown', () => {
+                if (this.onClick) {
+                    this.onClick(this.rewardId);
+                }
+            });
         } else {
-            this.container.disableInteractive();
+            this.hudContainer!.getContainer().disableInteractive();
             this.background.setFillStyle(0xcccccc, 0.7);
         }
     }
 
     setVisible(visible: boolean): void {
-        this.container.setVisible(visible);
+        this.hudContainer!.setVisible(visible);
     }
 
     destroy(): void {
@@ -164,6 +154,5 @@ export class RewardCard {
             this.hudContainer.destroy();
             this.hudContainer = null;
         }
-        this.container.destroy();
     }
 }
