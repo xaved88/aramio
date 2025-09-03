@@ -20,6 +20,7 @@ export class UIManager {
     private statsOverlay: StatsOverlay;
     private respawnOverlay: RespawnOverlay;
     private permanentEffectsDisplay: PermanentEffectsDisplay;
+    private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
 
     // HUD elements
     private hudElements: {
@@ -175,14 +176,29 @@ export class UIManager {
             const remainingTime = currentPlayer.respawnTime - state.gameTime;
             const hasUnspentRewards = currentPlayer.levelRewards && currentPlayer.levelRewards.length > 0;
             
-            // Update rewards if player has unspent rewards
+            // Only update rewards if they have actually changed
             if (hasUnspentRewards) {
-                this.respawnOverlay.updateRewards(currentPlayer);
+                const currentRewardIds = currentPlayer.rewardsForChoice || [];
+                const rewardsChanged = currentRewardIds.length !== this.lastRewardIds.length ||
+                    currentRewardIds.some((id, index) => id !== this.lastRewardIds[index]);
+                
+                if (rewardsChanged) {
+                    this.respawnOverlay.updateRewards(currentPlayer);
+                    this.lastRewardIds = [...currentRewardIds];
+                }
+            } else {
+                // Clear rewards if no unspent rewards
+                if (this.lastRewardIds.length > 0) {
+                    this.respawnOverlay.updateRewards(currentPlayer);
+                    this.lastRewardIds = [];
+                }
             }
             
             this.respawnOverlay.showWithTimer(remainingTime > 0 ? remainingTime : 0, hasUnspentRewards);
         } else {
             this.respawnOverlay.hide();
+            // Reset reward tracking when not respawning
+            this.lastRewardIds = [];
         }
     }
 
