@@ -28,7 +28,11 @@ export class RewardCard {
     private iconImage: Phaser.GameObjects.Image | null = null;
     private rewardId: string;
     private onClick?: (rewardId: string) => void;
-    private isInteractive: boolean = false;
+    private _isInteractive: boolean = false;
+
+    get isInteractive(): boolean {
+        return this._isInteractive;
+    }
 
     constructor(scene: Phaser.Scene, config: RewardCardConfig) {
         this.scene = scene;
@@ -116,7 +120,7 @@ export class RewardCard {
 
 
     setInteractive(interactive: boolean): void {
-        this.isInteractive = interactive;
+        this._isInteractive = interactive;
         
         // Remove any existing event listeners first
         this.hudContainer!.getContainer().removeAllListeners();
@@ -127,11 +131,15 @@ export class RewardCard {
             
             // Set up event listeners when becoming interactive
             this.hudContainer!.getContainer().on('pointerover', () => {
-                this.background.setFillStyle(0xf0f0f0, 0.9);
+                this.background.setFillStyle(0xe0e0e0, 0.95);
+                this.background.setStrokeStyle(3, 0x4a90e2);
+                this.hudContainer!.getContainer().setScale(1.05);
             });
             
             this.hudContainer!.getContainer().on('pointerout', () => {
                 this.background.setFillStyle(0xffffff, 0.9);
+                this.background.setStrokeStyle(2, 0xcccccc);
+                this.hudContainer!.getContainer().setScale(1.0);
             });
             
             this.hudContainer!.getContainer().on('pointerdown', () => {
