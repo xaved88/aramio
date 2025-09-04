@@ -44,8 +44,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     async create() {
-        // Load icons
-        await IconManager.getInstance().loadIcons();
+        // Load icons and pre-generate textures
+        await IconManager.getInstance().loadIconsAndTextures(this);
         
         // In development, connect to the Colyseus server on port 2567
         // In production, connect to the same host (since server serves both)

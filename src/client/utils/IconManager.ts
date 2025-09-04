@@ -14,7 +14,7 @@ export class IconManager {
         return IconManager.instance;
     }
 
-    async loadIcons(): Promise<void> {
+    async loadIconsAndTextures(scene?: Phaser.Scene): Promise<void> {
         if (this.loaded) return;
 
         const iconMappings = {
@@ -51,6 +51,14 @@ export class IconManager {
                 if (response.ok) {
                     const svgContent = await response.text();
                     this.icons.set(key, svgContent);
+                    
+                    // Pre-generate texture if scene is provided
+                    if (scene) {
+                        const textureKey = `icon_${key}`;
+                        if (!scene.textures.exists(textureKey)) {
+                            scene.textures.addBase64(textureKey, this.svgToBase64(svgContent));
+                        }
+                    }
                 } else {
                     console.warn(`Failed to load icon: ${iconName}.svg`);
                 }
@@ -67,13 +75,24 @@ export class IconManager {
     }
 
     createIconImage(scene: Phaser.Scene, x: number, y: number, rewardId: string, size: number = 32): Phaser.GameObjects.Image | null {
-        const svgContent = this.getIcon(rewardId);
-        if (!svgContent) return null;
-
         const textureKey = `icon_${rewardId}`;
         
         if (!scene.textures.exists(textureKey)) {
-            scene.textures.addBase64(textureKey, this.svgToBase64(svgContent));
+            console.warn(`Texture not found for ${rewardId}, icons may not be preloaded`);
+            
+            // Create a "missing image" fallback
+            const fallbackKey = `missing_${rewardId}`;
+            if (!scene.textures.exists(fallbackKey)) {
+                const graphics = scene.add.graphics();
+                graphics.fillStyle(0xcccccc);
+                graphics.fillRect(0, 0, size, size);
+                graphics.lineStyle(2, 0x999999);
+                graphics.strokeRect(0, 0, size, size);
+                graphics.generateTexture(fallbackKey, size, size);
+                graphics.destroy();
+            }
+            
+            return scene.add.image(x, y, fallbackKey).setDisplaySize(size, size);
         }
 
         return scene.add.image(x, y, textureKey).setDisplaySize(size, size);
