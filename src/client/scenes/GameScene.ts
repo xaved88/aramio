@@ -467,8 +467,11 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
-            return; // Not a supported ability type
+        // Don't show range indicator if player is respawning or not a supported ability type
+        if (!currentHero || 
+            currentHero.state === 'respawning' ||
+            (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            return;
         }
         
         // Calculate cast range based on ability type
@@ -599,8 +602,11 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        if (!currentHero || (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
-            this.hideRangeIndicator(); // Hide if not a supported ability type
+        // Hide range indicator if player is respawning or not a supported ability type
+        if (!currentHero || 
+            currentHero.state === 'respawning' ||
+            (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            this.hideRangeIndicator();
             return;
         }
 

@@ -338,7 +338,7 @@ export const CLIENT_CONFIG = {
     TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
     MINION_SIZE: 12, // size for minion shapes
     DEBUG: {
-        SPAWN_LOCATION_INDICATORS_ENABLED: true, // Whether to show spawn position indicators
+        SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
     },
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
