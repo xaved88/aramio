@@ -273,4 +273,29 @@ describe('Bot Strategies', () => {
             expect(moveCommands.length).toBeGreaterThan(0);
         });
     });
+
+    describe('Strategy Assignment Verification', () => {
+        it('should explicitly verify which strategy is active for a bot after ability change', () => {
+            // This test explicitly checks which strategy is being used by a bot
+            // after it acquires a new ability
+            
+            // Test 1: Bot with hookshot ability should use HookshotBotStrategy
+            expect(botManager.selectBotStrategyForAbility('hookshot')).toBe('bot-hookshot');
+            
+            // Test 2: Bot with mercenary ability should use MercenaryBotStrategy
+            expect(botManager.selectBotStrategyForAbility('mercenary')).toBe('bot-mercenary');
+            
+            // Test 3: Bot with pyromancer ability should use SimpletonBotStrategy
+            expect(botManager.selectBotStrategyForAbility('pyromancer')).toBe('bot-simpleton');
+            
+            // Test 4: Bot with thorndive ability should use SimpletonBotStrategy
+            expect(botManager.selectBotStrategyForAbility('thorndive')).toBe('bot-simpleton');
+            
+            // Test 5: Bot with default ability should use SimpletonBotStrategy
+            expect(botManager.selectBotStrategyForAbility('default')).toBe('bot-simpleton');
+            
+            // Test 6: Bot with unknown ability should fallback to SimpletonBotStrategy
+            expect(botManager.selectBotStrategyForAbility('unknown')).toBe('bot-simpleton');
+        });
+    });
 });

@@ -108,7 +108,7 @@ export class GameRoom extends Room<GameState> {
         
         // Determine team based on current player hero count (excluding bots)
         const currentPlayerHeroCount = Array.from(this.state.combatants.values())
-            .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot-')).length;
+            .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot')).length;
         const team = currentPlayerHeroCount % 2 === 0 
             ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
             : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
@@ -266,36 +266,18 @@ export class GameRoom extends Room<GameState> {
             const spawnPosition = spawnPositions[i % spawnPositions.length];
             const abilityType = botAbilityTypes[i % botAbilityTypes.length];
             
-            // Choose bot strategy based on ability type
-            const botStrategy = this.selectBotStrategy(abilityType);
-            
-            this.gameEngine.spawnControlledHero(botStrategy, team, spawnPosition, abilityType);
+            // Spawn bot with generic 'bot' controller - strategy will be determined dynamically
+            this.gameEngine.spawnControlledHero('bot', team, spawnPosition, abilityType);
         }
     }
 
-    private selectBotStrategy(abilityType: string): string {
-        switch (abilityType) {
-            case 'hookshot':
-                return 'bot-hookshot';
-            case 'pyromancer':
-                return 'bot-simpleton';
-            case 'thorndive':
-                return 'bot-simpleton';
-            case 'mercenary':
-                return 'bot-mercenary';
-            case 'default':
-                return 'bot-simpleton';
-            default:
-                return 'bot-simpleton';
-        }
-    }
 
     private replaceBotWithPlayer(playerId: ControllerId, team: string): boolean {
         // Find a bot on the specified team to replace
         let botToReplace: any = null;
         this.state.combatants.forEach((combatant: any) => {
             if (combatant.type === COMBATANT_TYPES.HERO && 
-                combatant.controller.startsWith('bot-') && 
+                combatant.controller.startsWith('bot') && 
                 combatant.team === team && 
                 !botToReplace) {
                 botToReplace = combatant;
@@ -329,9 +311,8 @@ export class GameRoom extends Room<GameState> {
     }
 
     private assignBotStrategyToHero(hero: any): void {
-        const abilityType = hero.ability?.type || 'default';
-        const botStrategy = this.selectBotStrategy(abilityType);
-        hero.controller = botStrategy;
+        // Assign generic 'bot' controller - strategy will be determined dynamically
+        hero.controller = 'bot';
     }
 
 
