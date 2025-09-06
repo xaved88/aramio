@@ -948,7 +948,8 @@ export class GameScene extends Phaser.Scene {
      */
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number, y: number } {
         // Use the CameraManager's camera for coordinate conversion
-        return this.cameraManager.getWorldPoint(screenX, screenY);
+        return this.cameraManager.camera.getWorldPoint(screenX, screenY);
+    }
 
     /**
      * Updates the coordinates debug panel with coordinate information

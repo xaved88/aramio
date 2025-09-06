@@ -5,14 +5,18 @@ import { SharedGameState } from '../shared/types/GameStateTypes';
 
 export class CameraManager {
     private scene: Phaser.Scene;
-    private camera: Phaser.Cameras.Scene2D.Camera;
+    public camera: Phaser.Cameras.Scene2D.Camera;
     private hudCamera: Phaser.Cameras.Scene2D.Camera;
     private playerSessionId: ControllerId | null = null;
     private viewportWidth: number;
     private viewportHeight: number;
     private mapWidth: number;
     private mapHeight: number;
-    private currentTween: Phaser.Tweens.Tween | null = null;
+    private isFollowing: boolean = false;
+    private entityManager: any = null;
+    private lastFollowedHeroId: string | null = null;
+    
+    // Mouse position tracking for lookahead
     private mouseX: number = 0;
     private mouseY: number = 0;
 
@@ -49,15 +53,31 @@ export class CameraManager {
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
+        // Reset following state when player changes
+        this.isFollowing = false;
+        this.lastFollowedHeroId = null;
     }
 
-    updateMousePosition(screenX: number, screenY: number): void {
-        this.mouseX = screenX;
-        this.mouseY = screenY;
+    resetFollowing(): void {
+        // Stop following current target and reset state
+        this.camera.stopFollow();
+        this.isFollowing = false;
+        this.lastFollowedHeroId = null;
+    }
+
+    setEntityManager(entityManager: any): void {
+        this.entityManager = entityManager;
     }
 
     updateCamera(state: SharedGameState): void {
-        if (!this.playerSessionId) return;
+        if (!this.playerSessionId || !this.entityManager) return;
+
+        // Update mouse position for lookahead calculation
+        if (this.scene.input) {
+            const pointer = this.scene.input.activePointer;
+            this.mouseX = pointer.x;
+            this.mouseY = pointer.y;
+        }
 
         // Find the player's hero
         let playerHero = null;
@@ -69,34 +89,28 @@ export class CameraManager {
         }
 
         if (playerHero) {
-            this.tweenToPosition(playerHero.x, playerHero.y);
-        }
-    }
-
-    private tweenToPosition(targetX: number, targetY: number): void {
-        // Calculate look-ahead offset based on mouse position
-        const lookAheadOffset = this.calculateLookAheadOffset();
-        
-        // Calculate target camera position (center the target in viewport) with look-ahead offset
-        const targetCameraX = targetX - this.viewportWidth / 2 + lookAheadOffset.x;
-        const targetCameraY = targetY - this.viewportHeight / 2 + lookAheadOffset.y;
-        
-        // Stop any existing tween
-        if (this.currentTween) {
-            this.currentTween.stop();
-        }
-        
-        // Create smooth camera tween
-        this.currentTween = this.scene.tweens.add({
-            targets: this.camera,
-            scrollX: targetCameraX,
-            scrollY: targetCameraY,
-            duration: CLIENT_CONFIG.CAMERA_TWEEN_DURATION_MS,
-            ease: 'Power2',
-            onComplete: () => {
-                this.currentTween = null;
+            // Only check for hero changes if we're already following someone
+            if (this.isFollowing && this.lastFollowedHeroId !== playerHero.id) {
+                this.resetFollowing();
             }
-        });
+
+            if (!this.isFollowing) {
+                // Get the actual Phaser Graphics object for the hero
+                const heroGraphics = this.entityManager.getEntityGraphics(playerHero.id);
+                if (heroGraphics) {
+                    // Start following the hero's Graphics object with smooth lerp
+                    this.camera.startFollow(heroGraphics, true, 0.1, 0.1);
+                    // Set initial follow offset to 0
+                    this.camera.setFollowOffset(0, 0);
+                    this.isFollowing = true;
+                    this.lastFollowedHeroId = playerHero.id;
+                }
+            } else {
+                // Update lookahead offset for existing follow
+                const offset = this.calculateLookAheadOffset();
+                this.camera.setFollowOffset(offset.x, offset.y);
+            }
+        }
     }
 
     private calculateLookAheadOffset(): { x: number, y: number } {
@@ -117,8 +131,9 @@ export class CameraManager {
         const lookAheadFactor = normalizedDistance * lookAheadThreshold;
         
         // Calculate offset based on mouse direction and look-ahead factor
-        const offsetX = (mouseOffsetX / maxDistance) * (this.viewportWidth / 2) * lookAheadFactor;
-        const offsetY = (mouseOffsetY / maxDistance) * (this.viewportHeight / 2) * lookAheadFactor;
+        // Invert the offset so camera looks ahead in mouse direction
+        const offsetX = -(mouseOffsetX / maxDistance) * (this.viewportWidth / 2) * lookAheadFactor;
+        const offsetY = -(mouseOffsetY / maxDistance) * (this.viewportHeight / 2) * lookAheadFactor;
         
         return { x: offsetX, y: offsetY };
     }
@@ -127,18 +142,6 @@ export class CameraManager {
         return {
             x: this.camera.scrollX,
             y: this.camera.scrollY
-        };
-    }
-
-    getWorldPoint(screenX: number, screenY: number): { x: number, y: number } {
-        // Get the actual camera position after bounds clamping
-        const actualScrollX = Math.max(0, Math.min(this.camera.scrollX, this.mapWidth - this.viewportWidth));
-        const actualScrollY = Math.max(0, Math.min(this.camera.scrollY, this.mapHeight - this.viewportHeight));
-        
-        // Calculate world coordinates using the actual camera position
-        return {
-            x: actualScrollX + screenX,
-            y: actualScrollY + screenY
         };
     }
 
