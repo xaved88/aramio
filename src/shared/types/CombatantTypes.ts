@@ -26,7 +26,8 @@ export const ABILITY_TYPES = {
     HOOKSHOT: 'hookshot',
     MERCENARY: 'mercenary',
     PYROMANCER: 'pyromancer',
-    THORNDIVE: 'thorndive'
+    THORNDIVE: 'thorndive',
+    SNIPER: 'sniper'
 } as const;
 
 export type AbilityType = typeof ABILITY_TYPES[keyof typeof ABILITY_TYPES];
@@ -163,6 +164,11 @@ export interface ThorndiveAbility extends Ability {
     type: typeof ABILITY_TYPES.THORNDIVE;
     range: number;
     landingRadius: number; // AOE radius for landing damage
+}
+
+export interface SniperAbility extends Ability {
+    type: typeof ABILITY_TYPES.SNIPER;
+    strength: number; // damage dealt by ability
 }
 
 export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect | PassiveHealingEffect;
