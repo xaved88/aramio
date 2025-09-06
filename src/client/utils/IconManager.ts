@@ -31,6 +31,7 @@ export class IconManager {
             'ability:pyromancer': 'pyromancer',
             'ability:hookshot': 'hookshot',
             'ability:mercenary': 'mercenary',
+            'ability:sniper': 'sniper',
             
             // Direct stat names for other uses
             'health': 'stats/health_plus',
@@ -42,7 +43,8 @@ export class IconManager {
             'thorndive': 'thorndive',
             'pyromancer': 'pyromancer',
             'hookshot': 'hookshot',
-            'mercenary': 'mercenary'
+            'mercenary': 'mercenary',
+            'sniper': 'sniper'
         };
 
         for (const [key, iconName] of Object.entries(iconMappings)) {

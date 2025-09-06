@@ -570,7 +570,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
     });
 }
 
-function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string): void {
+export function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string): void {
     player.experience += amount;
     player.roundStats.totalExperience += amount;
     

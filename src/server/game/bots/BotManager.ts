@@ -60,14 +60,8 @@ export class BotManager {
         switch (abilityType) {
             case 'hookshot':
                 return 'bot-hookshot';
-            case 'pyromancer':
-                return 'bot-simpleton';
-            case 'thorndive':
-                return 'bot-simpleton';
             case 'mercenary':
                 return 'bot-mercenary';
-            case 'default':
-                return 'bot-simpleton';
             default:
                 return 'bot-simpleton';
         }

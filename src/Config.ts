@@ -91,12 +91,12 @@ export const GAMEPLAY_CONFIG = {
             },
         },
         ABILITIES: {
-              'default': {
+            'default': {
                 COOLDOWN_MS: 1000,
                 STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
-                },
-              'hookshot': {
+            },
+            'hookshot': {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
@@ -146,6 +146,11 @@ export const GAMEPLAY_CONFIG = {
                 REFLECT_PERCENTAGE: 100, // 100% damage reflection
                 ARMOR_BONUS_BULLET: 50, // Additional bullet armor during effect
                 ARMOR_BONUS_ABILITY: 50, // Additional ability armor during effect
+            },
+            'sniper': {
+                COOLDOWN_MS: 1000, // Same as default
+                STRENGTH: 7, // Same as default
+                SPEED: 200, // Same as default
             }
         },
         CRADLE: {
@@ -228,8 +233,7 @@ export const GAMEPLAY_CONFIG = {
     },
     BOTS: {
         BOTS_PER_TEAM: 5, // Number of bots to spawn per team
-        // ABILITY_TYPES: ['thorndive', 'pyromancer', 'mercenary', 'hookshot', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
-        ABILITY_TYPES: ['default', 'default', 'default', 'default', 'default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
+        ABILITY_TYPES: ['default'], // Array of ability types for bots to spawn with (loops if more bots than abilities)
         ABILITY_COOLDOWN_MULTIPLIER: {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again
@@ -255,6 +259,7 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability:pyromancer", weight: 1 },
                     { id: "ability:hookshot", weight: 1 },
                     { id: "ability:mercenary", weight: 1 },
+                    { id: "ability:sniper", weight: 1 },
                 ]
             }
         },
@@ -311,8 +316,17 @@ export const GAMEPLAY_CONFIG = {
             "ability:mercenary": {
                 type: "ability",
                 abilityType: "mercenary"
+            },
+            "ability:sniper": {
+                type: "ability",
+                abilityType: "sniper"
             }
         }
+    },
+    
+    // Debug Configuration
+    DEBUG: {
+        STARTING_LEVEL: 1, // Level that heroes start with
     },
 } as const;
 
@@ -572,6 +586,12 @@ export const CLIENT_CONFIG = {
                 title: "Mercenary",
                 description: "Rage mode berserker",
                 icon: "sword",
+                rarity: "ability"
+            },
+            "ability:sniper": {
+                title: "Sniper",
+                description: "Precise ranged attack",
+                icon: "sniper",
                 rarity: "ability"
             }
         }
