@@ -339,6 +339,8 @@ export const CLIENT_CONFIG = {
     MINION_SIZE: 12, // size for minion shapes
     DEBUG: {
         SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
+        WORLD_COORDINATE_GRID_ENABLED: false, // Whether to show world coordinate grid overlay
+        SCREEN_COORDINATE_GRID_ENABLED: false, // Whether to show screen coordinate grid overlay
     },
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
