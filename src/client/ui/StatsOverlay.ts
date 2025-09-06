@@ -51,15 +51,14 @@ export class StatsOverlay {
         arrow: 60,
         heroId: 120,
         abilityType: 100,
-        level: 30,
+        level: 35,
         totalXp: 50,
-        minionKills: 60,
-        heroKills: 60,
-        turretKills: 60,
-        deaths: 60,
+        minionKills: 45,
+        heroKills: 45,
+        turretKills: 45,
+        deaths: 45,
         damageTaken: 60,
-        damageDealt: 60,
-        rewards: 50
+        damageDealt: 60
     };
 
     // Column definitions for consistent table structure
@@ -67,15 +66,14 @@ export class StatsOverlay {
         { key: 'arrow', width: 'arrow', header: '', align: 'right', getValue: (player: PlayerStats) => player.isCurrentPlayer ? '▶' : '' },
         { key: 'heroId', width: 'heroId', header: 'Hero', align: 'left', getValue: (player: PlayerStats) => player.id.length > 14 ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5) : player.id },
         { key: 'abilityType', width: 'abilityType', header: 'Ability', align: 'left', getValue: (player: PlayerStats) => player.abilityType },
-        { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.level.toString() },
+        { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.levelRewards > 0 ? `(${player.levelRewards}) ${player.level}` : player.level.toString() },
         { key: 'totalXp', width: 'totalXp', header: 'XP', align: 'right', getValue: (player: PlayerStats) => Math.round(player.totalExperience).toString() },
-        { key: 'heroKills', width: 'heroKills', header: 'Kills', align: 'right', getValue: (player: PlayerStats) => Math.round(player.heroKills).toString() },
-        { key: 'deaths', width: 'deaths', header: 'Deaths', align: 'right', getValue: (player: PlayerStats) => player.deaths.toString() },
-        { key: 'minionKills', width: 'minionKills', header: 'Minions', align: 'right', getValue: (player: PlayerStats) => Math.round(player.minionKills).toString() },
-        { key: 'turretKills', width: 'turretKills', header: 'Turrets', align: 'right', getValue: (player: PlayerStats) => Math.round(player.turretKills).toString() },
+        { key: 'heroKills', width: 'heroKills', header: 'K', align: 'right', getValue: (player: PlayerStats) => Math.round(player.heroKills).toString() },
+        { key: 'deaths', width: 'deaths', header: 'D', align: 'right', getValue: (player: PlayerStats) => player.deaths.toString() },
+        { key: 'minionKills', width: 'minionKills', header: 'Min.', align: 'right', getValue: (player: PlayerStats) => Math.round(player.minionKills).toString() },
+        { key: 'turretKills', width: 'turretKills', header: 'Tur.', align: 'right', getValue: (player: PlayerStats) => Math.round(player.turretKills).toString() },
         { key: 'damageDealt', width: 'damageDealt', header: 'Dealt', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageDealt).toString() },
-        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() },
-        { key: 'rewards', width: 'rewards', header: 'Rewards', align: 'right', getValue: (player: PlayerStats) => player.levelRewards.toString() }
+        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() }
     ] as const;
 
     // Depth configuration for consistent layering
