@@ -5,7 +5,7 @@ import { StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
@@ -148,6 +148,49 @@ export class GameEngine {
 
         // Use the AbilityUseManager to handle the ability usage
         AbilityUseManager.useAbility(heroCombatant.ability, heroId, x, y, this.state);
+    }
+
+    /**
+     * Debug method to instantly kill a hero (for testing)
+     * @param heroId The hero's ID
+     */
+    debugKill(heroId: CombatantId): void {
+        // Only allow if debug kill is enabled
+        if (!GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+            return;
+        }
+
+        const hero = this.state.combatants.get(heroId);
+        if (!hero || hero.type !== 'hero') {
+            return;
+        }
+
+        // Set health to 0 to trigger death
+        hero.health = 0;
+        console.log(`Debug kill: Hero ${heroId} killed for testing`);
+    }
+
+    /**
+     * Debug method to instantly respawn a hero (for testing)
+     * @param heroId The hero's ID
+     */
+    instantRespawn(heroId: CombatantId): void {
+        // Only allow if instant respawn is enabled
+        if (!GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+            return;
+        }
+
+        const hero = this.state.combatants.get(heroId);
+        if (!hero || hero.type !== 'hero') {
+            return;
+        }
+
+        // Cast to Hero type to access respawnTime property
+        const heroCombatant = hero as any;
+
+        // Set respawn time to 1 to trigger immediate respawn
+        heroCombatant.respawnTime = 1;
+        console.log(`Debug instant respawn: Hero ${heroId} respawn timer set to 1`);
     }
 
     private updateProjectiles(deltaTime: number): void {

@@ -466,6 +466,19 @@ export class GameScene extends Phaser.Scene {
             }
         });
 
+        // D key handler for debug kill (only if enabled)
+        this.input.keyboard?.on('keydown-D', (event: KeyboardEvent) => {
+            if (this.room && GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+                this.room.send('debugKill');
+            }
+        });
+
+        // L key handler for instant respawn (only if enabled)
+        this.input.keyboard?.on('keydown-L', (event: KeyboardEvent) => {
+            if (this.room && GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+                this.room.send('instantRespawn');
+            }
+        });
 
         // Tab key handlers for stats overlay (hold to show)
         this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {

@@ -332,6 +332,8 @@ export const GAMEPLAY_CONFIG = {
     // Debug Configuration
     DEBUG: {
         STARTING_LEVEL: 1, // Level that heroes start with
+        CHEAT_KILL_PLAYER_ENABLED: true, // Enable 'd' key to instantly kill player for testing
+        CHEAT_INSTANT_RESPAWN_ENABLED: true, // Enable 'l' key to instantly respawn player for testing
     },
 } as const;
 

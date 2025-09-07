@@ -98,6 +98,26 @@ export class GameRoom extends Room<GameState> {
             }
         });
 
+        this.onMessage('debugKill', (client) => {
+            // Only allow debug kill if enabled in config
+            if (GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+                const heroId = this.findHeroByController(client.sessionId);
+                if (heroId) {
+                    this.gameEngine.debugKill(heroId);
+                }
+            }
+        });
+
+        this.onMessage('instantRespawn', (client) => {
+            // Only allow instant respawn if enabled in config
+            if (GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+                const heroId = this.findHeroByController(client.sessionId);
+                if (heroId) {
+                    this.gameEngine.instantRespawn(heroId);
+                }
+            }
+        });
+
         this.onMessage('toggleHero', (client) => {
             this.handleToggleHero(client.sessionId);
         });
@@ -237,6 +257,7 @@ export class GameRoom extends Room<GameState> {
             }
         }
     }
+
 
     private findHeroByController(controllerId: ControllerId): CombatantId | null {
         for (const [heroId, combatant] of this.state.combatants.entries()) {
