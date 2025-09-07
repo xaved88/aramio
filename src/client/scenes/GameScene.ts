@@ -33,7 +33,7 @@ export class GameScene extends Phaser.Scene {
     private isClickHeld: boolean = false;
     private clickDownPosition: { x: number, y: number } | null = null;
     private isRestarting: boolean = false;
-    private rangeIndicator: Phaser.GameObjects.Graphics | null = null;
+    private abilityRangeDisplay: Phaser.GameObjects.Graphics | null = null;
     private coordinateGrid: Phaser.GameObjects.Graphics | null = null;
     private coordinatesDebugPanel: Phaser.GameObjects.Text | null = null;
     private gridLabels: Phaser.GameObjects.Text[] = [];
@@ -91,9 +91,9 @@ export class GameScene extends Phaser.Scene {
         // Set camera manager for game object factory
         this.gameObjectFactory.setCameraManager(this.cameraManager);
         
-        // Create range indicator
-        this.rangeIndicator = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-        this.rangeIndicator.setVisible(false);
+        // Create ability range display
+        this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
+        this.abilityRangeDisplay.setVisible(false);
         
         // Create world coordinate grid overlay
         this.coordinateGrid = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
@@ -160,9 +160,9 @@ export class GameScene extends Phaser.Scene {
         // Get current mouse position for coordinate display
         const pointer = this.input.activePointer;
         
-        // Update range indicator position if visible
-        if (this.rangeIndicator && this.rangeIndicator.visible) {
-            this.updateRangeIndicatorPosition();
+        // Update ability range display position if visible
+        if (this.abilityRangeDisplay && this.abilityRangeDisplay.visible) {
+            this.updateAbilityRangeDisplayWithMouse();
         }
         
         // Update coordinates debug panel
@@ -398,15 +398,15 @@ export class GameScene extends Phaser.Scene {
                     this.moveTarget = { x: worldPos.x, y: worldPos.y };
                     this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
                     
-                    // Show range indicator for hookshot ability
-                    this.showRangeIndicator(worldPos.x, worldPos.y);
+                    // Show ability range display for hookshot ability (using mouse-following logic)
+                    this.updateAbilityRangeDisplayWithMouse();
                 }
             });
 
             this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
                 if (this.room && this.isClickHeld) {
-                    // Hide range indicator
-                    this.hideRangeIndicator();
+                    // Hide ability range display
+                    this.hideAbilityRangeDisplay();
                     
                     // Use ability at release position (converted to world coordinates)
                     const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
@@ -491,127 +491,20 @@ export class GameScene extends Phaser.Scene {
         });
     }
 
-    /**
-     * Shows the range indicator for hookshot ability
-     */
-    private showRangeIndicator(x: number, y: number): void {
-        if (!this.rangeIndicator || !this.lastState) return;
-        
-        // Find the current player's hero
-        const sharedState = convertToSharedGameState(this.lastState);
-        let currentHero: any = null;
-        
-        for (const combatant of sharedState.combatants.values()) {
-            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
-                currentHero = combatant;
-                break;
-            }
-        }
-        
-        // Don't show range indicator if player is respawning or not a supported ability type
-        if (!currentHero || 
-            currentHero.state === 'respawning' ||
-            (currentHero.ability.type !== 'default' && currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'sniper' && currentHero.ability.type !== 'thorndive')) {
-            return;
-        }
-        
-        // Calculate cast range based on ability type
-        let castRange: number;
-        if (currentHero.ability.type === 'default') {
-            castRange = this.calculateDefaultCastRange(currentHero);
-        } else if (currentHero.ability.type === 'hookshot') {
-            castRange = this.calculateHookshotCastRange(currentHero);
-        } else if (currentHero.ability.type === 'mercenary') {
-            castRange = this.calculateMercenaryRageRange(currentHero);
-        } else if (currentHero.ability.type === 'pyromancer') {
-            castRange = this.calculatePyromancerCastRange(currentHero);
-        } else if (currentHero.ability.type === 'sniper') {
-            castRange = this.calculateSniperCastRange(currentHero);
-        } else if (currentHero.ability.type === 'thorndive') {
-            castRange = this.calculateThorndiveCastRange(currentHero);
-        } else {
-            return;
-        }
-        
-        // Determine color based on ability cooldown status
-        const rangeColor = this.getRangeIndicatorColor(currentHero);
-        
-        // Clear and draw the range indicator
-        this.rangeIndicator.clear();
-        this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
-        this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
-        
-        // Draw targeting circles for abilities
-        if (currentHero.ability.type === 'default') {
-            this.drawDefaultTargetingCircle(currentHero, x, y, rangeColor);
-        } else if (currentHero.ability.type === 'thorndive') {
-            this.drawThorndiveTargetingCircle(currentHero, x, y, rangeColor);
-        } else if (currentHero.ability.type === 'pyromancer') {
-            this.drawPyromancerTargetingCircle(currentHero, x, y, rangeColor);
-        } else if (currentHero.ability.type === 'hookshot') {
-            this.drawHookshotTargetingCircle(currentHero, x, y, rangeColor);
-        } else if (currentHero.ability.type === 'sniper') {
-            this.drawSniperTargetingCircle(currentHero, x, y, rangeColor);
-        }
-        
-        this.rangeIndicator.setVisible(true);
-    }
 
     /**
-     * Calculates the cast range for default ability
+     * Calculates the cast range for abilities
      */
-    private calculateDefaultCastRange(hero: any): number {
-        // Get the range directly from the hero's ability (which includes level scaling)
+    private calculateCastRange(hero: any): number {
+        // All abilities use their configured range (which includes level scaling)
         return hero.ability.range;
     }
 
-    /**
-     * Calculates the cast range for hookshot ability
-     */
-    private calculateHookshotCastRange(hero: any): number {
-        // Get the range directly from the hero's ability (which includes level scaling)
-        return hero.ability.range;
-    }
 
     /**
-     * Calculates the rage attack range for mercenary ability (the reduced range during rage)
+     * Gets the appropriate color for the ability range display based on ability cooldown status
      */
-    private calculateMercenaryRageRange(hero: any): number {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.mercenary;
-        // TODO - get this from the combatant ability not the config.
-        
-        // The mercenary ability reduces attack range to a fixed value during rage
-        return config.RAGE_ATTACK_RADIUS;
-    }
-
-    /**
-     * Calculates the cast range for pyromancer ability
-     */
-    private calculatePyromancerCastRange(hero: any): number {
-        // Get the range directly from the hero's ability (which includes level scaling)
-        return hero.ability.range;
-    }
-
-    /**
-     * Calculates the cast range for sniper ability
-     */
-    private calculateSniperCastRange(hero: any): number {
-        // Get the range directly from the hero's ability (which includes level scaling)
-        return hero.ability.range;
-    }
-
-    /**
-     * Calculates the cast range for thorndive ability
-     */
-    private calculateThorndiveCastRange(hero: any): number {
-        // Get the range directly from the hero's ability (which includes level scaling)
-        return hero.ability.range;
-    }
-
-    /**
-     * Gets the appropriate color for the range indicator based on ability cooldown status
-     */
-    private getRangeIndicatorColor(hero: any): number {
+    private getAbilityRangeDisplayColor(hero: any): number {
         if (!this.lastState) return CLIENT_CONFIG.HUD.ABILITY_BAR.COOLDOWN_COLOR;
         
         const currentTime = this.lastState.gameTime;
@@ -634,19 +527,19 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
-     * Hides the range indicator
+     * Hides the ability range display
      */
-    private hideRangeIndicator(): void {
-        if (this.rangeIndicator) {
-            this.rangeIndicator.setVisible(false);
+    private hideAbilityRangeDisplay(): void {
+        if (this.abilityRangeDisplay) {
+            this.abilityRangeDisplay.setVisible(false);
         }
     }
 
     /**
-     * Updates the position of the range indicator based on the current player's hero position
+     * Updates the ability range display with targeting circle following mouse position (clamped to range)
      */
-    private updateRangeIndicatorPosition(): void {
-        if (!this.rangeIndicator || !this.lastState) return;
+    private updateAbilityRangeDisplayWithMouse(): void {
+        if (!this.abilityRangeDisplay || !this.lastState) return;
 
         // Find the current player's hero
         const sharedState = convertToSharedGameState(this.lastState);
@@ -659,40 +552,30 @@ export class GameScene extends Phaser.Scene {
             }
         }
         
-        // Hide range indicator if player is respawning or not a supported ability type
+        // Hide ability range display if player is respawning or not a supported ability type
         if (!currentHero || 
             currentHero.state === 'respawning' ||
             (currentHero.ability.type !== 'default' && currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'sniper' && currentHero.ability.type !== 'thorndive')) {
-            this.hideRangeIndicator();
+            this.hideAbilityRangeDisplay();
             return;
         }
 
         // Calculate cast range based on ability type
         let castRange: number;
-        if (currentHero.ability.type === 'default') {
-            castRange = this.calculateDefaultCastRange(currentHero);
-        } else if (currentHero.ability.type === 'hookshot') {
-            castRange = this.calculateHookshotCastRange(currentHero);
-        } else if (currentHero.ability.type === 'mercenary') {
-            castRange = this.calculateMercenaryRageRange(currentHero);
-        } else if (currentHero.ability.type === 'pyromancer') {
-            castRange = this.calculatePyromancerCastRange(currentHero);
-        } else if (currentHero.ability.type === 'sniper') {
-            castRange = this.calculateSniperCastRange(currentHero);
-        } else if (currentHero.ability.type === 'thorndive') {
-            castRange = this.calculateThorndiveCastRange(currentHero);
+        if (currentHero.ability.type === 'mercenary') {
+            // Mercenary is a self-buff ability, show a very small range circle
+            castRange = 15; // Very small circle to indicate self-buff
         } else {
-            this.hideRangeIndicator();
-            return;
+            castRange = this.calculateCastRange(currentHero);
         }
         
         // Determine color based on ability cooldown status
-        const rangeColor = this.getRangeIndicatorColor(currentHero);
+        const rangeColor = this.getAbilityRangeDisplayColor(currentHero);
         
-        // Clear and draw the range indicator centered on the hero
-        this.rangeIndicator.clear();
-        this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
-        this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
+        // Clear and draw the ability range circle centered on the hero
+        this.abilityRangeDisplay.clear();
+        this.abilityRangeDisplay.lineStyle(2, rangeColor, 0.6);
+        this.abilityRangeDisplay.strokeCircle(currentHero.x, currentHero.y, castRange);
         
         // Get mouse position and calculate target position (sticking to cast range if beyond)
         const mouseWorldPos = this.screenToWorldCoordinates(this.input.activePointer.x, this.input.activePointer.y);
@@ -713,100 +596,40 @@ export class GameScene extends Phaser.Scene {
             targetY = currentHero.y + directionY * castRange;
         }
         
-        // Draw targeting circles for abilities at target position
-        if (currentHero.ability.type === 'default') {
-            this.drawDefaultTargetingCircle(currentHero, targetX, targetY, rangeColor);
-        } else if (currentHero.ability.type === 'thorndive') {
-            this.drawThorndiveTargetingCircle(currentHero, targetX, targetY, rangeColor);
-        } else if (currentHero.ability.type === 'pyromancer') {
-            this.drawPyromancerTargetingCircle(currentHero, targetX, targetY, rangeColor);
-        } else if (currentHero.ability.type === 'hookshot') {
-            this.drawHookshotTargetingCircle(currentHero, targetX, targetY, rangeColor);
-        } else if (currentHero.ability.type === 'sniper') {
-            this.drawSniperTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        // Draw targeting circle for abilities at target position
+        this.drawTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        
+        this.abilityRangeDisplay.setVisible(true);
+    }
+
+    /**
+     * Draws the targeting circle for any ability at the target location
+     */
+    private drawTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
+        let targetingRadius: number;
+        
+        // Get targeting radius based on ability type
+        if (hero.ability.type === 'thorndive') {
+            // Get AOE radius from the hero's ability (which includes level scaling)
+            targetingRadius = (hero.ability as any).landingRadius || 70; // fallback to default if not available
+        } else if (hero.ability.type === 'pyromancer') {
+            // Get AOE radius from the hero's ability (which includes level scaling)
+            targetingRadius = (hero.ability as any).radius || 20; // fallback to default if not available
+        } else if (hero.ability.type === 'mercenary') {
+            // Mercenary is a self-buff ability, don't show targeting circle
+            return; // No targeting circle needed for self-buff
+        } else {
+            // Small hardcoded radius for projectile-based abilities (about projectile size)
+            targetingRadius = 8;
         }
         
-        this.rangeIndicator.setVisible(true);
-    }
-
-    /**
-     * Draws the targeting circle for thorndive ability at the target location
-     */
-    private drawThorndiveTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        // Get AOE radius from the hero's ability (which includes level scaling)
-        const aoeRadius = (hero.ability as any).landingRadius || 70; // fallback to default if not available
-        
         // Draw targeting circle at target location
-        this.rangeIndicator!.lineStyle(1, color, 0.3);
-        this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
+        this.abilityRangeDisplay!.lineStyle(1, color, 0.3);
+        this.abilityRangeDisplay!.strokeCircle(targetX, targetY, targetingRadius);
         
         // Fill with very light color
-        this.rangeIndicator!.fillStyle(color, 0.1);
-        this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
-    }
-
-    /**
-     * Draws the targeting circle for pyromancer ability at the target location
-     */
-    private drawPyromancerTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        // Get AOE radius from the hero's ability (which includes level scaling)
-        const aoeRadius = (hero.ability as any).radius || 20; // fallback to default if not available
-        
-        // Draw targeting circle at target location
-        this.rangeIndicator!.lineStyle(1, color, 0.3);
-        this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
-        
-        // Fill with very light color
-        this.rangeIndicator!.fillStyle(color, 0.1);
-        this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
-    }
-
-    /**
-     * Draws the targeting circle for default ability at the target location
-     */
-    private drawDefaultTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        // Small hardcoded radius for default targeting (about projectile size)
-        const targetingRadius = 8;
-        
-        // Draw targeting circle at target location
-        this.rangeIndicator!.lineStyle(1, color, 0.3);
-        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
-        
-        // Fill with very light color
-        this.rangeIndicator!.fillStyle(color, 0.1);
-        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
-    }
-
-    /**
-     * Draws the targeting circle for hookshot ability at the target location
-     */
-    private drawHookshotTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        // Small hardcoded radius for hookshot targeting (about projectile size)
-        const targetingRadius = 8;
-        
-        // Draw targeting circle at target location
-        this.rangeIndicator!.lineStyle(1, color, 0.3);
-        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
-        
-        // Fill with very light color
-        this.rangeIndicator!.fillStyle(color, 0.1);
-        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
-    }
-
-    /**
-     * Draws the targeting circle for sniper ability at the target location
-     */
-    private drawSniperTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        // Small hardcoded radius for sniper targeting (about projectile size)
-        const targetingRadius = 8;
-        
-        // Draw targeting circle at target location
-        this.rangeIndicator!.lineStyle(1, color, 0.3);
-        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
-        
-        // Fill with very light color
-        this.rangeIndicator!.fillStyle(color, 0.1);
-        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
+        this.abilityRangeDisplay!.fillStyle(color, 0.1);
+        this.abilityRangeDisplay!.fillCircle(targetX, targetY, targetingRadius);
     }
 
 

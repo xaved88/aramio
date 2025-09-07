@@ -154,7 +154,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 1000, // Same as default
                 STRENGTH: 7, // Same as default
                 SPEED: 200, // Same as default
-                RANGE: 400, // Longer range than default
+                RANGE: 300, // Longer range than default
                 RANGE_PER_LEVEL: 10, // More range per level than default
             }
         },
