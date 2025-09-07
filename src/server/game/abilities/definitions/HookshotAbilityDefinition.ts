@@ -24,14 +24,20 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
         ability.strength = config.STRENGTH;
+        ability.range = config.RANGE;
         
         return ability;
     }
 
     onLevelUp(ability: HookshotAbility): void {
+        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+        
         // Scale strength like other abilities
         const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
+        
+        // Scale range
+        ability.range += config.RANGE_PER_LEVEL;
     }
 
     useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any): boolean {
@@ -44,7 +50,21 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
             ability.lastUsedTime = currentTime;
-            this.createProjectile(heroId, x, y, state, ability);
+            // Apply range clamping even on first use
+            const dx = x - hero.x;
+            const dy = y - hero.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            let targetX = x;
+            let targetY = y;
+            if (distance > ability.range) {
+                const directionX = dx / distance;
+                const directionY = dy / distance;
+                targetX = hero.x + directionX * ability.range;
+                targetY = hero.y + directionY * ability.range;
+            }
+            
+            this.createProjectile(heroId, targetX, targetY, state, ability);
             return true;
         }
         
@@ -54,8 +74,24 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
             return false; // Ability is on cooldown
         }
 
+        // Calculate distance to target
+        const dx = x - hero.x;
+        const dy = y - hero.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Clamp target to max range if beyond range
+        let targetX = x;
+        let targetY = y;
+        if (distance > ability.range) {
+            // Calculate direction and clamp to max range
+            const directionX = dx / distance;
+            const directionY = dy / distance;
+            targetX = hero.x + directionX * ability.range;
+            targetY = hero.y + directionY * ability.range;
+        }
+
         ability.lastUsedTime = currentTime;
-        this.createProjectile(heroId, x, y, state, ability);
+        this.createProjectile(heroId, targetX, targetY, state, ability);
         return true;
     }
 

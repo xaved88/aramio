@@ -101,6 +101,8 @@ export const GAMEPLAY_CONFIG = {
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
                 DURATION_MS: 500, // 500ms projectile duration
+                RANGE: 125, // base range (speed * duration / 1000)
+                RANGE_PER_LEVEL: 8.75, // additional range per level (7% of base range)
                 STUN_DURATION_MS: 700, // 700ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
                 SPEED_BOOST_PERCENTAGE: 0.07, // +7% speed per level

@@ -21,6 +21,7 @@ export class HookshotAbility extends Ability {
     this.type = ABILITY_TYPES.HOOKSHOT;
   }
   @type('number') strength!: number; // damage dealt by ability
+  @type('number') range!: number; // projectile range
 }
 
 export class MercenaryAbility extends Ability {

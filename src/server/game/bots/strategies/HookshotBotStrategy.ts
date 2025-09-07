@@ -96,11 +96,7 @@ export class HookshotBotStrategy {
 
             
             // Don't hookshot enemies that are too far (outside Hookshot range)
-            const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
-            const heroLevel = bot.level || 1;
-            const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
-            const scaledSpeed = config.SPEED * speedMultiplier;
-            const hookshotRange = scaledSpeed * (config.DURATION_MS / 1000);
+            const hookshotRange = bot.ability.range;
             
             if (enemy.distance > hookshotRange) {
                 return false;

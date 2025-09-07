@@ -537,32 +537,24 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.lineStyle(2, rangeColor, 0.6);
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
         
-        // Draw AOE circles for thorndive and pyromancer
+        // Draw targeting circles for abilities
         if (currentHero.ability.type === 'thorndive') {
-            this.drawThorndiveAOECircle(currentHero, x, y, rangeColor);
+            this.drawThorndiveTargetingCircle(currentHero, x, y, rangeColor);
         } else if (currentHero.ability.type === 'pyromancer') {
-            this.drawPyromancerAOECircle(currentHero, x, y, rangeColor);
+            this.drawPyromancerTargetingCircle(currentHero, x, y, rangeColor);
+        } else if (currentHero.ability.type === 'hookshot') {
+            this.drawHookshotTargetingCircle(currentHero, x, y, rangeColor);
         }
         
         this.rangeIndicator.setVisible(true);
     }
 
     /**
-     * Calculates the cast range for hookshot based on speed and duration
+     * Calculates the cast range for hookshot ability
      */
     private calculateHookshotCastRange(hero: any): number {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
-        const heroLevel = hero.level || 1;
-        
-        // Calculate scaled speed (base speed + 10% per level)
-        const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
-        const scaledSpeed = config.SPEED * speedMultiplier;
-        
-        // Calculate range: speed (pixels/second) * duration (seconds)
-        const durationInSeconds = config.DURATION_MS / 1000;
-        const castRange = scaledSpeed * durationInSeconds;
-        
-        return castRange;
+        // Get the range directly from the hero's ability (which includes level scaling)
+        return hero.ability.range;
     }
 
     /**
@@ -693,24 +685,26 @@ export class GameScene extends Phaser.Scene {
             targetY = currentHero.y + directionY * castRange;
         }
         
-        // Draw AOE circles for thorndive and pyromancer at target position
+        // Draw targeting circles for abilities at target position
         if (currentHero.ability.type === 'thorndive') {
-            this.drawThorndiveAOECircle(currentHero, targetX, targetY, rangeColor);
+            this.drawThorndiveTargetingCircle(currentHero, targetX, targetY, rangeColor);
         } else if (currentHero.ability.type === 'pyromancer') {
-            this.drawPyromancerAOECircle(currentHero, targetX, targetY, rangeColor);
+            this.drawPyromancerTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        } else if (currentHero.ability.type === 'hookshot') {
+            this.drawHookshotTargetingCircle(currentHero, targetX, targetY, rangeColor);
         }
         
         this.rangeIndicator.setVisible(true);
     }
 
     /**
-     * Draws the AOE circle for thorndive ability at the target location
+     * Draws the targeting circle for thorndive ability at the target location
      */
-    private drawThorndiveAOECircle(hero: any, targetX: number, targetY: number, color: number): void {
+    private drawThorndiveTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
         // Get AOE radius from the hero's ability (which includes level scaling)
         const aoeRadius = (hero.ability as any).landingRadius || 70; // fallback to default if not available
         
-        // Draw AOE circle at target location
+        // Draw targeting circle at target location
         this.rangeIndicator!.lineStyle(1, color, 0.3);
         this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
         
@@ -720,19 +714,35 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
-     * Draws the AOE circle for pyromancer ability at the target location
+     * Draws the targeting circle for pyromancer ability at the target location
      */
-    private drawPyromancerAOECircle(hero: any, targetX: number, targetY: number, color: number): void {
+    private drawPyromancerTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
         // Get AOE radius from the hero's ability (which includes level scaling)
         const aoeRadius = (hero.ability as any).radius || 20; // fallback to default if not available
         
-        // Draw AOE circle at target location
+        // Draw targeting circle at target location
         this.rangeIndicator!.lineStyle(1, color, 0.3);
         this.rangeIndicator!.strokeCircle(targetX, targetY, aoeRadius);
         
         // Fill with very light color
         this.rangeIndicator!.fillStyle(color, 0.1);
         this.rangeIndicator!.fillCircle(targetX, targetY, aoeRadius);
+    }
+
+    /**
+     * Draws the targeting circle for hookshot ability at the target location
+     */
+    private drawHookshotTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
+        // Small hardcoded radius for hookshot targeting (about projectile size)
+        const targetingRadius = 8;
+        
+        // Draw targeting circle at target location
+        this.rangeIndicator!.lineStyle(1, color, 0.3);
+        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
+        
+        // Fill with very light color
+        this.rangeIndicator!.fillStyle(color, 0.1);
+        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
     }
 
 
