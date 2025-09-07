@@ -134,7 +134,10 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.speed = scaledSpeed;
         projectile.team = hero.team;
         projectile.type = 'hook';
-        projectile.duration = config.DURATION_MS;
+        projectile.duration = -1; // Infinite duration - use range-based removal
+        projectile.startX = hero.x; // Track starting position for range calculation
+        projectile.startY = hero.y; // Track starting position for range calculation
+        projectile.range = ability.range; // Set range for range-based removal
         projectile.createdAt = state.gameTime;
         
         // Add applyDamage effect
@@ -156,7 +159,9 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         nocollisionEffect.effectType = 'applyEffect';
         nocollisionEffect.combatantEffect = new NoCollisionEffect();
         nocollisionEffect.combatantEffect.type = 'nocollision';
-        nocollisionEffect.combatantEffect.duration = config.DURATION_MS;
+        // Calculate duration based on range and speed (with safety margin)
+        const maxTravelTime = (ability.range / scaledSpeed) * 1000; // Convert to milliseconds
+        nocollisionEffect.combatantEffect.duration = maxTravelTime * 2; // Double the expected time as safety margin
         nocollisionEffect.combatantEffect.appliedAt = state.gameTime;
 
         // Create move effect

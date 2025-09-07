@@ -95,13 +95,14 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 1000,
                 STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
+                RANGE: 100, // base range (infinite duration projectiles)
+                RANGE_PER_LEVEL: 5, // additional range per level
             },
             'hookshot': {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
-                DURATION_MS: 500, // 500ms projectile duration
-                RANGE: 125, // base range (speed * duration / 1000)
+                RANGE: 125, // base range
                 RANGE_PER_LEVEL: 8.75, // additional range per level (7% of base range)
                 STUN_DURATION_MS: 700, // 700ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
@@ -153,6 +154,8 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 1000, // Same as default
                 STRENGTH: 7, // Same as default
                 SPEED: 200, // Same as default
+                RANGE: 400, // Longer range than default
+                RANGE_PER_LEVEL: 10, // More range per level than default
             }
         },
         CRADLE: {

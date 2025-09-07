@@ -13,12 +13,15 @@ export class Projectile extends Schema {
     @type('string') ownerId!: CombatantId; // who fired the projectile
     @type('number') x!: number;
     @type('number') y!: number;
+    @type('number') startX?: number; // Starting position for range calculation
+    @type('number') startY?: number; // Starting position for range calculation
     @type('number') directionX!: number; // normalized direction vector
     @type('number') directionY!: number;
     @type('number') speed!: number; // pixels per second
     @type('string') team!: string; // team of the owner
     @type('string') type!: ProjectileType; // type of projectile
     @type('number') duration!: number; // Duration in milliseconds, -1 = infinite
+    @type('number') range?: number; // Maximum range for range-based removal
     @type('number') createdAt!: number; // Timestamp when projectile was created
     @type([ProjectileEffect]) effects = new ArraySchema<ProjectileEffect>(); // Array of effects that trigger on collision
     @type('number') targetX?: number; // For destination-based projectiles

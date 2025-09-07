@@ -176,6 +176,22 @@ export class GameEngine {
                 }
             }
             
+            // Check range-based removal for projectiles with range limits
+            if (projectile.duration === -1 && projectile.range !== undefined) {
+                // Calculate distance traveled from starting position
+                const startX = projectile.startX || projectile.x;
+                const startY = projectile.startY || projectile.y;
+                const distanceTraveled = Math.sqrt(
+                    Math.pow(projectile.x - startX, 2) + 
+                    Math.pow(projectile.y - startY, 2)
+                );
+                
+                if (distanceTraveled >= projectile.range) {
+                    projectilesToRemove.push(projectile.id);
+                    return;
+                }
+            }
+            
             // Handle destination-based projectiles (like fireball and thorndive)
             if ((projectile.type === 'fireball' || projectile.type === 'thorndive') && projectile.targetX !== undefined && projectile.targetY !== undefined) {
                 const targetDistance = Math.sqrt(

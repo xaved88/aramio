@@ -13,6 +13,7 @@ export class DefaultAbility extends Ability {
     this.type = ABILITY_TYPES.DEFAULT;
   }
   @type('number') strength!: number; // damage dealt by ability
+  @type('number') range!: number; // projectile range
 }
 
 export class HookshotAbility extends Ability {
@@ -56,4 +57,5 @@ export class SniperAbility extends Ability {
         this.type = ABILITY_TYPES.SNIPER;
     }
     @type('number') strength!: number; // damage dealt by ability
+    @type('number') range!: number; // projectile range
 }

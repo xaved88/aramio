@@ -511,18 +511,22 @@ export class GameScene extends Phaser.Scene {
         // Don't show range indicator if player is respawning or not a supported ability type
         if (!currentHero || 
             currentHero.state === 'respawning' ||
-            (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            (currentHero.ability.type !== 'default' && currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'sniper' && currentHero.ability.type !== 'thorndive')) {
             return;
         }
         
         // Calculate cast range based on ability type
         let castRange: number;
-        if (currentHero.ability.type === 'hookshot') {
+        if (currentHero.ability.type === 'default') {
+            castRange = this.calculateDefaultCastRange(currentHero);
+        } else if (currentHero.ability.type === 'hookshot') {
             castRange = this.calculateHookshotCastRange(currentHero);
         } else if (currentHero.ability.type === 'mercenary') {
             castRange = this.calculateMercenaryRageRange(currentHero);
         } else if (currentHero.ability.type === 'pyromancer') {
             castRange = this.calculatePyromancerCastRange(currentHero);
+        } else if (currentHero.ability.type === 'sniper') {
+            castRange = this.calculateSniperCastRange(currentHero);
         } else if (currentHero.ability.type === 'thorndive') {
             castRange = this.calculateThorndiveCastRange(currentHero);
         } else {
@@ -538,15 +542,27 @@ export class GameScene extends Phaser.Scene {
         this.rangeIndicator.strokeCircle(currentHero.x, currentHero.y, castRange);
         
         // Draw targeting circles for abilities
-        if (currentHero.ability.type === 'thorndive') {
+        if (currentHero.ability.type === 'default') {
+            this.drawDefaultTargetingCircle(currentHero, x, y, rangeColor);
+        } else if (currentHero.ability.type === 'thorndive') {
             this.drawThorndiveTargetingCircle(currentHero, x, y, rangeColor);
         } else if (currentHero.ability.type === 'pyromancer') {
             this.drawPyromancerTargetingCircle(currentHero, x, y, rangeColor);
         } else if (currentHero.ability.type === 'hookshot') {
             this.drawHookshotTargetingCircle(currentHero, x, y, rangeColor);
+        } else if (currentHero.ability.type === 'sniper') {
+            this.drawSniperTargetingCircle(currentHero, x, y, rangeColor);
         }
         
         this.rangeIndicator.setVisible(true);
+    }
+
+    /**
+     * Calculates the cast range for default ability
+     */
+    private calculateDefaultCastRange(hero: any): number {
+        // Get the range directly from the hero's ability (which includes level scaling)
+        return hero.ability.range;
     }
 
     /**
@@ -572,6 +588,14 @@ export class GameScene extends Phaser.Scene {
      * Calculates the cast range for pyromancer ability
      */
     private calculatePyromancerCastRange(hero: any): number {
+        // Get the range directly from the hero's ability (which includes level scaling)
+        return hero.ability.range;
+    }
+
+    /**
+     * Calculates the cast range for sniper ability
+     */
+    private calculateSniperCastRange(hero: any): number {
         // Get the range directly from the hero's ability (which includes level scaling)
         return hero.ability.range;
     }
@@ -638,19 +662,23 @@ export class GameScene extends Phaser.Scene {
         // Hide range indicator if player is respawning or not a supported ability type
         if (!currentHero || 
             currentHero.state === 'respawning' ||
-            (currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'thorndive')) {
+            (currentHero.ability.type !== 'default' && currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'sniper' && currentHero.ability.type !== 'thorndive')) {
             this.hideRangeIndicator();
             return;
         }
 
         // Calculate cast range based on ability type
         let castRange: number;
-        if (currentHero.ability.type === 'hookshot') {
+        if (currentHero.ability.type === 'default') {
+            castRange = this.calculateDefaultCastRange(currentHero);
+        } else if (currentHero.ability.type === 'hookshot') {
             castRange = this.calculateHookshotCastRange(currentHero);
         } else if (currentHero.ability.type === 'mercenary') {
             castRange = this.calculateMercenaryRageRange(currentHero);
         } else if (currentHero.ability.type === 'pyromancer') {
             castRange = this.calculatePyromancerCastRange(currentHero);
+        } else if (currentHero.ability.type === 'sniper') {
+            castRange = this.calculateSniperCastRange(currentHero);
         } else if (currentHero.ability.type === 'thorndive') {
             castRange = this.calculateThorndiveCastRange(currentHero);
         } else {
@@ -686,12 +714,16 @@ export class GameScene extends Phaser.Scene {
         }
         
         // Draw targeting circles for abilities at target position
-        if (currentHero.ability.type === 'thorndive') {
+        if (currentHero.ability.type === 'default') {
+            this.drawDefaultTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        } else if (currentHero.ability.type === 'thorndive') {
             this.drawThorndiveTargetingCircle(currentHero, targetX, targetY, rangeColor);
         } else if (currentHero.ability.type === 'pyromancer') {
             this.drawPyromancerTargetingCircle(currentHero, targetX, targetY, rangeColor);
         } else if (currentHero.ability.type === 'hookshot') {
             this.drawHookshotTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        } else if (currentHero.ability.type === 'sniper') {
+            this.drawSniperTargetingCircle(currentHero, targetX, targetY, rangeColor);
         }
         
         this.rangeIndicator.setVisible(true);
@@ -730,10 +762,42 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
+     * Draws the targeting circle for default ability at the target location
+     */
+    private drawDefaultTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
+        // Small hardcoded radius for default targeting (about projectile size)
+        const targetingRadius = 8;
+        
+        // Draw targeting circle at target location
+        this.rangeIndicator!.lineStyle(1, color, 0.3);
+        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
+        
+        // Fill with very light color
+        this.rangeIndicator!.fillStyle(color, 0.1);
+        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
+    }
+
+    /**
      * Draws the targeting circle for hookshot ability at the target location
      */
     private drawHookshotTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
         // Small hardcoded radius for hookshot targeting (about projectile size)
+        const targetingRadius = 8;
+        
+        // Draw targeting circle at target location
+        this.rangeIndicator!.lineStyle(1, color, 0.3);
+        this.rangeIndicator!.strokeCircle(targetX, targetY, targetingRadius);
+        
+        // Fill with very light color
+        this.rangeIndicator!.fillStyle(color, 0.1);
+        this.rangeIndicator!.fillCircle(targetX, targetY, targetingRadius);
+    }
+
+    /**
+     * Draws the targeting circle for sniper ability at the target location
+     */
+    private drawSniperTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
+        // Small hardcoded radius for sniper targeting (about projectile size)
         const targetingRadius = 8;
         
         // Draw targeting circle at target location
