@@ -37,7 +37,8 @@ export const PROJECTILE_TYPES = {
     DEFAULT: 'default',
     HOOK: 'hook',
     FIREBALL: 'fireball',
-    THORNDIVE: 'thorndive'
+    THORNDIVE: 'thorndive',
+    SNIPER: 'sniper'
 } as const;
 
 export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];

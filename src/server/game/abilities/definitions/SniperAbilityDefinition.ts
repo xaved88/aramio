@@ -81,7 +81,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         projectile.directionY = directionY;
         projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.sniper.SPEED;
         projectile.team = hero.team;
-        projectile.type = 'default'; // Use default projectile type since sniper is a copy
+        projectile.type = 'sniper';
         projectile.duration = -1; // Infinite duration
         projectile.createdAt = state.gameTime;
         

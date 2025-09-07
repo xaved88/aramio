@@ -13,6 +13,8 @@ export class AbilityIconManager {
                 return '&';
             case 'thorndive':
                 return '#';
+            case 'sniper':
+                return 'S';
             default:
                 return '?';
         }

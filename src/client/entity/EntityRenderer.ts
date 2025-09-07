@@ -358,6 +358,10 @@ export class EntityRenderer {
                 // Render fireball projectile as an ampersand (&)
                 this.renderFireballProjectile(graphics, projectileColor, radius);
                 break;
+            case 'sniper':
+                // Render sniper projectile as a star (same as default)
+                this.renderSniperProjectile(graphics, projectileColor, radius);
+                break;
             case 'default':
             default:
                 // Render default projectile as a star
@@ -435,6 +439,23 @@ export class EntityRenderer {
      * Renders a default projectile as a star
      */
     private renderDefaultProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
+        const spikes = 8; // Number of spikes
+        const innerRadius = radius * 0.4; // Inner radius for the star shape
+        const outerRadius = radius; // Outer radius for the spikes
+        
+        // Draw border first
+        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius);
+        
+        // Draw filled star
+        graphics.fillStyle(color, 1);
+        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius, true);
+    }
+    
+    /**
+     * Renders a sniper projectile as a star (identical to default)
+     */
+    private renderSniperProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
         const spikes = 8; // Number of spikes
         const innerRadius = radius * 0.4; // Inner radius for the star shape
         const outerRadius = radius; // Outer radius for the spikes
