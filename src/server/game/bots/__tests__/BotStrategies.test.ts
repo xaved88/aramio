@@ -117,16 +117,36 @@ describe('Bot Strategies', () => {
             const mercenaryStrategy = new MercenaryBotStrategy();
             const simpletonStrategy = new SimpletonBotStrategy();
 
-            const mockBot = {
+            // Create separate bots for each strategy since they have different abilities
+            const mercenaryBot = {
                 id: 'mercenary-bot',
                 team: 'blue',
                 x: 300,
                 y: 300,
                 health: 100,
                 state: 'alive',
-                ability: { lastUsedTime: 0, cooldown: 10000 }, // Rage is ready
+                ability: { 
+                    lastUsedTime: 0, 
+                    cooldown: 10000 // Rage is ready - mercenary ability has no range
+                },
                 effects: [],
-                getAttackRadius: () => 50 // Mock attack radius
+                getAttackRadius: () => 50
+            } as any;
+
+            const simpletonBot = {
+                id: 'simpleton-bot',
+                team: 'blue',
+                x: 300,
+                y: 300,
+                health: 100,
+                state: 'alive',
+                ability: { 
+                    lastUsedTime: 0, 
+                    cooldown: 10000,
+                    range: 50 // Simpleton uses a projectile ability with range
+                },
+                effects: [],
+                getAttackRadius: () => 50
             } as any;
 
             // Only minions nearby, no heroes
@@ -143,13 +163,14 @@ describe('Bot Strategies', () => {
             const mockState = {
                 gameTime: 1000,
                 combatants: new Map([
-                    [mockBot.id, mockBot],
+                    [mercenaryBot.id, mercenaryBot],
+                    [simpletonBot.id, simpletonBot],
                     [mockMinion.id, mockMinion]
                 ])
             } as any;
 
-            const mercenaryCommands = mercenaryStrategy.generateCommands(mockBot, mockState);
-            const simpletonCommands = simpletonStrategy.generateCommands(mockBot, mockState);
+            const mercenaryCommands = mercenaryStrategy.generateCommands(mercenaryBot, mockState);
+            const simpletonCommands = simpletonStrategy.generateCommands(simpletonBot, mockState);
             
             // Mercenary should NOT use rage on minions - it waits for heroes
             const mercenaryAbilityCommands = mercenaryCommands.filter(cmd => cmd.type === 'useAbility');
@@ -271,6 +292,97 @@ describe('Bot Strategies', () => {
             expect(commands.length).toBeGreaterThan(0);
             const moveCommands = commands.filter(cmd => cmd.type === 'move');
             expect(moveCommands.length).toBeGreaterThan(0);
+        });
+
+        it('should not fire ability when no enemies are within ability range', () => {
+            const simpletonStrategy = new SimpletonBotStrategy();
+
+            const mockBot = {
+                id: 'simpleton-bot',
+                team: 'blue',
+                x: 100,
+                y: 100,
+                health: 100,
+                state: 'alive',
+                ability: { 
+                    lastUsedTime: 0, // Ready to use
+                    cooldown: 5000,
+                    range: 100 // Ability range is 100
+                },
+                effects: []
+            } as any;
+
+            // Enemy is 200 units away (beyond ability range of 100)
+            const mockEnemy = {
+                id: 'enemy-hero',
+                team: 'red',
+                x: 300, // 200 units away from bot at (100, 100)
+                y: 100,
+                health: 80,
+                type: 'hero',
+                state: 'alive'
+            } as any;
+
+            const mockState = {
+                gameTime: 1000,
+                combatants: new Map([
+                    [mockBot.id, mockBot],
+                    [mockEnemy.id, mockEnemy]
+                ])
+            } as any;
+
+            const commands = simpletonStrategy.generateCommands(mockBot, mockState);
+            
+            // Should not generate any ability commands since enemy is out of range
+            const abilityCommands = commands.filter(cmd => cmd.type === 'useAbility');
+            expect(abilityCommands.length).toBe(0);
+        });
+
+        it('should fire ability when enemies are within ability range', () => {
+            const simpletonStrategy = new SimpletonBotStrategy();
+
+            const mockBot = {
+                id: 'simpleton-bot',
+                team: 'blue',
+                x: 100,
+                y: 100,
+                health: 100,
+                state: 'alive',
+                ability: { 
+                    lastUsedTime: 0, // Ready to use
+                    cooldown: 5000,
+                    range: 100 // Ability range is 100
+                },
+                effects: []
+            } as any;
+
+            // Enemy is 50 units away (within ability range of 100)
+            const mockEnemy = {
+                id: 'enemy-hero',
+                team: 'red',
+                x: 150, // 50 units away from bot at (100, 100)
+                y: 100,
+                health: 80,
+                type: 'hero',
+                state: 'alive'
+            } as any;
+
+            const mockState = {
+                gameTime: 1000,
+                combatants: new Map([
+                    [mockBot.id, mockBot],
+                    [mockEnemy.id, mockEnemy]
+                ])
+            } as any;
+
+            const commands = simpletonStrategy.generateCommands(mockBot, mockState);
+            
+            // Should generate ability command since enemy is in range
+            const abilityCommands = commands.filter(cmd => cmd.type === 'useAbility');
+            expect(abilityCommands.length).toBe(1);
+            expect(abilityCommands[0].data.heroId).toBe(mockBot.id);
+            expect(abilityCommands[0].data.x).toBe(mockEnemy.x);
+            expect(abilityCommands[0].data.y).toBe(mockEnemy.y);
         });
     });
 

@@ -64,5 +64,32 @@ describe('DefaultAbility', () => {
             expect(projectile.effects[0]?.effectType).toBe('applyDamage');
             expect(projectile.effects[0]?.damage).toBe(defaultAbility.strength);
         });
+
+
+        it('should not clamp target when target is within ability range', () => {
+            // Default ability has range 100, hero at (100, 100)
+            // Target at (150, 100) is 50 units away, should not be clamped
+            const targetX = 150;
+            const targetY = 100;
+            
+            DefaultAbilityDefinition.instance.useAbility(
+                defaultAbility, 
+                hero.id, 
+                targetX, 
+                targetY, 
+                gameState
+            );
+            
+            const projectile = Array.from(gameState.projectiles.values())[0];
+            
+            // Projectile should be created at hero position
+            expect(projectile.x).toBe(hero.x);
+            expect(projectile.y).toBe(hero.y);
+            
+            // Check that the projectile direction points toward the original target (not clamped)
+            const distance = Math.sqrt((targetX - hero.x) ** 2 + (targetY - hero.y) ** 2);
+            expect(projectile.directionX).toBeCloseTo((targetX - hero.x) / distance, 5);
+            expect(projectile.directionY).toBeCloseTo((targetY - hero.y) / distance, 5);
+        });
     });
 });

@@ -27,9 +27,11 @@ export class SimpletonBotStrategy {
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length > 0) {
-                    // Check if it's time to use ability based on deterministic cooldown
-        if (this.shouldUseAbility(bot, state)) {
-                const targetEnemy = this.selectTargetEnemy(allEnemies);
+            // Check if it's time to use ability based on deterministic cooldown
+            if (this.shouldUseAbility(bot, state)) {
+                // Filter enemies to only those within ability range
+                const enemiesInAbilityRange = this.findEnemiesInAbilityRange(allEnemies, bot);
+                const targetEnemy = this.selectTargetEnemy(enemiesInAbilityRange);
                 if (targetEnemy) {
                     commands.push({
                         type: 'useAbility',
@@ -143,6 +145,14 @@ export class SimpletonBotStrategy {
             // 20% chance: target random enemy (decreased from 30%)
             return targetPool[Math.floor(Math.random() * targetPool.length)];
         }
+    }
+
+    private findEnemiesInAbilityRange(enemies: any[], bot: any): any[] {
+        // Filter enemies to only those within ability range
+        return enemies.filter(enemy => {
+            const abilityRange = bot.ability.range;
+            return enemy.distance <= abilityRange;
+        });
     }
 
     private findEnemiesInRange(bot: any, state: SharedGameState): any[] {

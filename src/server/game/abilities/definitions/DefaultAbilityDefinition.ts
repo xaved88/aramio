@@ -53,12 +53,12 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
             
             let targetX = x;
             let targetY = y;
-            if (distance > ability.range) {
-                const directionX = dx / distance;
-                const directionY = dy / distance;
-                targetX = hero.x + directionX * ability.range;
-                targetY = hero.y + directionY * ability.range;
-            }
+        if (distance > ability.range) {
+            const directionX = dx / distance;
+            const directionY = dy / distance;
+            targetX = hero.x + directionX * ability.range;
+            targetY = hero.y + directionY * ability.range;
+        }
             
             this.createProjectile(heroId, targetX, targetY, state, ability);
             return true;
