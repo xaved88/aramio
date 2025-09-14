@@ -4,7 +4,7 @@ import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { StunEffect, NoCollisionEffect, MoveEffect } from '../../../schema/Effects';
 import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbility> {
     private static _instance: HookshotAbilityDefinition | null = null;

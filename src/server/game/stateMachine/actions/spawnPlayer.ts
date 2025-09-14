@@ -3,7 +3,7 @@ import { Hero } from '../../../schema/Combatants';
 import { CombatantEffect } from '../../../schema/Effects';
 import { RoundStats } from '../../../schema/Events';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../abilities/AbilityFactory';
 import { ArraySchema } from '@colyseus/schema';

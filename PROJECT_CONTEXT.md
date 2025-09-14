@@ -13,6 +13,12 @@ This is an IO MOBA game - the idea is to boil down the core essence of a MOBA fo
 - Real-time communication: probably sockets? 
 - Hosting: ?? tbd
 
+## Configuration Files
+The project uses three separate configuration files to maintain proper separation of concerns:
+- **GameConfig.ts**: Core gameplay mechanics, combat stats, abilities, experience system, minion spawning, etc.
+- **ServerConfig.ts**: Server-specific settings like port, update rates, room management, team assignment
+- **ClientConfig.ts**: Client-specific settings like UI rendering, animations, colors, HUD layout, debug options
+
 ## Development Priorities
 1. Phase 1: Core gameplay mechanics, locally hosted
 2. Phase 2: Multiplayer - online hosting

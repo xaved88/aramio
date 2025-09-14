@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { HUDContainer } from './HUDContainer';
 
 export class VictoryScreen {

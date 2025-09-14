@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { IconManager } from '../utils/IconManager';
 
 export class PermanentEffectsDisplay {

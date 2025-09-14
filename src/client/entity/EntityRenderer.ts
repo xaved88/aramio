@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, MINION_TYPES, isMinionCombatant, CombatantId, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { AbilityIconManager } from '../abilities/AbilityIconManager';
 
 /**

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../../shared/types/GameStateTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
 

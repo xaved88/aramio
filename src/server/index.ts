@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { GameRoom } from './rooms/GameRoom';
-import { SERVER_CONFIG } from '../Config';
+import { SERVER_CONFIG } from '../ServerConfig';
 
 const port = Number(process.env.PORT || SERVER_CONFIG.PORT);
 const app = express();

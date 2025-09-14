@@ -1,7 +1,7 @@
 import { ThorndiveAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, MoveEffect, ReflectEffect, TauntEffect } from '../../../schema/Effects';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { ArraySchema } from '@colyseus/schema';

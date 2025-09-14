@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { RewardCard } from './RewardCard';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 

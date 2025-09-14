@@ -1,7 +1,7 @@
 import { DefaultAbility } from '../../../schema/Abilities';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbility> {
     private static _instance: DefaultAbilityDefinition | null = null;

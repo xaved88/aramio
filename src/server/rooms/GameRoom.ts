@@ -1,6 +1,7 @@
 import { Room, Client } from '@colyseus/core';
 import { GameState } from '../schema/GameState';
-import { SERVER_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { SERVER_CONFIG } from '../../ServerConfig';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
 import { gameStateToString } from '../../shared/utils/DebugUtils';

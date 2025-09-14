@@ -4,7 +4,7 @@ import { Hero, Minion, Combatant } from '../../../../schema/Combatants';
 import { AttackEvent, RoundStats } from '../../../../schema/Events';
 import { DefaultAbility } from '../../../../schema/Abilities';
 import { UpdateGameAction, StateMachineResult } from '../../types';
-import { GAMEPLAY_CONFIG } from '../../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../../abilities/AbilityFactory';
 

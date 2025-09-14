@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
-import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { hexToColorString } from '../utils/ColorUtils';
 import { HUDContainer } from './HUDContainer';
 

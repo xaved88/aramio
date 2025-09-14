@@ -1,7 +1,7 @@
 import { SniperAbility } from '../../../schema/Abilities';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility> {
     private static _instance: SniperAbilityDefinition | null = null;

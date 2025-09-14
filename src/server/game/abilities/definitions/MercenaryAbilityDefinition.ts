@@ -1,7 +1,7 @@
 import { MercenaryAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, HunterEffect } from '../../../schema/Effects';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAbility> {

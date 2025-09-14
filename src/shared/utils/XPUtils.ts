@@ -1,4 +1,4 @@
-import { GAMEPLAY_CONFIG } from '../../Config';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
 
 /**
  * Calculates the total XP needed to reach a specific level

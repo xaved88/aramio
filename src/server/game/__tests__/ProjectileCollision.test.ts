@@ -5,13 +5,13 @@ import { ProjectileEffect } from '../../schema/Projectiles';
 import { Hero, Minion, Combatant } from '../../schema/Combatants';
 import { StunEffect } from '../../schema/Effects';
 import { RoundStats } from '../../schema/Events';
-import { CLIENT_CONFIG } from '../../../Config';
+import { CLIENT_CONFIG } from '../../../ClientConfig';
 import { ArraySchema } from '@colyseus/schema';
 import { COMBATANT_TYPES, PROJECTILE_TYPES } from '../../../shared/types/CombatantTypes';
 
-// Mock the Config to avoid import issues
+// Mock the ClientConfig to avoid import issues
 // These are TEST values. Do not use these as reference for how the game is configured.
-jest.mock('../../../Config', () => ({
+jest.mock('../../../ClientConfig', () => ({
     CLIENT_CONFIG: {
         GAME_CANVAS_WIDTH: 700,
         GAME_CANVAS_HEIGHT: 700,

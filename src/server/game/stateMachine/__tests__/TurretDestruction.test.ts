@@ -2,7 +2,7 @@ import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 describe('TurretDestruction', () => {
     let initialState: GameState;

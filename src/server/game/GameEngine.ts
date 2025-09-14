@@ -5,7 +5,8 @@ import { StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
-import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';

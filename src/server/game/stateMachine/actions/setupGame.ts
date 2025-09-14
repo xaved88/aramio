@@ -1,7 +1,7 @@
 import { GameState } from '../../../schema/GameState';
 import { Combatant } from '../../../schema/Combatants';
 import { SetupGameAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export function handleSetupGame(state: GameState, action: SetupGameAction): StateMachineResult {

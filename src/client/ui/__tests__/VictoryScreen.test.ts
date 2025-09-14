@@ -1,5 +1,5 @@
 import { VictoryScreen } from '../VictoryScreen';
-import { CLIENT_CONFIG } from '../../../Config';
+import { CLIENT_CONFIG } from '../../../ClientConfig';
 
 // Mock Phaser
 const mockScene = {

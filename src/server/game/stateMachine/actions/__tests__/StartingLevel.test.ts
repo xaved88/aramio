@@ -2,7 +2,7 @@ import { GameStateMachine } from '../../GameStateMachine';
 import { GameState } from '../../../../schema/GameState';
 import { Hero } from '../../../../schema/Combatants';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../../GameConfig';
 import { calculateXPForLevel } from '../../../../../shared/utils/XPUtils';
 
 describe('Starting Level Configuration', () => {

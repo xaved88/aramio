@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CLIENT_CONFIG } from '../Config';
+import { CLIENT_CONFIG } from '../ClientConfig';
 
 /**
  * GameObjectFactory provides a centralized way to create game objects

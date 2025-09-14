@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { HUDContainer } from './HUDContainer';
 
 interface PlayerStats {

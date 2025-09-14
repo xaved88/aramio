@@ -1,7 +1,7 @@
 import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { MoveHeroAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../../shared/utils/GameBounds';
 

@@ -1,7 +1,7 @@
 import { PyromancerAbility } from '../../../schema/Abilities';
 import { AbilityDefinition } from './AbilityDefinition';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 export class PyromancerAbilityDefinition implements AbilityDefinition<PyromancerAbility> {
     private static _instance: PyromancerAbilityDefinition;

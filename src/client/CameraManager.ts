@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CLIENT_CONFIG } from '../Config';
+import { CLIENT_CONFIG } from '../ClientConfig';
 import { ControllerId } from '../shared/types/CombatantTypes';
 import { SharedGameState } from '../shared/types/GameStateTypes';
 

@@ -1,6 +1,6 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 /**
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability

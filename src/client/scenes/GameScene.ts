@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { GameState } from '../../server/schema/GameState';
-import { CLIENT_CONFIG, GAMEPLAY_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { type SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';

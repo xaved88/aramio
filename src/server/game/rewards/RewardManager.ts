@@ -1,5 +1,5 @@
 import { Hero } from '../../schema/Combatants';
-import { GAMEPLAY_CONFIG } from '../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 import { StatModEffect } from '../../schema/Effects';
 import { COMBATANT_EFFECT_TYPES } from '../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../abilities/AbilityFactory';

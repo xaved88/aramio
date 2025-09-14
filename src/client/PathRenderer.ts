@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAMEPLAY_CONFIG } from '../Config';
+import { GAMEPLAY_CONFIG } from '../GameConfig';
 
 export class PathRenderer {
     private scene: Phaser.Scene;

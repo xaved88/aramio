@@ -3,7 +3,7 @@ import { Hero } from '../../../schema/Combatants';
 import { DefaultAbility } from '../../../schema/Abilities';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 
 describe('GameStateMachine', () => {
     let initialState: GameState;

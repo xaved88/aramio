@@ -1,6 +1,6 @@
 import { StatProgressionDisplay } from '../ui/StatProgressionDisplay';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 
 // Mock Phaser.Scene
 const mockScene = {

@@ -1,4 +1,5 @@
-import { GAMEPLAY_CONFIG, CLIENT_CONFIG } from '../../Config';
+import { GAMEPLAY_CONFIG } from '../../GameConfig';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 
 /**
  * Gets the minimum X boundary

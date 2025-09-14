@@ -1,5 +1,5 @@
 import { CameraManager } from '../CameraManager';
-import { CLIENT_CONFIG } from '../../Config';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { ControllerId } from '../../shared/types/CombatantTypes';
 

@@ -1,6 +1,6 @@
 import { GameState } from '../../schema/GameState';
 import { Minion } from '../../schema/Combatants';
-import { GAMEPLAY_CONFIG } from '../../../Config';
+import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 import { COMBATANT_TYPES, MINION_TYPES, MinionType } from '../../../shared/types/CombatantTypes';
 import { CombatantUtils } from './CombatantUtils';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../shared/utils/GameBounds';
