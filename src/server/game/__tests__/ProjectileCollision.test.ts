@@ -8,6 +8,7 @@ import { RoundStats } from '../../schema/Events';
 import { CLIENT_CONFIG } from '../../../ClientConfig';
 import { ArraySchema } from '@colyseus/schema';
 import { COMBATANT_TYPES, PROJECTILE_TYPES } from '../../../shared/types/CombatantTypes';
+import { TEST_GAMEPLAY_CONFIG } from '../../config/TestGameplayConfig';
 
 // Mock the ClientConfig to avoid import issues
 // These are TEST values. Do not use these as reference for how the game is configured.
@@ -34,7 +35,7 @@ describe('Projectile Collision Detection', () => {
     beforeEach(() => {
         gameState = new GameState();
         gameState.gameTime = 1000;
-        gameEngine = new GameEngine(gameState);
+        gameEngine = new GameEngine(gameState, TEST_GAMEPLAY_CONFIG);
 
         // Setup test combatants
         blueHero = new Hero();

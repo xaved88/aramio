@@ -3,6 +3,7 @@ import { SniperAbility } from '../../../schema/Abilities';
 import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('SniperAbility', () => {
     let sniperAbility: SniperAbility;
@@ -10,7 +11,7 @@ describe('SniperAbility', () => {
     let hero: Hero;
 
     beforeEach(() => {
-        sniperAbility = SniperAbilityDefinition.instance.create();
+        sniperAbility = SniperAbilityDefinition.instance.create(TEST_GAMEPLAY_CONFIG);
         gameState = new GameState();
         gameState.gameTime = 0;
         
@@ -37,7 +38,8 @@ describe('SniperAbility', () => {
                 hero.id, 
                 200, 
                 200, 
-                gameState
+                gameState,
+                TEST_GAMEPLAY_CONFIG
             );
             
             expect(result).toBe(true);
@@ -51,7 +53,8 @@ describe('SniperAbility', () => {
                 hero.id, 
                 200, 
                 200, 
-                gameState
+                gameState,
+                TEST_GAMEPLAY_CONFIG
             );
             
             const projectile = Array.from(gameState.projectiles.values())[0];
