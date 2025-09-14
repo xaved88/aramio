@@ -6,9 +6,14 @@ import cors from 'cors';
 import path from 'path';
 import { GameRoom } from './rooms/GameRoom';
 import { SERVER_CONFIG } from '../ServerConfig';
+import { ConfigProvider, GameplayConfig } from './config/ConfigProvider';
 
 const port = Number(process.env.PORT || SERVER_CONFIG.PORT);
 const app = express();
+
+// Initialize config provider and load default config
+const configProvider = new ConfigProvider();
+const gameplayConfig: GameplayConfig = configProvider.loadConfig('default');
 
 app.use(cors());
 app.use(express.json());
@@ -22,7 +27,7 @@ const server = new Server({
     })
 });
 
-server.define('game', GameRoom);
+server.define('game', GameRoom, { gameplayConfig });
 
 app.use('/colyseus', monitor());
 

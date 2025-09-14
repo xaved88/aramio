@@ -1,13 +1,13 @@
 import { Room, Client } from '@colyseus/core';
 import { GameState } from '../schema/GameState';
 import { SERVER_CONFIG } from '../../ServerConfig';
-import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { GameEngine } from '../game/GameEngine';
 import { BotManager } from '../game/bots/BotManager';
 import { gameStateToString } from '../../shared/utils/DebugUtils';
 import { ControllerId, CombatantId, COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 import { GameCommand, GameMoveCommand, GameUseAbilityCommand } from '../../shared/types/GameCommands';
 import { RewardManager } from '../game/rewards/RewardManager';
+import { GameplayConfig } from '../config/ConfigProvider';
 
 export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
@@ -16,9 +16,13 @@ export class GameRoom extends Room<GameState> {
     private gameEngine!: GameEngine;
     private botManager!: BotManager;
     private restartTimer: NodeJS.Timeout | null = null;
+    private gameplayConfig!: GameplayConfig;
 
 
     onCreate(options: any) {
+        // Initialize gameplay config from options
+        this.gameplayConfig = options.gameplayConfig;
+        
         this.initializeGame();
         this.setupMessageHandlers();
     }
@@ -101,7 +105,7 @@ export class GameRoom extends Room<GameState> {
 
         this.onMessage('debugKill', (client) => {
             // Only allow debug kill if enabled in config
-            if (GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+            if (this.gameplayConfig.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
                 const heroId = this.findHeroByController(client.sessionId);
                 if (heroId) {
                     this.gameEngine.debugKill(heroId);
@@ -111,7 +115,7 @@ export class GameRoom extends Room<GameState> {
 
         this.onMessage('instantRespawn', (client) => {
             // Only allow instant respawn if enabled in config
-            if (GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+            if (this.gameplayConfig.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
                 const heroId = this.findHeroByController(client.sessionId);
                 if (heroId) {
                     this.gameEngine.instantRespawn(heroId);
@@ -273,10 +277,10 @@ export class GameRoom extends Room<GameState> {
 
     private spawnBots() {
         // Spawn bots at different positions around the cradles
-        const blueSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE;
-        const redSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED;
-        const botAbilityTypes = GAMEPLAY_CONFIG.BOTS.ABILITY_TYPES;
-        const botsPerTeam = GAMEPLAY_CONFIG.BOTS.BOTS_PER_TEAM;
+        const blueSpawnPositions = this.gameplayConfig.HERO_SPAWN_POSITIONS.BLUE;
+        const redSpawnPositions = this.gameplayConfig.HERO_SPAWN_POSITIONS.RED;
+        const botAbilityTypes = this.gameplayConfig.BOTS.ABILITY_TYPES;
+        const botsPerTeam = this.gameplayConfig.BOTS.BOTS_PER_TEAM;
         
         // Spawn bots for each team
         this.spawnBotsForTeam('blue', blueSpawnPositions, botAbilityTypes, botsPerTeam);
