@@ -2,8 +2,9 @@ import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { RemovePlayerAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES, CombatantId } from '../../../../shared/types/CombatantTypes';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
-export function handleRemovePlayer(state: GameState, action: RemovePlayerAction): StateMachineResult {
+export function handleRemovePlayer(state: GameState, action: RemovePlayerAction, gameplayConfig: GameplayConfig): StateMachineResult {
     // Find and remove hero by controller (client ID)
     let heroIdToRemove: CombatantId | undefined;
     state.combatants.forEach((combatant, id) => {

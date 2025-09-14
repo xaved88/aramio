@@ -46,7 +46,7 @@ export class GameRoom extends Room<GameState> {
         this.setState(gameState);
         
         // Initialize game engine with the same state reference
-        this.gameEngine = new GameEngine(this.state);
+        this.gameEngine = new GameEngine(this.state, this.gameplayConfig);
         this.gameEngine.setupGame();
 
         // Initialize bot manager

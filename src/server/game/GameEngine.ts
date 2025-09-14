@@ -1,23 +1,27 @@
 import { GameState } from '../schema/GameState';
 import { Combatant } from '../schema/Combatants';
 import { Projectile, ProjectileEffect } from '../schema/Projectiles';
-import { StunEffect, NoCollisionEffect, MoveEffect, StatModEffect, ReflectEffect, CombatantEffect } from '../schema/Effects';
+import { MoveEffect, CombatantEffect } from '../schema/Effects';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
-import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
 import { AOEDamageEvent } from '../schema/Events';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
+import { GameplayConfig } from '../config/ConfigProvider';
 
 export class GameEngine {
     private state: GameState;
+    private gameplayConfig: GameplayConfig;
+    private stateMachine: GameStateMachine;
 
-    constructor(state: GameState) {
+    constructor(state: GameState, gameplayConfig: GameplayConfig) {
         this.state = state;
+        this.gameplayConfig = gameplayConfig;
+        this.stateMachine = new GameStateMachine(gameplayConfig);
     }
 
     /**
@@ -32,7 +36,7 @@ export class GameEngine {
      * @param action The action to process
      */
     processAction(action: GameActionTypes): void {
-        const result = GameStateMachine.processAction(this.state, action);
+        const result = this.stateMachine.processAction(this.state, action);
         // The state machine now returns the same state reference, so no need to reassign
         
         // Handle any events returned by the state machine
@@ -46,7 +50,7 @@ export class GameEngine {
      * @param deltaTime Time since last update in milliseconds
      */
     update(deltaTime: number): StateMachineResult {
-        const result = GameStateMachine.processAction(this.state, {
+        const result = this.stateMachine.processAction(this.state, {
             type: 'UPDATE_GAME',
             payload: { deltaTime }
         });
@@ -157,7 +161,7 @@ export class GameEngine {
      */
     debugKill(heroId: CombatantId): void {
         // Only allow if debug kill is enabled
-        if (!GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+        if (!this.gameplayConfig.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
             return;
         }
 
@@ -177,7 +181,7 @@ export class GameEngine {
      */
     instantRespawn(heroId: CombatantId): void {
         // Only allow if instant respawn is enabled
-        if (!GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+        if (!this.gameplayConfig.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
             return;
         }
 
