@@ -67,7 +67,8 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     hero.roundStats.damageDealt = 0;
     
     // Initialize ability
-    hero.ability = AbilityFactory.create(abilityType);
+    const abilityFactory = new AbilityFactory(gameplayConfig);
+    hero.ability = abilityFactory.create(abilityType);
     
     // Initialize level rewards
     hero.levelRewards = new ArraySchema<string>();

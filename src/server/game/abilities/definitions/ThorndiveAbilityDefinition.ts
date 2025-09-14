@@ -1,7 +1,7 @@
 import { ThorndiveAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, MoveEffect, ReflectEffect, TauntEffect } from '../../../schema/Effects';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { ArraySchema } from '@colyseus/schema';
@@ -16,10 +16,10 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         return ThorndiveAbilityDefinition._instance;
     }
 
-    create(): ThorndiveAbility {
+    create(gameplayConfig: GameplayConfig): ThorndiveAbility {
         const ability = new ThorndiveAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.thorndive;
+        const config = gameplayConfig.COMBAT.ABILITIES.thorndive;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -29,8 +29,8 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         return ability;
     }
 
-    onLevelUp(ability: ThorndiveAbility): void {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.thorndive;
+    onLevelUp(ability: ThorndiveAbility, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.thorndive;
         ability.range += config.RANGE_PER_LEVEL;
         
         // Reduce cooldown by configured percentage per level
@@ -40,7 +40,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         }
     }
 
-    useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // Find hero by ID
@@ -64,7 +64,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
                 targetY = hero.y + directionY * ability.range;
             }
             
-            this.executeThornDive(heroId, targetX, targetY, state, 1); // Level 1 for new hero
+            this.executeThornDive(heroId, targetX, targetY, state, 1, gameplayConfig); // Level 1 for new hero
             return true;
         }
         
@@ -92,15 +92,15 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         // Update last used time
         ability.lastUsedTime = currentTime;
         
-        this.executeThornDive(heroId, targetX, targetY, state, hero.level);
+        this.executeThornDive(heroId, targetX, targetY, state, hero.level, gameplayConfig);
         return true;
     }
 
-    private executeThornDive(heroId: string, targetX: number, targetY: number, state: any, heroLevel: number): void {
+    private executeThornDive(heroId: string, targetX: number, targetY: number, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
         const hero = state.combatants.get(heroId);
         if (!hero) return;
 
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.thorndive;
+        const config = gameplayConfig.COMBAT.ABILITIES.thorndive;
         const currentTime = state.gameTime;
         
         // Calculate scaled values

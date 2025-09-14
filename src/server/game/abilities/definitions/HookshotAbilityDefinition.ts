@@ -4,7 +4,7 @@ import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { StunEffect, NoCollisionEffect, MoveEffect } from '../../../schema/Effects';
 import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbility> {
     private static _instance: HookshotAbilityDefinition | null = null;
@@ -16,10 +16,10 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         return HookshotAbilityDefinition._instance;
     }
 
-    create(): HookshotAbility {
+    create(gameplayConfig: GameplayConfig): HookshotAbility {
         const ability = new HookshotAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+        const config = gameplayConfig.COMBAT.ABILITIES.hookshot;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -29,18 +29,18 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         return ability;
     }
 
-    onLevelUp(ability: HookshotAbility): void {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+    onLevelUp(ability: HookshotAbility, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.hookshot;
         
         // Scale strength like other abilities
-        const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
+        const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
         
         // Scale range
         ability.range += config.RANGE_PER_LEVEL;
     }
 
-    useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // Find hero by ID
@@ -64,7 +64,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
                 targetY = hero.y + directionY * ability.range;
             }
             
-            this.createProjectile(heroId, targetX, targetY, state, ability);
+            this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
             return true;
         }
         
@@ -91,11 +91,11 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         }
 
         ability.lastUsedTime = currentTime;
-        this.createProjectile(heroId, targetX, targetY, state, ability);
+        this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
         return true;
     }
 
-    private createProjectile(heroId: string, targetX: number, targetY: number, state: GameState, ability: HookshotAbility): void {
+    private createProjectile(heroId: string, targetX: number, targetY: number, state: GameState, ability: HookshotAbility, gameplayConfig: GameplayConfig): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) {
@@ -113,7 +113,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         const directionY = dy / distance;
         
         // Get config and calculate scaled values based on hero level
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.hookshot;
+        const config = gameplayConfig.COMBAT.ABILITIES.hookshot;
         const heroLevel = (hero as Hero).level || 1;
         
         // Calculate scaled speed (base speed + 10% per level)

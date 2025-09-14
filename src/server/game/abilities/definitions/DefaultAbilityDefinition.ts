@@ -1,7 +1,7 @@
 import { DefaultAbility } from '../../../schema/Abilities';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbility> {
     private static _instance: DefaultAbilityDefinition | null = null;
@@ -13,10 +13,10 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         return DefaultAbilityDefinition._instance;
     }
 
-    create(): DefaultAbility {
+    create(gameplayConfig: GameplayConfig): DefaultAbility {
         const ability = new DefaultAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default;
+        const config = gameplayConfig.COMBAT.ABILITIES.default;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -26,17 +26,17 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         return ability;
     }
 
-    onLevelUp(ability: DefaultAbility): void {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default;
+    onLevelUp(ability: DefaultAbility, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.default;
         
-        const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
+        const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
         
         // Scale range
         ability.range += config.RANGE_PER_LEVEL;
     }
 
-    useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // Find hero by ID
@@ -60,7 +60,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
             targetY = hero.y + directionY * ability.range;
         }
             
-            this.createProjectile(heroId, targetX, targetY, state, ability);
+            this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
             return true;
         }
         
@@ -87,11 +87,11 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         }
 
         ability.lastUsedTime = currentTime;
-        this.createProjectile(heroId, targetX, targetY, state, ability);
+        this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
         return true;
     }
 
-    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: DefaultAbility): void {
+    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: DefaultAbility, gameplayConfig: GameplayConfig): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) return;
@@ -117,7 +117,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.startY = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.default.SPEED;
+        projectile.speed = gameplayConfig.COMBAT.ABILITIES.default.SPEED;
         projectile.team = hero.team;
         projectile.type = 'default';
         projectile.duration = -1; // Infinite duration
