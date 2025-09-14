@@ -1,15 +1,15 @@
 import { Hero } from '../../schema/Combatants';
-import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 import { StatModEffect } from '../../schema/Effects';
 import { COMBATANT_EFFECT_TYPES } from '../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../abilities/AbilityFactory';
+import { GameplayConfig } from '../../config/ConfigProvider';
 
 export class RewardManager {
     /**
      * Generates 3 random rewards from a chest based on weights
      */
-    static generateRewardsFromChest(chestType: string): string[] {
-        const chest = GAMEPLAY_CONFIG.REWARDS.CHESTS[chestType as keyof typeof GAMEPLAY_CONFIG.REWARDS.CHESTS];
+    static generateRewardsFromChest(chestType: string, gameplayConfig: GameplayConfig): string[] {
+        const chest = gameplayConfig.REWARDS.CHESTS[chestType as keyof typeof gameplayConfig.REWARDS.CHESTS];
         if (!chest) {
             console.warn(`Unknown chest type: ${chestType}`);
             return [];
@@ -42,8 +42,8 @@ export class RewardManager {
     /**
      * Applies a reward to a hero by creating a permanent stat modification effect
      */
-    static applyReward(hero: Hero, rewardId: string, gameTime: number): boolean {
-        const rewardType = GAMEPLAY_CONFIG.REWARDS.REWARD_TYPES[rewardId as keyof typeof GAMEPLAY_CONFIG.REWARDS.REWARD_TYPES];
+    static applyReward(hero: Hero, rewardId: string, gameTime: number, gameplayConfig: GameplayConfig): boolean {
+        const rewardType = gameplayConfig.REWARDS.REWARD_TYPES[rewardId as keyof typeof gameplayConfig.REWARDS.REWARD_TYPES];
         if (!rewardType) {
             console.warn(`Unknown reward type: ${rewardId}`);
             return false;
@@ -64,7 +64,8 @@ export class RewardManager {
             return true;
         } else if (rewardType.type === 'ability') {
             // Replace the hero's ability with a new one that has all the proper stats
-            hero.ability = AbilityFactory.create(rewardType.abilityType);
+            const abilityFactory = new AbilityFactory(gameplayConfig);
+            hero.ability = abilityFactory.create(rewardType.abilityType);
             return true;
         }
 
@@ -75,8 +76,8 @@ export class RewardManager {
     /**
      * Determines which chest type to give based on player level
      */
-    static getChestTypeForLevel(level: number): string {
-        const levelChests = GAMEPLAY_CONFIG.REWARDS.LEVEL_CHESTS;
+    static getChestTypeForLevel(level: number, gameplayConfig: GameplayConfig): string {
+        const levelChests = gameplayConfig.REWARDS.LEVEL_CHESTS;
         return levelChests[level as keyof typeof levelChests] || 'common';
     }
 }

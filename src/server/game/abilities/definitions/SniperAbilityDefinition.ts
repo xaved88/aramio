@@ -1,7 +1,7 @@
 import { SniperAbility } from '../../../schema/Abilities';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility> {
     private static _instance: SniperAbilityDefinition | null = null;
@@ -13,10 +13,10 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         return SniperAbilityDefinition._instance;
     }
 
-    create(): SniperAbility {
+    create(gameplayConfig: GameplayConfig): SniperAbility {
         const ability = new SniperAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.sniper;
+        const config = gameplayConfig.COMBAT.ABILITIES.sniper;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -26,17 +26,17 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         return ability;
     }
 
-    onLevelUp(ability: SniperAbility): void {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.sniper;
+    onLevelUp(ability: SniperAbility, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.sniper;
         
-        const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
+        const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
         
         // Scale range
         ability.range += config.RANGE_PER_LEVEL;
     }
 
-    useAbility(ability: SniperAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: SniperAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // Find hero by ID
@@ -60,7 +60,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
                 targetY = hero.y + directionY * ability.range;
             }
             
-            this.createProjectile(heroId, targetX, targetY, state, ability);
+            this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
             return true;
         }
         
@@ -87,11 +87,11 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         }
 
         ability.lastUsedTime = currentTime;
-        this.createProjectile(heroId, targetX, targetY, state, ability);
+        this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
         return true;
     }
 
-    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: SniperAbility): void {
+    private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: SniperAbility, gameplayConfig: GameplayConfig): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) return;
@@ -117,7 +117,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         projectile.startY = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = GAMEPLAY_CONFIG.COMBAT.ABILITIES.sniper.SPEED;
+        projectile.speed = gameplayConfig.COMBAT.ABILITIES.sniper.SPEED;
         projectile.team = hero.team;
         projectile.type = 'sniper';
         projectile.duration = -1; // Infinite duration

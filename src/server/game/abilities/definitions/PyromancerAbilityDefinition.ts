@@ -1,7 +1,7 @@
 import { PyromancerAbility } from '../../../schema/Abilities';
 import { AbilityDefinition } from './AbilityDefinition';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class PyromancerAbilityDefinition implements AbilityDefinition<PyromancerAbility> {
     private static _instance: PyromancerAbilityDefinition;
@@ -13,10 +13,10 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         return PyromancerAbilityDefinition._instance;
     }
 
-    create(): PyromancerAbility {
+    create(gameplayConfig: GameplayConfig): PyromancerAbility {
         const ability = new PyromancerAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.pyromancer;
+        const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -27,20 +27,20 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         return ability;
     }
 
-    onLevelUp(ability: PyromancerAbility): void {
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.pyromancer;
+    onLevelUp(ability: PyromancerAbility, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
         ability.strength += config.STRENGTH_PER_LEVEL;
         ability.radius += config.RADIUS_PER_LEVEL;
         ability.range += config.RANGE_PER_LEVEL;
     }
 
-    useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
             ability.lastUsedTime = currentTime;
-            this.createFireball(heroId, x, y, state, ability);
+            this.createFireball(heroId, x, y, state, ability, gameplayConfig);
             return true;
         }
         
@@ -73,12 +73,12 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         ability.lastUsedTime = currentTime;
         
         // Create fireball projectile
-        this.createFireball(heroId, targetX, targetY, state, ability);
+        this.createFireball(heroId, targetX, targetY, state, ability, gameplayConfig);
         
         return true;
     }
 
-    private createFireball(heroId: string, targetX: number, targetY: number, state: any, ability: PyromancerAbility): void {
+    private createFireball(heroId: string, targetX: number, targetY: number, state: any, ability: PyromancerAbility, gameplayConfig: GameplayConfig): void {
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) return;
@@ -95,7 +95,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const directionY = dy / distance;
         
         // Calculate speed based on level
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.pyromancer;
+        const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
         const level = hero.level || 1;
         const speed = config.SPEED + (config.SPEED_PER_LEVEL * (level - 1));
         

@@ -390,7 +390,7 @@ function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig):
                 if (hero.levelRewards.length > 0 && hero.rewardsForChoice.length === 0) {
                     const chestType = hero.levelRewards[0]; // Process the first chest
                     if (chestType) {
-                        const rewards = RewardManager.generateRewardsFromChest(chestType);
+                        const rewards = RewardManager.generateRewardsFromChest(chestType, gameplayConfig);
                         hero.rewardsForChoice.push(...rewards);
                     }
                 }
@@ -627,10 +627,11 @@ function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayC
     player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
     
     // Boost ability strength using the AbilityLevelUpManager
-    AbilityLevelUpManager.levelUpAbility(player.ability);
+    const abilityLevelUpManager = new AbilityLevelUpManager(gameplayConfig);
+    abilityLevelUpManager.levelUpAbility(player.ability);
     
     // Add level reward chest
-    const chestType = RewardManager.getChestTypeForLevel(player.level);
+    const chestType = RewardManager.getChestTypeForLevel(player.level, gameplayConfig);
     player.levelRewards.push(chestType);
     
     // Create level-up event

@@ -242,7 +242,7 @@ export class GameRoom extends Room<GameState> {
             const heroCombatant = hero as any; // Cast to access levelRewards
             if (heroCombatant.levelRewards && heroCombatant.levelRewards.length > 0) {
                 // Apply the chosen reward
-                const success = RewardManager.applyReward(heroCombatant, command.data.rewardId, this.state.gameTime);
+                const success = RewardManager.applyReward(heroCombatant, command.data.rewardId, this.state.gameTime, this.gameplayConfig);
                 if (success) {
                     // Remove the chest from levelRewards and clear rewardsForChoice
                     heroCombatant.levelRewards.splice(0, 1);
@@ -251,7 +251,7 @@ export class GameRoom extends Room<GameState> {
                     // Generate new reward choices for the next chest if there are more
                     if (heroCombatant.levelRewards.length > 0) {
                         const nextChestType = heroCombatant.levelRewards[0];
-                        const rewards = RewardManager.generateRewardsFromChest(nextChestType);
+                        const rewards = RewardManager.generateRewardsFromChest(nextChestType, this.gameplayConfig);
                         heroCombatant.rewardsForChoice.push(...rewards);
                     }
                     

@@ -1,7 +1,7 @@
 import { MercenaryAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, HunterEffect } from '../../../schema/Effects';
 import { AbilityDefinition } from './AbilityDefinition';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAbility> {
@@ -14,10 +14,10 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         return MercenaryAbilityDefinition._instance;
     }
 
-    create(): MercenaryAbility {
+    create(gameplayConfig: GameplayConfig): MercenaryAbility {
         const ability = new MercenaryAbility();
         
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.mercenary;
+        const config = gameplayConfig.COMBAT.ABILITIES.mercenary;
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
@@ -25,17 +25,17 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         return ability;
     }
 
-    onLevelUp(ability: MercenaryAbility): void {
+    onLevelUp(ability: MercenaryAbility, gameplayConfig: GameplayConfig): void {
         // No stat changes on level up - the level affects the effects when used
     }
 
-    useAbility(ability: MercenaryAbility, heroId: string, x: number, y: number, state: any): boolean {
+    useAbility(ability: MercenaryAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
             ability.lastUsedTime = currentTime;
-            this.applyRageEffects(heroId, state, 1); // Level 1 for new hero
+            this.applyRageEffects(heroId, state, 1, gameplayConfig); // Level 1 for new hero
             return true;
         }
         
@@ -51,15 +51,15 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         const hero = state.combatants.get(heroId);
         if (!hero) return false;
         
-        this.applyRageEffects(heroId, state, hero.level);
+        this.applyRageEffects(heroId, state, hero.level, gameplayConfig);
         return true;
     }
 
-    private applyRageEffects(heroId: string, state: any, heroLevel: number): void {
+    private applyRageEffects(heroId: string, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
         const hero = state.combatants.get(heroId);
         if (!hero) return;
 
-        const config = GAMEPLAY_CONFIG.COMBAT.ABILITIES.mercenary;
+        const config = gameplayConfig.COMBAT.ABILITIES.mercenary;
         const currentTime = state.gameTime; // Use game time instead of Date.now()
         
         // Calculate scaled values

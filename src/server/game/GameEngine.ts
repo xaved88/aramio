@@ -17,11 +17,13 @@ export class GameEngine {
     private state: GameState;
     private gameplayConfig: GameplayConfig;
     private stateMachine: GameStateMachine;
+    private abilityUseManager: AbilityUseManager;
 
     constructor(state: GameState, gameplayConfig: GameplayConfig) {
         this.state = state;
         this.gameplayConfig = gameplayConfig;
         this.stateMachine = new GameStateMachine(gameplayConfig);
+        this.abilityUseManager = new AbilityUseManager(gameplayConfig);
     }
 
     /**
@@ -152,7 +154,7 @@ export class GameEngine {
         }
 
         // Use the AbilityUseManager to handle the ability usage
-        AbilityUseManager.useAbility(heroCombatant.ability, heroId, x, y, this.state);
+        this.abilityUseManager.useAbility(heroCombatant.ability, heroId, x, y, this.state);
     }
 
     /**
