@@ -492,8 +492,8 @@ export class GameEngine {
         combatant.y += normalizedDy * moveDistance;
         
         // Clamp to game bounds
-        combatant.x = Math.max(getMinX(), Math.min(getMaxX(), combatant.x));
-        combatant.y = Math.max(getMinY(), Math.min(getMaxY(), combatant.y));
+        combatant.x = Math.max(getMinX(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(this.gameplayConfig.GAME_BOUND_BUFFER), combatant.x));
+        combatant.y = Math.max(getMinY(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(this.gameplayConfig.GAME_BOUND_BUFFER), combatant.y));
         
         return false; // Don't remove the effect yet
     }

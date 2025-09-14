@@ -90,8 +90,8 @@ export class MinionManager {
         const newY = minion.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
-        minion.x = Math.max(getMinX(), Math.min(getMaxX(), newX));
-        minion.y = Math.max(getMinY(), Math.min(getMaxY(), newY));
+        minion.x = Math.max(getMinX(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(this.gameplayConfig.GAME_BOUND_BUFFER), newX));
+        minion.y = Math.max(getMinY(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(this.gameplayConfig.GAME_BOUND_BUFFER), newY));
     }
 
     spawnMinionWave(state: GameState): void {
@@ -167,8 +167,8 @@ export class MinionManager {
         minion.y = cradlePosition.y + Math.sin(angle) * distance;
 
         // Clamp to game bounds
-        minion.x = Math.max(getMinX(), Math.min(getMaxX(), minion.x));
-        minion.y = Math.max(getMinY(), Math.min(getMaxY(), minion.y));
+        minion.x = Math.max(getMinX(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(this.gameplayConfig.GAME_BOUND_BUFFER), minion.x));
+        minion.y = Math.max(getMinY(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(this.gameplayConfig.GAME_BOUND_BUFFER), minion.y));
 
         state.combatants.set(minion.id, minion);
     }

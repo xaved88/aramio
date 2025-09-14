@@ -20,18 +20,18 @@ describe('Starting Level Configuration', () => {
 
     describe('calculateXPForLevel', () => {
         it('should return 0 for level 1', () => {
-            expect(calculateXPForLevel(1)).toBe(0);
+            expect(calculateXPForLevel(1, TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER)).toBe(0);
         });
 
         it('should calculate correct XP for level 2', () => {
             const expectedXP = 1 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // 15
-            expect(calculateXPForLevel(2)).toBe(expectedXP);
+            expect(calculateXPForLevel(2, TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER)).toBe(expectedXP);
         });
 
         it('should calculate correct XP for level 3', () => {
             const expectedXP = (1 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) + 
                               (2 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 = 45
-            expect(calculateXPForLevel(3)).toBe(expectedXP);
+            expect(calculateXPForLevel(3, TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER)).toBe(expectedXP);
         });
 
         it('should calculate correct XP for level 5', () => {
@@ -39,7 +39,7 @@ describe('Starting Level Configuration', () => {
                               (2 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
                               (3 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
                               (4 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 + 45 + 60 = 150
-            expect(calculateXPForLevel(5)).toBe(expectedXP);
+            expect(calculateXPForLevel(5, TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER)).toBe(expectedXP);
         });
     });
 
@@ -87,7 +87,7 @@ describe('Starting Level Configuration', () => {
 
             expect(hero?.level).toBe(configuredStartingLevel);
             expect(hero?.experience).toBe(0); // Should be 0 after leveling up
-            expect(hero?.roundStats.totalExperience).toBe(calculateXPForLevel(configuredStartingLevel));
+            expect(hero?.roundStats.totalExperience).toBe(calculateXPForLevel(configuredStartingLevel, TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER));
         });
 
         it('should grant level-up rewards when heroes start at higher level', () => {

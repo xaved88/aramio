@@ -188,8 +188,6 @@ export const GAMEPLAY_CONFIG = {
         TOWER_DESTROYED: 50,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
         LAST_HIT_BONUS_PERCENTAGE: 0.25, // bonus experience for getting the last hit on a unit
-        XP_EVENT_DURATION_MS: 2000, // how long XP events stay in state (matches client animation)
-        LEVEL_UP_EVENT_DURATION_MS: 3000, // how long level-up events stay in state (matches client animation)
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,

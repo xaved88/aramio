@@ -184,15 +184,15 @@ describe('MinionManager', () => {
 
         it('should respect game bounds when moving', () => {
             // Place blue minion at edge of bounds
-            blueMinion.x = getMinX();
-            blueMinion.y = getMinY();
+            blueMinion.x = getMinX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER);
+            blueMinion.y = getMinY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER);
             
             minionManager.moveMinions(gameState);
             
-            expect(blueMinion.x).toBeGreaterThanOrEqual(getMinX());
-            expect(blueMinion.y).toBeGreaterThanOrEqual(getMinY());
-            expect(blueMinion.x).toBeLessThanOrEqual(getMaxX());
-            expect(blueMinion.y).toBeLessThanOrEqual(getMaxY());
+            expect(blueMinion.x).toBeGreaterThanOrEqual(getMinX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
+            expect(blueMinion.y).toBeGreaterThanOrEqual(getMinY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
+            expect(blueMinion.x).toBeLessThanOrEqual(getMaxX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
+            expect(blueMinion.y).toBeLessThanOrEqual(getMaxY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
         });
 
         it('should not move when close to target', () => {
