@@ -1,12 +1,18 @@
 import { GameState } from '../../schema/GameState';
 import { Minion } from '../../schema/Combatants';
-import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 import { COMBATANT_TYPES, MINION_TYPES, MinionType } from '../../../shared/types/CombatantTypes';
 import { CombatantUtils } from './CombatantUtils';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../shared/utils/GameBounds';
+import { GameplayConfig } from '../../config/ConfigProvider';
 
 export class MinionManager {
-    static moveMinions(state: GameState): void {
+    private gameplayConfig: GameplayConfig;
+
+    constructor(gameplayConfig: GameplayConfig) {
+        this.gameplayConfig = gameplayConfig;
+    }
+
+    moveMinions(state: GameState): void {
         const allCombatants = Array.from(state.combatants.values());
         
         allCombatants.forEach(combatant => {
@@ -18,7 +24,7 @@ export class MinionManager {
         });
     }
     
-    private static moveMinion(minion: Minion, allCombatants: any[]): void {
+    private moveMinion(minion: Minion, allCombatants: any[]): void {
         // Check if minion is stunned - stunned minions cannot move
         if (this.isCombatantStunned(minion)) {
             return;
@@ -48,13 +54,13 @@ export class MinionManager {
      * @param combatant The combatant to check
      * @returns True if the combatant is stunned, false otherwise
      */
-    private static isCombatantStunned(combatant: any): boolean {
+    private isCombatantStunned(combatant: any): boolean {
         if (!combatant.effects || combatant.effects.length === 0) return false;
         
         return combatant.effects.some((effect: any) => effect.type === 'stun');
     }
     
-    private static findEnemyCradle(minionTeam: string, allCombatants: any[]): any | null {
+    private findEnemyCradle(minionTeam: string, allCombatants: any[]): any | null {
         const enemyTeam = minionTeam === 'blue' ? 'red' : 'blue';
         return allCombatants.find(combatant => 
             combatant.type === COMBATANT_TYPES.CRADLE && 
@@ -63,14 +69,14 @@ export class MinionManager {
         ) || null;
     }
     
-    private static moveTowardsTarget(minion: Minion, targetX: number, targetY: number): void {
+    private moveTowardsTarget(minion: Minion, targetX: number, targetY: number): void {
         // Calculate direction vector
         const dx = targetX - minion.x;
         const dy = targetY - minion.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // If we're close enough, don't move
-        if (distance < GAMEPLAY_CONFIG.HERO_STOP_DISTANCE) {
+        if (distance < this.gameplayConfig.HERO_STOP_DISTANCE) {
             return;
         }
         
@@ -88,7 +94,7 @@ export class MinionManager {
         minion.y = Math.max(getMinY(), Math.min(getMaxY(), newY));
     }
 
-    static spawnMinionWave(state: GameState): void {
+    spawnMinionWave(state: GameState): void {
         // Spawn warriors for both teams first
         this.spawnTeamWarriors(state, 'blue');
         this.spawnTeamWarriors(state, 'red');
@@ -97,66 +103,66 @@ export class MinionManager {
         state.warriorSpawnTimes.set(state.currentWave.toString(), state.gameTime);
     }
 
-    private static spawnTeamWarriors(state: GameState, team: string): void {
+    private spawnTeamWarriors(state: GameState, team: string): void {
         const cradlePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : this.gameplayConfig.CRADLE_POSITIONS.RED;
 
         // Spawn warriors
-        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE; i++) {
+        for (let i = 0; i < this.gameplayConfig.MINION_SPAWNING.WARRIORS_PER_WAVE; i++) {
             this.spawnMinion(state, team, MINION_TYPES.WARRIOR, cradlePosition);
         }
     }
 
-    private static spawnTeamArchers(state: GameState, team: string): void {
+    private spawnTeamArchers(state: GameState, team: string): void {
         const cradlePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : this.gameplayConfig.CRADLE_POSITIONS.RED;
 
         // Spawn archers
-        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE; i++) {
+        for (let i = 0; i < this.gameplayConfig.MINION_SPAWNING.ARCHERS_PER_WAVE; i++) {
             this.spawnMinion(state, team, MINION_TYPES.ARCHER, cradlePosition);
         }
     }
 
-    private static spawnTeamMinions(state: GameState, team: string): void {
+    private spawnTeamMinions(state: GameState, team: string): void {
         const cradlePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : this.gameplayConfig.CRADLE_POSITIONS.RED;
 
         // Spawn warriors
-        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE; i++) {
+        for (let i = 0; i < this.gameplayConfig.MINION_SPAWNING.WARRIORS_PER_WAVE; i++) {
             this.spawnMinion(state, team, MINION_TYPES.WARRIOR, cradlePosition);
         }
 
         // Spawn archers
-        for (let i = 0; i < GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE; i++) {
+        for (let i = 0; i < this.gameplayConfig.MINION_SPAWNING.ARCHERS_PER_WAVE; i++) {
             this.spawnMinion(state, team, MINION_TYPES.ARCHER, cradlePosition);
         }
     }
 
-    private static spawnMinion(state: GameState, team: string, minionType: MinionType, cradlePosition: { x: number, y: number }): void {
+    private spawnMinion(state: GameState, team: string, minionType: MinionType, cradlePosition: { x: number, y: number }): void {
         const minion = new Minion();
         minion.id = `${team}-${minionType}-${state.gameTime}-${Math.random()}`;
         minion.type = COMBATANT_TYPES.MINION;
         minion.team = team;
         minion.minionType = minionType;
-        minion.health = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].HEALTH;
+        minion.health = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].HEALTH;
         minion.maxHealth = minion.health;
-        minion.attackRadius = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_RADIUS;
-        minion.attackStrength = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_STRENGTH;
-        minion.attackSpeed = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].ATTACK_SPEED;
-        minion.windUp = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].WIND_UP;
-        minion.moveSpeed = GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
+        minion.attackRadius = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_RADIUS;
+        minion.attackStrength = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_STRENGTH;
+        minion.attackSpeed = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_SPEED;
+        minion.windUp = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].WIND_UP;
+        minion.moveSpeed = this.gameplayConfig.MINION_MOVE_SPEED;
         minion.attackReadyAt = 0; // Initialize to 0 (no wind-up in progress)
-        minion.size = GAMEPLAY_CONFIG.COMBAT.MINION[minionType.toUpperCase() as keyof typeof GAMEPLAY_CONFIG.COMBAT.MINION].SIZE;
+        minion.size = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].SIZE;
         minion.lastAttackTime = 0;
         minion.bulletArmor = 0;
         minion.abilityArmor = 0;
 
         // Random position near cradle
         const angle = Math.random() * 2 * Math.PI;
-        const distance = Math.random() * GAMEPLAY_CONFIG.MINION_SPAWNING.SPAWN_RADIUS;
+        const distance = Math.random() * this.gameplayConfig.MINION_SPAWNING.SPAWN_RADIUS;
         minion.x = cradlePosition.x + Math.cos(angle) * distance;
         minion.y = cradlePosition.y + Math.sin(angle) * distance;
 
@@ -167,10 +173,10 @@ export class MinionManager {
         state.combatants.set(minion.id, minion);
     }
 
-    static checkAndSpawnWave(state: GameState): void {
+    checkAndSpawnWave(state: GameState): void {
         const currentTime = state.gameTime;
-        const firstWaveTime = GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS;
-        const waveInterval = GAMEPLAY_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS;
+        const firstWaveTime = this.gameplayConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS;
+        const waveInterval = this.gameplayConfig.MINION_SPAWNING.WAVE_INTERVAL_MS;
 
         // Calculate expected wave number
         let expectedWave = 0;
@@ -188,9 +194,9 @@ export class MinionManager {
         this.checkAndSpawnArchers(state);
     }
 
-    private static checkAndSpawnArchers(state: GameState): void {
+    private checkAndSpawnArchers(state: GameState): void {
         const currentTime = state.gameTime;
-        const archerDelay = GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS;
+        const archerDelay = this.gameplayConfig.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS;
 
         // Check each wave to see if archers should be spawned
         for (let wave = 1; wave <= state.currentWave; wave++) {

@@ -10,7 +10,7 @@ import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 import { RewardManager } from '../../rewards/RewardManager';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
-export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig): StateMachineResult {
+export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig, minionManager: MinionManager): StateMachineResult {
     // Update game time directly on the state
     state.gameTime = state.gameTime + action.payload.deltaTime;
     
@@ -78,10 +78,10 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
     processCombat(state);
     
     // Check and spawn minion waves
-    MinionManager.checkAndSpawnWave(state);
+    minionManager.checkAndSpawnWave(state);
     
     // Move minions
-    MinionManager.moveMinions(state);
+    minionManager.moveMinions(state);
     
     // Handle collisions
     handleCollisions(state, gameplayConfig);
