@@ -1,11 +1,11 @@
 import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { MoveHeroAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../../shared/utils/GameBounds';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
-export function handleMoveHero(state: GameState, action: MoveHeroAction): StateMachineResult {
+export function handleMoveHero(state: GameState, action: MoveHeroAction, gameplayConfig: GameplayConfig): StateMachineResult {
     // Find hero by ID
     const hero = state.combatants.get(action.payload.heroId) as Hero;
     
@@ -24,7 +24,7 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction): StateM
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // If we're close enough, don't move
-        if (distance < GAMEPLAY_CONFIG.HERO_STOP_DISTANCE) {
+        if (distance < gameplayConfig.HERO_STOP_DISTANCE) {
             return { newState: state };
         }
         

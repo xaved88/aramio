@@ -2,15 +2,15 @@ import { GameState } from '../../../schema/GameState';
 import { Hero, Combatant } from '../../../schema/Combatants';
 import { XPEvent, LevelUpEvent, AttackEvent, KillEvent } from '../../../schema/Events';
 import { UpdateGameAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { SERVER_CONFIG } from '../../../../ServerConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { MinionManager } from '../../combatants/MinionManager';
 import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 import { RewardManager } from '../../rewards/RewardManager';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
-export function handleUpdateGame(state: GameState, action: UpdateGameAction): StateMachineResult {
+export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig): StateMachineResult {
     // Update game time directly on the state
     state.gameTime = state.gameTime + action.payload.deltaTime;
     
@@ -33,7 +33,7 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     const xpEventsToRemove: number[] = [];
     
     state.xpEvents.forEach((event, index) => {
-        if (currentTime - event.timestamp > GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS) {
+        if (currentTime - event.timestamp > gameplayConfig.EXPERIENCE.XP_EVENT_DURATION_MS) {
             xpEventsToRemove.push(index);
         }
     });
@@ -47,7 +47,7 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     const levelUpEventsToRemove: number[] = [];
     
     state.levelUpEvents.forEach((event, index) => {
-        if (currentTime - event.timestamp > GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS) {
+        if (currentTime - event.timestamp > gameplayConfig.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS) {
             levelUpEventsToRemove.push(index);
         }
     });
@@ -72,7 +72,7 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     });
     
     // Handle passive healing
-    handlePassiveHealing(state);
+    handlePassiveHealing(state, gameplayConfig);
     
     // Process combat
     processCombat(state);
@@ -84,10 +84,10 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction): St
     MinionManager.moveMinions(state);
     
     // Handle collisions
-    handleCollisions(state);
+    handleCollisions(state, gameplayConfig);
     
     // Handle respawning and dead combatants
-    handleDeadCombatants(state);
+    handleDeadCombatants(state, gameplayConfig);
     
     // Check for game end conditions
     const gameEndResult = checkGameEndConditions(state);
@@ -275,7 +275,7 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
     }
 }
 
-function handleCollisions(state: GameState): void {
+function handleCollisions(state: GameState, gameplayConfig: GameplayConfig): void {
     const allCombatants = Array.from(state.combatants.values());
     
     // Filter out combatants with nocollision effects for performance
@@ -299,7 +299,7 @@ function handleCollisions(state: GameState): void {
             
             // Calculate distance between centers
             const distance = CombatantUtils.getDistance(combatant1, combatant2);
-            const collisionThreshold = (combatant1.size + combatant2.size) * GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
+            const collisionThreshold = (combatant1.size + combatant2.size) * gameplayConfig.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
             
             // Check if they're colliding
             if (distance < collisionThreshold) {
@@ -362,7 +362,7 @@ function resolveCollision(combatant1: any, combatant2: any, distance: number, co
     }
 }
 
-function handleDeadCombatants(state: GameState): void {
+function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig): void {
     const currentTime = state.gameTime;
     
     // Handle hero death and grant XP BEFORE respawn logic
@@ -371,8 +371,8 @@ function handleDeadCombatants(state: GameState): void {
             const hero = combatant as Hero;
             if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero just died, grant XP to opposing team
-                const heroKillXP = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
-                grantExperienceToTeamForUnitKill(heroKillXP, hero.team, state, hero);
+                const heroKillXP = hero.level * gameplayConfig.EXPERIENCE.HERO_KILL_MULTIPLIER;
+                grantExperienceToTeamForUnitKill(heroKillXP, hero.team, state, hero, gameplayConfig);
             }
         }
     });
@@ -384,7 +384,7 @@ function handleDeadCombatants(state: GameState): void {
             
             if (hero.getHealth() <= 0 && hero.state === 'alive') {
                 // Hero died, start respawn
-                startPlayerRespawn(hero, state);
+                startPlayerRespawn(hero, state, gameplayConfig);
             } else if (hero.state === 'respawning') {
                 // Generate reward choices for respawning heroes who have unspent rewards but no choices
                 if (hero.levelRewards.length > 0 && hero.rewardsForChoice.length === 0) {
@@ -403,15 +403,15 @@ function handleDeadCombatants(state: GameState): void {
                         // The respawn time check will continue to pass, but respawn won't complete
                     } else {
                         // Respawn the hero
-                        completePlayerRespawn(hero);
+                        completePlayerRespawn(hero, gameplayConfig);
                     }
                 }
             }
             
             // Check for level up (regardless of how experience was gained)
-            const experienceNeeded = hero.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+            const experienceNeeded = hero.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
             if (hero.experience >= experienceNeeded) {
-                levelUpPlayer(hero, state);
+                levelUpPlayer(hero, state, gameplayConfig);
             }
         }
     });
@@ -421,7 +421,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeamForTurret(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED, combatant.team, state, combatant.x, combatant.y);
+                grantExperienceToTeamForTurret(gameplayConfig.EXPERIENCE.TOWER_DESTROYED, combatant.team, state, combatant.x, combatant.y, gameplayConfig);
                 turretsToRemove.push(id);
             }
         }
@@ -437,7 +437,7 @@ function handleDeadCombatants(state: GameState): void {
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.MINION) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeamForUnitKill(GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED, combatant.team, state, combatant);
+                grantExperienceToTeamForUnitKill(gameplayConfig.EXPERIENCE.MINION_KILLED, combatant.team, state, combatant, gameplayConfig);
                 minionsToRemove.push(id);
             }
         }
@@ -449,7 +449,7 @@ function handleDeadCombatants(state: GameState): void {
     });
 }
 
-function startPlayerRespawn(player: Hero, state: GameState): void {
+function startPlayerRespawn(player: Hero, state: GameState, gameplayConfig: GameplayConfig): void {
     player.state = 'respawning';
     player.respawnTime = state.gameTime + player.respawnDuration;
     
@@ -469,13 +469,13 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     
     // Move player to spawn location based on their position in the team
     if (player.team === 'blue') {
-        const blueSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE;
+        const blueSpawnPositions = gameplayConfig.HERO_SPAWN_POSITIONS.BLUE;
         const spawnIndex = Math.min(heroIndex, blueSpawnPositions.length - 1);
         const spawnPosition = blueSpawnPositions[spawnIndex];
         player.x = spawnPosition.x;
         player.y = spawnPosition.y;
     } else {
-        const redSpawnPositions = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED;
+        const redSpawnPositions = gameplayConfig.HERO_SPAWN_POSITIONS.RED;
         const spawnIndex = Math.min(heroIndex, redSpawnPositions.length - 1);
         const spawnPosition = redSpawnPositions[spawnIndex];
         player.x = spawnPosition.x;
@@ -483,26 +483,26 @@ function startPlayerRespawn(player: Hero, state: GameState): void {
     }
 }
 
-function completePlayerRespawn(player: Hero): void {
+function completePlayerRespawn(player: Hero, gameplayConfig: GameplayConfig): void {
     player.state = 'alive';
     player.health = player.getMaxHealth(); // Restore to max health, not base health
     player.lastDamageTime = 0; // Reset last damage time
     CombatantUtils.removePassiveHealingEffects(player); // Remove any existing passive healing effects
 }
 
-function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number): void {
+function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state: GameState, turretX?: number, turretY?: number, gameplayConfig?: GameplayConfig): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
             const hero = combatant as Hero;
             // Grant experience to all players on opposing team, even when dead/respawning
-            grantExperience(hero, amount, state, turretX, turretY);
+            grantExperience(hero, amount, state, turretX, turretY, undefined, gameplayConfig);
         }
     });
 }
 
-function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: Combatant): void {
+function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, state: GameState, dyingUnit: Combatant, gameplayConfig: GameplayConfig): void {
     const opposingTeam = enemyTeam === 'blue' ? 'red' : 'blue';
     
     // Find the killer (last hit) from kill events
@@ -527,7 +527,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
             const hero = combatant as Hero;
             if (hero.state === 'alive') {
                 const distance = CombatantUtils.getDistance(hero, dyingUnit);
-                if (distance <= GAMEPLAY_CONFIG.EXPERIENCE.UNIT_KILL_RADIUS) {
+                if (distance <= gameplayConfig.EXPERIENCE.UNIT_KILL_RADIUS) {
                     heroesInRange.push(hero);
                 }
             }
@@ -556,7 +556,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         
         // Grant additional bonus to the killer (ONLY if killer is a hero)
         if (killerHero && hero.id === killerHero.id) {
-            bonusExperience = amount * GAMEPLAY_CONFIG.EXPERIENCE.LAST_HIT_BONUS_PERCENTAGE;
+            bonusExperience = amount * gameplayConfig.EXPERIENCE.LAST_HIT_BONUS_PERCENTAGE;
             
             // Set the type based on what was killed
             if (dyingUnit.type === COMBATANT_TYPES.MINION) {
@@ -567,11 +567,11 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         }
         
         const totalExperience = experiencePerHero + bonusExperience;
-        grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType);
+        grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType, gameplayConfig);
     });
 }
 
-export function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string): void {
+export function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string, gameplayConfig?: GameplayConfig): void {
     player.experience += amount;
     player.roundStats.totalExperience += amount;
     
@@ -591,19 +591,19 @@ export function grantExperience(player: Hero, amount: number, state: GameState, 
     
     // Check for level up(s) - loop to handle multiple level-ups
     while (true) {
-        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        const experienceNeeded = player.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
         if (player.experience >= experienceNeeded) {
-            levelUpPlayer(player, state);
+            levelUpPlayer(player, state, gameplayConfig);
         } else {
             break; // No more level-ups possible
         }
     }
 }
 
-function levelUpPlayer(player: Hero, state: GameState): void {
-    const boostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE;
-    const rangeBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
-    const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayConfig): void {
+    const boostMultiplier = 1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE;
+    const rangeBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
+    const experienceNeeded = player.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
     
     // Level up
     player.level++;
@@ -624,7 +624,7 @@ function levelUpPlayer(player: Hero, state: GameState): void {
     player.attackSpeed = player.attackSpeed * boostMultiplier;
 
     // Make respawn duration longer as a punishment for higher level deaths.
-    player.respawnDuration = Math.round(player.respawnDuration * (1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
+    player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
     
     // Boost ability strength using the AbilityLevelUpManager
     AbilityLevelUpManager.levelUpAbility(player.ability);
@@ -672,9 +672,9 @@ function checkGameEndConditions(state: GameState): StateMachineResult | null {
 /**
  * Handles passive healing for heroes based on the no-damage threshold
  */
-function handlePassiveHealing(state: GameState): void {
+function handlePassiveHealing(state: GameState, gameplayConfig: GameplayConfig): void {
     const currentTime = state.gameTime;
-    const { PASSIVE_HEALING } = GAMEPLAY_CONFIG;
+    const { PASSIVE_HEALING } = gameplayConfig;
     
     state.combatants.forEach((combatant, id) => {
         // Only apply passive healing to heroes

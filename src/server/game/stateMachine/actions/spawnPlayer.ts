@@ -3,14 +3,14 @@ import { Hero } from '../../../schema/Combatants';
 import { CombatantEffect } from '../../../schema/Effects';
 import { RoundStats } from '../../../schema/Events';
 import { SpawnPlayerAction, StateMachineResult } from '../types';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../abilities/AbilityFactory';
 import { ArraySchema } from '@colyseus/schema';
 import { calculateXPForLevel } from '../../../../shared/utils/XPUtils';
 import { grantExperience } from './updateGame';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
-export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): StateMachineResult {
+export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, gameplayConfig: GameplayConfig): StateMachineResult {
     const { playerId, team, x, y, abilityType = 'default' } = action.payload;
     
     const hero = new Hero();
@@ -26,16 +26,16 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     } else {
         // Default spawn at first spawn position for team
         if (team === 'blue') {
-            hero.x = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE[0].x;
-            hero.y = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE[0].y;
+            hero.x = gameplayConfig.HERO_SPAWN_POSITIONS.BLUE[0].x;
+            hero.y = gameplayConfig.HERO_SPAWN_POSITIONS.BLUE[0].y;
         } else {
-            hero.x = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED[0].x;
-            hero.y = GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED[0].y;
+            hero.x = gameplayConfig.HERO_SPAWN_POSITIONS.RED[0].x;
+            hero.y = gameplayConfig.HERO_SPAWN_POSITIONS.RED[0].y;
         }
     }
     
     // Get hero config based on ability type
-    const heroConfig = GAMEPLAY_CONFIG.COMBAT.HEROES[abilityType as keyof typeof GAMEPLAY_CONFIG.COMBAT.HEROES] || GAMEPLAY_CONFIG.COMBAT.HEROES.default;
+    const heroConfig = gameplayConfig.COMBAT.HEROES[abilityType as keyof typeof gameplayConfig.COMBAT.HEROES] || gameplayConfig.COMBAT.HEROES.default;
     
     hero.health = heroConfig.HEALTH;
     hero.maxHealth = heroConfig.HEALTH;
@@ -44,7 +44,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.attackSpeed = heroConfig.ATTACK_SPEED;
     hero.size = heroConfig.SIZE;
     hero.windUp = heroConfig.WIND_UP;
-    hero.moveSpeed = GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
+    hero.moveSpeed = gameplayConfig.HERO_MOVE_SPEED;
     hero.bulletArmor = (heroConfig as any).BULLET_ARMOR || 0;
     hero.abilityArmor = (heroConfig as any).ABILITY_ARMOR || 0;
     hero.attackReadyAt = 0;
@@ -79,10 +79,10 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction): 
     hero.permanentEffects = new ArraySchema<CombatantEffect>();
     
     // Grant starting XP if STARTING_LEVEL > 1
-    if (GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL > 1) {
-        const startingXP = calculateXPForLevel(GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL);
+    if (gameplayConfig.DEBUG.STARTING_LEVEL > 1) {
+        const startingXP = calculateXPForLevel(gameplayConfig.DEBUG.STARTING_LEVEL);
         // Use the normal XP granting system instead of direct assignment
-        grantExperience(hero, startingXP, state, hero.x, hero.y, 'starting_level');
+        grantExperience(hero, startingXP, state, hero.x, hero.y, 'starting_level', gameplayConfig);
     }
     
     // Add hero to state
