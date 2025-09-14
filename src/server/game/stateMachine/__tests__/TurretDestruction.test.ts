@@ -2,22 +2,27 @@ import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { MinionManager } from '../../combatants/MinionManager';
+import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('TurretDestruction', () => {
     let initialState: GameState;
+    let gameStateMachine: GameStateMachine;
 
     beforeEach(() => {
         initialState = new GameState();
         initialState.gameTime = 0;
         initialState.gamePhase = 'playing';
+        
+        const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
+        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
     });
 
     describe('Player destroys turret', () => {
         it('should destroy turret and grant experience when player is in range', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -51,12 +56,12 @@ describe('TurretDestruction', () => {
         }
             
             // Update game multiple times to allow wind-up period to complete
-            let result = GameStateMachine.processAction(spawnResult.newState, {
+            let result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
             // Run another update to allow attack to complete
-            result = GameStateMachine.processAction(result.newState, {
+            result = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
@@ -70,18 +75,18 @@ describe('TurretDestruction', () => {
             });
             
             // Hero should have gained experience and leveled up
-            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(updatedHero?.level).toBe(3);
             
             // Hero stats should be boosted
-            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
         });
 
         it('should not destroy turret when player is out of range', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -112,12 +117,12 @@ describe('TurretDestruction', () => {
             }
             
             // Update game multiple times to allow wind-up period to complete
-            let result = GameStateMachine.processAction(spawnResult.newState, {
+            let result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
             // Run another update to allow attack to complete
-            result = GameStateMachine.processAction(result.newState, {
+            result = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
@@ -137,12 +142,12 @@ describe('TurretDestruction', () => {
 
         it('should grant experience to all players on the same team', () => {
             // Setup game with two players on blue team
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
-            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+            const spawnResult2 = gameStateMachine.processAction(spawnResult1.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player2', team: 'blue' }
             });
@@ -188,12 +193,12 @@ describe('TurretDestruction', () => {
             }
             
             // Update game multiple times to allow wind-up period to complete
-            let result = GameStateMachine.processAction(spawnResult2.newState, {
+            let result = gameStateMachine.processAction(spawnResult2.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
             // Run another update to allow attack to complete
-            result = GameStateMachine.processAction(result.newState, {
+            result = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
@@ -211,8 +216,8 @@ describe('TurretDestruction', () => {
             
             // Both blue team heroes should have gained experience and leveled up
             // They get 20 experience each, level up (consuming 10), so 10 remaining each
-            expect(updatedHero1?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Check that both heroes leveled up
             expect(updatedHero1?.level).toBe(3);
@@ -221,8 +226,8 @@ describe('TurretDestruction', () => {
 
         it('should not grant experience to players on opposing team', () => {
             // Setup game with a player on blue team
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -252,12 +257,12 @@ describe('TurretDestruction', () => {
             }
             
             // Update game multiple times to allow wind-up period to complete
-            let result = GameStateMachine.processAction(spawnResult.newState, {
+            let result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
             // Run another update to allow attack to complete
-            result = GameStateMachine.processAction(result.newState, {
+            result = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
@@ -272,13 +277,13 @@ describe('TurretDestruction', () => {
             
             // Hero should be level 3 with remaining experience
             expect(updatedHero?.level).toBe(3);
-            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
         });
 
         it('should handle multiple level ups correctly', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -306,12 +311,12 @@ describe('TurretDestruction', () => {
             }
 
             // Update game multiple times to allow wind-up period to complete
-            let result = GameStateMachine.processAction(spawnResult.newState, {
+            let result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
             // Run another update to allow attack to complete
-            result = GameStateMachine.processAction(result.newState, {
+            result = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 300 }
             });
@@ -333,12 +338,12 @@ describe('TurretDestruction', () => {
 
         it('should only grant minion XP to heroes within range', () => {
             // Setup game with two players on blue team
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
-            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+            const spawnResult2 = gameStateMachine.processAction(spawnResult1.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player2', team: 'blue' }
             });
@@ -383,7 +388,7 @@ describe('TurretDestruction', () => {
                 minion.health = 0; // Kill the minion
                 
                 // Update game to process minion death
-                const result = GameStateMachine.processAction(spawnResult2.newState, {
+                const result = gameStateMachine.processAction(spawnResult2.newState, {
                     type: 'UPDATE_GAME',
                     payload: { deltaTime: 100 }
                 });
@@ -401,23 +406,23 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only hero1 should get XP (within range), hero2 should not (out of range)
-                            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
             expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2); // Should not get XP
             }
         });
 
         it('should grant hero kill XP to heroes within range', () => {
             // Setup game with two players on blue team and one on red team
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
-            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+            const spawnResult2 = gameStateMachine.processAction(spawnResult1.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player2', team: 'blue' }
             });
-            const spawnResult3 = GameStateMachine.processAction(spawnResult2.newState, {
+            const spawnResult3 = gameStateMachine.processAction(spawnResult2.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player3', team: 'red' }
             });
@@ -471,7 +476,7 @@ describe('TurretDestruction', () => {
              }
              
              // Update game to process hero death
-             const result = GameStateMachine.processAction(spawnResult3.newState, {
+             const result = gameStateMachine.processAction(spawnResult3.newState, {
                  type: 'UPDATE_GAME',
                  payload: { deltaTime: 100 }
              });
@@ -488,7 +493,7 @@ describe('TurretDestruction', () => {
             });
             
             // Calculate expected XP: level 3 * 4 = 12 XP
-            const expectedXP = 3 * GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
+            const expectedXP = 3 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
             
             // Only blueHero1 should get XP (within range), blueHero2 should not (out of range)
             expect(updatedBlueHero1?.roundStats.totalExperience).toBe(initialExp1 + expectedXP);
@@ -497,12 +502,12 @@ describe('TurretDestruction', () => {
 
         it('should grant turret XP to dead players but not minion XP', () => {
             // Setup game with two players on blue team
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult1 = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult1 = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
-            const spawnResult2 = GameStateMachine.processAction(spawnResult1.newState, {
+            const spawnResult2 = gameStateMachine.processAction(spawnResult1.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player2', team: 'blue' }
             });
@@ -537,7 +542,7 @@ describe('TurretDestruction', () => {
             }
             
             // Update game to process turret destruction
-            const result1 = GameStateMachine.processAction(spawnResult2.newState, {
+            const result1 = gameStateMachine.processAction(spawnResult2.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -556,8 +561,8 @@ describe('TurretDestruction', () => {
             
             // Both players should have gained turret XP (even the dead one)
             // Account for leveling: 20 XP granted, 10 needed for level 1, so 10 remaining
-            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2 + GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Now kill a minion - only alive player should get XP
             const minions = Array.from(result1.newState.combatants.values())
@@ -572,7 +577,7 @@ describe('TurretDestruction', () => {
                 const expBeforeMinion2 = updatedHero2?.experience || 0;
                 
                 // Update game to process minion death
-                const result2 = GameStateMachine.processAction(result1.newState, {
+                const result2 = gameStateMachine.processAction(result1.newState, {
                     type: 'UPDATE_GAME',
                     payload: { deltaTime: 100 }
                 });
@@ -590,7 +595,7 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only alive player should get minion XP
-                            expect(finalHero1?.roundStats.totalExperience).toBe(expBeforeMinion1 + GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                            expect(finalHero1?.roundStats.totalExperience).toBe(expBeforeMinion1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
             expect(finalHero2?.roundStats.totalExperience).toBe(expBeforeMinion2); // Dead player should not get minion XP
             }
         });

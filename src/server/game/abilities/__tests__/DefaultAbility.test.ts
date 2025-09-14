@@ -3,6 +3,7 @@ import { DefaultAbility } from '../../../schema/Abilities';
 import { GameState } from '../../../schema/GameState';
 import { Hero } from '../../../schema/Combatants';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('DefaultAbility', () => {
     let defaultAbility: DefaultAbility;
@@ -10,7 +11,7 @@ describe('DefaultAbility', () => {
     let hero: Hero;
 
     beforeEach(() => {
-        defaultAbility = DefaultAbilityDefinition.instance.create();
+        defaultAbility = DefaultAbilityDefinition.instance.create(TEST_GAMEPLAY_CONFIG);
         gameState = new GameState();
         gameState.gameTime = 0;
         
@@ -37,7 +38,8 @@ describe('DefaultAbility', () => {
                 hero.id, 
                 200, 
                 200, 
-                gameState
+                gameState,
+                TEST_GAMEPLAY_CONFIG
             );
             
             expect(result).toBe(true);
@@ -51,7 +53,8 @@ describe('DefaultAbility', () => {
                 hero.id, 
                 200, 
                 200, 
-                gameState
+                gameState,
+                TEST_GAMEPLAY_CONFIG
             );
             
             const projectile = Array.from(gameState.projectiles.values())[0];
@@ -77,7 +80,8 @@ describe('DefaultAbility', () => {
                 hero.id, 
                 targetX, 
                 targetY, 
-                gameState
+                gameState,
+                TEST_GAMEPLAY_CONFIG
             );
             
             const projectile = Array.from(gameState.projectiles.values())[0];

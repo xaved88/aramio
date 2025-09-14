@@ -3,20 +3,25 @@ import { Hero } from '../../../schema/Combatants';
 import { DefaultAbility } from '../../../schema/Abilities';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { MinionManager } from '../../combatants/MinionManager';
+import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('GameStateMachine', () => {
     let initialState: GameState;
+    let gameStateMachine: GameStateMachine;
 
     beforeEach(() => {
         initialState = new GameState();
         initialState.gameTime = 0;
         initialState.gamePhase = 'playing';
+        
+        const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
+        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
     });
 
     describe('SETUP_GAME', () => {
         it('should initialize the game with cradles and turrets', () => {
-            const result = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const result = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             const newState = result.newState;
 
             // Check that game is in playing phase
@@ -47,7 +52,7 @@ describe('GameStateMachine', () => {
 
     describe('SPAWN_PLAYER', () => {
         it('should spawn a player', () => {
-            const result = GameStateMachine.processAction(initialState, {
+            const result = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -65,17 +70,17 @@ describe('GameStateMachine', () => {
             
             expect(hero).toBeDefined();
             expect(hero?.team).toBe('blue');
-            expect(hero?.health).toBe(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
+            expect(hero?.health).toBe(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
             expect(hero?.controller).toBe('player1');
         });
 
         it('should spawn multiple players', () => {
-            const result1 = GameStateMachine.processAction(initialState, {
+            const result1 = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
 
-            const result2 = GameStateMachine.processAction(result1.newState, {
+            const result2 = gameStateMachine.processAction(result1.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player2', team: 'red' }
             });
@@ -102,10 +107,10 @@ describe('GameStateMachine', () => {
 
         it('should preserve existing combatant types when spawning players', () => {
             // Setup game
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             
             // Spawn a player
-            const result = GameStateMachine.processAction(setupResult.newState, {
+            const result = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -128,14 +133,14 @@ describe('GameStateMachine', () => {
     describe('UPDATE_GAME', () => {
         it('should advance game time and process combat', () => {
             // Setup game with players
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
             
             // Update game with time delta
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -151,7 +156,7 @@ describe('GameStateMachine', () => {
 
         it('should handle player death and respawn', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -170,7 +175,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game to trigger respawn
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -190,7 +195,7 @@ describe('GameStateMachine', () => {
 
         it('should complete respawn after respawn time', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -209,7 +214,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game to trigger respawn
-            const result1 = GameStateMachine.processAction(spawnResult.newState, {
+            const result1 = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -228,7 +233,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game to complete respawn
-            const result2 = GameStateMachine.processAction(result1.newState, {
+            const result2 = gameStateMachine.processAction(result1.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -248,8 +253,8 @@ describe('GameStateMachine', () => {
 
         it('should grant experience when turret is destroyed', () => {
             // Setup game with players
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -261,7 +266,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game - should grant experience to blue team
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -277,13 +282,13 @@ describe('GameStateMachine', () => {
             
             // Player should have gained experience and leveled up
             // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
-            expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(player?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(3); // Should have leveled up
         });
 
         it('should grant experience to players', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -303,7 +308,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game to process the experience
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -323,7 +328,7 @@ describe('GameStateMachine', () => {
 
         it('should level up players when they gain enough experience', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -338,12 +343,12 @@ describe('GameStateMachine', () => {
             
             // Give hero enough experience to level up
             if (hero) {
-                hero.experience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // Enough to level up
-                hero.roundStats.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+                hero.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // Enough to level up
+                hero.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
             }
             
             // Update game to trigger level up
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -358,17 +363,17 @@ describe('GameStateMachine', () => {
             
             // Hero should be level 2 with boosted stats
             expect(updatedHero?.level).toBe(2);
-            expect(updatedHero?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
-            expect(updatedHero?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
+            expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
             expect(updatedHero?.levelRewards.length).toBe(1); // Should have one chest reward
             expect(updatedHero?.levelRewards[0]).toBe("common"); // Should be "common" chest
         });
 
         it('should preserve combatant types during game updates', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -376,7 +381,7 @@ describe('GameStateMachine', () => {
             // Update game multiple times
             let currentState = spawnResult.newState;
             for (let i = 0; i < 5; i++) {
-                const result = GameStateMachine.processAction(currentState, {
+                const result = gameStateMachine.processAction(currentState, {
                     type: 'UPDATE_GAME',
                     payload: { deltaTime: 100 }
                 });
@@ -405,8 +410,8 @@ describe('GameStateMachine', () => {
 
         it('should debug experience grant issue', () => {
             // Setup game with players
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -418,7 +423,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game - should grant experience to blue team
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -434,14 +439,14 @@ describe('GameStateMachine', () => {
             
             // Player should have gained experience and leveled up
             // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
-            expect(player?.roundStats.totalExperience).toBe(GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(player?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(3); // Should have leveled up
         });
 
         it('should debug level up issue', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -454,12 +459,12 @@ describe('GameStateMachine', () => {
                 }
             });
             if (player) {
-                player.experience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5; // More than enough to level up
-                player.roundStats.totalExperience = GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5;
+                player.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5; // More than enough to level up
+                player.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5;
             }
             
             // Update game - should trigger level up
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -476,14 +481,14 @@ describe('GameStateMachine', () => {
             // Player should be level 2 with boosted stats
             expect(updatedPlayer?.level).toBe(2);
             expect(updatedPlayer?.roundStats.totalExperience).toBe(20); // Should have 20 total experience (15 + 5)
-            expect(updatedPlayer?.maxHealth).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
-            expect(updatedPlayer?.attackStrength).toBeGreaterThan(GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            expect(updatedPlayer?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
+            expect(updatedPlayer?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
         });
 
         it('should verify deep copy preserves manual changes', () => {
             // Setup game with a player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -504,7 +509,7 @@ describe('GameStateMachine', () => {
             if (redTurret) redTurret.health = 0;
             
             // Process an action to trigger deep copy
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -531,8 +536,8 @@ describe('GameStateMachine', () => {
     describe('REMOVE_PLAYER', () => {
         it('should remove a player from the game', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -547,7 +552,7 @@ describe('GameStateMachine', () => {
             expect(hero).toBeDefined();
             
             // Remove player
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'REMOVE_PLAYER',
                 payload: { playerId: 'player1' }
             });
@@ -568,14 +573,14 @@ describe('GameStateMachine', () => {
 
         it('should preserve combatant types when removing players', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
             
             // Remove player
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'REMOVE_PLAYER',
                 payload: { playerId: 'player1' }
             });
@@ -596,7 +601,7 @@ describe('GameStateMachine', () => {
     describe('MOVE_HERO', () => {
         it('should move player towards target', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -613,7 +618,7 @@ describe('GameStateMachine', () => {
             const initialY = hero?.y || 0;
             
             // Move player (move up and left to stay within bounds)
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'MOVE_HERO',
                 payload: { 
                     heroId: hero!.id, 
@@ -637,7 +642,7 @@ describe('GameStateMachine', () => {
 
         it('should not move respawning players', () => {
             // Spawn a player
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -656,7 +661,7 @@ describe('GameStateMachine', () => {
             }
             
             // Update game to trigger respawn
-            const respawnResult = GameStateMachine.processAction(spawnResult.newState, {
+            const respawnResult = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 100 }
             });
@@ -673,7 +678,7 @@ describe('GameStateMachine', () => {
             const respawnY = respawningHero?.y || 0;
             
             // Try to move respawning hero
-            const result = GameStateMachine.processAction(respawnResult.newState, {
+            const result = gameStateMachine.processAction(respawnResult.newState, {
                 type: 'MOVE_HERO',
                 payload: { 
                     heroId: hero!.id, 
@@ -697,8 +702,8 @@ describe('GameStateMachine', () => {
 
         it('should preserve combatant types when moving players', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -712,7 +717,7 @@ describe('GameStateMachine', () => {
             });
             
             // Move player
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'MOVE_HERO',
                 payload: { heroId: hero!.id, targetX: 100, targetY: 100 }
             });
@@ -741,14 +746,14 @@ describe('GameStateMachine', () => {
     describe('END_GAME', () => {
         it('should end the game and preserve combatant types', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
             
             // End game
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'END_GAME',
                 payload: { winningTeam: 'blue' }
             });
@@ -780,8 +785,8 @@ describe('GameStateMachine', () => {
     describe('Multiple Level-ups', () => {
         it('should correctly increase player stats when multiple level-ups occur simultaneously', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -814,7 +819,7 @@ describe('GameStateMachine', () => {
             const experienceToGrant = 100;
             
             // Update game to grant experience
-            const result = GameStateMachine.processAction(spawnResult.newState, {
+            const result = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });
@@ -824,7 +829,7 @@ describe('GameStateMachine', () => {
             player!.roundStats.totalExperience += experienceToGrant;
             
             // Update game again to trigger level-ups
-            const finalResult = GameStateMachine.processAction(result.newState, {
+            const finalResult = gameStateMachine.processAction(result.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });
@@ -843,9 +848,9 @@ describe('GameStateMachine', () => {
             expect(updatedPlayer!.level).toBeGreaterThan(initialLevel);
             
             // Calculate expected stat increases based on configuration
-            const statBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
-            const rangeBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
-            const abilityBoostMultiplier = 1 + GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE; // 1.20
+            const statBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
+            const rangeBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
+            const abilityBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE; // 1.20
             
             // Calculate expected stats after multiple level-ups
             // Level 1->2: multiply by 1.15
@@ -867,7 +872,7 @@ describe('GameStateMachine', () => {
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;
             for (let level = initialLevel; level < updatedPlayer!.level; level++) {
-                totalExperienceNeeded += level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+                totalExperienceNeeded += level * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
             }
             const expectedRemainingExperience = experienceToGrant - totalExperienceNeeded;
             expect(updatedPlayer!.experience).toBe(expectedRemainingExperience);
@@ -878,8 +883,8 @@ describe('GameStateMachine', () => {
 
         it('should block respawn when player has unspent level rewards', () => {
             // Setup game and spawn player
-            const setupResult = GameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
-            const spawnResult = GameStateMachine.processAction(setupResult.newState, {
+            const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
+            const spawnResult = gameStateMachine.processAction(setupResult.newState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -898,7 +903,7 @@ describe('GameStateMachine', () => {
             player!.experience = 15; // Enough to level up (level 1 * 15 = 15 XP needed)
             
             // Update game to trigger level up
-            const levelUpResult = GameStateMachine.processAction(spawnResult.newState, {
+            const levelUpResult = gameStateMachine.processAction(spawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });
@@ -919,7 +924,7 @@ describe('GameStateMachine', () => {
             leveledPlayer!.health = 0;
             
             // Update game to trigger respawn
-            const respawnResult = GameStateMachine.processAction(levelUpResult.newState, {
+            const respawnResult = gameStateMachine.processAction(levelUpResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });
@@ -939,7 +944,7 @@ describe('GameStateMachine', () => {
             respawningPlayer!.respawnTime = respawnResult.newState.gameTime - 1000;
             
             // Update game - should NOT respawn because of unspent rewards
-            const blockedResult = GameStateMachine.processAction(respawnResult.newState, {
+            const blockedResult = gameStateMachine.processAction(respawnResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });
@@ -960,7 +965,7 @@ describe('GameStateMachine', () => {
             blockedPlayer!.levelRewards.clear();
             
             // Update game again - should respawn now
-            const finalResult = GameStateMachine.processAction(blockedResult.newState, {
+            const finalResult = gameStateMachine.processAction(blockedResult.newState, {
                 type: 'UPDATE_GAME',
                 payload: { deltaTime: 1000 }
             });

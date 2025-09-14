@@ -2,15 +2,20 @@ import { GameStateMachine } from '../../GameStateMachine';
 import { GameState } from '../../../../schema/GameState';
 import { Hero } from '../../../../schema/Combatants';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
-import { GAMEPLAY_CONFIG } from '../../../../../GameConfig';
 import { calculateXPForLevel } from '../../../../../shared/utils/XPUtils';
+import { MinionManager } from '../../../combatants/MinionManager';
+import { TEST_GAMEPLAY_CONFIG } from '../../../../config/TestGameplayConfig';
 
 describe('Starting Level Configuration', () => {
     let initialState: GameState;
+    let gameStateMachine: GameStateMachine;
 
     beforeEach(() => {
         initialState = new GameState();
         initialState.gameTime = 0;
+        
+        const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
+        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
     });
 
     describe('calculateXPForLevel', () => {
@@ -19,21 +24,21 @@ describe('Starting Level Configuration', () => {
         });
 
         it('should calculate correct XP for level 2', () => {
-            const expectedXP = 1 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // 15
+            const expectedXP = 1 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // 15
             expect(calculateXPForLevel(2)).toBe(expectedXP);
         });
 
         it('should calculate correct XP for level 3', () => {
-            const expectedXP = (1 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) + 
-                              (2 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 = 45
+            const expectedXP = (1 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) + 
+                              (2 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 = 45
             expect(calculateXPForLevel(3)).toBe(expectedXP);
         });
 
         it('should calculate correct XP for level 5', () => {
-            const expectedXP = (1 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) + 
-                              (2 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
-                              (3 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
-                              (4 * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 + 45 + 60 = 150
+            const expectedXP = (1 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) + 
+                              (2 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
+                              (3 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER) +
+                              (4 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // 15 + 30 + 45 + 60 = 150
             expect(calculateXPForLevel(5)).toBe(expectedXP);
         });
     });
@@ -41,10 +46,10 @@ describe('Starting Level Configuration', () => {
     describe('Hero spawning and starting level', () => {
         it('should spawn hero at level 1 when STARTING_LEVEL is 1', () => {
             // Temporarily set starting level to 1 for this test
-            const originalStartingLevel = GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
-            (GAMEPLAY_CONFIG as any).DEBUG.STARTING_LEVEL = 1;
+            const originalStartingLevel = TEST_GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
+            (TEST_GAMEPLAY_CONFIG as any).DEBUG.STARTING_LEVEL = 1;
 
-            const result = GameStateMachine.processAction(initialState, {
+            const result = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -60,15 +65,15 @@ describe('Starting Level Configuration', () => {
             expect(hero?.experience).toBe(0);
 
             // Restore original starting level
-            (GAMEPLAY_CONFIG as any).DEBUG.STARTING_LEVEL = originalStartingLevel;
+            (TEST_GAMEPLAY_CONFIG as any).DEBUG.STARTING_LEVEL = originalStartingLevel;
         });
 
         it('should grant XP and level up heroes during spawn when STARTING_LEVEL > 1', () => {
             // Use the configured starting level
-            const configuredStartingLevel = GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
+            const configuredStartingLevel = TEST_GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
 
             // Spawn a hero (this should now grant XP and level up the hero)
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });
@@ -87,10 +92,10 @@ describe('Starting Level Configuration', () => {
 
         it('should grant level-up rewards when heroes start at higher level', () => {
             // Use the configured starting level
-            const configuredStartingLevel = GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
+            const configuredStartingLevel = TEST_GAMEPLAY_CONFIG.DEBUG.STARTING_LEVEL;
 
             // Spawn a hero (this should now grant XP and level up the hero)
-            const spawnResult = GameStateMachine.processAction(initialState, {
+            const spawnResult = gameStateMachine.processAction(initialState, {
                 type: 'SPAWN_PLAYER',
                 payload: { playerId: 'player1', team: 'blue' }
             });

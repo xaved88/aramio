@@ -4,7 +4,7 @@ import { HookshotBotStrategy } from './strategies/HookshotBotStrategy';
 import { MercenaryBotStrategy } from './strategies/MercenaryBotStrategy';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
 import { GameCommand } from '../../../shared/types/GameCommands';
-import { GameplayConfig } from '../config/ConfigProvider';
+import { GameplayConfig } from '../../config/ConfigProvider';
 
 export class BotManager {
     private strategies: Map<string, any> = new Map();

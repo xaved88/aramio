@@ -3,17 +3,18 @@ import { HookshotBotStrategy } from '../strategies/HookshotBotStrategy';
 import { SimpletonBotStrategy } from '../strategies/SimpletonBotStrategy';
 import { MercenaryBotStrategy } from '../strategies/MercenaryBotStrategy';
 import { GameRoom } from '../../../rooms/GameRoom';
+import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('Bot Strategies', () => {
     let botManager: BotManager;
 
     beforeEach(() => {
-        botManager = new BotManager();
+        botManager = new BotManager(TEST_GAMEPLAY_CONFIG);
     });
 
     describe('HookshotBotStrategy Behavior', () => {
         it('should generate commands when hookshot bot has a teammate', () => {
-            const hookshotStrategy = new HookshotBotStrategy();
+            const hookshotStrategy = new HookshotBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             const mockBot = {
                 id: 'test-bot',
@@ -51,7 +52,7 @@ describe('Bot Strategies', () => {
         });
 
         it('should reposition hookshot bot behind teammates for defensive positioning', () => {
-            const hookshotStrategy = new HookshotBotStrategy();
+            const hookshotStrategy = new HookshotBotStrategy(TEST_GAMEPLAY_CONFIG);
             
             // Bot is positioned in front of teammate (closer to enemy base)
             // Blue base: (100, 1100), Red base: (1100, 100)
@@ -114,8 +115,8 @@ describe('Bot Strategies', () => {
 
     describe('MercenaryBotStrategy Behavior', () => {
         it('should refuse to use rage on minions when only minions are available', () => {
-            const mercenaryStrategy = new MercenaryBotStrategy();
-            const simpletonStrategy = new SimpletonBotStrategy();
+            const mercenaryStrategy = new MercenaryBotStrategy(TEST_GAMEPLAY_CONFIG);
+            const simpletonStrategy = new SimpletonBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             // Create separate bots for each strategy since they have different abilities
             const mercenaryBot = {
@@ -182,8 +183,8 @@ describe('Bot Strategies', () => {
         });
 
         it('should avoid areas with multiple attackers while simpleton charges in', () => {
-            const mercenaryStrategy = new MercenaryBotStrategy();
-            const simpletonStrategy = new SimpletonBotStrategy();
+            const mercenaryStrategy = new MercenaryBotStrategy(TEST_GAMEPLAY_CONFIG);
+            const simpletonStrategy = new SimpletonBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             const mockBot = {
                 id: 'mercenary-bot',
@@ -254,7 +255,7 @@ describe('Bot Strategies', () => {
 
     describe('SimpletonBotStrategy Behavior', () => {
         it('should retreat when targeted by defensive structures', () => {
-            const simpletonStrategy = new SimpletonBotStrategy();
+            const simpletonStrategy = new SimpletonBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             const mockBot = {
                 id: 'simpleton-bot',
@@ -295,7 +296,7 @@ describe('Bot Strategies', () => {
         });
 
         it('should not fire ability when no enemies are within ability range', () => {
-            const simpletonStrategy = new SimpletonBotStrategy();
+            const simpletonStrategy = new SimpletonBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             const mockBot = {
                 id: 'simpleton-bot',
@@ -339,7 +340,7 @@ describe('Bot Strategies', () => {
         });
 
         it('should fire ability when enemies are within ability range', () => {
-            const simpletonStrategy = new SimpletonBotStrategy();
+            const simpletonStrategy = new SimpletonBotStrategy(TEST_GAMEPLAY_CONFIG);
 
             const mockBot = {
                 id: 'simpleton-bot',
