@@ -50,7 +50,7 @@ export class GameRoom extends Room<GameState> {
         this.gameEngine.setupGame();
 
         // Initialize bot manager
-        this.botManager = new BotManager();
+        this.botManager = new BotManager(this.gameplayConfig);
 
         // Spawn bots
         this.spawnBots();

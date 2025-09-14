@@ -1,6 +1,6 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 /**
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability
@@ -18,6 +18,11 @@ import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
  * - Avoids areas with multiple attackers for strategic positioning
  */
 export class MercenaryBotStrategy {
+    private gameplayConfig: GameplayConfig;
+
+    constructor(gameplayConfig: GameplayConfig) {
+        this.gameplayConfig = gameplayConfig;
+    }
 
     generateCommands(bot: any, state: SharedGameState): GameCommand[] {
         const commands: GameCommand[] = [];
@@ -327,8 +332,8 @@ export class MercenaryBotStrategy {
         if (friendlyStructures.length === 0) {
             // Fallback to team spawn position
             return bot.team === 'blue' 
-                ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-                : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+                ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+                : this.gameplayConfig.CRADLE_POSITIONS.RED;
         }
 
         // Find closest friendly structure
@@ -372,8 +377,8 @@ export class MercenaryBotStrategy {
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
         const basePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;
+            ? this.gameplayConfig.CRADLE_POSITIONS.RED 
+            : this.gameplayConfig.CRADLE_POSITIONS.BLUE;
         
         // Add some randomization to avoid all bots targeting the exact same spot
         const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
@@ -387,8 +392,8 @@ export class MercenaryBotStrategy {
 
     private getDistanceToBase(combatant: any, team: string): number {
         const basePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : this.gameplayConfig.CRADLE_POSITIONS.RED;
         
         const dx = combatant.x - basePosition.x;
         const dy = combatant.y - basePosition.y;
@@ -397,8 +402,8 @@ export class MercenaryBotStrategy {
 
     private getDirectionToBase(combatant: any, team: string): { x: number, y: number } {
         const basePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : this.gameplayConfig.CRADLE_POSITIONS.RED;
         
         const dx = basePosition.x - combatant.x;
         const dy = basePosition.y - combatant.y;

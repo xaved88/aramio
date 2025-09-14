@@ -7,6 +7,7 @@ import { handleMoveHero } from './actions/moveHero';
 import { handleUpdateGame } from './actions/updateGame';
 import { handleEndGame } from './actions/endGame';
 import { GameplayConfig } from '../../config/ConfigProvider';
+import { MinionManager } from '../combatants/MinionManager';
 
 
 /**
@@ -14,9 +15,11 @@ import { GameplayConfig } from '../../config/ConfigProvider';
  */
 export class GameStateMachine {
     private gameplayConfig: GameplayConfig;
+    private minionManager: MinionManager;
 
-    constructor(gameplayConfig: GameplayConfig) {
+    constructor(gameplayConfig: GameplayConfig, minionManager: MinionManager) {
         this.gameplayConfig = gameplayConfig;
+        this.minionManager = minionManager;
     }
     
     /**
@@ -40,7 +43,7 @@ export class GameStateMachine {
                 return handleMoveHero(currentState, action, this.gameplayConfig);
                 
             case 'UPDATE_GAME':
-                return handleUpdateGame(currentState, action, this.gameplayConfig);
+                return handleUpdateGame(currentState, action, this.gameplayConfig, this.minionManager);
                 
             case 'END_GAME':
                 return handleEndGame(currentState, action, this.gameplayConfig);

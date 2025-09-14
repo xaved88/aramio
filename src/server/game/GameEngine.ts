@@ -12,25 +12,28 @@ import { AbilityUseManager } from './abilities/AbilityUseManager';
 import { AOEDamageEvent } from '../schema/Events';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
 import { GameplayConfig } from '../config/ConfigProvider';
+import { MinionManager } from './combatants/MinionManager';
 
 export class GameEngine {
     private state: GameState;
     private gameplayConfig: GameplayConfig;
     private stateMachine: GameStateMachine;
     private abilityUseManager: AbilityUseManager;
+    private minionManager: MinionManager;
 
     constructor(state: GameState, gameplayConfig: GameplayConfig) {
         this.state = state;
         this.gameplayConfig = gameplayConfig;
-        this.stateMachine = new GameStateMachine(gameplayConfig);
+        this.minionManager = new MinionManager(gameplayConfig);
+        this.stateMachine = new GameStateMachine(gameplayConfig, this.minionManager);
         this.abilityUseManager = new AbilityUseManager(gameplayConfig);
     }
 
     /**
-     * Gets the current game state
+     * Gets the minion manager instance
      */
-    getState(): GameState {
-        return this.state;
+    getMinionManager(): MinionManager {
+        return this.minionManager;
     }
 
     /**

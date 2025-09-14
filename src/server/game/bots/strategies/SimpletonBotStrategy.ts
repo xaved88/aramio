@@ -1,8 +1,13 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
-import { GAMEPLAY_CONFIG } from '../../../../GameConfig';
+import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class SimpletonBotStrategy {
+    private gameplayConfig: GameplayConfig;
+
+    constructor(gameplayConfig: GameplayConfig) {
+        this.gameplayConfig = gameplayConfig;
+    }
 
     generateCommands(bot: any, state: SharedGameState): GameCommand[] {
         const commands: GameCommand[] = [];
@@ -87,8 +92,8 @@ export class SimpletonBotStrategy {
         const randomValue = (seed % 1000) / 1000;
         
         // Map to our min/max range
-        return GAMEPLAY_CONFIG.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MIN + 
-               (randomValue * (GAMEPLAY_CONFIG.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MAX - GAMEPLAY_CONFIG.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MIN));
+        return this.gameplayConfig.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MIN + 
+               (randomValue * (this.gameplayConfig.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MAX - this.gameplayConfig.BOTS.ABILITY_COOLDOWN_MULTIPLIER.MIN));
     }
 
     private hashCode(str: string): number {
@@ -208,8 +213,8 @@ export class SimpletonBotStrategy {
         if (friendlyStructures.length === 0) {
             // Fallback to team spawn position
             return bot.team === 'blue' 
-                ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE 
-                : GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+                ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
+                : this.gameplayConfig.CRADLE_POSITIONS.RED;
         }
 
         // Find closest friendly structure
@@ -253,8 +258,8 @@ export class SimpletonBotStrategy {
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
         const basePosition = team === 'blue' 
-            ? GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED 
-            : GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;
+            ? this.gameplayConfig.CRADLE_POSITIONS.RED 
+            : this.gameplayConfig.CRADLE_POSITIONS.BLUE;
         
         // Add some randomization to avoid all bots targeting the exact same spot
         const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels

@@ -4,15 +4,18 @@ import { HookshotBotStrategy } from './strategies/HookshotBotStrategy';
 import { MercenaryBotStrategy } from './strategies/MercenaryBotStrategy';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
 import { GameCommand } from '../../../shared/types/GameCommands';
+import { GameplayConfig } from '../config/ConfigProvider';
 
 export class BotManager {
     private strategies: Map<string, any> = new Map();
+    private gameplayConfig: GameplayConfig;
 
-    constructor() {
+    constructor(gameplayConfig: GameplayConfig) {
+        this.gameplayConfig = gameplayConfig;
         // Register bot strategies
-        this.strategies.set('bot-simpleton', new SimpletonBotStrategy());
-        this.strategies.set('bot-hookshot', new HookshotBotStrategy());
-        this.strategies.set('bot-mercenary', new MercenaryBotStrategy());
+        this.strategies.set('bot-simpleton', new SimpletonBotStrategy(gameplayConfig));
+        this.strategies.set('bot-hookshot', new HookshotBotStrategy(gameplayConfig));
+        this.strategies.set('bot-mercenary', new MercenaryBotStrategy(gameplayConfig));
     }
 
     /**
