@@ -183,7 +183,7 @@ export const CLIENT_CONFIG = {
         },
         ANIMATION: {
             FLOAT_DISTANCE: 30, // How far the text floats up
-            DURATION_MS: 2000, // Matches GAMEPLAY_CONFIG.EXPERIENCE.XP_EVENT_DURATION_MS
+            DURATION_MS: 2000,
         },
     },
     LEVEL_UP_EVENTS: {
@@ -191,7 +191,7 @@ export const CLIENT_CONFIG = {
         FONT_SIZE: '20px',
         ANIMATION: {
             FLOAT_DISTANCE: 50, // How far the text floats up
-            DURATION_MS: 3000, // Matches GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS
+            DURATION_MS: 3000,
         },
     },
     REWARDS: {

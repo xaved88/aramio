@@ -38,8 +38,8 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction, gamepla
         const newY = hero.y + normalizedDy * moveSpeed;
         
         // Clamp to game bounds
-        hero.x = Math.max(getMinX(), Math.min(getMaxX(), newX));
-        hero.y = Math.max(getMinY(), Math.min(getMaxY(), newY));
+        hero.x = Math.max(getMinX(gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(gameplayConfig.GAME_BOUND_BUFFER), newX));
+        hero.y = Math.max(getMinY(gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(gameplayConfig.GAME_BOUND_BUFFER), newY));
     }
     
     return { newState: state };
