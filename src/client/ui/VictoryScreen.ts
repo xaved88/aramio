@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
-import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { HUDContainer } from './HUDContainer';
 
 export class VictoryScreen {
@@ -87,12 +86,12 @@ export class VictoryScreen {
         this.fadeInTween = this.scene.tweens.add({
             targets: [this.background, this.victoryText],
             alpha: 1,
-            duration: GAMEPLAY_CONFIG.VICTORY_SCREEN.FADE_IN_DURATION_MS,
+            duration: CLIENT_CONFIG.VICTORY_SCREEN.FADE_IN_DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 // After display duration, fade out
                 this.scene.time.delayedCall(
-                    GAMEPLAY_CONFIG.VICTORY_SCREEN.DISPLAY_DURATION_MS,
+                    CLIENT_CONFIG.VICTORY_SCREEN.DISPLAY_DURATION_MS,
                     () => this.fadeOut()
                 );
             }
@@ -105,7 +104,7 @@ export class VictoryScreen {
         this.fadeOutTween = this.scene.tweens.add({
             targets: [this.background, this.victoryText],
             alpha: 0,
-            duration: GAMEPLAY_CONFIG.VICTORY_SCREEN.FADE_OUT_DURATION_MS,
+            duration: CLIENT_CONFIG.VICTORY_SCREEN.FADE_OUT_DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 this.destroy();

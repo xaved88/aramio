@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
-import { GAMEPLAY_CONFIG } from '../GameConfig';
+import { GameplayConfig } from '../server/config/ConfigProvider';
 
 export class PathRenderer {
     private scene: Phaser.Scene;
+    private gameplayConfig: GameplayConfig; // Deserialized gameplay configuration
     private cameraManager: any = null;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig) {
         this.scene = scene;
+        this.gameplayConfig = gameplayConfig;
     }
 
     setCameraManager(cameraManager: any): void {
@@ -26,8 +28,8 @@ export class PathRenderer {
         }
         
         // Get cradle positions
-        const blueCradle = GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE;
-        const redCradle = GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED;
+        const blueCradle = this.gameplayConfig.CRADLE_POSITIONS.BLUE;
+        const redCradle = this.gameplayConfig.CRADLE_POSITIONS.RED;
         
         // Calculate path dimensions
         const pathWidth = 80;

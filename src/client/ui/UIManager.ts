@@ -6,6 +6,7 @@ import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
 import { RespawnOverlay } from './RespawnOverlay';
 import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
+import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
  * UIManager handles all UI elements including HUD, menus, and interface components.
@@ -13,6 +14,7 @@ import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
  */
 export class UIManager {
     private scene: Phaser.Scene;
+    private gameplayConfig: GameplayConfig;
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
     private hudRenderer: HUDRenderer;
@@ -57,9 +59,10 @@ export class UIManager {
         rewardsText: null
     };
 
-    constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
+    constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
-        this.hudRenderer = new HUDRenderer(scene);
+        this.gameplayConfig = gameplayConfig;
+        this.hudRenderer = new HUDRenderer(scene, gameplayConfig);
         this.victoryScreen = new VictoryScreen(scene);
         this.statsOverlay = new StatsOverlay(scene);
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
