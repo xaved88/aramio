@@ -11,9 +11,12 @@ import { ConfigProvider, GameplayConfig } from './config/ConfigProvider';
 const port = Number(process.env.PORT || SERVER_CONFIG.PORT);
 const app = express();
 
-// Initialize config provider and load default config
+// Initialize config provider and load glass-cannon config
 const configProvider = new ConfigProvider();
 const gameplayConfig: GameplayConfig = configProvider.loadConfig('default');
+
+console.log('Available configs:', configProvider.getAvailableConfigs());
+console.log('Using config: glass-cannon');
 
 app.use(cors());
 app.use(express.json());
