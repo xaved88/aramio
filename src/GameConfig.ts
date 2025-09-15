@@ -197,12 +197,6 @@ export const GAMEPLAY_CONFIG = {
         SPAWN_RADIUS: 50, // radius around cradle to spawn minions
         ARCHER_SPAWN_DELAY_MS: 1300, // delay before spawning archers after warriors
     },
-    VICTORY_SCREEN: {
-        FADE_IN_DURATION_MS: 1000, // 1 second fade in
-        DISPLAY_DURATION_MS: 3000, // 3 seconds display
-        FADE_OUT_DURATION_MS: 1000, // 1 second fade out
-        BACKGROUND_ALPHA: 0.5, // 50% alpha black background
-    },
     HERO_SPAWN_POSITIONS: {
         BLUE: [
             { x: 100, y: 675 }, // Spawn 1: 75 units below blue cradle (clamped to max Y)

@@ -1,21 +1,23 @@
 import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
-import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { hexToColorString } from '../utils/ColorUtils';
 import { HUDContainer } from './HUDContainer';
+import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
  * HUDRenderer handles all HUD rendering logic
  */
 export class HUDRenderer {
     private scene: Phaser.Scene;
+    private gameplayConfig: GameplayConfig; // Deserialized gameplay configuration
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
     private hudContainer: HUDContainer | null = null;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig) {
         this.scene = scene;
+        this.gameplayConfig = gameplayConfig;
     }
 
     setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
@@ -295,7 +297,7 @@ export class HUDRenderer {
         hudElements.healthText.setText(`${Math.round(player.health)}/${Math.round(player.maxHealth)}`);
         
         // Update experience bar
-        const experienceNeeded = player.level * GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        const experienceNeeded = player.level * this.gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
         const experiencePercent = player.experience / experienceNeeded;
         
         hudElements.experienceBar.clear();

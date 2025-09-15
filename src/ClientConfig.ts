@@ -37,6 +37,12 @@ export const CLIENT_CONFIG = {
         GAME_UI: 1000,          // Stats overlay, game interface
         MODALS: 2000            // Victory screen, modals
     } as const,
+    VICTORY_SCREEN: {
+        FADE_IN_DURATION_MS: 1000, // 1 second fade in
+        DISPLAY_DURATION_MS: 3000, // 3 seconds display
+        FADE_OUT_DURATION_MS: 1000, // 1 second fade out
+        BACKGROUND_ALPHA: 0.5, // 50% alpha black background
+    },
     PROJECTILE: {
         RADIUS: 6,
         BLUE_COLOR: 0x2980b9, // darker blue team color

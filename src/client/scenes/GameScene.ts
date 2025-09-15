@@ -2,8 +2,7 @@ import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { GameState } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../ClientConfig';
-import { GAMEPLAY_CONFIG } from '../../GameConfig';
-import { type SharedGameState } from '../../shared/types/GameStateTypes';
+import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
@@ -14,10 +13,13 @@ import { GameObjectFactory } from '../GameObjectFactory';
 import { hexToColorString } from '../utils/ColorUtils';
 import { IconManager } from '../utils/IconManager';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
+import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
     private room: any;
+    private gameplayConfig: GameplayConfig | null; // Deserialized gameplay configuration
+    private uiComponentsInitialized: boolean = false; // Track if UI components have been initialized
     private entityManager!: EntityManager;
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
@@ -43,6 +45,7 @@ export class GameScene extends Phaser.Scene {
 
     constructor() {
         super({ key: 'GameScene' });
+        this.gameplayConfig = null; // Will be loaded from server
     }
 
     preload() {
@@ -65,29 +68,21 @@ export class GameScene extends Phaser.Scene {
             serverUrl = `${protocol}//${window.location.host}`;
         }
         this.client = new Client(serverUrl);
+        console.log(`Attempting to connect to server at: ${serverUrl}`);
         
         // Initialize managers
         this.entityManager = new EntityManager(this);
         this.animationManager = new AnimationManager(this);
-        this.uiManager = new UIManager(this, (rewardId: string) => {
-            this.handleRewardChosen(rewardId);
-        });
-        this.pathRenderer = new PathRenderer(this);
         this.cameraManager = new CameraManager(this);
         this.gameObjectFactory = new GameObjectFactory(this);
         
-        // Set HUD camera for UI components
-        this.uiManager.setHUDCamera(this.cameraManager.getHUDCamera());
-        this.uiManager.setCameraManager(this.cameraManager);
+        // UI components will be initialized after gameplay config is available
         
         // Set camera manager for entity manager
         this.entityManager.setCameraManager(this.cameraManager);
         
         // Set entity manager for camera manager
         this.cameraManager.setEntityManager(this.entityManager);
-        
-        // Set camera manager for path renderer
-        this.pathRenderer.setCameraManager(this.cameraManager);
         
         // Set camera manager for game object factory
         this.gameObjectFactory.setCameraManager(this.cameraManager);
@@ -120,13 +115,8 @@ export class GameScene extends Phaser.Scene {
             this.createScreenGrid();
         }
         
-        // Create spawn indicators
-        this.createSpawnIndicators();
-        
-        // Create path highlight from corner to corner
-        this.pathRenderer.createPathHighlight();
-        
         try {
+            console.log('Attempting to join or create room...');
             this.room = await this.client.joinOrCreate('game');
             console.log('Connected to server');
             
@@ -143,8 +133,6 @@ export class GameScene extends Phaser.Scene {
             this.setupRoomHandlers();
             this.setupInputHandlers();
             this.setupVisibilityHandlers();
-            
-            this.uiManager.createHUD();
             
         } catch (error) {
             console.error('Failed to connect:', error);
@@ -287,7 +275,46 @@ export class GameScene extends Phaser.Scene {
         this.uiManager.updateHUD(state, this.playerTeam, this.playerSessionId);
     }
 
+    private initializeUIComponents() {
+        // Initialize UI components now that we have the gameplay config
+        this.uiManager = new UIManager(this, this.gameplayConfig, (rewardId: string) => {
+            this.handleRewardChosen(rewardId);
+        });
+        this.pathRenderer = new PathRenderer(this, this.gameplayConfig);
+        
+        // Set HUD camera for UI components
+        this.uiManager.setHUDCamera(this.cameraManager.getHUDCamera());
+        this.uiManager.setCameraManager(this.cameraManager);
+        
+        // Set camera manager for path renderer
+        this.pathRenderer.setCameraManager(this.cameraManager);
+        
+        // Create path highlight from corner to corner
+        this.pathRenderer.createPathHighlight();
+        
+        // Create spawn indicators
+        this.createSpawnIndicators();
+        
+        // Create HUD
+        this.uiManager.createHUD();
+    }
 
+    private processStateChange(colyseusState: GameState) {
+        this.lastState = colyseusState      
+        
+        const sharedState = convertToSharedGameState(colyseusState);
+        
+        // Track the player's team when they spawn
+        this.updatePlayerTeam(sharedState);
+        
+        this.updateCombatantEntities(sharedState);
+        this.processAttackEvents(sharedState);
+        this.processDamageEvents(sharedState);
+        this.updateHUD(sharedState);
+        
+        // Update camera to follow player
+        this.cameraManager.updateCamera(sharedState);
+    }
 
     private setupRoomHandlers() {
         this.room.onStateChange((colyseusState: GameState) => {
@@ -296,20 +323,27 @@ export class GameScene extends Phaser.Scene {
                 return;
             }
             
-            this.lastState = colyseusState      
+            // Deserialize gameplay config from room state
+            if (colyseusState.gameplayConfig && !this.gameplayConfig) {
+                this.gameplayConfig = JSON.parse(colyseusState.gameplayConfig);
+                console.log('Deserialized gameplay config from room state');
+                console.log('Gameplay config structure:', Object.keys(this.gameplayConfig));
+            }
             
-            const sharedState = convertToSharedGameState(colyseusState);
+            // Initialize UI components if we have config but haven't initialized yet
+            if (this.gameplayConfig && !this.uiComponentsInitialized) {
+                console.log('Initializing UI components...');
+                this.initializeUIComponents();
+                this.uiComponentsInitialized = true;
+                console.log('UI components initialized');
+            }
             
-            // Track the player's team when they spawn
-            this.updatePlayerTeam(sharedState);
+            // Skip processing if UI components aren't ready yet
+            if (!this.uiComponentsInitialized) {
+                return;
+            }
             
-            this.updateCombatantEntities(sharedState);
-            this.processAttackEvents(sharedState);
-            this.processDamageEvents(sharedState);
-            this.updateHUD(sharedState);
-            
-            // Update camera to follow player
-            this.cameraManager.updateCamera(sharedState);
+            this.processStateChange(colyseusState);
         });
         
         this.room.onMessage('gameRestarted', () => {
@@ -326,6 +360,7 @@ export class GameScene extends Phaser.Scene {
             this.moveTarget = null;
             this.clickDownPosition = null;
             this.isClickHeld = false;
+            this.uiComponentsInitialized = false; // Reset UI initialization flag
             
             // Clear all entities and animations
             this.entityManager.clearAllEntities();
@@ -469,14 +504,14 @@ export class GameScene extends Phaser.Scene {
 
         // D key handler for debug kill (only if enabled)
         this.input.keyboard?.on('keydown-D', (event: KeyboardEvent) => {
-            if (this.room && GAMEPLAY_CONFIG.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+            if (this.room && this.gameplayConfig.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
                 this.room.send('debugKill');
             }
         });
 
         // L key handler for instant respawn (only if enabled)
         this.input.keyboard?.on('keydown-L', (event: KeyboardEvent) => {
-            if (this.room && GAMEPLAY_CONFIG.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+            if (this.room && this.gameplayConfig.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
                 this.room.send('instantRespawn');
             }
         });
@@ -818,7 +853,7 @@ export class GameScene extends Phaser.Scene {
         }
 
         // Create spawn indicators for blue team using hardcoded positions
-        GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.BLUE.forEach((position, index) => {
+        this.gameplayConfig.HERO_SPAWN_POSITIONS.BLUE.forEach((position: any, index: number) => {
             const indicator = this.gameObjectFactory.createGraphics(position.x, position.y, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
             
             // Draw a small circle with team color
@@ -836,7 +871,7 @@ export class GameScene extends Phaser.Scene {
         });
         
         // Create spawn indicators for red team using hardcoded positions
-        GAMEPLAY_CONFIG.HERO_SPAWN_POSITIONS.RED.forEach((position, index) => {
+        this.gameplayConfig.HERO_SPAWN_POSITIONS.RED.forEach((position: any, index: number) => {
             const indicator = this.gameObjectFactory.createGraphics(position.x, position.y, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
             
             // Draw a small circle with team color
