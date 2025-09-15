@@ -14,6 +14,10 @@ import { hexToColorString } from '../utils/ColorUtils';
 import { IconManager } from '../utils/IconManager';
 import { ControllerId, CombatantId, isHeroCombatant } from '../../shared/types/CombatantTypes';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
+import { LoadingScreen } from '../ui/LoadingScreen';
+import { ConnectionManager } from '../ConnectionManager';
+import { DebugOverlay } from '../ui/DebugOverlay';
+import { InputHandler } from '../InputHandler';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -42,6 +46,12 @@ export class GameScene extends Phaser.Scene {
     private gridLabels: Phaser.GameObjects.Text[] = [];
     private screenGrid: Phaser.GameObjects.Graphics | null = null;
     private screenGridLabels: Phaser.GameObjects.Text[] = [];
+    
+    // New component-based architecture
+    private loadingScreen!: LoadingScreen;
+    private connectionManager!: ConnectionManager;
+    private debugOverlay!: DebugOverlay;
+    private inputHandler!: InputHandler;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -56,86 +66,28 @@ export class GameScene extends Phaser.Scene {
         // Load icons and pre-generate textures
         await IconManager.getInstance().loadIconsAndTextures(this);
         
-        // In development, connect to the Colyseus server on port 2567
-        // In production, connect to the same host (since server serves both)
-        let serverUrl: string;
-        if (window.location.hostname === 'localhost' && window.location.port === '3000') {
-            // Development: Vite dev server on 3000, but Colyseus server on 2567
-            serverUrl = 'ws://localhost:2567';
-        } else {
-            // Production: same host and port
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            serverUrl = `${protocol}//${window.location.host}`;
-        }
-        this.client = new Client(serverUrl);
-        console.log(`Attempting to connect to server at: ${serverUrl}`);
-        
-        // Initialize managers
-        this.entityManager = new EntityManager(this);
-        this.animationManager = new AnimationManager(this);
-        this.cameraManager = new CameraManager(this);
+        // Initialize basic components
         this.gameObjectFactory = new GameObjectFactory(this);
+        this.loadingScreen = new LoadingScreen(this);
         
-        // UI components will be initialized after gameplay config is available
+        // Show loading screen
+        this.loadingScreen.show();
         
-        // Set camera manager for entity manager
-        this.entityManager.setCameraManager(this.cameraManager);
-        
-        // Set entity manager for camera manager
-        this.cameraManager.setEntityManager(this.entityManager);
-        
-        // Set camera manager for game object factory
-        this.gameObjectFactory.setCameraManager(this.cameraManager);
-        
-        // Create ability range display
-        this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-        this.abilityRangeDisplay.setVisible(false);
-        
-        // Create world coordinate grid overlay
-        this.coordinateGrid = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND);
-        this.coordinateGrid.setVisible(CLIENT_CONFIG.DEBUG.WORLD_COORDINATE_GRID_ENABLED);
-        
-        // Create screen coordinate grid overlay (rendered at UI depth so it stays on screen)
-        this.screenGrid = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI);
-        this.screenGrid.setVisible(CLIENT_CONFIG.DEBUG.SCREEN_COORDINATE_GRID_ENABLED);
-        
-        // Create coordinates debug panel (positioned halfway up screen)
-        this.coordinatesDebugPanel = this.gameObjectFactory.createText(10, CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2, '', {
-            fontSize: '16px',
-            color: hexToColorString(0xffffff),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
-        }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0, 0);
-        this.coordinatesDebugPanel.setVisible(CLIENT_CONFIG.DEBUG.WORLD_COORDINATE_GRID_ENABLED || CLIENT_CONFIG.DEBUG.SCREEN_COORDINATE_GRID_ENABLED);
-        
-        // Create the grids if enabled
-        if (CLIENT_CONFIG.DEBUG.WORLD_COORDINATE_GRID_ENABLED) {
-            this.createCoordinateGrid();
-        }
-        if (CLIENT_CONFIG.DEBUG.SCREEN_COORDINATE_GRID_ENABLED) {
-            this.createScreenGrid();
-        }
+        // Initialize connection manager and connect to server
+        this.connectionManager = new ConnectionManager();
         
         try {
-            console.log('Attempting to join or create room...');
-            this.room = await this.client.joinOrCreate('game');
-            console.log('Connected to server');
+            const { client, room, sessionId } = await this.connectionManager.connect();
+            this.client = client;
+            this.room = room;
+            this.playerSessionId = sessionId;
             
-            // Store the session ID for this client
-            this.playerSessionId = this.room.sessionId;
-            console.log(`Client session ID: ${this.playerSessionId}`);
-            
-            // Set the player session ID in the entity manager
-            this.entityManager.setPlayerSessionId(this.playerSessionId);
-            
-            // Set the player session ID in the camera manager
-            this.cameraManager.setPlayerSessionId(this.playerSessionId);
-            
+            // Set up room handlers
             this.setupRoomHandlers();
-            this.setupInputHandlers();
-            this.setupVisibilityHandlers();
             
         } catch (error) {
             console.error('Failed to connect:', error);
+            this.loadingScreen.hide();
             this.gameObjectFactory.createText(300, 300, 'Failed to connect to server', {
                 fontSize: CLIENT_CONFIG.UI.FONTS.ERROR,
                 color: hexToColorString(CLIENT_CONFIG.UI.COLORS.ERROR)
@@ -143,69 +95,60 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
+    private async initializeGame(): Promise<void> {
+        // Hide loading screen
+        this.loadingScreen.hide();
+        
+        // Initialize core managers
+        this.entityManager = new EntityManager(this);
+        this.animationManager = new AnimationManager(this);
+        this.cameraManager = new CameraManager(this);
+        
+        // Set up manager relationships
+        this.entityManager.setCameraManager(this.cameraManager);
+        this.cameraManager.setEntityManager(this.entityManager);
+        this.gameObjectFactory.setCameraManager(this.cameraManager);
+        
+        // Set player session ID in managers
+        this.entityManager.setPlayerSessionId(this.playerSessionId!);
+        this.cameraManager.setPlayerSessionId(this.playerSessionId!);
+        
+        // Initialize debug overlay
+        this.debugOverlay = new DebugOverlay(this, this.gameObjectFactory);
+        this.debugOverlay.initialize();
+        
+        // Initialize input handler
+        this.inputHandler = new InputHandler(this, this.room);
+        this.inputHandler.setupHandlers();
+        
+        // Create ability range display
+        this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
+        this.abilityRangeDisplay.setVisible(false);
+        
+        // Set up remaining handlers
+        this.setupInputHandlers();
+        this.setupVisibilityHandlers();
+        
+        console.log('Game initialization complete');
+    }
+
     update() {
         if (!this.room || !this.room.state) return;
         
-        // Get current mouse position for coordinate display
-        const pointer = this.input.activePointer;
+        // Update debug overlay
+        if (this.debugOverlay) {
+            const pointer = this.input.activePointer;
+            this.debugOverlay.update(pointer);
+        }
         
         // Update ability range display position if visible
         if (this.abilityRangeDisplay && this.abilityRangeDisplay.visible) {
             this.updateAbilityRangeDisplayWithMouse();
         }
         
-        // Update coordinates debug panel
-        this.updateCoordinatesDebugPanel(pointer);
-        
-        // Update screen grid visibility
-        if (this.screenGrid) {
-            this.screenGrid.setVisible(CLIENT_CONFIG.DEBUG.SCREEN_COORDINATE_GRID_ENABLED);
-        }
-        
-        
-        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
-            // Control scheme A: point to move (original behavior)
-            const pointer = this.input.activePointer;
-            const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-            this.room.send('move', { 
-                targetX: worldPos.x, 
-                targetY: worldPos.y 
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
-            // Control scheme B: send continuous movement to target if we have one
-            if (this.moveTarget) {
-                this.room.send('move', {
-                    targetX: this.moveTarget.x,
-                    targetY: this.moveTarget.y
-                });
-            }
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Control scheme C: point to move when not clicking, hold position when clicking
-            if (!this.isClickHeld) {
-                const pointer = this.input.activePointer;
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', { 
-                    targetX: worldPos.x, 
-                    targetY: worldPos.y 
-                });
-            } else if (this.moveTarget) {
-                // When click is held, keep moving to the click-down position
-                this.room.send('move', {
-                    targetX: this.moveTarget.x,
-                    targetY: this.moveTarget.y
-                });
-            }
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
-            // Control scheme D: point to move when not clicking, stop moving when clicking
-            if (!this.isClickHeld) {
-                const pointer = this.input.activePointer;
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', { 
-                    targetX: worldPos.x, 
-                    targetY: worldPos.y 
-                });
-            }
-            // When click is held, don't send any move commands (stop moving)
+        // Update input handling
+        if (this.inputHandler) {
+            this.inputHandler.update();
         }
     }
 
@@ -328,6 +271,13 @@ export class GameScene extends Phaser.Scene {
                 this.gameplayConfig = JSON.parse(colyseusState.gameplayConfig);
                 console.log('Deserialized gameplay config from room state');
                 console.log('Gameplay config structure:', Object.keys(this.gameplayConfig));
+                
+                // Initialize the game now that we have the config
+                this.initializeGame().then(() => {
+                    console.log('Game initialization completed');
+                }).catch((error) => {
+                    console.error('Game initialization failed:', error);
+                });
             }
             
             // Initialize UI components if we have config but haven't initialized yet
