@@ -36,8 +36,6 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
         
-        // Scale range
-        ability.range += config.RANGE_PER_LEVEL;
     }
 
     useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {

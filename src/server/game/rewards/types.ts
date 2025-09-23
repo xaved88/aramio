@@ -20,10 +20,19 @@ export interface AbilityReward {
     abilityType: string;
 }
 
+export interface AbilityStatReward {
+    type: 'ability_stat';
+    ability_stat: string; // Ability-specific stats like 'range'
+    modifier: RewardModifier;
+}
+
 export interface RewardDefinition {
-    type: 'stat' | 'ability';
+    type: 'stat' | 'ability' | 'ability_stat';
     stats?: StatRewardConfig[];
     abilityType?: string;
+    stat?: string;
+    ability_stat?: string;
+    modifier?: RewardModifier;
 }
 
 export interface ChestReward {

@@ -213,68 +213,62 @@ export const CLIENT_CONFIG = {
             "stat:health": {
                 title: "Health Boost",
                 description: "+15% max health",
-                icon: "heart",
                 rarity: "common"
             },
             "stat:defense": {
                 title: "Defense Boost", 
                 description: "+15 bullet & ability armor",
-                icon: "shield",
                 rarity: "common"
             },
             "stat:damage": {
                 title: "Damage Boost",
                 description: "+15% attack strength", 
-                icon: "sword",
                 rarity: "common"
             },
             "stat:attack_speed": {
                 title: "Attack Speed",
                 description: "+15% attacks per second",
-                icon: "lightning",
                 rarity: "common"
             },
             "stat:attack_range": {
                 title: "Attack Range",
                 description: "+10 attack radius",
-                icon: "crosshair",
                 rarity: "common"
             },
             "stat:move_speed": {
                 title: "Movement Speed",
                 description: "+15% movement speed",
-                icon: "boots",
                 rarity: "common"
             },
             "ability:thorndive": {
                 title: "Thorndive",
                 description: "Tank with dash and taunt",
-                icon: "shield",
                 rarity: "ability"
             },
             "ability:pyromancer": {
                 title: "Pyromancer",
                 description: "AOE fire damage",
-                icon: "fire",
                 rarity: "ability"
             },
             "ability:hookshot": {
                 title: "Hookshot",
                 description: "Grappling hook stun",
-                icon: "hook",
                 rarity: "ability"
             },
             "ability:mercenary": {
                 title: "Mercenary",
                 description: "Rage mode berserker",
-                icon: "sword",
                 rarity: "ability"
             },
             "ability:sniper": {
                 title: "Sniper",
                 description: "Precise ranged attack",
-                icon: "sniper",
                 rarity: "ability"
+            },
+            "ability_stat:range": {
+                title: "Ability Range",
+                description: "+20% ability range",
+                rarity: "upgrade"
             }
         }
     },

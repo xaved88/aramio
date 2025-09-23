@@ -390,7 +390,7 @@ function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig):
                 if (hero.levelRewards.length > 0 && hero.rewardsForChoice.length === 0) {
                     const chestType = hero.levelRewards[0]; // Process the first chest
                     if (chestType) {
-                        const rewards = RewardManager.generateRewardsFromChest(chestType, gameplayConfig);
+                        const rewards = RewardManager.generateRewardsFromChest(chestType, gameplayConfig, hero);
                         hero.rewardsForChoice.push(...rewards);
                     }
                 }

@@ -223,7 +223,8 @@ export const GAMEPLAY_CONFIG = {
     },
     REWARDS: {
         LEVEL_CHESTS: {
-            3: "ability_chest" // At level 3, give ability chest instead of common
+            3: "ability_chest", // At level 3, give ability chest instead of common
+            4: "ability_stats" // At level 4, give ability stat upgrades chest
         },
         CHESTS: {
             common: {
@@ -242,6 +243,15 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability:hookshot", weight: 1 },
                     { id: "ability:mercenary", weight: 1 },
                     { id: "ability:sniper", weight: 1 },
+                ]
+            },
+            ability_stats: {
+                rewards: [
+                    { id: "ability_stat:range", weight: 90 },
+                    { id: "stat:health", weight: 1 },
+                    { id: "stat:defense", weight: 1 },
+                    { id: "stat:damage", weight: 1 },
+                    { id: "stat:attack_speed", weight: 1 },
                 ]
             }
         },
@@ -302,6 +312,11 @@ export const GAMEPLAY_CONFIG = {
             "ability:sniper": {
                 type: "ability",
                 abilityType: "sniper"
+            },
+            "ability_stat:range": {
+                type: "ability_stat",
+                ability_stat: "range",
+                modifier: { type: "percent", value: 1.50 }
             }
         }
     },
