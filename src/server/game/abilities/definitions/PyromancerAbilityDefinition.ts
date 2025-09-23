@@ -31,7 +31,6 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
         ability.strength += config.STRENGTH_PER_LEVEL;
         ability.radius += config.RADIUS_PER_LEVEL;
-        ability.range += config.RANGE_PER_LEVEL;
     }
 
     useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {

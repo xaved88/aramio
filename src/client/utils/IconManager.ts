@@ -33,6 +33,9 @@ export class IconManager {
             'ability:mercenary': 'mercenary',
             'ability:sniper': 'sniper',
             
+            // Ability stat upgrade icons
+            'ability_stat:range': 'stats/ability_range_waves',
+            
             // Direct stat names for other uses
             'health': 'stats/health_plus',
             'defense': 'stats/attack_armor_shield_sword',

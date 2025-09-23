@@ -7,8 +7,9 @@ import { GameplayConfig } from '../../config/ConfigProvider';
 export class RewardManager {
     /**
      * Generates 3 random rewards from a chest based on weights
+     * Filters out invalid ability stat rewards for the given hero
      */
-    static generateRewardsFromChest(chestType: string, gameplayConfig: GameplayConfig): string[] {
+    static generateRewardsFromChest(chestType: string, gameplayConfig: GameplayConfig, hero?: any): string[] {
         const chest = gameplayConfig.REWARDS.CHESTS[chestType as keyof typeof gameplayConfig.REWARDS.CHESTS];
         if (!chest) {
             console.warn(`Unknown chest type: ${chestType}`);
@@ -16,7 +17,19 @@ export class RewardManager {
         }
 
         const rewards: string[] = [];
-        const availableRewards = [...chest.rewards];
+        let availableRewards = [...chest.rewards];
+
+        // Filter out invalid ability stat rewards for this hero's ability
+        if (hero && hero.ability) {
+            availableRewards = availableRewards.filter(reward => {
+                const rewardType = gameplayConfig.REWARDS.REWARD_TYPES[reward.id as keyof typeof gameplayConfig.REWARDS.REWARD_TYPES];
+                if (rewardType?.type === 'ability_stat') {
+                    // Check if the hero's ability supports this stat
+                    return rewardType.ability_stat in hero.ability;
+                }
+                return true; // Keep non-ability_stat rewards
+            });
+        }
 
         // Select 3 rewards randomly based on weights
         for (let i = 0; i < 3 && availableRewards.length > 0; i++) {
@@ -67,6 +80,19 @@ export class RewardManager {
             const abilityFactory = new AbilityFactory(gameplayConfig);
             hero.ability = abilityFactory.create(rewardType.abilityType);
             return true;
+        } else if (rewardType.type === 'ability_stat') {
+            // Apply stat modification directly to the hero's current ability
+            const statName = rewardType.ability_stat as keyof typeof hero.ability;
+            if (statName in hero.ability && typeof (hero.ability as any)[statName] === 'number') {
+                const currentValue = (hero.ability as any)[statName] as number;
+                if (rewardType.modifier.type === 'percent') {
+                    (hero.ability as any)[statName] = Math.round(currentValue * rewardType.modifier.value);
+                } else if (rewardType.modifier.type === 'flat') {
+                    (hero.ability as any)[statName] = currentValue + rewardType.modifier.value;
+                }
+                return true;
+            }
+            return false;
         }
 
         // This should never be reached since we handle all known reward types above

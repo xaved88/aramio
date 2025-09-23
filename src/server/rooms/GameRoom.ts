@@ -361,7 +361,7 @@ export class GameRoom extends Room<GameState> {
                     // Generate new reward choices for the next chest if there are more
                     if (heroCombatant.levelRewards.length > 0) {
                         const nextChestType = heroCombatant.levelRewards[0];
-                        const rewards = RewardManager.generateRewardsFromChest(nextChestType, this.gameplayConfig);
+                        const rewards = RewardManager.generateRewardsFromChest(nextChestType, this.gameplayConfig, heroCombatant);
                         heroCombatant.rewardsForChoice.push(...rewards);
                     }
                     

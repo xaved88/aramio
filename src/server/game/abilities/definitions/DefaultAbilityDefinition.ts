@@ -32,8 +32,6 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
         ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
         
-        // Scale range
-        ability.range += config.RANGE_PER_LEVEL;
     }
 
     useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
@@ -90,6 +88,7 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         this.createProjectile(heroId, targetX, targetY, state, ability, gameplayConfig);
         return true;
     }
+
 
     private createProjectile(heroId: string, targetX: number, targetY: number, state: any, ability: DefaultAbility, gameplayConfig: GameplayConfig): void {
         // Find hero by ID
