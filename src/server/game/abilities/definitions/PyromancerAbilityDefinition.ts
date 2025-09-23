@@ -29,7 +29,6 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
 
     onLevelUp(ability: PyromancerAbility, gameplayConfig: GameplayConfig): void {
         const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
-        ability.strength += config.STRENGTH_PER_LEVEL;
         ability.radius += config.RADIUS_PER_LEVEL;
     }
 
