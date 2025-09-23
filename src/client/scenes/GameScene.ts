@@ -79,10 +79,11 @@ export class GameScene extends Phaser.Scene {
         try {
             // Check if we have lobby data from lobby
             const lobbyData = (this.scene.settings.data as any)?.lobbyData;
+            const playerLobbyId = (this.scene.settings.data as any)?.playerLobbyId;
             
             if (lobbyData) {
                 // Connect to game room with lobby data
-                const { client, room, sessionId } = await this.connectionManager.connectToGame(lobbyData);
+                const { client, room, sessionId } = await this.connectionManager.connectToGame(lobbyData, playerLobbyId);
                 this.client = client;
                 this.room = room;
                 this.playerSessionId = sessionId;

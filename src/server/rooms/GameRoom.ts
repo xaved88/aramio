@@ -141,12 +141,31 @@ export class GameRoom extends Room<GameState> {
     onJoin(client: Client, options: any) {
         console.log(`${client.sessionId} joined`);
         
-        // Determine team based on current player hero count (excluding bots)
-        const currentPlayerHeroCount = Array.from(this.state.combatants.values())
-            .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot')).length;
-        const team = currentPlayerHeroCount % 2 === 0 
-            ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
-            : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
+        let team: 'blue' | 'red';
+        const playerLobbyId: string | undefined = options?.playerLobbyId;
+        
+        // If we have lobby data, find the player's team from lobby
+        if (this.lobbyData) {
+            const lobbyTeam = this.getPlayerTeamFromLobby(playerLobbyId || client.sessionId);
+            if (lobbyTeam) {
+                team = lobbyTeam;
+            } else {
+                console.warn(`Player ${client.sessionId} not found in lobby data, using default team assignment`);
+                // Fall back to default team assignment
+                const currentPlayerHeroCount = Array.from(this.state.combatants.values())
+                    .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot')).length;
+                team = currentPlayerHeroCount % 2 === 0 
+                    ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
+                    : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
+            }
+        } else {
+            // Determine team based on current player hero count (excluding bots)
+            const currentPlayerHeroCount = Array.from(this.state.combatants.values())
+                .filter(c => c.type === COMBATANT_TYPES.HERO && !(c as any).controller.startsWith('bot')).length;
+            team = currentPlayerHeroCount % 2 === 0 
+                ? SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.EVEN_PLAYER_COUNT_TEAM 
+                : SERVER_CONFIG.ROOM.TEAM_ASSIGNMENT.ODD_PLAYER_COUNT_TEAM;
+        }
         
         // Try to replace a bot on the appropriate team
         const replacedBot = this.replaceBotWithPlayer(client.sessionId, team);
@@ -156,6 +175,9 @@ export class GameRoom extends Room<GameState> {
             this.gameEngine.spawnControlledHero(client.sessionId, team);
             // The hero ID will be set in the next update cycle when we process the spawn action
         }
+        
+        // Update player name from lobby data if available
+        this.updatePlayerNameFromLobby(playerLobbyId || client.sessionId, client.sessionId);
     }
 
     onLeave(client: Client, consented: boolean) {
@@ -354,6 +376,86 @@ export class GameRoom extends Room<GameState> {
         }
     }
 
+
+
+    private getPlayerTeamFromLobby(lobbyPlayerId: string): 'blue' | 'red' | null {
+        if (!this.lobbyData) {
+            console.log('No lobby data available');
+            return null;
+        }
+        
+        console.log('Lobby data:', JSON.stringify(this.lobbyData, null, 2));
+        console.log('Looking for lobby player:', lobbyPlayerId);
+        
+        // Check blue team
+        for (const slot of this.lobbyData.blueTeam) {
+            if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                console.log('Found player in blue team');
+                return 'blue';
+            }
+        }
+        
+        // Check red team
+        for (const slot of this.lobbyData.redTeam) {
+            if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                console.log('Found player in red team');
+                return 'red';
+            }
+        }
+        
+        console.log('Player not found in lobby data');
+        return null;
+    }
+
+    private updatePlayerNameFromLobby(lobbyPlayerId: string, gameSessionId: string): void {
+        if (!this.lobbyData) {
+            console.log('No lobby data available for name update');
+            return;
+        }
+        
+        console.log('Updating player name for lobby player:', lobbyPlayerId);
+        
+        // Find player's name from lobby data
+        let playerName: string | null = null;
+        
+        // Check blue team
+        for (const slot of this.lobbyData.blueTeam) {
+            if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                playerName = slot.playerName;
+                console.log('Found player name in blue team:', playerName);
+                break;
+            }
+        }
+        
+        // Check red team if not found in blue
+        if (!playerName) {
+            for (const slot of this.lobbyData.redTeam) {
+                if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                    playerName = slot.playerName;
+                    console.log('Found player name in red team:', playerName);
+                    break;
+                }
+            }
+        }
+        
+        // Update the hero's name if found
+        if (playerName) {
+            let heroFound = false;
+            this.state.combatants.forEach((combatant: any) => {
+                if (combatant.type === COMBATANT_TYPES.HERO && combatant.controller === gameSessionId) {
+                    combatant.playerName = playerName;
+                    console.log(`Updated player ${gameSessionId} name to: ${playerName}`);
+                    heroFound = true;
+                }
+            });
+            
+            if (!heroFound) {
+                console.log(`No hero found for player ${gameSessionId} to update name`);
+            }
+        } else {
+            console.log(`No player name found in lobby data for lobby player ${lobbyPlayerId}`);
+        }
+    }
 
     private replaceBotWithPlayer(playerId: ControllerId, team: string): boolean {
         // Find a bot on the specified team to replace

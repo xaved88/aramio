@@ -36,14 +36,14 @@ export class ConnectionManager {
         return { client: this.client, room: this.room, sessionId };
     }
 
-    async connectToGame(lobbyData: any): Promise<{ client: Client; room: any; sessionId: string }> {
+    async connectToGame(lobbyData: any, playerLobbyId?: string): Promise<{ client: Client; room: any; sessionId: string }> {
         const serverUrl = this.getServerUrl();
 
         this.client = new Client(serverUrl);
         console.log(`Attempting to connect to game room with lobby data:`, lobbyData);
         
         console.log('Attempting to join or create game room...');
-        this.room = await this.client.joinOrCreate('game', { lobbyData: lobbyData });
+        this.room = await this.client.joinOrCreate('game', { lobbyData: lobbyData, playerLobbyId });
         console.log('Connected to game');
         
         const sessionId = this.room.sessionId;

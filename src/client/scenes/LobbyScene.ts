@@ -60,7 +60,7 @@ export class LobbyScene extends Phaser.Scene {
 
         this.room.onMessage('gameStarting', (message: any) => {
             console.log('Game starting, transitioning to game scene...');
-            this.scene.start('GameScene', { lobbyData: message.lobbyData });
+            this.scene.start('GameScene', { lobbyData: message.lobbyData, playerLobbyId: this.playerSessionId });
         });
 
         this.room.onLeave(() => {
