@@ -166,6 +166,7 @@ export const CLIENT_CONFIG = {
             ERROR: '16px',
             VICTORY: '48px',
             DEFAULT_FAMILY: 'Arial',
+            PRIMARY: 'Arial',
         },
         COLORS: {
             TEXT_PRIMARY: 0xffffff,
@@ -173,6 +174,13 @@ export const CLIENT_CONFIG = {
             ERROR: 0xff0000,
             VICTORY: 0x2ecc71, // green
             DEFEAT: 0xe74c3c, // red
+            PRIMARY: 0x3498db, // blue
+            TEXT: 0xffffff, // white
+            BACKGROUND: 0x2c3e50, // dark blue-gray
+            SUCCESS: 0x2ecc71, // green
+            DISABLED: 0x7f8c8d, // gray
+            BLUE: 0x3498db, // blue
+            RED: 0xe74c3c, // red
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,

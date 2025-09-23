@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { GameRoom } from './rooms/GameRoom';
+import { LobbyRoom } from './rooms/LobbyRoom';
 import { SERVER_CONFIG } from '../ServerConfig';
 import { ConfigProvider, GameplayConfig } from './config/ConfigProvider';
 
@@ -30,6 +31,7 @@ const server = new Server({
     })
 });
 
+server.define('lobby', LobbyRoom, { gameplayConfig });
 server.define('game', GameRoom, { gameplayConfig });
 
 app.use('/colyseus', monitor());

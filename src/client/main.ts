@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
 import { GameScene } from './scenes/GameScene';
+import { LobbyScene } from './scenes/LobbyScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -8,7 +9,7 @@ const config: Phaser.Types.Core.GameConfig = {
     height: CLIENT_CONFIG.GAME_CANVAS_HEIGHT,
     parent: 'game-container',
     backgroundColor: CLIENT_CONFIG.UI.BACKGROUND.GAME_CANVAS,
-    scene: [GameScene],
+    scene: [LobbyScene, GameScene],
     physics: {
         default: 'arcade',
         arcade: {

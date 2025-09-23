@@ -77,10 +77,22 @@ export class GameScene extends Phaser.Scene {
         this.connectionManager = new ConnectionManager();
         
         try {
-            const { client, room, sessionId } = await this.connectionManager.connect();
-            this.client = client;
-            this.room = room;
-            this.playerSessionId = sessionId;
+            // Check if we have lobby data from lobby
+            const lobbyData = (this.scene.settings.data as any)?.lobbyData;
+            
+            if (lobbyData) {
+                // Connect to game room with lobby data
+                const { client, room, sessionId } = await this.connectionManager.connectToGame(lobbyData);
+                this.client = client;
+                this.room = room;
+                this.playerSessionId = sessionId;
+            } else {
+                // Fallback: connect to lobby (shouldn't happen in normal flow)
+                const { client, room, sessionId } = await this.connectionManager.connectToLobby();
+                this.client = client;
+                this.room = room;
+                this.playerSessionId = sessionId;
+            }
             
             // Set up room handlers
             this.setupRoomHandlers();
@@ -117,9 +129,9 @@ export class GameScene extends Phaser.Scene {
         this.debugOverlay = new DebugOverlay(this, this.gameObjectFactory);
         this.debugOverlay.initialize();
         
-        // Initialize input handler
+        // Initialize input handler (but don't set up handlers - GameScene handles input)
         this.inputHandler = new InputHandler(this, this.room);
-        this.inputHandler.setupHandlers();
+        // Note: setupHandlers() is not called to avoid conflicts with GameScene's input handling
         
         // Create ability range display
         this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
@@ -332,6 +344,11 @@ export class GameScene extends Phaser.Scene {
             }, 100);
         });
         
+        this.room.onMessage('returnToLobby', () => {
+            console.log('Returning to lobby...');
+            this.scene.start('LobbyScene');
+        });
+
         this.room.onLeave((code: number) => {
             console.log('Left room with code:', code);
             // When disconnected, restart the entire scene for a fresh game

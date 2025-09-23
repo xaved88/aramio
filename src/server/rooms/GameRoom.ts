@@ -17,11 +17,15 @@ export class GameRoom extends Room<GameState> {
     private botManager!: BotManager;
     private restartTimer: NodeJS.Timeout | null = null;
     private gameplayConfig!: GameplayConfig;
+    private lobbyData: any = null;
 
 
     onCreate(options: any) {
         // Initialize gameplay config from options
         this.gameplayConfig = options.gameplayConfig;
+        
+        // Store lobby data if provided
+        this.lobbyData = options.lobbyData || null;
         
         this.initializeGame();
         this.setupMessageHandlers();
@@ -82,6 +86,7 @@ export class GameRoom extends Room<GameState> {
         this.onMessage('useAbility', (client, data) => {
             const heroId = this.findHeroByController(client.sessionId);
             if (heroId) {
+                console.log(`Ability used by ${client.sessionId} (hero: ${heroId}) at (${data.x}, ${data.y})`);
                 this.commands.push({
                     type: 'useAbility',
                     data: {
@@ -90,6 +95,8 @@ export class GameRoom extends Room<GameState> {
                         y: data.y
                     }
                 });
+            } else {
+                console.warn(`No hero found for controller ${client.sessionId} when trying to use ability`);
             }
         });
 
@@ -156,10 +163,48 @@ export class GameRoom extends Room<GameState> {
         
         // Find the hero controlled by this player and replace it with a bot
         this.replacePlayerWithBot(client.sessionId);
+        
+        // Check if there are any human players left
+        this.checkForEmptyRoom();
     }
 
     onDispose() {
         console.log('Room disposed');
+    }
+
+    private checkForEmptyRoom(): void {
+        // Count human players (non-bot controllers)
+        let humanPlayerCount = 0;
+        this.state.combatants.forEach((combatant: any) => {
+            if (combatant.type === COMBATANT_TYPES.HERO && 
+                combatant.controller && 
+                !combatant.controller.startsWith('bot')) {
+                humanPlayerCount++;
+            }
+        });
+
+        // If no human players left, destroy the room after a short delay
+        if (humanPlayerCount === 0) {
+            console.log('No human players left in game room, destroying in 5 seconds...');
+            setTimeout(() => {
+                // Double-check that no humans joined in the meantime
+                let currentHumanCount = 0;
+                this.state.combatants.forEach((combatant: any) => {
+                    if (combatant.type === COMBATANT_TYPES.HERO && 
+                        combatant.controller && 
+                        !combatant.controller.startsWith('bot')) {
+                        currentHumanCount++;
+                    }
+                });
+
+                if (currentHumanCount === 0) {
+                    console.log('Destroying empty game room');
+                    this.disconnect();
+                } else {
+                    console.log('Human players rejoined, keeping room alive');
+                }
+            }, SERVER_CONFIG.ROOM.EMPTY_ROOM_CLEANUP_DELAY_MS);
+        }
     }
 
     private update() {
@@ -283,7 +328,16 @@ export class GameRoom extends Room<GameState> {
         const blueSpawnPositions = this.gameplayConfig.HERO_SPAWN_POSITIONS.BLUE;
         const redSpawnPositions = this.gameplayConfig.HERO_SPAWN_POSITIONS.RED;
         const botAbilityTypes = this.gameplayConfig.BOTS.ABILITY_TYPES;
-        const botsPerTeam = this.gameplayConfig.BOTS.BOTS_PER_TEAM;
+        
+        // Use lobby data if available, otherwise use config defaults
+        let botsPerTeam: number;
+        if (this.lobbyData) {
+            // Calculate bots needed to fill team size
+            const teamSize = this.lobbyData.teamSize || 5;
+            botsPerTeam = teamSize; // Will be reduced by actual players in onJoin
+        } else {
+            botsPerTeam = this.gameplayConfig.BOTS.BOTS_PER_TEAM;
+        }
         
         // Spawn bots for each team
         this.spawnBotsForTeam('blue', blueSpawnPositions, botAbilityTypes, botsPerTeam);
@@ -408,14 +462,35 @@ export class GameRoom extends Room<GameState> {
     private handleGameOver(payload: any): void {
         console.log(`Game over! Winning team: ${payload.winningTeam}`);
         
-        // Set a timer to restart the game after a few seconds
+        // Set a timer to return to lobby after a few seconds
         if (this.restartTimer) {
             clearTimeout(this.restartTimer);
         }
         
         this.restartTimer = setTimeout(() => {
-            this.restartGame();
+            this.returnToLobby();
         }, SERVER_CONFIG.ROOM.GAME_RESTART_DELAY_MS);
+    }
+
+    private returnToLobby(): void {
+        console.log('Returning players to lobby...');
+        
+        // Clear restart timer
+        if (this.restartTimer) {
+            clearTimeout(this.restartTimer);
+            this.restartTimer = null;
+        }
+        
+        // Notify clients to return to lobby
+        this.broadcast('returnToLobby', {});
+        
+        // Disconnect all clients so they can reconnect to lobby
+        this.clients.forEach(client => {
+            client.leave();
+        });
+        
+        // Dispose the room
+        this.disconnect();
     }
 
     private restartGame(): void {

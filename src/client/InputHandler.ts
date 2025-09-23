@@ -106,13 +106,17 @@ export class InputHandler {
     private handleAbilityUse(pointer: Phaser.Input.Pointer): void {
         const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
         this.room.send('useAbility', { 
-            targetX: worldPos.x, 
-            targetY: worldPos.y 
+            x: worldPos.x, 
+            y: worldPos.y 
         });
     }
 
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number; y: number } {
         const camera = this.scene.cameras.main;
+        if (!camera) {
+            console.warn('Camera not available for coordinate conversion');
+            return { x: 0, y: 0 };
+        }
         return {
             x: camera.scrollX + screenX,
             y: camera.scrollY + screenY
