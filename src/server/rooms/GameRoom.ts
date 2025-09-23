@@ -12,6 +12,7 @@ import { GameplayConfig } from '../config/ConfigProvider';
 export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
     private commands: GameCommand[] = [];
+    private lastMoveCommands: Map<CombatantId, GameMoveCommand> = new Map();
     private lastUpdateTime = 0;
     private gameEngine!: GameEngine;
     private botManager!: BotManager;
@@ -183,7 +184,13 @@ export class GameRoom extends Room<GameState> {
     onLeave(client: Client, consented: boolean) {
         console.log(`${client.sessionId} left`);
         
-        // Find the hero controlled by this player and replace it with a bot
+        // Find the hero controlled by this player and clean up their move command
+        const heroId = this.findHeroByController(client.sessionId);
+        if (heroId) {
+            this.lastMoveCommands.delete(heroId);
+        }
+        
+        // Replace player with a bot
         this.replacePlayerWithBot(client.sessionId);
         
         // Check if there are any human players left
@@ -266,6 +273,8 @@ export class GameRoom extends Room<GameState> {
         this.commands.forEach(command => {
             if (command.type === 'move') {
                 latestMoveCommands.set(command.data.heroId, command);
+                // Store the latest move command for each hero
+                this.lastMoveCommands.set(command.data.heroId, command as GameMoveCommand);
             } else {
                 otherCommands.push(command);
             }
@@ -274,6 +283,26 @@ export class GameRoom extends Room<GameState> {
         // Process latest move commands
         latestMoveCommands.forEach(command => {
             this.processCommand(command);
+        });
+        
+        // For heroes that didn't send move commands this frame, continue with their last move command
+        // This enables Control Scheme C to work - when client stops sending move events (mouse down),
+        // server continues with the last direction
+        this.lastMoveCommands.forEach((lastCommand, heroId) => {
+            if (!latestMoveCommands.has(heroId)) {
+                // Check if hero is close to target before continuing movement
+                const hero = this.state.combatants.get(heroId);
+                if (hero && hero.type === 'hero') {
+                    const dx = lastCommand.data.targetX - hero.x;
+                    const dy = lastCommand.data.targetY - hero.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Only continue moving if not close to target (within stop distance)
+                    if (distance > this.gameplayConfig.HERO_STOP_DISTANCE) {
+                        this.processCommand(lastCommand);
+                    }
+                }
+            }
         });
         
         // Process all other commands

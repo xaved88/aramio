@@ -27,17 +27,7 @@ export class InputHandler {
                 this.handleMoveTarget(pointer);
             });
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Scheme C: point to move when not clicking, hold position when clicking
-            this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                this.isClickHeld = true;
-                this.moveTarget = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.handleAbilityUse(pointer);
-            });
-            
-            this.scene.input.on('pointerup', () => {
-                this.isClickHeld = false;
-                this.moveTarget = null;
-            });
+            // Scheme C: handled by GameScene, no duplicate handlers needed
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
             // Scheme D: point to move when not clicking, stop moving when clicking
             this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -70,32 +60,29 @@ export class InputHandler {
                 });
             }
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Control scheme C: point to move when not clicking, hold position when clicking
-            if (!this.isClickHeld) {
+            // Control scheme C: move to pointer when not clicking; stop sending move events when clicking
+            // Check GameScene's isClickHeld state since GameScene handles Control Scheme C
+            const gameScene = this.scene as any;
+            if (!gameScene.isClickHeld) {
                 const pointer = this.scene.input.activePointer;
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', { 
-                    targetX: worldPos.x, 
-                    targetY: worldPos.y 
-                });
-            } else if (this.moveTarget) {
-                // When click is held, keep moving to the click-down position
                 this.room.send('move', {
-                    targetX: this.moveTarget.x,
-                    targetY: this.moveTarget.y
+                    targetX: worldPos.x,
+                    targetY: worldPos.y
                 });
             }
+            // When clicking (isClickHeld = true), don't send move events - server will continue with last direction
         } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
             // Control scheme D: point to move when not clicking, stop moving when clicking
-            if (!this.isClickHeld) {
-                const pointer = this.scene.input.activePointer;
+            const pointer = this.scene.input.activePointer;
+            if (!pointer.isDown) {
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', { 
-                    targetX: worldPos.x, 
-                    targetY: worldPos.y 
+                this.room.send('move', {
+                    targetX: worldPos.x,
+                    targetY: worldPos.y
                 });
             }
-            // When click is held, don't send move commands (stop moving)
+            // if pointer is down, do not emit move commands
         }
     }
 
