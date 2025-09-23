@@ -88,7 +88,6 @@ export const GAMEPLAY_CONFIG = {
                 SPEED: 250, // pixels per second (base speed)
                 RANGE: 125, // base range
                 STUN_DURATION_MS: 700, // 700ms base stun duration
-                STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
             },
             'mercenary': {
                 COOLDOWN_MS: 8000,
@@ -97,7 +96,6 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_BOOST_PER_LEVEL: 0.10, // +10% per level
                 MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost
                 MOVE_SPEED_BOOST_PER_LEVEL: 0.07, // +7% per level
-                DURATION_BOOST_PER_LEVEL_MS: 100, // +0.1 second per level
                 RAGE_ATTACK_RADIUS: 25,
                 RAGE_WIND_UP: 0.1,
                 RAGE_BULLET_ARMOR: 200, // Bullet armor granted during rage
@@ -120,9 +118,7 @@ export const GAMEPLAY_CONFIG = {
                 LANDING_RADIUS: 50, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
                 TAUNT_RADIUS: 50, // Radius for taunt effect
                 TAUNT_DURATION_MS: 1000, // Base taunt duration (1 second)
-                TAUNT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
                 REFLECT_DURATION_MS: 3000, // Base reflect duration (3 seconds)
-                REFLECT_DURATION_PER_LEVEL_MS: 100, // +0.1 second per level
                 REFLECT_PERCENTAGE: 100, // 100% damage reflection
                 ARMOR_BONUS_BULLET: 50, // Additional bullet armor during effect
                 ARMOR_BONUS_ABILITY: 50, // Additional ability armor during effect
@@ -238,8 +234,9 @@ export const GAMEPLAY_CONFIG = {
             },
             ability_stats: {
                 rewards: [
-                    { id: "ability_stat:range", weight: 50 },
-                    { id: "ability_stat:strength", weight: 50 },
+                    { id: "ability_stat:range", weight: 40 },
+                    { id: "ability_stat:strength", weight: 40 },
+                    { id: "ability_stat:duration", weight: 20 },
                     { id: "stat:health", weight: 1 },
                     { id: "stat:defense", weight: 1 },
                     { id: "stat:damage", weight: 1 },
@@ -314,6 +311,11 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability_stat",
                 ability_stat: "strength",
                 modifier: { type: "percent", value: 1.20 }
+            },
+            "ability_stat:duration": {
+                type: "ability_stat",
+                ability_stat: "duration",
+                modifier: { type: "percent", value: 1.25 }
             }
         }
     },

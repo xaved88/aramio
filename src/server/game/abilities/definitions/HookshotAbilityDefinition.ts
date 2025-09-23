@@ -25,6 +25,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         ability.lastUsedTime = 0;
         ability.strength = config.STRENGTH;
         ability.range = config.RANGE;
+        ability.duration = config.STUN_DURATION_MS;
         
         return ability;
     }
@@ -110,8 +111,8 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         
         const speed = config.SPEED;
         
-        // Calculate scaled stun duration (base duration + 100ms per level)
-        const scaledStunDuration = config.STUN_DURATION_MS + (config.STUN_DURATION_PER_LEVEL_MS * (heroLevel - 1));
+        // Use flat duration (no level scaling)
+        const stunDuration = ability.duration;
         
         // Create projectile
         const projectile = new Projectile();
@@ -141,7 +142,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         stunEffect.effectType = 'applyEffect';
         stunEffect.combatantEffect = new StunEffect();
         stunEffect.combatantEffect.type = 'stun';
-        stunEffect.combatantEffect.duration = scaledStunDuration;
+        stunEffect.combatantEffect.duration = stunDuration;
         stunEffect.combatantEffect.appliedAt = state.gameTime;
 
         // Create nocollision effect
