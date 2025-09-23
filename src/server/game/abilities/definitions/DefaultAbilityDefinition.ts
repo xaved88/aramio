@@ -27,11 +27,6 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
     }
 
     onLevelUp(ability: DefaultAbility, gameplayConfig: GameplayConfig): void {
-        const config = gameplayConfig.COMBAT.ABILITIES.default;
-        
-        const abilityBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE;
-        ability.strength = Math.round(ability.strength * abilityBoostMultiplier);
-        
     }
 
     useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {

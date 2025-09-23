@@ -65,13 +65,13 @@ GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.RAGE_ABILITY_ARMOR = 25; // Reduc
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 1200; // Faster cooldown (was 2000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH = 20; // Much higher damage (was 10)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH_PER_LEVEL = 8; // Higher scaling (was 5)
+// STRENGTH_PER_LEVEL removed - strength now improved through rewards
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.SPEED = 250; // Faster projectiles (was 200)
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.COOLDOWN_MS = 7000; // Faster cooldown (was 11000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.DASH_SPEED = 500; // Faster dash (was 400)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.LANDING_DAMAGE = 20; // Higher damage (was 10)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.LANDING_DAMAGE_PER_LEVEL = 10; // Higher scaling (was 6)
+// LANDING_DAMAGE_PER_LEVEL removed - strength now improved through rewards
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.TAUNT_DURATION_MS = 800; // Shorter taunt (was 1000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.REFLECT_DURATION_MS = 2000; // Shorter reflect (was 3000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.ARMOR_BONUS_BULLET = 25; // Reduced armor (was 50)

@@ -23,6 +23,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
+        ability.strength = config.LANDING_DAMAGE;
         ability.range = config.RANGE;
         ability.landingRadius = config.LANDING_RADIUS;
         
@@ -63,7 +64,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
                 targetY = hero.y + directionY * ability.range;
             }
             
-            this.executeThornDive(heroId, targetX, targetY, state, 1, gameplayConfig); // Level 1 for new hero
+            this.executeThornDive(ability, heroId, targetX, targetY, state, 1, gameplayConfig); // Level 1 for new hero
             return true;
         }
         
@@ -91,11 +92,11 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         // Update last used time
         ability.lastUsedTime = currentTime;
         
-        this.executeThornDive(heroId, targetX, targetY, state, hero.level, gameplayConfig);
+        this.executeThornDive(ability, heroId, targetX, targetY, state, hero.level, gameplayConfig);
         return true;
     }
 
-    private executeThornDive(heroId: string, targetX: number, targetY: number, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
+    private executeThornDive(ability: ThorndiveAbility, heroId: string, targetX: number, targetY: number, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
         const hero = state.combatants.get(heroId);
         if (!hero) return;
 
@@ -103,7 +104,6 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         const currentTime = state.gameTime;
         
         // Calculate scaled values
-        const landingDamage = config.LANDING_DAMAGE + (config.LANDING_DAMAGE_PER_LEVEL * (heroLevel - 1));
         const tauntDuration = config.TAUNT_DURATION_MS + (config.TAUNT_DURATION_PER_LEVEL_MS * (heroLevel - 1));
         const reflectDuration = config.REFLECT_DURATION_MS + (config.REFLECT_DURATION_PER_LEVEL_MS * (heroLevel - 1));
 
@@ -159,7 +159,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         // Add landing damage effect
         const damageEffect = new ProjectileEffect();
         damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = landingDamage;
+        damageEffect.damage = ability.strength;
         projectile.effects.push(damageEffect);
 
         // Add taunt effect - appliedAt will be set when projectile lands

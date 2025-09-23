@@ -867,7 +867,8 @@ describe('GameStateMachine', () => {
             expect(updatedPlayer!.attackRadius).toBe(Math.round(initialAttackRadius * expectedRangeMultiplier));
             expect(updatedPlayer!.attackSpeed).toBe(initialAttackSpeed * expectedStatMultiplier);
             expect(updatedPlayer!.respawnDuration).toBe(Math.round(initialRespawnDuration * expectedStatMultiplier));
-            expect((updatedPlayer!.ability as DefaultAbility).strength).toBe(Math.round(initialAbilityStrength * expectedAbilityMultiplier));
+            // Ability strength no longer increases automatically on level up (now handled by rewards)
+            expect((updatedPlayer!.ability as DefaultAbility).strength).toBe(initialAbilityStrength);
             
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;

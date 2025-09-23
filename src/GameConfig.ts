@@ -81,14 +81,12 @@ export const GAMEPLAY_CONFIG = {
                 STRENGTH: 7, // damage dealt by projectile
                 SPEED: 200, // pixels per second
                 RANGE: 100, // base range (infinite duration projectiles)
-                RANGE_PER_LEVEL: 5, // additional range per level
             },
             'hookshot': {
                 COOLDOWN_MS: 5000,
                 STRENGTH: 3, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
                 RANGE: 125, // base range
-                RANGE_PER_LEVEL: 8.75, // additional range per level (7% of base range)
                 STUN_DURATION_MS: 700, // 700ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
                 SPEED_BOOST_PERCENTAGE: 0.07, // +7% speed per level
@@ -109,11 +107,9 @@ export const GAMEPLAY_CONFIG = {
             'pyromancer': {
                 COOLDOWN_MS: 2000,
                 STRENGTH: 10,
-                STRENGTH_PER_LEVEL: 5, // linear scaling (exponent is in the aoe)
                 RADIUS: 30,
                 RADIUS_PER_LEVEL: 2.5,
                 RANGE: 150,
-                RANGE_PER_LEVEL: 20,
                 SPEED: 200, 
                 SPEED_PER_LEVEL: 20
             },
@@ -122,9 +118,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_REDUCTION_PER_LEVEL: 0.08, // Reduce cooldown by 8% per level
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
                 RANGE: 100, // Base dash range
-                RANGE_PER_LEVEL: 5, // Additional range per level
                 LANDING_DAMAGE: 10, // Base landing damage
-                LANDING_DAMAGE_PER_LEVEL: 6, // Additional damage per level
                 LANDING_RADIUS: 50, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
                 TAUNT_RADIUS: 50, // Radius for taunt effect
                 TAUNT_DURATION_MS: 1000, // Base taunt duration (1 second)
@@ -140,7 +134,6 @@ export const GAMEPLAY_CONFIG = {
                 STRENGTH: 7, // Same as default
                 SPEED: 200, // Same as default
                 RANGE: 300, // Longer range than default
-                RANGE_PER_LEVEL: 10, // More range per level than default
             }
         },
         CRADLE: {
@@ -247,7 +240,8 @@ export const GAMEPLAY_CONFIG = {
             },
             ability_stats: {
                 rewards: [
-                    { id: "ability_stat:range", weight: 90 },
+                    { id: "ability_stat:range", weight: 50 },
+                    { id: "ability_stat:strength", weight: 50 },
                     { id: "stat:health", weight: 1 },
                     { id: "stat:defense", weight: 1 },
                     { id: "stat:damage", weight: 1 },
@@ -317,6 +311,11 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability_stat",
                 ability_stat: "range",
                 modifier: { type: "percent", value: 1.50 }
+            },
+            "ability_stat:strength": {
+                type: "ability_stat",
+                ability_stat: "strength",
+                modifier: { type: "percent", value: 1.20 }
             }
         }
     },
