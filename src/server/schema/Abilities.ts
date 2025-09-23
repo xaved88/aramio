@@ -23,6 +23,7 @@ export class HookshotAbility extends Ability {
   }
   @type('number') strength!: number; // damage dealt by ability
   @type('number') range!: number; // projectile range
+  @type('number') duration!: number; // stun duration in ms
 }
 
 export class MercenaryAbility extends Ability {
@@ -30,6 +31,7 @@ export class MercenaryAbility extends Ability {
         super();
         this.type = ABILITY_TYPES.MERCENARY;
     }
+    @type('number') duration!: number; // rage duration in ms
 }
 
 export class PyromancerAbility extends Ability {
@@ -49,6 +51,8 @@ export class ThorndiveAbility extends Ability {
     }
     @type('number') strength!: number; // damage dealt by ability (landing damage)
     @type('number') range!: number; // dash range
+    @type('number') duration!: number; // reflect duration in ms
+    @type('number') tauntDuration!: number; // taunt duration in ms
     @type('number') landingRadius!: number; // AOE radius for landing damage
 }
 

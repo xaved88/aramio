@@ -25,6 +25,8 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         ability.lastUsedTime = 0;
         ability.strength = config.LANDING_DAMAGE;
         ability.range = config.RANGE;
+        ability.duration = config.REFLECT_DURATION_MS;
+        ability.tauntDuration = config.TAUNT_DURATION_MS;
         ability.landingRadius = config.LANDING_RADIUS;
         
         return ability;
@@ -104,8 +106,8 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         const currentTime = state.gameTime;
         
         // Calculate scaled values
-        const tauntDuration = config.TAUNT_DURATION_MS + (config.TAUNT_DURATION_PER_LEVEL_MS * (heroLevel - 1));
-        const reflectDuration = config.REFLECT_DURATION_MS + (config.REFLECT_DURATION_PER_LEVEL_MS * (heroLevel - 1));
+        const tauntDuration = ability.tauntDuration; // Flat duration, no level scaling
+        const reflectDuration = ability.duration; // Use flat duration (no level scaling)
 
         // 1. Create dash movement effect
         const moveEffect = new MoveEffect();

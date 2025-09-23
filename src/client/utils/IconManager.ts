@@ -36,6 +36,7 @@ export class IconManager {
             // Ability stat upgrade icons
             'ability_stat:range': 'stats/ability_range_waves',
             'ability_stat:strength': 'stats/ability_power_wand',
+            'ability_stat:duration': 'stats/cooldown_stopwatch',
             
             // Direct stat names for other uses
             'health': 'stats/health_plus',

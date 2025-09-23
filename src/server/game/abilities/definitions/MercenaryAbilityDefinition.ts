@@ -21,6 +21,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
+        ability.duration = config.DURATION_MS;
         
         return ability;
     }
@@ -35,7 +36,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
         if (ability.lastUsedTime === 0) {
             ability.lastUsedTime = currentTime;
-            this.applyRageEffects(heroId, state, 1, gameplayConfig); // Level 1 for new hero
+            this.applyRageEffects(ability, heroId, state, 1, gameplayConfig); // Level 1 for new hero
             return true;
         }
         
@@ -51,11 +52,11 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         const hero = state.combatants.get(heroId);
         if (!hero) return false;
         
-        this.applyRageEffects(heroId, state, hero.level, gameplayConfig);
+        this.applyRageEffects(ability, heroId, state, hero.level, gameplayConfig);
         return true;
     }
 
-    private applyRageEffects(heroId: string, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
+    private applyRageEffects(ability: MercenaryAbility, heroId: string, state: any, heroLevel: number, gameplayConfig: GameplayConfig): void {
         const hero = state.combatants.get(heroId);
         if (!hero) return;
 
@@ -65,7 +66,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         // Calculate scaled values
         const attackBoost = config.ATTACK_BOOST_BASE + (config.ATTACK_BOOST_PER_LEVEL * (heroLevel - 1));
         const moveSpeedBoost = 1 + config.MOVE_SPEED_BOOST_BASE + (config.MOVE_SPEED_BOOST_PER_LEVEL * (heroLevel - 1));
-        const duration = config.DURATION_MS + (config.DURATION_BOOST_PER_LEVEL_MS * (heroLevel - 1));
+        const duration = ability.duration; // Use flat duration (no level scaling)
 
         // Attack strength boost (300% base + 10% per level)
         const attackStrengthEffect = new StatModEffect();
