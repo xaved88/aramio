@@ -7,7 +7,11 @@ export const CLIENT_CONFIG = {
         LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)
     },
     CONTROLS: {
-        SCHEME: 'C' as 'A' | 'B' | 'C' | 'D', // A: point-to-move + click-for-ability, B: click-to-move + space+point-for-ability, C: point-to-move + click-down-to-stop + click-up-for-ability, D: point-to-move + click-down-to-stop-moving + click-up-for-ability
+        // Control Scheme C: point-to-move + click-down-to-stop + click-up-for-ability
+        // This is the only control scheme - InputHandler is the single source of truth for all input
+        POINT_TO_MOVE: true, // Move towards mouse pointer when not clicking
+        CLICK_DOWN_TO_STOP: true, // Stop sending move events when mouse is held down
+        CLICK_UP_FOR_ABILITY: true, // Fire ability when mouse is released
     },
     // Canvas/Viewport size (what the player sees)
     GAME_CANVAS_WIDTH: 700,

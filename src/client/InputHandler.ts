@@ -2,100 +2,114 @@ import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
 
 /**
- * Handles all input schemes and control logic
+ * SINGLE SOURCE OF TRUTH FOR ALL INPUT HANDLING
+ * 
+ * This class handles ALL input for the game. It is the only place where input events
+ * are processed and converted to game commands. This centralized approach allows for:
+ * - Easy addition of new input methods (touch, controller, etc.)
+ * - Consistent input handling across the entire game
+ * - Simple modification of control schemes
+ * - Better testing and debugging of input logic
+ * 
+ * Control Scheme: Point-to-move + Click-down-to-stop + Click-up-for-ability
+ * - Mouse not pressed: Move towards mouse pointer
+ * - Mouse pressed: Stop sending move events, show ability targeting
+ * - Mouse released: Fire ability at release position
  */
 export class InputHandler {
     private scene: Phaser.Scene;
     private room: any;
-    private moveTarget: { x: number; y: number } | null = null;
     private isClickHeld: boolean = false;
+    private clickDownPosition: { x: number; y: number } | null = null;
 
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
         this.room = room;
     }
 
+    /**
+     * Sets up all input event handlers
+     * This is the ONLY place where input events should be registered
+     */
     setupHandlers(): void {
-        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
-            // Scheme A: point to move, click to use ability
-            this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                this.handleAbilityUse(pointer);
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
-            // Scheme B: click to set move target, click to use ability
-            this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                this.handleMoveTarget(pointer);
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Scheme C: handled by GameScene, no duplicate handlers needed
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
-            // Scheme D: point to move when not clicking, stop moving when clicking
-            this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                this.isClickHeld = true;
-                this.moveTarget = null; // Stop moving
-                this.handleAbilityUse(pointer);
-            });
-            
-            this.scene.input.on('pointerup', () => {
-                this.isClickHeld = false;
-            });
-        }
+        // Pointer down: Start ability targeting, stop movement
+        this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            this.handlePointerDown(pointer);
+        });
+
+        // Pointer up: Fire ability, resume movement
+        this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+            this.handlePointerUp(pointer);
+        });
     }
 
+    /**
+     * Called every frame to handle continuous input (movement)
+     * This is the ONLY place where movement commands should be sent
+     */
     update(): void {
-        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
-            // Control scheme A: point to move (original behavior)
+        // Only send movement commands when not clicking (for ability targeting)
+        if (!this.isClickHeld) {
             const pointer = this.scene.input.activePointer;
             const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-            this.room.send('move', { 
-                targetX: worldPos.x, 
-                targetY: worldPos.y 
+            this.room.send('move', {
+                targetX: worldPos.x,
+                targetY: worldPos.y
             });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
-            // Control scheme B: send continuous movement to target if we have one
-            if (this.moveTarget) {
-                this.room.send('move', {
-                    targetX: this.moveTarget.x,
-                    targetY: this.moveTarget.y
-                });
-            }
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Control scheme C: move to pointer when not clicking; stop sending move events when clicking
-            // Check GameScene's isClickHeld state since GameScene handles Control Scheme C
-            const gameScene = this.scene as any;
-            if (!gameScene.isClickHeld) {
-                const pointer = this.scene.input.activePointer;
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', {
-                    targetX: worldPos.x,
-                    targetY: worldPos.y
-                });
-            }
-            // When clicking (isClickHeld = true), don't send move events - server will continue with last direction
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
-            // Control scheme D: point to move when not clicking, stop moving when clicking
-            const pointer = this.scene.input.activePointer;
-            if (!pointer.isDown) {
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('move', {
-                    targetX: worldPos.x,
-                    targetY: worldPos.y
-                });
-            }
-            // if pointer is down, do not emit move commands
+        }
+        // When clicking (isClickHeld = true), don't send move events - server will continue with last direction
+    }
+
+    /**
+     * Handles pointer down events - starts ability targeting
+     */
+    private handlePointerDown(pointer: Phaser.Input.Pointer): void {
+        this.isClickHeld = true;
+        const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+        this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
+        
+        // Notify scene for UI updates (ability range display)
+        this.notifyScenePointerDown(pointer);
+    }
+
+    /**
+     * Handles pointer up events - fires ability
+     */
+    private handlePointerUp(pointer: Phaser.Input.Pointer): void {
+        if (this.isClickHeld) {
+            // Fire ability at release position
+            const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+            this.room.send('useAbility', {
+                x: worldPos.x,
+                y: worldPos.y
+            });
+            
+            // Notify scene for UI updates (hide ability range display)
+            this.notifyScenePointerUp(pointer);
+        }
+        
+        this.isClickHeld = false;
+        this.clickDownPosition = null;
+    }
+
+    /**
+     * Notifies the scene about pointer down for UI updates
+     */
+    private notifyScenePointerDown(pointer: Phaser.Input.Pointer): void {
+        const gameScene = this.scene as any;
+        if (gameScene.onPointerDown) {
+            gameScene.onPointerDown(pointer);
         }
     }
 
-    private handleMoveTarget(pointer: Phaser.Input.Pointer): void {
-        this.moveTarget = this.screenToWorldCoordinates(pointer.x, pointer.y);
-    }
-
-    private handleAbilityUse(pointer: Phaser.Input.Pointer): void {
-        const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-        this.room.send('useAbility', { 
-            x: worldPos.x, 
-            y: worldPos.y 
-        });
+    /**
+     * Notifies the scene about pointer up for UI updates
+     */
+    private notifyScenePointerUp(pointer: Phaser.Input.Pointer): void {
+        const gameScene = this.scene as any;
+        if (gameScene.onPointerUp) {
+            gameScene.onPointerUp(pointer);
+        }
     }
 
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number; y: number } {

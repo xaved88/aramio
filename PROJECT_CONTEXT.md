@@ -60,7 +60,7 @@ The client uses a **component-based architecture** to reduce the "god object" pr
 - **LoadingScreen**: Manages initial loading state with "Loading..." message
 - **ConnectionManager**: Handles server connection and room joining logic
 - **DebugOverlay**: Manages coordinate grids, debug panels, and debug visualization
-- **InputHandler**: Handles all input schemes and control logic
+- **InputHandler**: **Single source of truth for ALL input handling** - centralized mouse/pointer events, movement commands, and ability casting
 - **UIManager**: Manages HUD, victory screen, and UI elements
 - **HUDRenderer**: Renders HUD elements with gameplay config injection
 - **PathRenderer**: Renders path highlights with gameplay config injection

@@ -35,10 +35,7 @@ export class GameScene extends Phaser.Scene {
     private lastState: GameState|null = null
     private playerTeam: string | null = null;
     private playerSessionId: ControllerId | null = null;
-    private spaceKeyPressed: boolean = false;
-    private moveTarget: { x: number, y: number } | null = null;
-    private isClickHeld: boolean = false;
-    private clickDownPosition: { x: number, y: number } | null = null;
+    // Input-related properties removed - InputHandler is now the single source of truth for all input
     private isRestarting: boolean = false;
     private abilityRangeDisplay: Phaser.GameObjects.Graphics | null = null;
     private coordinateGrid: Phaser.GameObjects.Graphics | null = null;
@@ -130,9 +127,9 @@ export class GameScene extends Phaser.Scene {
         this.debugOverlay = new DebugOverlay(this, this.gameObjectFactory);
         this.debugOverlay.initialize();
         
-        // Initialize input handler (but don't set up handlers - GameScene handles input)
+        // Initialize input handler - this is the single source of truth for all input
         this.inputHandler = new InputHandler(this, this.room);
-        // Note: setupHandlers() is not called to avoid conflicts with GameScene's input handling
+        this.inputHandler.setupHandlers();
         
         // Create ability range display
         this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
@@ -320,9 +317,7 @@ export class GameScene extends Phaser.Scene {
             this.lastState = null;
             this.processedAttackEvents.clear();
             this.processedDamageEvents.clear();
-            this.moveTarget = null;
-            this.clickDownPosition = null;
-            this.isClickHeld = false;
+            // Input state cleanup handled by InputHandler
             this.uiComponentsInitialized = false; // Reset UI initialization flag
             
             // Clear all entities and animations
@@ -372,96 +367,11 @@ export class GameScene extends Phaser.Scene {
         this.uiManager.setPlayerSessionId(this.playerSessionId);
     }
 
+    /**
+     * Sets up keyboard handlers only
+     * All mouse/pointer input is now handled by InputHandler
+     */
     private setupInputHandlers(): void {
-        if (CLIENT_CONFIG.CONTROLS.SCHEME === 'A') {
-            // Scheme A: point to move, click to use ability
-            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                if (this.room) {
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
-                }
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B') {
-            // Scheme B: click to move, space+point to use ability
-            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                if (this.room && !this.spaceKeyPressed) {
-                    // Click without space: set move target
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.moveTarget = { x: worldPos.x, y: worldPos.y };
-                }
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'C') {
-            // Scheme C: click down to stop at position, click up to use ability
-            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                if (this.room) {
-                    this.isClickHeld = true;
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.moveTarget = { x: worldPos.x, y: worldPos.y };
-                    this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
-                    
-                    // Show ability range display for hookshot ability (using mouse-following logic)
-                    this.updateAbilityRangeDisplayWithMouse();
-                }
-            });
-
-            this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-                if (this.room && this.isClickHeld) {
-                    // Hide ability range display
-                    this.hideAbilityRangeDisplay();
-                    
-                    // Use ability at release position (converted to world coordinates)
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
-                    this.isClickHeld = false;
-                    this.moveTarget = null; // Clear move target to resume point-to-move
-                    this.clickDownPosition = null; // Clear click-down position
-                }
-            });
-        } else if (CLIENT_CONFIG.CONTROLS.SCHEME === 'D') {
-            // Scheme D: click down to stop moving, click up to use ability
-            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-                if (this.room) {
-                    this.isClickHeld = true;
-                    // Don't set moveTarget - we want to stop moving, not move to this position
-                }
-            });
-
-            this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-                if (this.room && this.isClickHeld) {
-                    // Use ability at release position
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
-                    this.isClickHeld = false;
-                }
-            });
-        }
-
-        // Space key handlers for control scheme B
-        this.input.keyboard?.on('keydown-SPACE', () => {
-            this.spaceKeyPressed = true;
-            // Fire ability at current pointer position when space is pressed
-            if (CLIENT_CONFIG.CONTROLS.SCHEME === 'B' && this.room) {
-                const pointer = this.input.activePointer;
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
-            }
-        });
-
-        this.input.keyboard?.on('keyup-SPACE', () => {
-            this.spaceKeyPressed = false;
-        });
 
         // S key handler for hero cycling
         this.input.keyboard?.on('keydown-S', (event: KeyboardEvent) => {
@@ -496,6 +406,20 @@ export class GameScene extends Phaser.Scene {
         this.input.keyboard?.on('keyup-TAB', () => {
             this.uiManager.hideStatsOverlay();
         });
+    }
+
+    /**
+     * Callback methods for InputHandler
+     * These are called by InputHandler to handle UI updates (ability range display, etc.)
+     */
+    public onPointerDown(pointer: Phaser.Input.Pointer): void {
+        // Show ability range display for hookshot ability
+        this.updateAbilityRangeDisplayWithMouse();
+    }
+
+    public onPointerUp(pointer: Phaser.Input.Pointer): void {
+        // Hide ability range display
+        this.hideAbilityRangeDisplay();
     }
 
     private setupVisibilityHandlers(): void {
