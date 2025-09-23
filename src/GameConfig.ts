@@ -89,7 +89,6 @@ export const GAMEPLAY_CONFIG = {
                 RANGE: 125, // base range
                 STUN_DURATION_MS: 700, // 700ms base stun duration
                 STUN_DURATION_PER_LEVEL_MS: 100, // +100ms stun duration per level
-                SPEED_BOOST_PERCENTAGE: 0.07, // +7% speed per level
             },
             'mercenary': {
                 COOLDOWN_MS: 8000,
@@ -110,8 +109,7 @@ export const GAMEPLAY_CONFIG = {
                 RADIUS: 30,
                 RADIUS_PER_LEVEL: 2.5,
                 RANGE: 150,
-                SPEED: 200, 
-                SPEED_PER_LEVEL: 20
+                SPEED: 200
             },
             'thorndive': {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)

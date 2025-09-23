@@ -92,10 +92,9 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const directionX = dx / distance;
         const directionY = dy / distance;
         
-        // Calculate speed based on level
+        // Use base speed (no level scaling)
         const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
-        const level = hero.level || 1;
-        const speed = config.SPEED + (config.SPEED_PER_LEVEL * (level - 1));
+        const speed = config.SPEED;
         
         // Create projectile
         const projectile = new Projectile();

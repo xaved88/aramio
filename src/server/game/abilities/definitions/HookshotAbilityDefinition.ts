@@ -108,9 +108,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         const config = gameplayConfig.COMBAT.ABILITIES.hookshot;
         const heroLevel = (hero as Hero).level || 1;
         
-        // Calculate scaled speed (base speed + 10% per level)
-        const speedMultiplier = 1 + (config.SPEED_BOOST_PERCENTAGE * (heroLevel - 1));
-        const scaledSpeed = Math.round(config.SPEED * speedMultiplier);
+        const speed = config.SPEED;
         
         // Calculate scaled stun duration (base duration + 100ms per level)
         const scaledStunDuration = config.STUN_DURATION_MS + (config.STUN_DURATION_PER_LEVEL_MS * (heroLevel - 1));
@@ -123,7 +121,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.y = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = scaledSpeed;
+        projectile.speed = speed;
         projectile.team = hero.team;
         projectile.type = 'hook';
         projectile.duration = -1; // Infinite duration - use range-based removal
@@ -152,7 +150,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         nocollisionEffect.combatantEffect = new NoCollisionEffect();
         nocollisionEffect.combatantEffect.type = 'nocollision';
         // Calculate duration based on range and speed (with safety margin)
-        const maxTravelTime = (ability.range / scaledSpeed) * 1000; // Convert to milliseconds
+        const maxTravelTime = (ability.range / speed) * 1000; // Convert to milliseconds
         nocollisionEffect.combatantEffect.duration = maxTravelTime * 2; // Double the expected time as safety margin
         nocollisionEffect.combatantEffect.appliedAt = state.gameTime;
 
@@ -164,7 +162,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         moveCombatantEffect.duration = -1; // Infinite duration - move until target reached
         moveCombatantEffect.moveTargetX = hero.x; // Current hero position
         moveCombatantEffect.moveTargetY = hero.y; // Current hero position
-        moveCombatantEffect.moveSpeed = scaledSpeed; // Use same scaled speed as projectile
+        moveCombatantEffect.moveSpeed = speed * 1.5; // 50% faster than projectile speed
         moveCombatantEffect.appliedAt = state.gameTime;
         moveEffect.combatantEffect = moveCombatantEffect;
 
