@@ -37,6 +37,7 @@ export class GameScene extends Phaser.Scene {
     private playerSessionId: ControllerId | null = null;
     // Input-related properties removed - InputHandler is now the single source of truth for all input
     private isRestarting: boolean = false;
+    private isReturningToLobby: boolean = false;
     private abilityRangeDisplay: Phaser.GameObjects.Graphics | null = null;
     private coordinateGrid: Phaser.GameObjects.Graphics | null = null;
     private coordinatesDebugPanel: Phaser.GameObjects.Text | null = null;
@@ -238,6 +239,7 @@ export class GameScene extends Phaser.Scene {
         // Set HUD camera for UI components
         this.uiManager.setHUDCamera(this.cameraManager.getHUDCamera());
         this.uiManager.setCameraManager(this.cameraManager);
+        this.uiManager.setRoom(this.room);
         
         // Set camera manager for path renderer
         this.pathRenderer.setCameraManager(this.cameraManager);
@@ -342,13 +344,18 @@ export class GameScene extends Phaser.Scene {
         
         this.room.onMessage('returnToLobby', () => {
             console.log('Returning to lobby...');
+            this.isReturningToLobby = true;
+            // Start fresh lobby scene
             this.scene.start('LobbyScene');
         });
 
         this.room.onLeave((code: number) => {
             console.log('Left room with code:', code);
-            // When disconnected, restart the entire scene for a fresh game
-            this.scene.restart();
+            // Don't restart if we're already transitioning to lobby
+            if (!this.isReturningToLobby) {
+                // When disconnected unexpectedly, restart the entire scene for a fresh game
+                this.scene.restart();
+            }
         });
     }
 

@@ -19,9 +19,13 @@ export class GameRoom extends Room<GameState> {
     private restartTimer: NodeJS.Timeout | null = null;
     private gameplayConfig!: GameplayConfig;
     private lobbyData: any = null;
+    private postGameTimer: NodeJS.Timeout | null = null;
+    private gameEnded = false;
 
 
     onCreate(options: any) {
+        console.log(`GameRoom created with ID: ${this.roomId}`);
+        
         // Store lobby data if provided
         this.lobbyData = options.lobbyData || null;
 
@@ -30,7 +34,7 @@ export class GameRoom extends Room<GameState> {
         if (selectedConfigName) {
             try {
                 this.gameplayConfig = configProvider.loadConfig(selectedConfigName);
-                console.log(`GameRoom loaded config from lobby selection: ${selectedConfigName}`);
+                console.log(`GameRoom ${this.roomId} loaded config from lobby selection: ${selectedConfigName}`);
             } catch (e) {
                 console.warn(`Failed to load selected config '${selectedConfigName}', falling back to default`);
                 this.gameplayConfig = options.gameplayConfig;
@@ -44,7 +48,7 @@ export class GameRoom extends Room<GameState> {
     }
 
     private initializeGame() {
-        console.log('Initializing game...');
+        console.log(`GameRoom ${this.roomId}: Initializing game...`);
         
         // Clear any existing restart timer
         if (this.restartTimer) {
@@ -148,10 +152,18 @@ export class GameRoom extends Room<GameState> {
         this.onMessage('toggleHero', (client) => {
             this.handleToggleHero(client.sessionId);
         });
+
+        this.onMessage('returnToLobby', (client) => {
+            console.log(`Client ${client.sessionId} requested to return to lobby`);
+            // Only allow return to lobby if game has ended
+            if (this.gameEnded) {
+                this.returnToLobby();
+            }
+        });
     }
 
     onJoin(client: Client, options: any) {
-        console.log(`${client.sessionId} joined`);
+        console.log(`Player ${client.sessionId} joined GameRoom ${this.roomId}`);
         
         let team: 'blue' | 'red';
         const playerLobbyId: string | undefined = options?.playerLobbyId;
@@ -193,7 +205,7 @@ export class GameRoom extends Room<GameState> {
     }
 
     onLeave(client: Client, consented: boolean) {
-        console.log(`${client.sessionId} left`);
+        console.log(`Player ${client.sessionId} left GameRoom ${this.roomId}`);
         
         // Find the hero controlled by this player and clean up their move command
         const heroId = this.findHeroByController(client.sessionId);
@@ -209,7 +221,7 @@ export class GameRoom extends Room<GameState> {
     }
 
     onDispose() {
-        console.log('Room disposed');
+        console.log(`GameRoom ${this.roomId} disposed`);
     }
 
     private checkForEmptyRoom(): void {
@@ -243,7 +255,7 @@ export class GameRoom extends Room<GameState> {
                 } else {
                     console.log('Human players rejoined, keeping room alive');
                 }
-            }, SERVER_CONFIG.ROOM.EMPTY_ROOM_CLEANUP_DELAY_MS);
+            }, this.gameEnded ? 10000 : SERVER_CONFIG.ROOM.EMPTY_ROOM_CLEANUP_DELAY_MS); // Longer delay if game ended
         }
     }
 
@@ -603,27 +615,40 @@ export class GameRoom extends Room<GameState> {
 
     private handleGameOver(payload: any): void {
         console.log(`Game over! Winning team: ${payload.winningTeam}`);
+        this.gameEnded = true;
         
-        // Set a timer to return to lobby after a few seconds
+        // Clear any existing timers
         if (this.restartTimer) {
             clearTimeout(this.restartTimer);
+            this.restartTimer = null;
+        }
+        if (this.postGameTimer) {
+            clearTimeout(this.postGameTimer);
+            this.postGameTimer = null;
         }
         
-        this.restartTimer = setTimeout(() => {
+        // Set a timer to destroy room after a longer delay (30 seconds)
+        // This gives time for victory/defeat screen and stats display
+        this.postGameTimer = setTimeout(() => {
+            console.log('Post-game timeout reached, returning to lobby...');
             this.returnToLobby();
-        }, SERVER_CONFIG.ROOM.GAME_RESTART_DELAY_MS);
+        }, 30000); // 30 seconds for post-game screen
     }
 
     private returnToLobby(): void {
         console.log('Returning players to lobby...');
         
-        // Clear restart timer
+        // Clear all timers
         if (this.restartTimer) {
             clearTimeout(this.restartTimer);
             this.restartTimer = null;
         }
+        if (this.postGameTimer) {
+            clearTimeout(this.postGameTimer);
+            this.postGameTimer = null;
+        }
         
-        // Notify clients to return to lobby
+        // Notify clients to return to lobby (no lobby room ID needed)
         this.broadcast('returnToLobby', {});
         
         // Disconnect all clients so they can reconnect to lobby

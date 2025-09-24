@@ -43,6 +43,10 @@ export class StatsOverlay {
     private overlayElements: Phaser.GameObjects.GameObject[] = [];
     private isVisible: boolean = false;
     private playerSessionId: ControllerId | null = null;
+    private victoryDefeatText: Phaser.GameObjects.Text | null = null;
+    private backToLobbyButton: Phaser.GameObjects.Text | null = null;
+    private isPostGameMode: boolean = false;
+    private room: any = null;
 
     // Table configuration
     private readonly CELL_HEIGHT = 20;
@@ -119,6 +123,10 @@ export class StatsOverlay {
         }
     }
 
+    setRoom(room: any): void {
+        this.room = room;
+    }
+
     /**
      * Sets the current player session ID for highlighting
      */
@@ -133,7 +141,18 @@ export class StatsOverlay {
         if (this.isVisible) return;
         
         this.isVisible = true;
+        this.isPostGameMode = false;
         this.createOverlay(state);
+    }
+
+    showPostGame(state: SharedGameState, winningTeam: string, playerTeam: string): void {
+        if (this.isVisible) return;
+        
+        this.isVisible = true;
+        this.isPostGameMode = true;
+        this.createOverlay(state);
+        this.addVictoryDefeatDisplay(winningTeam, playerTeam);
+        this.addBackToLobbyButton();
     }
 
     /**
@@ -361,6 +380,105 @@ export class StatsOverlay {
      */
     destroy(): void {
         this.hide();
+    }
+
+    /**
+     * Adds victory/defeat display to the stats overlay
+     */
+    private addVictoryDefeatDisplay(winningTeam: string, playerTeam: string): void {
+        if (!this.hudContainer) return;
+        
+        const isVictory = winningTeam === playerTeam;
+        const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
+        const textColor = isVictory ? '#4CAF50' : '#F44336';
+        
+        // Position in upper right corner with same padding as health bar (20px)
+        this.victoryDefeatText = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH - 20,
+            20,
+            text,
+            {
+                fontSize: '48px',
+                color: textColor,
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 3,
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 4,
+                    fill: true
+                }
+            }
+        ).setOrigin(1, 0).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0); // Right-aligned origin
+        
+        this.hudContainer.add(this.victoryDefeatText);
+        this.overlayElements.push(this.victoryDefeatText);
+    }
+
+    /**
+     * Adds back to lobby button
+     */
+    private addBackToLobbyButton(): void {
+        if (!this.hudContainer) return;
+        
+        const buttonX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+        const buttonY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 80;
+        
+        // Create button background
+        const buttonBg = this.scene.add.graphics();
+        buttonBg.fillStyle(0x2E7D32, 0.9);
+        buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
+        buttonBg.setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
+        this.hudContainer.add(buttonBg);
+        this.overlayElements.push(buttonBg);
+        
+        // Create button text
+        this.backToLobbyButton = this.scene.add.text(
+            buttonX,
+            buttonY,
+            'Back to Lobby',
+            {
+                fontSize: '24px',
+                color: '#FFFFFF',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
+        
+        this.hudContainer.add(this.backToLobbyButton);
+        this.overlayElements.push(this.backToLobbyButton);
+        
+        // Make button interactive
+        this.backToLobbyButton.setInteractive({ useHandCursor: true });
+        this.backToLobbyButton.on('pointerdown', () => {
+            this.handleBackToLobby();
+        });
+        
+        // Hover effects
+        this.backToLobbyButton.on('pointerover', () => {
+            buttonBg.clear();
+            buttonBg.fillStyle(0x388E3C, 0.9);
+            buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
+        });
+        
+        this.backToLobbyButton.on('pointerout', () => {
+            buttonBg.clear();
+            buttonBg.fillStyle(0x2E7D32, 0.9);
+            buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
+        });
+    }
+
+    /**
+     * Handles back to lobby button click
+     */
+    private handleBackToLobby(): void {
+        // Send message to server to return to lobby
+        if (this.room) {
+            this.room.send('returnToLobby', {});
+        }
     }
 
     /**

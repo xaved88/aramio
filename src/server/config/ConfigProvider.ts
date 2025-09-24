@@ -1,5 +1,6 @@
 import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { GLASS_CANNON_CONFIG } from './GlassCannonConfig';
+import { QUICK_WIN_CONFIG } from './QuickWinConfig';
 
 export type GameplayConfig = any; // Type alias for now, will be made strict later
 
@@ -10,6 +11,7 @@ export class ConfigProvider {
         // Register available configs
         this.registerConfig('default', GAMEPLAY_CONFIG);
         this.registerConfig('glass-cannon', GLASS_CANNON_CONFIG);
+        this.registerConfig('quick-win', QUICK_WIN_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {

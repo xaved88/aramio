@@ -70,6 +70,9 @@ export class UIManager {
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
+        this.victoryScreen.setShowStatsCallback((state: any, winningTeam: string, playerTeam: string) => {
+            this.showPostGameStats(state, winningTeam, playerTeam);
+        });
     }
 
     setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
@@ -89,6 +92,10 @@ export class UIManager {
         this.respawnOverlay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
+    }
+
+    setRoom(room: any): void {
+        this.statsOverlay.setRoom(room);
     }
 
     createHUD(): void {
@@ -118,6 +125,10 @@ export class UIManager {
 
     hideStatsOverlay(): void {
         this.statsOverlay.hide();
+    }
+
+    showPostGameStats(state: SharedGameState, winningTeam: string, playerTeam: string): void {
+        this.statsOverlay.showPostGame(state, winningTeam, playerTeam);
     }
 
     updateStatsOverlay(state: SharedGameState): void {
@@ -156,7 +167,7 @@ export class UIManager {
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
             const team = playerTeam || currentPlayer.team;
-            this.victoryScreen.showVictory(state.winningTeam, team);
+            this.victoryScreen.showVictory(state.winningTeam, team, state);
         }
     }
 
