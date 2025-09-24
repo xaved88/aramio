@@ -28,3 +28,6 @@ export class ConfigProvider {
         return Array.from(this.configs.keys());
     }
 }
+
+// Shared singleton for accessing configs across rooms
+export const configProvider = new ConfigProvider();

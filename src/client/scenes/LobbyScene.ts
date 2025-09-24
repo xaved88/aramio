@@ -14,6 +14,9 @@ export class LobbyScene extends Phaser.Scene {
     
     // UI Elements
     private teamSizeText!: Phaser.GameObjects.Text;
+    private configLabel!: Phaser.GameObjects.Text;
+    private configValue!: Phaser.GameObjects.Text;
+    private configDropdownItems: Phaser.GameObjects.Text[] = [];
     private blueTeamContainer!: Phaser.GameObjects.Container;
     private redTeamContainer!: Phaser.GameObjects.Container;
     private startButton!: Phaser.GameObjects.Text;
@@ -87,7 +90,9 @@ export class LobbyScene extends Phaser.Scene {
                 playerName: slot.playerName,
                 isBot: slot.isBot,
                 isReady: slot.isReady
-            }))
+            })),
+            availableConfigs: Array.from(state.availableConfigs),
+            selectedConfig: state.selectedConfig
         };
     }
 
@@ -132,24 +137,43 @@ export class LobbyScene extends Phaser.Scene {
             this.teamSizeButtons.push(button);
         }
 
-        // Team containers
-        this.blueTeamContainer = this.add.container(centerX - 200, 250);
-        this.redTeamContainer = this.add.container(centerX + 200, 250);
+        // Config selector
+        this.configLabel = this.add.text(centerX, 220, 'Config:', {
+            fontSize: '20px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        }).setOrigin(0.5);
 
-        this.add.text(centerX - 200, 220, 'Blue Team', {
+        this.configValue = this.add.text(centerX, 250, 'default', {
+            fontSize: '18px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setInteractive();
+
+        this.configValue.on('pointerdown', () => {
+            this.toggleConfigDropdown(centerX, 280);
+        });
+
+        // Team containers
+        this.blueTeamContainer = this.add.container(centerX - 200, 310);
+        this.redTeamContainer = this.add.container(centerX + 200, 310);
+
+        this.add.text(centerX - 200, 280, 'Blue Team', {
             fontSize: '20px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5);
 
-        this.add.text(centerX + 200, 220, 'Red Team', {
+        this.add.text(centerX + 200, 280, 'Red Team', {
             fontSize: '20px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5);
 
         // Start button
-        this.startButton = this.add.text(centerX, 450, 'Start Game', {
+        this.startButton = this.add.text(centerX, 520, 'Start Game', {
             fontSize: '24px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -169,6 +193,11 @@ export class LobbyScene extends Phaser.Scene {
 
         // Update team size display
         this.teamSizeText.setText(this.lobbyState.teamSize.toString());
+
+        // Update config selector
+        if (this.configValue) {
+            this.configValue.setText(this.lobbyState.selectedConfig || 'default');
+        }
 
         // Update team size buttons
         this.teamSizeButtons.forEach((button, index) => {
@@ -190,6 +219,34 @@ export class LobbyScene extends Phaser.Scene {
         } else {
             this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
         }
+    }
+
+    private toggleConfigDropdown(centerX: number, startY: number) {
+        // Clear existing dropdown
+        this.configDropdownItems.forEach(item => item.destroy());
+        this.configDropdownItems = [];
+
+        if (!this.lobbyState) return;
+        const items = this.lobbyState.availableConfigs || [];
+
+        items.forEach((name, idx) => {
+            const y = startY + idx * 28;
+            const item = this.add.text(centerX, y, name, {
+                fontSize: '16px',
+                color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                padding: { x: 10, y: 4 }
+            }).setOrigin(0.5).setInteractive();
+
+            item.on('pointerdown', () => {
+                this.room.send('setConfig', { name });
+                this.configDropdownItems.forEach(i => i.destroy());
+                this.configDropdownItems = [];
+            });
+
+            this.configDropdownItems.push(item);
+        });
     }
 
     private updateTeamDisplay(team: 'blue' | 'red', slots: PlayerSlot[]) {

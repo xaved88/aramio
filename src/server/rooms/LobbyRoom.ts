@@ -2,7 +2,7 @@ import { Room, Client } from '@colyseus/core';
 import { LobbyState } from '../schema/LobbyState';
 import { PlayerSlot } from '../schema/PlayerSlot';
 import { SERVER_CONFIG } from '../../ServerConfig';
-import { GameplayConfig } from '../config/ConfigProvider';
+import { GameplayConfig, configProvider } from '../config/ConfigProvider';
 import { Server } from '@colyseus/core';
 
 export class LobbyRoom extends Room<LobbyState> {
@@ -18,6 +18,13 @@ export class LobbyRoom extends Room<LobbyState> {
         lobbyState.teamSize = 5;
         lobbyState.lobbyPhase = 'waiting';
         lobbyState.canStart = false;
+        // Load available configs into state and set default selection
+        const configs = configProvider.getAvailableConfigs();
+        lobbyState.availableConfigs.clear();
+        configs.forEach((name) => lobbyState.availableConfigs.push(name));
+        if (configs.length > 0) {
+            lobbyState.selectedConfig = configs.includes('default') ? 'default' : configs[0];
+        }
         
         // Initialize empty team slots
         for (let i = 0; i < lobbyState.teamSize; i++) {
@@ -136,6 +143,14 @@ export class LobbyRoom extends Room<LobbyState> {
         this.onMessage('switchPlayerTeam', (client, data) => {
             this.handleSwitchPlayerTeam(data.playerId, data.targetTeam);
         });
+
+        this.onMessage('setConfig', (client, data) => {
+            const name: string = data?.name;
+            if (!name) return;
+            if (this.state.availableConfigs.indexOf(name) === -1) return;
+            this.state.selectedConfig = name;
+            console.log(`Lobby selected config set to: ${name}`);
+        });
     }
 
     private handleSwitchTeam(playerId: string, team: 'blue' | 'red') {
@@ -168,7 +183,8 @@ export class LobbyRoom extends Room<LobbyState> {
         const lobbyData = {
             teamSize: this.state.teamSize,
             blueTeam: Array.from(this.state.blueTeam),
-            redTeam: Array.from(this.state.redTeam)
+            redTeam: Array.from(this.state.redTeam),
+            selectedConfig: this.state.selectedConfig
         };
         
         // Broadcast game starting with lobby data

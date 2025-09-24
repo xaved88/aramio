@@ -7,7 +7,7 @@ import { gameStateToString } from '../../shared/utils/DebugUtils';
 import { ControllerId, CombatantId, COMBATANT_TYPES } from '../../shared/types/CombatantTypes';
 import { GameCommand, GameMoveCommand, GameUseAbilityCommand } from '../../shared/types/GameCommands';
 import { RewardManager } from '../game/rewards/RewardManager';
-import { GameplayConfig } from '../config/ConfigProvider';
+import { GameplayConfig, configProvider } from '../config/ConfigProvider';
 
 export class GameRoom extends Room<GameState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
@@ -22,11 +22,22 @@ export class GameRoom extends Room<GameState> {
 
 
     onCreate(options: any) {
-        // Initialize gameplay config from options
-        this.gameplayConfig = options.gameplayConfig;
-        
         // Store lobby data if provided
         this.lobbyData = options.lobbyData || null;
+
+        // Initialize gameplay config from selected lobby config if present, otherwise fallback to provided or default
+        const selectedConfigName: string | undefined = this.lobbyData?.selectedConfig;
+        if (selectedConfigName) {
+            try {
+                this.gameplayConfig = configProvider.loadConfig(selectedConfigName);
+                console.log(`GameRoom loaded config from lobby selection: ${selectedConfigName}`);
+            } catch (e) {
+                console.warn(`Failed to load selected config '${selectedConfigName}', falling back to default`);
+                this.gameplayConfig = options.gameplayConfig;
+            }
+        } else {
+            this.gameplayConfig = options.gameplayConfig;
+        }
         
         this.initializeGame();
         this.setupMessageHandlers();

@@ -14,4 +14,6 @@ export interface LobbyState {
     gameRoomId: string;
     blueTeam: PlayerSlot[];
     redTeam: PlayerSlot[];
+    availableConfigs: string[];
+    selectedConfig: string;
 }

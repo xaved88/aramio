@@ -7,17 +7,15 @@ import path from 'path';
 import { GameRoom } from './rooms/GameRoom';
 import { LobbyRoom } from './rooms/LobbyRoom';
 import { SERVER_CONFIG } from '../ServerConfig';
-import { ConfigProvider, GameplayConfig } from './config/ConfigProvider';
+import { configProvider, GameplayConfig } from './config/ConfigProvider';
 
 const port = Number(process.env.PORT || SERVER_CONFIG.PORT);
 const app = express();
 
-// Initialize config provider and load glass-cannon config
-const configProvider = new ConfigProvider();
+// Use shared config provider and load default config
 const gameplayConfig: GameplayConfig = configProvider.loadConfig('default');
 
 console.log('Available configs:', configProvider.getAvailableConfigs());
-console.log('Using config: glass-cannon');
 
 app.use(cors());
 app.use(express.json());

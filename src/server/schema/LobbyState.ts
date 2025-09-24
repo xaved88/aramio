@@ -10,4 +10,6 @@ export class LobbyState extends Schema {
     @type('string') gameRoomId = ''; // ID of the game room when started
     @type([PlayerSlot]) blueTeam = new ArraySchema<PlayerSlot>();
     @type([PlayerSlot]) redTeam = new ArraySchema<PlayerSlot>();
+    @type(['string']) availableConfigs = new ArraySchema<string>();
+    @type('string') selectedConfig = 'default';
 }
