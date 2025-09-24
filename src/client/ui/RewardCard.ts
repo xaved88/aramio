@@ -73,7 +73,7 @@ export class RewardCard {
         
         // Create icon
         const iconManager = IconManager.getInstance();
-        this.iconImage = iconManager.createIconImage(this.scene, 0, -config.height / 2 + 45, config.rewardId, 32);
+        this.iconImage = iconManager.createIconImage(this.scene, 0, -config.height / 2 + 50, config.rewardId, 50);
         if (this.iconImage) {
             this.iconImage.setScrollFactor(0, 0);
             this.iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
@@ -82,10 +82,10 @@ export class RewardCard {
         // Title text
         this.titleText = this.scene.add.text(
             0, 
-            config.height / 2 - 50, 
+            config.height / 2 - 60, 
             config.title || `Reward ${config.rewardId}`,
             {
-                fontSize: '18px',
+                fontSize: '16px',
                 color: '#333333',
                 fontStyle: 'bold',
                 align: 'center'
@@ -97,13 +97,13 @@ export class RewardCard {
         // Description text
         this.descriptionText = this.scene.add.text(
             0, 
-            config.height / 2 - 20, 
+            config.height / 2 - 25, 
             config.description || 'Click to claim this reward',
             {
-                fontSize: '14px',
+                fontSize: '16px',
                 color: '#666666',
                 align: 'center',
-                wordWrap: { width: config.width - 20 }
+                wordWrap: { width: config.width - 30 }
             }
         );
         this.descriptionText.setOrigin(0.5);
@@ -126,7 +126,7 @@ export class RewardCard {
         this.hudContainer!.getContainer().removeAllListeners();
         
         if (interactive) {
-            this.hudContainer!.getContainer().setInteractive(new Phaser.Geom.Rectangle(-60, -80, 120, 160), Phaser.Geom.Rectangle.Contains);
+            this.hudContainer!.getContainer().setInteractive(new Phaser.Geom.Rectangle(-80, -100, 160, 200), Phaser.Geom.Rectangle.Contains);
             this.background.setFillStyle(0xffffff, 0.9);
             
             // Set up event listeners when becoming interactive

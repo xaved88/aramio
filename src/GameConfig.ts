@@ -207,7 +207,12 @@ export const GAMEPLAY_CONFIG = {
     REWARDS: {
         LEVEL_CHESTS: {
             3: "ability_chest", // At level 3, give ability chest instead of common
-            4: "ability_stats" // At level 4, give ability stat upgrades chest
+            4: "ability_stats", // At level 4, give ability stat upgrades chest
+            5: "ability_stats", // At level 5, give ability stat upgrades chest
+            7: "ability_stats", // At level 7, give ability stat upgrades chest
+            10: "ability_stats", // At level 10, give ability stat upgrades chest
+            12: "ability_stats", // At level 12, give ability stat upgrades chest
+            15: "ability_stats" // At level 15, give ability stat upgrades chest
         },
         CHESTS: {
             common: {
@@ -230,16 +235,12 @@ export const GAMEPLAY_CONFIG = {
             },
             ability_stats: {
                 rewards: [
-                    { id: "ability_stat:range", weight: 40 },
-                    { id: "ability_stat:strength", weight: 40 },
-                    { id: "ability_stat:duration", weight: 20 },
-                    { id: "ability_stat:mercenary_rage_speed", weight: 90 },
-                    { id: "ability_stat:pyromancer_radius", weight: 15 },
-                    { id: "ability_stat:thorndive_cooldown", weight: 15 },
-                    { id: "stat:health", weight: 1 },
-                    { id: "stat:defense", weight: 1 },
-                    { id: "stat:damage", weight: 1 },
-                    { id: "stat:attack_speed", weight: 1 },
+                    { id: "ability_stat:range", weight: 1 },
+                    { id: "ability_stat:strength", weight: 1 },
+                    { id: "ability_stat:duration", weight: 1 },
+                    { id: "ability_stat:mercenary_rage_speed", weight: 1 },
+                    { id: "ability_stat:pyromancer_radius", weight: 1 },
+                    { id: "ability_stat:thorndive_cooldown", weight: 1 },
                 ]
             }
         },
@@ -304,7 +305,7 @@ export const GAMEPLAY_CONFIG = {
             "ability_stat:range": {
                 type: "ability_stat",
                 ability_stat: "range",
-                modifier: { type: "percent", value: 1.50 }
+                modifier: { type: "percent", value: 1.20 }
             },
             "ability_stat:strength": {
                 type: "ability_stat",
@@ -319,12 +320,12 @@ export const GAMEPLAY_CONFIG = {
             "ability_stat:mercenary_rage_speed": {
                 type: "ability_stat",
                 ability_stat: "mercenaryRageSpeedBoost",
-                modifier: { type: "percent", value: 1.30 }
+                modifier: { type: "percent", value: 1.15 }
             },
             "ability_stat:pyromancer_radius": {
                 type: "ability_stat",
                 ability_stat: "fireballRadius",
-                modifier: { type: "percent", value: 1.50 }
+                modifier: { type: "percent", value: 1.25 }
             },
             "ability_stat:thorndive_cooldown": {
                 type: "ability_stat",

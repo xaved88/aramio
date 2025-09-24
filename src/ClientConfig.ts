@@ -286,12 +286,12 @@ export const CLIENT_CONFIG = {
             },
             "ability_stat:mercenary_rage_speed": {
                 title: "Rage Speed",
-                description: "+30% move speed during rage",
+                description: "+15% move speed during rage",
                 rarity: "upgrade"
             },
             "ability_stat:pyromancer_radius": {
                 title: "Fire Radius",
-                description: "+50% fireball radius",
+                description: "+25% fireball radius",
                 rarity: "upgrade"
             },
             "ability_stat:thorndive_cooldown": {

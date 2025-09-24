@@ -34,11 +34,11 @@ export class IconManager {
             'ability:sniper': 'sniper',
             
             // Ability stat upgrade icons
-            'ability_stat:range': 'stats/ability_range_waves',
+            'ability_stat:range': 'stats/attack_range_bow_arrow',
             'ability_stat:strength': 'stats/ability_power_wand',
             'ability_stat:duration': 'stats/cooldown_stopwatch',
             'ability_stat:mercenary_rage_speed': 'stats/move_speed_boots',
-            'ability_stat:pyromancer_radius': 'stats/ability_range_waves',
+            'ability_stat:pyromancer_radius': 'stats/reticle_bonus',
             'ability_stat:thorndive_cooldown': 'stats/cooldown_stopwatch',
             
             // Direct stat names for other uses

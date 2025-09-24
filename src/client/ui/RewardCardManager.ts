@@ -34,14 +34,15 @@ export class RewardCardManager {
             return;
         }
 
-        const cardWidth = 120;
-        const cardHeight = 160;
-        const cardSpacing = 20;
-        const totalWidth = (cardWidth * 3) + (cardSpacing * 2);
+        const cardWidth = 160;
+        const cardHeight = 200;
+        const cardSpacing = 30;
+        const numCards = Math.min(3, hero.rewardsForChoice.length);
+        const totalWidth = (cardWidth * numCards) + (cardSpacing * (numCards - 1));
         const startX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2 - totalWidth / 2;
-        const cardY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 + 50;
+        const cardY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 + 40;
 
-        for (let i = 0; i < Math.min(3, hero.rewardsForChoice.length); i++) {
+        for (let i = 0; i < numCards; i++) {
             const cardX = startX + (cardWidth + cardSpacing) * i + cardWidth / 2;
             const rewardId = hero.rewardsForChoice[i];
             const rewardDisplay = CLIENT_CONFIG.REWARDS.DISPLAY[rewardId as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
