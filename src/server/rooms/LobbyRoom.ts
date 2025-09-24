@@ -35,11 +35,11 @@ export class LobbyRoom extends Room<LobbyState> {
         this.setState(lobbyState);
         this.setupMessageHandlers();
         
-        console.log('Lobby room created');
+        console.log(`LobbyRoom created with ID: ${this.roomId}`);
     }
 
     onJoin(client: Client, options: any) {
-        console.log(`Player ${client.sessionId} joined lobby`);
+        console.log(`Player ${client.sessionId} joined LobbyRoom ${this.roomId}`);
         
         // Find an empty slot or assign to team with fewer players
         const blueCount = this.getTeamPlayerCount('blue');
@@ -57,7 +57,7 @@ export class LobbyRoom extends Room<LobbyState> {
     }
 
     onLeave(client: Client, consented: boolean) {
-        console.log(`Player ${client.sessionId} left lobby`);
+        console.log(`Player ${client.sessionId} left LobbyRoom ${this.roomId}`);
         
         this.removePlayerFromTeam(client.sessionId);
         this.updateCanStartStatus();
@@ -67,7 +67,7 @@ export class LobbyRoom extends Room<LobbyState> {
     }
 
     onDispose() {
-        console.log('Lobby room disposed');
+        console.log(`LobbyRoom ${this.roomId} disposed`);
     }
 
     private checkForEmptyRoom(): void {
@@ -185,12 +185,19 @@ export class LobbyRoom extends Room<LobbyState> {
             blueTeam: Array.from(this.state.blueTeam),
             redTeam: Array.from(this.state.redTeam),
             selectedConfig: this.state.selectedConfig
+            // No longer need lobbyRoomId since we'll destroy this room
         };
         
         // Broadcast game starting with lobby data
         this.broadcast('gameStarting', { lobbyData: lobbyData });
         
-        console.log(`Starting game with lobby data:`, lobbyData);
+        console.log(`LobbyRoom ${this.roomId}: Starting game with lobby data:`, lobbyData);
+        
+        // Destroy this lobby room after a short delay to allow clients to process the message
+        setTimeout(() => {
+            console.log(`LobbyRoom ${this.roomId}: Destroying lobby room after game start`);
+            this.disconnect();
+        }, 1000); // 1 second delay
     }
 
     private handleToggleReady(playerId: string) {
@@ -322,27 +329,4 @@ export class LobbyRoom extends Room<LobbyState> {
         this.state.canStart = bluePlayers > 0 || redPlayers > 0;
     }
 
-    // Method to be called when game ends to return players to lobby
-    public returnToLobby() {
-        this.state.lobbyPhase = 'waiting';
-        this.state.gameRoomId = '';
-        this.gameRoomId = null;
-        
-        // Reset ready states
-        for (let i = 0; i < this.state.blueTeam.length; i++) {
-            const slot = this.state.blueTeam[i];
-            if (slot) {
-                slot.isReady = false;
-            }
-        }
-        for (let i = 0; i < this.state.redTeam.length; i++) {
-            const slot = this.state.redTeam[i];
-            if (slot) {
-                slot.isReady = false;
-            }
-        }
-        
-        this.updateCanStartStatus();
-        console.log('Players returned to lobby');
-    }
 }

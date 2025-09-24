@@ -290,6 +290,7 @@ export class LobbyScene extends Phaser.Scene {
                 color: hexToColorString(textColor),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }).setOrigin(0.5);
+            
 
             // Add team switching arrows for players (not bots)
             if (slot.playerId && !slot.isBot) {

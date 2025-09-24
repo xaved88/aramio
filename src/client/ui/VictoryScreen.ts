@@ -13,6 +13,10 @@ export class VictoryScreen {
     private fadeInTween: Phaser.Tweens.Tween | null = null;
     private fadeOutTween: Phaser.Tweens.Tween | null = null;
     private onRestart: (() => void) | null = null;
+    private onShowStats: ((state: any, winningTeam: string, playerTeam: string) => void) | null = null;
+    private currentWinningTeam: string = '';
+    private currentPlayerTeam: string = '';
+    private currentState: any = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -33,10 +37,17 @@ export class VictoryScreen {
         this.onRestart = callback;
     }
 
-    showVictory(winningTeam: string, playerTeam: string): void {
+    setShowStatsCallback(callback: (state: any, winningTeam: string, playerTeam: string) => void): void {
+        this.onShowStats = callback;
+    }
+
+    showVictory(winningTeam: string, playerTeam: string, state?: any): void {
         if (this.isActive) return;
         
         this.isActive = true;
+        this.currentWinningTeam = winningTeam;
+        this.currentPlayerTeam = playerTeam;
+        this.currentState = state;
         const isVictory = winningTeam === playerTeam;
         
         // Create HUD container
@@ -89,11 +100,28 @@ export class VictoryScreen {
             duration: CLIENT_CONFIG.VICTORY_SCREEN.FADE_IN_DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
-                // After display duration, fade out
+                // After display duration, fade out and show stats
                 this.scene.time.delayedCall(
-                    CLIENT_CONFIG.VICTORY_SCREEN.DISPLAY_DURATION_MS,
-                    () => this.fadeOut()
+                    3000, // Show victory screen for 3 seconds
+                    () => this.transitionToStats()
                 );
+            }
+        });
+    }
+
+    private transitionToStats(): void {
+        if (!this.background || !this.victoryText) return;
+        
+        this.fadeOutTween = this.scene.tweens.add({
+            targets: [this.background, this.victoryText],
+            alpha: 0,
+            duration: CLIENT_CONFIG.VICTORY_SCREEN.FADE_OUT_DURATION_MS,
+            ease: 'Power2',
+            onComplete: () => {
+                this.destroy();
+                if (this.onShowStats) {
+                    this.onShowStats(this.currentState, this.currentWinningTeam, this.currentPlayerTeam);
+                }
             }
         });
     }
