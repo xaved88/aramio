@@ -92,10 +92,8 @@ export const GAMEPLAY_CONFIG = {
             'mercenary': {
                 COOLDOWN_MS: 8000,
                 DURATION_MS: 3000, // 3 seconds base duration
-                ATTACK_BOOST_BASE: 6.0, // 600% attack boost
-                ATTACK_BOOST_PER_LEVEL: 0.10, // +10% per level
-                MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost
-                MOVE_SPEED_BOOST_PER_LEVEL: 0.07, // +7% per level
+                ATTACK_BOOST_BASE: 6.0, // 600% attack boost (no level scaling)
+                MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost (no level scaling)
                 RAGE_ATTACK_RADIUS: 25,
                 RAGE_WIND_UP: 0.1,
                 RAGE_BULLET_ARMOR: 200, // Bullet armor granted during rage
@@ -237,6 +235,7 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability_stat:range", weight: 40 },
                     { id: "ability_stat:strength", weight: 40 },
                     { id: "ability_stat:duration", weight: 20 },
+                    { id: "ability_stat:mercenary_rage_speed", weight: 90 },
                     { id: "stat:health", weight: 1 },
                     { id: "stat:defense", weight: 1 },
                     { id: "stat:damage", weight: 1 },
@@ -316,13 +315,18 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability_stat",
                 ability_stat: "duration",
                 modifier: { type: "percent", value: 1.25 }
+            },
+            "ability_stat:mercenary_rage_speed": {
+                type: "ability_stat",
+                ability_stat: "mercenaryRageSpeedBoost",
+                modifier: { type: "percent", value: 1.30 }
             }
         }
     },
     
     // Debug Configuration
     DEBUG: {
-        STARTING_LEVEL: 1, // Level that heroes start with
+        STARTING_LEVEL: 4, // Level that heroes start with
         CHEAT_KILL_PLAYER_ENABLED: true, // Enable 'd' key to instantly kill player for testing
         CHEAT_INSTANT_RESPAWN_ENABLED: true, // Enable 'l' key to instantly respawn player for testing
     },

@@ -283,6 +283,11 @@ export const CLIENT_CONFIG = {
                 title: "Ability Duration",
                 description: "+25% ability duration",
                 rarity: "upgrade"
+            },
+            "ability_stat:mercenary_rage_speed": {
+                title: "Rage Speed",
+                description: "+30% move speed during rage",
+                rarity: "upgrade"
             }
         }
     },

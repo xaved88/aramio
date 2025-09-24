@@ -22,6 +22,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
         ability.duration = config.DURATION_MS;
+        ability.mercenaryRageSpeedBoost = 1.0; // Initialize rage speed boost multiplier
         
         return ability;
     }
@@ -63,12 +64,14 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         const config = gameplayConfig.COMBAT.ABILITIES.mercenary;
         const currentTime = state.gameTime; // Use game time instead of Date.now()
         
-        // Calculate scaled values
-        const attackBoost = config.ATTACK_BOOST_BASE + (config.ATTACK_BOOST_PER_LEVEL * (heroLevel - 1));
-        const moveSpeedBoost = 1 + config.MOVE_SPEED_BOOST_BASE + (config.MOVE_SPEED_BOOST_PER_LEVEL * (heroLevel - 1));
+        // Calculate ability values
+        const attackBoost = config.ATTACK_BOOST_BASE; // Fixed attack boost (no level scaling)
+        const baseMoveSpeedBoost = 1 + config.MOVE_SPEED_BOOST_BASE; // Fixed move speed boost (no level scaling)
+        const rageSpeedMultiplier = ability.mercenaryRageSpeedBoost || 1.0; // Get reward-based speed boost from ability
+        const moveSpeedBoost = baseMoveSpeedBoost * rageSpeedMultiplier; // Apply reward multiplier
         const duration = ability.duration; // Use flat duration (no level scaling)
 
-        // Attack strength boost (300% base + 10% per level)
+        // Attack strength boost (600% base, no level scaling)
         const attackStrengthEffect = new StatModEffect();
         attackStrengthEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
         attackStrengthEffect.stat = 'attackStrength';
@@ -77,7 +80,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         attackStrengthEffect.duration = duration;
         attackStrengthEffect.appliedAt = currentTime;
 
-        // Move speed boost (50% base + 5% per level)  
+        // Move speed boost
         const moveSpeedEffect = new StatModEffect();
         moveSpeedEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
         moveSpeedEffect.stat = 'moveSpeed';

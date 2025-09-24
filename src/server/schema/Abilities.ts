@@ -32,6 +32,7 @@ export class MercenaryAbility extends Ability {
         this.type = ABILITY_TYPES.MERCENARY;
     }
     @type('number') duration!: number; // rage duration in ms
+    @type('number') mercenaryRageSpeedBoost!: number; // multiplier for rage move speed boost
 }
 
 export class PyromancerAbility extends Ability {
