@@ -28,18 +28,13 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         ability.duration = config.REFLECT_DURATION_MS;
         ability.tauntDuration = config.TAUNT_DURATION_MS;
         ability.landingRadius = config.LANDING_RADIUS;
+        ability.thorndiveCooldownBoost = 1.0; // Initialize cooldown boost multiplier
         
         return ability;
     }
 
     onLevelUp(ability: ThorndiveAbility, gameplayConfig: GameplayConfig): void {
-        const config = gameplayConfig.COMBAT.ABILITIES.thorndive;
-        
-        // Reduce cooldown by configured percentage per level
-        const cooldownReduction = config.COOLDOWN_REDUCTION_PER_LEVEL || 0;
-        if (cooldownReduction > 0) {
-            ability.cooldown = Math.max(1000, ability.cooldown * (1 - cooldownReduction)); // Minimum 1 second cooldown
-        }
+        // No stat changes on level up - cooldown now improved through rewards
     }
 
     useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
@@ -70,8 +65,9 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
             return true;
         }
         
-        // Check cooldown
-        if (currentTime - ability.lastUsedTime < ability.cooldown) {
+        // Check cooldown with boost applied
+        const effectiveCooldown = ability.cooldown / (ability.thorndiveCooldownBoost || 1.0);
+        if (currentTime - ability.lastUsedTime < effectiveCooldown) {
             return false;
         }
         

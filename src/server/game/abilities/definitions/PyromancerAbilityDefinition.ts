@@ -23,13 +23,13 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         ability.strength = config.STRENGTH;
         ability.radius = config.RADIUS;
         ability.range = config.RANGE;
+        ability.fireballRadius = config.RADIUS; // Initialize reward-modifiable radius
         
         return ability;
     }
 
     onLevelUp(ability: PyromancerAbility, gameplayConfig: GameplayConfig): void {
-        const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
-        ability.radius += config.RADIUS_PER_LEVEL;
+        // No stat changes on level up - radius now improved through rewards
     }
 
     useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
@@ -113,7 +113,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
-        projectile.aoeRadius = ability.radius;
+        projectile.aoeRadius = ability.fireballRadius;
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();

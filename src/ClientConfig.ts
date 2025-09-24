@@ -288,6 +288,16 @@ export const CLIENT_CONFIG = {
                 title: "Rage Speed",
                 description: "+30% move speed during rage",
                 rarity: "upgrade"
+            },
+            "ability_stat:pyromancer_radius": {
+                title: "Fire Radius",
+                description: "+50% fireball radius",
+                rarity: "upgrade"
+            },
+            "ability_stat:thorndive_cooldown": {
+                title: "Dash Cooldown",
+                description: "50% cooldown reduction",
+                rarity: "upgrade"
             }
         }
     },

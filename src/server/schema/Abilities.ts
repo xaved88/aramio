@@ -43,6 +43,7 @@ export class PyromancerAbility extends Ability {
     @type('number') strength!: number; // damage dealt by ability
     @type('number') radius!: number; // AOE radius
     @type('number') range!: number; // projectile range
+    @type('number') fireballRadius!: number; // AOE radius (can be modified by rewards)
 }
 
 export class ThorndiveAbility extends Ability {
@@ -55,6 +56,7 @@ export class ThorndiveAbility extends Ability {
     @type('number') duration!: number; // reflect duration in ms
     @type('number') tauntDuration!: number; // taunt duration in ms
     @type('number') landingRadius!: number; // AOE radius for landing damage
+    @type('number') thorndiveCooldownBoost!: number; // multiplier for cooldown reduction
 }
 
 export class SniperAbility extends Ability {

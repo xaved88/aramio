@@ -1,7 +1,7 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../types/GameStateTypes';
-import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
+import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility, SniperAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
 import { applyStatModifications } from './StatModification';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
@@ -210,8 +210,13 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     strength: (hero.ability as any).strength,
                     radius: (hero.ability as any).radius,
                     range: (hero.ability as any).range,
-                    landingRadius: (hero.ability as any).landingRadius
-                } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility,
+                    duration: (hero.ability as any).duration,
+                    tauntDuration: (hero.ability as any).tauntDuration,
+                    landingRadius: (hero.ability as any).landingRadius,
+                    fireballRadius: (hero.ability as any).fireballRadius,
+                    mercenaryRageSpeedBoost: (hero.ability as any).mercenaryRageSpeedBoost,
+                    thorndiveCooldownBoost: (hero.ability as any).thorndiveCooldownBoost
+                } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility | SniperAbility,
                 controller: hero.controller,
                 levelRewards: hero.levelRewards ? Array.from(hero.levelRewards) : [],
                 rewardsForChoice: hero.rewardsForChoice ? Array.from(hero.rewardsForChoice) : [],

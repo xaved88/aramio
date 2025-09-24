@@ -103,13 +103,11 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 2000,
                 STRENGTH: 10,
                 RADIUS: 30,
-                RADIUS_PER_LEVEL: 2.5,
                 RANGE: 150,
                 SPEED: 200
             },
             'thorndive': {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
-                COOLDOWN_REDUCTION_PER_LEVEL: 0.08, // Reduce cooldown by 8% per level
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
                 RANGE: 100, // Base dash range
                 LANDING_DAMAGE: 10, // Base landing damage
@@ -236,6 +234,8 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability_stat:strength", weight: 40 },
                     { id: "ability_stat:duration", weight: 20 },
                     { id: "ability_stat:mercenary_rage_speed", weight: 90 },
+                    { id: "ability_stat:pyromancer_radius", weight: 15 },
+                    { id: "ability_stat:thorndive_cooldown", weight: 15 },
                     { id: "stat:health", weight: 1 },
                     { id: "stat:defense", weight: 1 },
                     { id: "stat:damage", weight: 1 },
@@ -320,13 +320,23 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability_stat",
                 ability_stat: "mercenaryRageSpeedBoost",
                 modifier: { type: "percent", value: 1.30 }
+            },
+            "ability_stat:pyromancer_radius": {
+                type: "ability_stat",
+                ability_stat: "fireballRadius",
+                modifier: { type: "percent", value: 1.50 }
+            },
+            "ability_stat:thorndive_cooldown": {
+                type: "ability_stat",
+                ability_stat: "thorndiveCooldownBoost",
+                modifier: { type: "percent", value: 2.0 }
             }
         }
     },
     
     // Debug Configuration
     DEBUG: {
-        STARTING_LEVEL: 4, // Level that heroes start with
+        STARTING_LEVEL: 1, // Level that heroes start with
         CHEAT_KILL_PLAYER_ENABLED: true, // Enable 'd' key to instantly kill player for testing
         CHEAT_INSTANT_RESPAWN_ENABLED: true, // Enable 'l' key to instantly respawn player for testing
     },

@@ -552,10 +552,10 @@ export class GameScene extends Phaser.Scene {
         // Get targeting radius based on ability type
         if (hero.ability.type === 'thorndive') {
             // Get AOE radius from the hero's ability (which includes level scaling)
-            targetingRadius = (hero.ability as any).landingRadius || 70; // fallback to default if not available
+            targetingRadius = (hero.ability as any).landingRadius;
         } else if (hero.ability.type === 'pyromancer') {
-            // Get AOE radius from the hero's ability (which includes level scaling)
-            targetingRadius = (hero.ability as any).radius || 20; // fallback to default if not available
+            // Get AOE radius from the hero's ability (directly modified by rewards)
+            targetingRadius = (hero.ability as any).fireballRadius;
         } else if (hero.ability.type === 'mercenary') {
             // Mercenary is a self-buff ability, don't show targeting circle
             return; // No targeting circle needed for self-buff
