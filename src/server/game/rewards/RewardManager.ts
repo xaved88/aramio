@@ -19,15 +19,20 @@ export class RewardManager {
         const rewards: string[] = [];
         let availableRewards = [...chest.rewards];
 
-        // Filter out invalid ability stat rewards for this hero's ability
+        // Filter out invalid rewards for this hero's ability
         if (hero && hero.ability) {
             availableRewards = availableRewards.filter(reward => {
                 const rewardType = gameplayConfig.REWARDS.REWARD_TYPES[reward.id as keyof typeof gameplayConfig.REWARDS.REWARD_TYPES];
                 if (rewardType?.type === 'ability_stat') {
                     // Check if the hero's ability supports this stat
                     return rewardType.ability_stat in hero.ability;
+                } else if (rewardType?.type === 'stat') {
+                    // Filter out attack range for mercenary (melee-focused)
+                    if (hero.ability.type === 'mercenary' && reward.id === 'stat:attack_range') {
+                        return false;
+                    }
                 }
-                return true; // Keep non-ability_stat rewards
+                return true; // Keep other rewards
             });
         }
 

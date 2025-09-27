@@ -247,6 +247,7 @@ export const GAMEPLAY_CONFIG = {
                 stats: [
                     { stat: "attackRadius", modifier: { type: "flat", value: 10 } }
                 ]
+                // Note: This reward is filtered out for mercenary heroes (melee-focused)
             },
             "stat:move_speed": { 
                 type: "stat", 
