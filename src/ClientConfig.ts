@@ -243,7 +243,7 @@ export const CLIENT_CONFIG = {
             },
             "stat:move_speed": {
                 title: "Movement Speed",
-                description: "+15% movement speed",
+                description: "+5% movement speed",
                 rarity: "common"
             },
             "ability:thorndive": {

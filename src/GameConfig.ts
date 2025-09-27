@@ -193,6 +193,7 @@ export const GAMEPLAY_CONFIG = {
                     { id: "stat:damage", weight: 1 },
                     { id: "stat:attack_speed", weight: 1 },
                     { id: "stat:attack_range", weight: 0.5 },
+                    { id: "stat:move_speed", weight: 0.5 },
                 ]
             },
             ability_chest: {
@@ -250,7 +251,7 @@ export const GAMEPLAY_CONFIG = {
             "stat:move_speed": { 
                 type: "stat", 
                 stats: [
-                    { stat: "moveSpeed", modifier: { type: "percent", value: 1.15 } }
+                    { stat: "moveSpeed", modifier: { type: "percent", value: 1.05 } }
                 ]
             },
             "ability:thorndive": {
