@@ -189,7 +189,8 @@ export const GAMEPLAY_CONFIG = {
             common: {
                 rewards: [
                     { id: "stat:health", weight: 2 },
-                    { id: "stat:defense", weight: 1 },
+                    { id: "stat:bullet_armor", weight: 1 },
+                    { id: "stat:ability_armor", weight: 1 },
                     { id: "stat:damage", weight: 1 },
                     { id: "stat:attack_speed", weight: 1 },
                     { id: "stat:attack_range", weight: 0.5 },
@@ -223,11 +224,16 @@ export const GAMEPLAY_CONFIG = {
                     { stat: "maxHealth", modifier: { type: "percent", value: 1.15 } }
                 ]
             },
-            "stat:defense": { 
+            "stat:bullet_armor": { 
                 type: "stat", 
                 stats: [
-                    { stat: "bulletArmor", modifier: { type: "flat", value: 15 } },
-                    { stat: "abilityArmor", modifier: { type: "flat", value: 15 } }
+                    { stat: "bulletArmor", modifier: { type: "flat", value: 25 } }
+                ]
+            },
+            "stat:ability_armor": { 
+                type: "stat", 
+                stats: [
+                    { stat: "abilityArmor", modifier: { type: "flat", value: 25 } }
                 ]
             },
             "stat:damage": { 

@@ -221,9 +221,14 @@ export const CLIENT_CONFIG = {
                 description: "+15% max health",
                 rarity: "common"
             },
-            "stat:defense": {
-                title: "Defense Boost", 
-                description: "+15 bullet & ability armor",
+            "stat:bullet_armor": {
+                title: "Bullet Armor", 
+                description: "+25 bullet armor",
+                rarity: "common"
+            },
+            "stat:ability_armor": {
+                title: "Ability Armor", 
+                description: "+25 ability armor",
                 rarity: "common"
             },
             "stat:damage": {

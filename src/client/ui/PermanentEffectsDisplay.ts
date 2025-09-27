@@ -147,8 +147,8 @@ export class PermanentEffectsDisplay {
             'attackSpeed': 'stat:attack_speed',
             'attackRadius': 'stat:attack_range',
             'moveSpeed': 'stat:move_speed',
-            'bulletArmor': 'stat:defense',
-            'abilityArmor': 'stat:defense'
+            'bulletArmor': 'stat:bullet_armor',
+            'abilityArmor': 'stat:ability_armor'
         };
         return statToRewardMap[statName] || statName;
     }

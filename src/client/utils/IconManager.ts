@@ -20,7 +20,8 @@ export class IconManager {
         const iconMappings = {
             // Stat icons - mapping to actual file names
             'stat:health': 'stats/health_plus',
-            'stat:defense': 'stats/attack_armor_shield_sword', 
+            'stat:bullet_armor': 'stats/attack_armor_shield_sword',
+            'stat:ability_armor': 'stats/ability_armor_shield_wand', 
             'stat:damage': 'stats/attack_power_sword',
             'stat:attack_speed': 'stats/attack_speed_sword_lines',
             'stat:attack_range': 'stats/attack_range_bow_arrow',
