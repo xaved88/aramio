@@ -1,0 +1,33 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#2c3e50" stroke="#34495e" stroke-width="2"/>
+  
+  <!-- Rifle scope -->
+  <rect x="20" y="28" width="24" height="8" fill="#95a5a6" stroke="#7f8c8d" stroke-width="1" rx="2"/>
+  
+  <!-- Rifle barrel -->
+  <rect x="44" y="30" width="12" height="4" fill="#7f8c8d" stroke="#5d6d7e" stroke-width="1"/>
+  
+  <!-- Scope crosshair -->
+  <circle cx="32" cy="32" r="6" fill="none" stroke="#e74c3c" stroke-width="1"/>
+  <line x1="26" y1="32" x2="38" y2="32" stroke="#e74c3c" stroke-width="1"/>
+  <line x1="32" y1="26" x2="32" y2="38" stroke="#e74c3c" stroke-width="1"/>
+  <circle cx="32" cy="32" r="1" fill="#e74c3c"/>
+  
+  <!-- Laser sight -->
+  <line x1="44" y1="32" x2="56" y2="32" stroke="#e74c3c" stroke-width="1" opacity="0.8"/>
+  
+  <!-- Target reticle (distant target) -->
+  <circle cx="52" cy="20" r="4" fill="none" stroke="#f39c12" stroke-width="1"/>
+  <line x1="48" y1="20" x2="56" y2="20" stroke="#f39c12" stroke-width="1"/>
+  <line x1="52" y1="16" x2="52" y2="24" stroke="#f39c12" stroke-width="1"/>
+  
+  <!-- Precision indicators (small dots) -->
+  <circle cx="24" cy="24" r="1" fill="#3498db"/>
+  <circle cx="40" cy="24" r="1" fill="#3498db"/>
+  <circle cx="24" cy="40" r="1" fill="#3498db"/>
+  <circle cx="40" cy="40" r="1" fill="#3498db"/>
+  
+  <!-- Bullet trajectory line -->
+  <line x1="56" y1="32" x2="60" y2="28" stroke="#95a5a6" stroke-width="1" stroke-dasharray="2,2" opacity="0.6"/>
+</svg>
