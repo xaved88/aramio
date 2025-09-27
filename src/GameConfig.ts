@@ -80,7 +80,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'sniper': {
                 COOLDOWN_MS: 1000, // Same as default
-                STRENGTH: 20,
+                STRENGTH: 15,
                 SPEED: 250,
                 RANGE: 300, // Longer range than default
             }
@@ -88,8 +88,8 @@ export const GAMEPLAY_CONFIG = {
         CRADLE: {
             HEALTH: 5000,
             ATTACK_RADIUS: 115,
-            ATTACK_STRENGTH: 40,
-            ATTACK_SPEED: 2, // attacks per second
+            ATTACK_STRENGTH: 100,
+            ATTACK_SPEED: 1, // attacks per second
             WIND_UP: 0.1, // 0.1 seconds wind-up time for cradles
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
