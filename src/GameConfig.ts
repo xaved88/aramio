@@ -38,13 +38,13 @@ export const GAMEPLAY_CONFIG = {
         ABILITIES: {
             'default': {
                 COOLDOWN_MS: 1000,
-                STRENGTH: 7, // damage dealt by projectile
+                STRENGTH: 10, // damage dealt by projectile
                 SPEED: 200, // pixels per second
                 RANGE: 100, // base range (infinite duration projectiles)
             },
             'hookshot': {
                 COOLDOWN_MS: 5000,
-                STRENGTH: 3, // damage dealt by projectile
+                STRENGTH: 10, // damage dealt by projectile
                 SPEED: 250, // pixels per second (base speed)
                 RANGE: 125, // base range
                 STUN_DURATION_MS: 700, // 700ms base stun duration
@@ -60,7 +60,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'pyromancer': {
                 COOLDOWN_MS: 2000,
-                STRENGTH: 10,
+                STRENGTH: 15,
                 RADIUS: 30,
                 RANGE: 150,
                 SPEED: 200
@@ -69,7 +69,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
                 RANGE: 100, // Base dash range
-                LANDING_DAMAGE: 10, // Base landing damage
+                LANDING_DAMAGE: 15, // Base landing damage
                 LANDING_RADIUS: 50, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
                 TAUNT_RADIUS: 50, // Radius for taunt effect
                 TAUNT_DURATION_MS: 1000, // Base taunt duration (1 second)
@@ -80,8 +80,8 @@ export const GAMEPLAY_CONFIG = {
             },
             'sniper': {
                 COOLDOWN_MS: 1000, // Same as default
-                STRENGTH: 7, // Same as default
-                SPEED: 200, // Same as default
+                STRENGTH: 20,
+                SPEED: 250,
                 RANGE: 300, // Longer range than default
             }
         },
@@ -128,7 +128,7 @@ export const GAMEPLAY_CONFIG = {
         STAT_BOOST_PERCENTAGE: 0.10, // 10% boost per level
         RANGE_BOOST_PERCENTAGE: 0.035, // reduced from 0.10 to prevent excessive late-game range at higher levels
         RESPAWN_LEVEL_MULTIPLIER: 0.10, // 10% increase per level
-        RESPAWN_MAX_TIME_MS: 15000, // Maximum respawn time cap (15 seconds) 
+        RESPAWN_MAX_TIME_MS: 18000, // Maximum respawn time cap
         MINION_KILLED: 3,
         HERO_KILL_MULTIPLIER: 4,
         TOWER_DESTROYED: 100,
@@ -169,22 +169,28 @@ export const GAMEPLAY_CONFIG = {
     },
     REWARDS: {
         LEVEL_CHESTS: {
-            3: "ability_chest", // At level 5, give ability chest instead of common
-            6: "ability_stats", // At level 7, give ability stat upgrades chest
-            10: "ability_stats", // At level 10, give ability stat upgrades chest
-            12: "ability_stats", // At level 12, give ability stat upgrades chest
-            15: "ability_stats", // At level 15, give ability stat upgrades chest
-            18: "ability_stats", // At level 18, give ability stat upgrades chest
-            20: "ability_stats", // At level 20, give ability stat upgrades chest
-            22: "ability_stats", // At level 22, give ability stat upgrades chest
-            25: "ability_stats" // At level 25, give ability stat upgrades chest
+            // Override default chest type at specific levels - ability_chest gives new abilities, ability_stats gives stat upgrades
+            3: "ability_chest",
+            5: "ability_stats",
+            7: "ability_stats",
+            10: "ability_stats",
+            12: "ability_stats",
+            15: "ability_stats",
+            18: "ability_stats",
+            20: "ability_stats",
+            22: "ability_stats",
+            25: "ability_stats",
+            28: "ability_stats",
+            30: "ability_stats",
+            32: "ability_stats",
+            35: "ability_stats",
         },
         CHESTS: {
             common: {
                 rewards: [
                     { id: "stat:health", weight: 2 },
                     { id: "stat:defense", weight: 1 },
-                    { id: "stat:damage", weight: 2 },
+                    { id: "stat:damage", weight: 1 },
                     { id: "stat:attack_speed", weight: 1 },
                     { id: "stat:attack_range", weight: 0.5 },
                 ]
