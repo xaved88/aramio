@@ -8,7 +8,7 @@ export const GAMEPLAY_CONFIG = {
     // Passive healing configuration
     PASSIVE_HEALING: {
         NO_DAMAGE_THRESHOLD_SECONDS: 5, // Seconds without damage to trigger healing
-        HEAL_PERCENT_PER_SECOND: 1, // Percentage of max health to heal per second
+        HEAL_PERCENT_PER_SECOND: 2, // Percentage of max health to heal per second
     },
 
     CRADLE_POSITIONS: {
@@ -166,6 +166,7 @@ export const GAMEPLAY_CONFIG = {
         STAT_BOOST_PERCENTAGE: 0.15,
         RANGE_BOOST_PERCENTAGE: 0.10, // Reduced range scaling (was 0.15) to prevent excessive late-game range
         ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.20,
+        RESPAWN_SCALING_PERCENTAGE: 0.05, // Respawn time increase per level (separate from other stats)
         MINION_KILLED: 2,
         HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
         TOWER_DESTROYED: 50,

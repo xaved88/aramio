@@ -624,7 +624,7 @@ function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayC
     player.attackSpeed = player.attackSpeed * boostMultiplier;
 
     // Make respawn duration longer as a punishment for higher level deaths.
-    player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE)); // Increase respawn time
+    player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.RESPAWN_SCALING_PERCENTAGE)); // Increase respawn time
     
     // Boost ability strength using the AbilityLevelUpManager
     const abilityLevelUpManager = new AbilityLevelUpManager(gameplayConfig);
