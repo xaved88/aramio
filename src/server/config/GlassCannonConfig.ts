@@ -55,13 +55,12 @@ GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH = 8; // Higher damage (wa
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.SPEED = 300; // Faster projectiles (was 250)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.STUN_DURATION_MS = 500; // Shorter stun (was 700)
 
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.COOLDOWN_MS = 5000; // Faster cooldown (was 8000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.DURATION_MS = 2000; // Shorter duration (was 3000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.ATTACK_BOOST_BASE = 8.0; // Higher boost (was 6.0)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.COOLDOWN_MS = 8000; // Faster cooldown (was 12000)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.DURATION_MS = 1500; // Shorter duration (was 2000)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.ATTACK_BOOST_BASE = 5.0; // Higher boost (was 3.0)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.MOVE_SPEED_BOOST_BASE = 1.0; // Higher speed boost (was 0.7)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.RAGE_WIND_UP = 0.05; // Faster wind-up (was 0.1)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.RAGE_BULLET_ARMOR = 100; // Reduced armor (was 200)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.RAGE_ABILITY_ARMOR = 25; // Reduced armor (was 50)
+// Removed armor values - no longer grants bullet or ability armor during rage
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 1200; // Faster cooldown (was 2000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH = 20; // Much higher damage (was 10)

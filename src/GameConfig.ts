@@ -90,14 +90,13 @@ export const GAMEPLAY_CONFIG = {
                 STUN_DURATION_MS: 700, // 700ms base stun duration
             },
             'mercenary': {
-                COOLDOWN_MS: 8000,
-                DURATION_MS: 3000, // 3 seconds base duration
-                ATTACK_BOOST_BASE: 6.0, // 600% attack boost (no level scaling)
+                COOLDOWN_MS: 12000, // Increased from 8000
+                DURATION_MS: 2000, // Reduced from 3000 (2 seconds base duration)
+                ATTACK_BOOST_BASE: 3.0, // Reduced from 6.0 (300% attack boost instead of 600%)
                 MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost (no level scaling)
                 RAGE_ATTACK_RADIUS: 25,
                 RAGE_WIND_UP: 0.1,
-                RAGE_BULLET_ARMOR: 200, // Bullet armor granted during rage
-                RAGE_ABILITY_ARMOR: 50, // Ability armor granted during rage
+                // Removed armor values - no longer grants bullet or ability armor during rage
             },
             'pyromancer': {
                 COOLDOWN_MS: 2000,
@@ -343,7 +342,7 @@ export const GAMEPLAY_CONFIG = {
     
     // Debug Configuration
     DEBUG: {
-        STARTING_LEVEL: 1, // Level that heroes start with
+        STARTING_LEVEL: 5, // Level that heroes start with
         CHEAT_KILL_PLAYER_ENABLED: true, // Enable 'd' key to instantly kill player for testing
         CHEAT_INSTANT_RESPAWN_ENABLED: true, // Enable 'l' key to instantly respawn player for testing
     },

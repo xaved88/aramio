@@ -59,9 +59,9 @@ QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH = 15; // Very high damage (w
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.SPEED = 400; // Very fast projectiles (was 250)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.RANGE = 350; // Much larger range (was 125)
 
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.COOLDOWN_MS = 3000; // Very fast cooldown (was 8000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.DURATION_MS = 1500; // Shorter duration (was 3000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.ATTACK_BOOST_BASE = 12.0; // Very high boost (was 6.0)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.COOLDOWN_MS = 6000; // Faster cooldown (was 12000)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.DURATION_MS = 1000; // Shorter duration (was 2000)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.ATTACK_BOOST_BASE = 6.0; // High boost (was 3.0)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.MOVE_SPEED_BOOST_BASE = 1.5; // Very high speed boost (was 0.7)
 
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 800; // Very fast cooldown (was 2000)

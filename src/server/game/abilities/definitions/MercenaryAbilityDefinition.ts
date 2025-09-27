@@ -71,7 +71,7 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         const moveSpeedBoost = baseMoveSpeedBoost * rageSpeedMultiplier; // Apply reward multiplier
         const duration = ability.duration; // Use flat duration (no level scaling)
 
-        // Attack strength boost (600% base, no level scaling)
+        // Attack strength boost (300% base, no level scaling)
         const attackStrengthEffect = new StatModEffect();
         attackStrengthEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
         attackStrengthEffect.stat = 'attackStrength';
@@ -119,32 +119,12 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         hunterEffect.duration = duration;
         hunterEffect.appliedAt = currentTime;
 
-        // Bullet armor boost
-        const bulletArmorEffect = new StatModEffect();
-        bulletArmorEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
-        bulletArmorEffect.stat = 'bulletArmor';
-        bulletArmorEffect.operator = 'relative';
-        bulletArmorEffect.amount = config.RAGE_BULLET_ARMOR;
-        bulletArmorEffect.duration = duration;
-        bulletArmorEffect.appliedAt = currentTime;
-
-        // Ability armor boost
-        const abilityArmorEffect = new StatModEffect();
-        abilityArmorEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
-        abilityArmorEffect.stat = 'abilityArmor';
-        abilityArmorEffect.operator = 'relative';
-        abilityArmorEffect.amount = config.RAGE_ABILITY_ARMOR;
-        abilityArmorEffect.duration = duration;
-        abilityArmorEffect.appliedAt = currentTime;
-
-        // Apply all effects
+        // Apply all effects (armor effects removed for simplicity)
         hero.effects.push(attackStrengthEffect);
         hero.effects.push(moveSpeedEffect);
         hero.effects.push(attackRadiusEffect);
         hero.effects.push(windUpEffect);
         hero.effects.push(noCollisionEffect);
         hero.effects.push(hunterEffect);
-        hero.effects.push(bulletArmorEffect);
-        hero.effects.push(abilityArmorEffect);
     }
 }
