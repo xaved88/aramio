@@ -33,7 +33,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_STRENGTH: 5,
                 ATTACK_SPEED: 1, // attacks per second
                 WIND_UP: 0.25, // same wind-up time for all heroes
-                RESPAWN_TIME_MS: 6000, // same respawn time for all heroes
+                RESPAWN_TIME_MS: 6000, // base respawn time
                 SIZE: 15, // visual & collision radius
             },
             'hookshot': {
@@ -127,7 +127,7 @@ export const GAMEPLAY_CONFIG = {
             }
         },
         CRADLE: {
-            HEALTH: 2000,
+            HEALTH: 5000,
             ATTACK_RADIUS: 115,
             ATTACK_STRENGTH: 40,
             ATTACK_SPEED: 2, // attacks per second
@@ -162,14 +162,17 @@ export const GAMEPLAY_CONFIG = {
         },
     },
     EXPERIENCE: {
-        LEVEL_UP_MULTIPLIER: 15, // experience needed per level
-        STAT_BOOST_PERCENTAGE: 0.15,
-        RANGE_BOOST_PERCENTAGE: 0.10, // Reduced range scaling (was 0.15) to prevent excessive late-game range
-        ABILITY_STRENGTH_BOOST_PERCENTAGE: 0.20,
-        RESPAWN_SCALING_PERCENTAGE: 0.05, // Respawn time increase per level (separate from other stats)
-        MINION_KILLED: 2,
-        HERO_KILL_MULTIPLIER: 4, // experience for hero kill = hero level * HERO_KILL_MULTIPLIER
-        TOWER_DESTROYED: 50,
+        LEVEL_UP_BASE_COST: 15, // Base XP cost for level 1
+        LEVEL_UP_INCREASE_RATE: 40, // Rate of increase that diminishes over time
+        LEVEL_UP_QUADRATIC_THRESHOLD: 10, // Level where quadratic scaling kicks in
+        LEVEL_UP_QUADRATIC_MULTIPLIER: 5, // Additional XP per level above threshold
+        STAT_BOOST_PERCENTAGE: 0.10, // 10% boost per level
+        RANGE_BOOST_PERCENTAGE: 0.035, // reduced from 0.10 to prevent excessive late-game range at higher levels
+        RESPAWN_LEVEL_MULTIPLIER: 0.10, // 10% increase per level
+        RESPAWN_MAX_TIME_MS: 15000, // Maximum respawn time cap (15 seconds) 
+        MINION_KILLED: 3,
+        HERO_KILL_MULTIPLIER: 4,
+        TOWER_DESTROYED: 100,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
         LAST_HIT_BONUS_PERCENTAGE: 0.25, // bonus experience for getting the last hit on a unit
     },
@@ -207,13 +210,15 @@ export const GAMEPLAY_CONFIG = {
     },
     REWARDS: {
         LEVEL_CHESTS: {
-            3: "ability_chest", // At level 3, give ability chest instead of common
-            4: "ability_stats", // At level 4, give ability stat upgrades chest
-            5: "ability_stats", // At level 5, give ability stat upgrades chest
-            7: "ability_stats", // At level 7, give ability stat upgrades chest
+            3: "ability_chest", // At level 5, give ability chest instead of common
+            6: "ability_stats", // At level 7, give ability stat upgrades chest
             10: "ability_stats", // At level 10, give ability stat upgrades chest
             12: "ability_stats", // At level 12, give ability stat upgrades chest
-            15: "ability_stats" // At level 15, give ability stat upgrades chest
+            15: "ability_stats", // At level 15, give ability stat upgrades chest
+            18: "ability_stats", // At level 18, give ability stat upgrades chest
+            20: "ability_stats", // At level 20, give ability stat upgrades chest
+            22: "ability_stats", // At level 22, give ability stat upgrades chest
+            25: "ability_stats" // At level 25, give ability stat upgrades chest
         },
         CHESTS: {
             common: {

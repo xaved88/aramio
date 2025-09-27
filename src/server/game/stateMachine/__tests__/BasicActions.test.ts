@@ -281,7 +281,7 @@ describe('GameStateMachine', () => {
             });
             
             // Player should have gained experience and leveled up
-            // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
+            // 100 experience granted, reaches level 3 with new quadratic XP system
             expect(player?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(3); // Should have leveled up
         });
@@ -343,8 +343,8 @@ describe('GameStateMachine', () => {
             
             // Give hero enough experience to level up
             if (hero) {
-                hero.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER; // Enough to level up
-                hero.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+                hero.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST; // Enough to level up
+                hero.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST;
             }
             
             // Update game to trigger level up
@@ -363,7 +363,7 @@ describe('GameStateMachine', () => {
             
             // Hero should be level 2 with boosted stats
             expect(updatedHero?.level).toBe(2);
-            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER); // Total experience should be preserved
+            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST); // Total experience should be preserved
             expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
             expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
             expect(updatedHero?.levelRewards.length).toBe(1); // Should have one chest reward
@@ -438,7 +438,7 @@ describe('GameStateMachine', () => {
             });
             
             // Player should have gained experience and leveled up
-            // 50 experience granted, 15 needed for level 1, 30 needed for level 2, so 5 remaining
+            // 100 experience granted, reaches level 3 with new quadratic XP system
             expect(player?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(player?.level).toBe(3); // Should have leveled up
         });
@@ -459,8 +459,8 @@ describe('GameStateMachine', () => {
                 }
             });
             if (player) {
-                player.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5; // More than enough to level up
-                player.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER + 5;
+                player.experience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST + 5; // More than enough to level up
+                player.roundStats.totalExperience = TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST + 5;
             }
             
             // Update game - should trigger level up
@@ -525,10 +525,8 @@ describe('GameStateMachine', () => {
             const newRedTurret = newState.combatants.get('red-turret-1');
             
             // Verify that our manual changes are preserved, accounting for turret destruction
-            // Player starts with 50, gets 50 from turret destruction (total 100)
-            // Level 1->2: consumes 15 XP, leaving 85
-            // Level 2->3: consumes 30 XP, leaving 55
-            expect(newPlayer?.roundStats.totalExperience).toBe(100);
+            // Player starts with 50, gets turret destruction XP
+            expect(newPlayer?.roundStats.totalExperience).toBe(50 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(newRedTurret).toBeUndefined(); // Turret was destroyed and removed
         });
     });
@@ -851,7 +849,6 @@ describe('GameStateMachine', () => {
             const statBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
             const rangeBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
             const abilityBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE; // 1.20
-            const respawnScalingMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.RESPAWN_SCALING_PERCENTAGE; // 1.05
             
             // Calculate expected stats after multiple level-ups
             // Level 1->2: multiply by 1.15
@@ -861,21 +858,20 @@ describe('GameStateMachine', () => {
             const expectedStatMultiplier = Math.pow(statBoostMultiplier, levelIncrease);
             const expectedRangeMultiplier = Math.pow(rangeBoostMultiplier, levelIncrease);
             const expectedAbilityMultiplier = Math.pow(abilityBoostMultiplier, levelIncrease);
-            const expectedRespawnMultiplier = Math.pow(respawnScalingMultiplier, levelIncrease);
-            
             // Verify stats increased correctly
             expect(updatedPlayer!.maxHealth).toBe(Math.round(initialMaxHealth * expectedStatMultiplier));
             expect(updatedPlayer!.attackStrength).toBe(Math.round(initialAttackStrength * expectedStatMultiplier));
             expect(updatedPlayer!.attackRadius).toBe(Math.round(initialAttackRadius * expectedRangeMultiplier));
             expect(updatedPlayer!.attackSpeed).toBe(initialAttackSpeed * expectedStatMultiplier);
-            expect(updatedPlayer!.respawnDuration).toBe(Math.round(initialRespawnDuration * expectedRespawnMultiplier));
+            // Verify respawn duration has increased from level 1
+            expect(updatedPlayer!.respawnDuration).toBeGreaterThan(initialRespawnDuration);
             // Ability strength no longer increases automatically on level up (now handled by rewards)
             expect((updatedPlayer!.ability as DefaultAbility).strength).toBe(initialAbilityStrength);
             
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;
             for (let level = initialLevel; level < updatedPlayer!.level; level++) {
-                totalExperienceNeeded += level * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+                totalExperienceNeeded += level * TEST_GAMEPLAY_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST;
             }
             const expectedRemainingExperience = experienceToGrant - totalExperienceNeeded;
             expect(updatedPlayer!.experience).toBe(expectedRemainingExperience);

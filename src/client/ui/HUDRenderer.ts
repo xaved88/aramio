@@ -297,8 +297,7 @@ export class HUDRenderer {
         hudElements.healthText.setText(`${Math.round(player.health)}/${Math.round(player.maxHealth)}`);
         
         // Update experience bar
-        const experienceNeeded = player.level * this.gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
-        const experiencePercent = player.experience / experienceNeeded;
+        const experiencePercent = player.experience / player.experienceNeeded;
         
         hudElements.experienceBar.clear();
         hudElements.experienceBar.fillStyle(expConfig.EXPERIENCE_COLOR, 1);
@@ -310,7 +309,7 @@ export class HUDRenderer {
         );
         
         // Update experience text
-        hudElements.experienceText.setText(`${Math.floor(player.experience)}/${experienceNeeded} XP`);
+        hudElements.experienceText.setText(`${Math.floor(player.experience)}/${Math.round(player.experienceNeeded)} XP`);
         
         // Update level text
         hudElements.levelText.setText(`Lv.${player.level}`);
@@ -376,4 +375,5 @@ export class HUDRenderer {
             });
         }
     }
+
 } 

@@ -75,6 +75,7 @@ export class Hero extends Combatant {
     @type('number') respawnDuration!: number; // respawn duration in ms
     @type('number') experience!: number;
     @type('number') level!: number;
+    @type('number') experienceNeeded!: number; // XP needed for next level
     @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots

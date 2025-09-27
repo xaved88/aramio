@@ -59,6 +59,7 @@ describe('StatProgressionDisplay', () => {
             respawnDuration: 6000,
             level: 1,
             experience: 0,
+            experienceNeeded: 15,
             roundStats: {
                 totalExperience: 0,
                 minionKills: 0,

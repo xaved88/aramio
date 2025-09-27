@@ -6,7 +6,7 @@ import { SpawnPlayerAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../abilities/AbilityFactory';
 import { ArraySchema } from '@colyseus/schema';
-import { calculateXPForLevel } from '../../../../shared/utils/XPUtils';
+import { calculateXPForLevel, calculateXPForSpecificLevel } from '../../../../shared/utils/XPUtils';
 import { grantExperience } from './updateGame';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
@@ -79,9 +79,12 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     // Initialize permanent effects
     hero.permanentEffects = new ArraySchema<CombatantEffect>();
     
+    // Calculate XP needed for next level
+    hero.experienceNeeded = calculateXPForSpecificLevel(hero.level, gameplayConfig);
+    
     // Grant starting XP if STARTING_LEVEL > 1
     if (gameplayConfig.DEBUG.STARTING_LEVEL > 1) {
-        const startingXP = calculateXPForLevel(gameplayConfig.DEBUG.STARTING_LEVEL, gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER);
+        const startingXP = calculateXPForLevel(gameplayConfig.DEBUG.STARTING_LEVEL, gameplayConfig);
         // Use the normal XP granting system instead of direct assignment
         grantExperience(hero, startingXP, state, hero.x, hero.y, 'starting_level', gameplayConfig);
     }

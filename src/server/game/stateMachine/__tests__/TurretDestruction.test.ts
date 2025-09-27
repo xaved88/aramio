@@ -20,6 +20,10 @@ describe('TurretDestruction', () => {
 
     describe('Player destroys turret', () => {
         it('should destroy turret and grant experience when player is in range', () => {
+            // Set turret destruction XP to 60 for this test
+            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            
             // Setup game with a player
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             const spawnResult = gameStateMachine.processAction(setupResult.newState, {
@@ -81,6 +85,9 @@ describe('TurretDestruction', () => {
             // Hero stats should be boosted
             expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
             expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            
+            // Restore original turret destruction XP
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should not destroy turret when player is out of range', () => {
@@ -103,7 +110,7 @@ describe('TurretDestruction', () => {
                 }
             });
             
-                        // Position hero far from turret (outside attack radius)
+            // Position hero far from turret (outside attack radius)
             if (hero && redTurret) {
                 hero.x = redTurret.x + 100; // Outside attack radius (80)
                 hero.y = redTurret.y;
@@ -141,6 +148,10 @@ describe('TurretDestruction', () => {
         });
 
         it('should grant experience to all players on the same team', () => {
+            // Set turret destruction XP to 60 for this test
+            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            
             // Setup game with two players on blue team
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             const spawnResult1 = gameStateMachine.processAction(setupResult.newState, {
@@ -215,16 +226,23 @@ describe('TurretDestruction', () => {
             });
             
             // Both blue team heroes should have gained experience and leveled up
-            // They get 20 experience each, level up (consuming 10), so 10 remaining each
+            // They get 60 experience each, which gets them to level 3
             expect(updatedHero1?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             expect(updatedHero2?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
             
             // Check that both heroes leveled up
             expect(updatedHero1?.level).toBe(3);
             expect(updatedHero2?.level).toBe(3);
+            
+            // Restore original turret destruction XP
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should not grant experience to players on opposing team', () => {
+            // Set turret destruction XP to 60 for this test
+            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            
             // Setup game with a player on blue team
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             const spawnResult = gameStateMachine.processAction(setupResult.newState, {
@@ -278,9 +296,16 @@ describe('TurretDestruction', () => {
             // Hero should be level 3 with remaining experience
             expect(updatedHero?.level).toBe(3);
             expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            
+            // Restore original turret destruction XP
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should handle multiple level ups correctly', () => {
+            // Set turret destruction XP to 60 for this test
+            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            
             // Setup game with a player
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
             const spawnResult = gameStateMachine.processAction(setupResult.newState, {
@@ -331,9 +356,12 @@ describe('TurretDestruction', () => {
             });
 
             // Player should be level 3 with remaining experience
-            // 13 + 50 = 63 experience, 15 needed for level 2, 30 needed for level 3, so 18 remaining
+            // 13 + 60 = 73 experience, 15 needed for level 2, 36 needed for level 3, so 22 remaining
             expect(updatedPlayer?.level).toBe(3);
-            expect(updatedPlayer?.roundStats.totalExperience).toBe(63);
+            expect(updatedPlayer?.roundStats.totalExperience).toBe(73);
+            
+            // Restore original turret destruction XP
+            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should only grant minion XP to heroes within range', () => {

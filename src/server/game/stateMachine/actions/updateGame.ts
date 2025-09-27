@@ -8,6 +8,7 @@ import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { MinionManager } from '../../combatants/MinionManager';
 import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 import { RewardManager } from '../../rewards/RewardManager';
+import { calculateXPForSpecificLevel } from '../../../../shared/utils/XPUtils';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig, minionManager: MinionManager): StateMachineResult {
@@ -409,7 +410,7 @@ function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig):
             }
             
             // Check for level up (regardless of how experience was gained)
-            const experienceNeeded = hero.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+            const experienceNeeded = calculateXPForSpecificLevel(hero.level, gameplayConfig);
             if (hero.experience >= experienceNeeded) {
                 levelUpPlayer(hero, state, gameplayConfig);
             }
@@ -591,7 +592,7 @@ export function grantExperience(player: Hero, amount: number, state: GameState, 
     
     // Check for level up(s) - loop to handle multiple level-ups
     while (true) {
-        const experienceNeeded = player.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+        const experienceNeeded = calculateXPForSpecificLevel(player.level, gameplayConfig);
         if (player.experience >= experienceNeeded) {
             levelUpPlayer(player, state, gameplayConfig);
         } else {
@@ -603,11 +604,14 @@ export function grantExperience(player: Hero, amount: number, state: GameState, 
 function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayConfig): void {
     const boostMultiplier = 1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE;
     const rangeBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
-    const experienceNeeded = player.level * gameplayConfig.EXPERIENCE.LEVEL_UP_MULTIPLIER;
+    const experienceNeeded = calculateXPForSpecificLevel(player.level, gameplayConfig);
     
     // Level up
     player.level++;
     player.experience -= experienceNeeded;
+    
+    // Calculate XP needed for next level
+    player.experienceNeeded = calculateXPForSpecificLevel(player.level, gameplayConfig);
     
     // Store old max health to calculate health increase
     const oldMaxHealth = player.getMaxHealth();
@@ -623,8 +627,9 @@ function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayC
     player.attackRadius = Math.round(player.attackRadius * rangeBoostMultiplier); // Use separate range scaling
     player.attackSpeed = player.attackSpeed * boostMultiplier;
 
-    // Make respawn duration longer as a punishment for higher level deaths.
-    player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.RESPAWN_SCALING_PERCENTAGE)); // Increase respawn time
+    // Respawn time increases by 10% per level, capped at max
+    player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.RESPAWN_LEVEL_MULTIPLIER));
+    player.respawnDuration = Math.min(player.respawnDuration, gameplayConfig.EXPERIENCE.RESPAWN_MAX_TIME_MS);
     
     // Boost ability strength using the AbilityLevelUpManager
     const abilityLevelUpManager = new AbilityLevelUpManager(gameplayConfig);

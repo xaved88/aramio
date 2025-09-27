@@ -204,6 +204,7 @@ export interface HeroCombatant extends BaseCombatant {
     respawnDuration: number;
     experience: number;
     level: number;
+    experienceNeeded: number; // XP needed for next level
     roundStats: RoundStats;
     ability: Ability;
     controller: ControllerId; // client ID for players, bot strategy for bots

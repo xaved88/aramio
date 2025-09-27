@@ -195,6 +195,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                 respawnDuration: hero.respawnDuration,
                 experience: hero.experience,
                 level: hero.level,
+                experienceNeeded: hero.experienceNeeded,
                 roundStats: {
                     totalExperience: hero.roundStats.totalExperience,
                     minionKills: hero.roundStats.minionKills,
