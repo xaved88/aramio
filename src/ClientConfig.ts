@@ -34,7 +34,9 @@ export const CLIENT_CONFIG = {
         TARGETING_LINES: 1,     // Targeting lines between combatants
         MINIONS: 5,             // Minion entities
         HEROES: 10,             // Hero entities
-        ABILITY_INDICATORS: 15, // Ability ready indicators, range indicators
+        PROJECTILES: 12,        // Enemy projectiles
+        PLAYER_PROJECTILES: 15, // Player-owned projectiles (higher than heroes)
+        ABILITY_INDICATORS: 18, // Ability ready indicators, range indicators
         EFFECTS: 20,            // AOE effects, explosions
         OVERLAY: 25,            // XP text, level up text
         HUD: 500,               // Health bars, experience bars, ability bars

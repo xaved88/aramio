@@ -265,6 +265,19 @@ export class EntityManager {
             // Set initial position immediately to avoid spawning at (0,0)
             projectileGraphics.setPosition(projectileData.x, projectileData.y);
             
+            // Set depth based on projectile ownership
+            const isOwnerControlledByPlayer = state && this.playerSessionId && projectileData.ownerId && 
+                (() => {
+                    const owner = state.combatants.get(projectileData.ownerId);
+                    return owner && owner.type === COMBATANT_TYPES.HERO && owner.controller === this.playerSessionId;
+                })();
+            
+            if (isOwnerControlledByPlayer) {
+                projectileGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.PLAYER_PROJECTILES);
+            } else {
+                projectileGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.PROJECTILES);
+            }
+            
             // Assign to main camera
             if (this.cameraManager) {
                 this.cameraManager.assignToMainCamera(projectileGraphics);
