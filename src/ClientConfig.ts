@@ -284,6 +284,11 @@ export const CLIENT_CONFIG = {
                 description: "+25% ability duration",
                 rarity: "upgrade"
             },
+            "ability_stat:cooldown": {
+                title: "Ability Cooldown",
+                description: "20% cooldown reduction",
+                rarity: "upgrade"
+            },
             "ability_stat:mercenary_rage_speed": {
                 title: "Rage Speed",
                 description: "+15% move speed during rage",
@@ -292,11 +297,6 @@ export const CLIENT_CONFIG = {
             "ability_stat:pyromancer_radius": {
                 title: "Fire Radius",
                 description: "+25% fireball radius",
-                rarity: "upgrade"
-            },
-            "ability_stat:thorndive_cooldown": {
-                title: "Dash Cooldown",
-                description: "50% cooldown reduction",
                 rarity: "upgrade"
             }
         }

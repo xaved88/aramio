@@ -56,7 +56,6 @@ export class ThorndiveAbility extends Ability {
     @type('number') duration!: number; // reflect duration in ms
     @type('number') tauntDuration!: number; // taunt duration in ms
     @type('number') landingRadius!: number; // AOE radius for landing damage
-    @type('number') thorndiveCooldownBoost!: number; // multiplier for cooldown reduction
 }
 
 export class SniperAbility extends Ability {

@@ -216,7 +216,6 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     landingRadius: (hero.ability as any).landingRadius,
                     fireballRadius: (hero.ability as any).fireballRadius,
                     mercenaryRageSpeedBoost: (hero.ability as any).mercenaryRageSpeedBoost,
-                    thorndiveCooldownBoost: (hero.ability as any).thorndiveCooldownBoost
                 } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility | SniperAbility,
                 controller: hero.controller,
                 levelRewards: hero.levelRewards ? Array.from(hero.levelRewards) : [],

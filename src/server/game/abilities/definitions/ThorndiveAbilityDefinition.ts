@@ -28,7 +28,6 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         ability.duration = config.REFLECT_DURATION_MS;
         ability.tauntDuration = config.TAUNT_DURATION_MS;
         ability.landingRadius = config.LANDING_RADIUS;
-        ability.thorndiveCooldownBoost = 1.0; // Initialize cooldown boost multiplier
         
         return ability;
     }
@@ -65,9 +64,8 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
             return true;
         }
         
-        // Check cooldown with boost applied
-        const effectiveCooldown = ability.cooldown / (ability.thorndiveCooldownBoost || 1.0);
-        if (currentTime - ability.lastUsedTime < effectiveCooldown) {
+        // Check cooldown
+        if (currentTime - ability.lastUsedTime < ability.cooldown) {
             return false;
         }
         

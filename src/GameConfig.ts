@@ -205,7 +205,7 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability_stat:duration", weight: 1 },
                     { id: "ability_stat:mercenary_rage_speed", weight: 1 },
                     { id: "ability_stat:pyromancer_radius", weight: 1 },
-                    { id: "ability_stat:thorndive_cooldown", weight: 1 },
+                    { id: "ability_stat:cooldown", weight: 1 },
                 ]
             }
         },
@@ -282,6 +282,11 @@ export const GAMEPLAY_CONFIG = {
                 ability_stat: "duration",
                 modifier: { type: "percent", value: 1.25 }
             },
+            "ability_stat:cooldown": {
+                type: "ability_stat",
+                ability_stat: "cooldown",
+                modifier: { type: "percent", value: 0.80 }
+            },
             "ability_stat:mercenary_rage_speed": {
                 type: "ability_stat",
                 ability_stat: "mercenaryRageSpeedBoost",
@@ -291,11 +296,6 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability_stat",
                 ability_stat: "fireballRadius",
                 modifier: { type: "percent", value: 1.25 }
-            },
-            "ability_stat:thorndive_cooldown": {
-                type: "ability_stat",
-                ability_stat: "thorndiveCooldownBoost",
-                modifier: { type: "percent", value: 2.0 }
             }
         }
     },
