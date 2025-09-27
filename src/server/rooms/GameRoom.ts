@@ -315,7 +315,7 @@ export class GameRoom extends Room<GameState> {
             if (!latestMoveCommands.has(heroId)) {
                 // Check if hero is close to target before continuing movement
                 const hero = this.state.combatants.get(heroId);
-                if (hero && hero.type === 'hero') {
+                if (hero && hero.type === 'hero' && !(hero as any).controller.startsWith('bot')) {
                     const dx = lastCommand.data.targetX - hero.x;
                     const dy = lastCommand.data.targetY - hero.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
