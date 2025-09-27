@@ -26,54 +26,14 @@ export const GAMEPLAY_CONFIG = {
 
     COMBAT: {
         COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
-        HEROES: {
-            'default': {
-                HEALTH: 75,
-                ATTACK_RADIUS: 50,
-                ATTACK_STRENGTH: 5,
-                ATTACK_SPEED: 1, // attacks per second
-                WIND_UP: 0.25, // same wind-up time for all heroes
-                RESPAWN_TIME_MS: 6000, // base respawn time
-                SIZE: 15, // visual & collision radius
-            },
-            'hookshot': {
-                HEALTH: 105, // A bit tanky
-                ATTACK_RADIUS: 25, // Melee
-                ATTACK_STRENGTH: 10, // Higher attack
-                ATTACK_SPEED: 0.5, // Low attack speed
-                WIND_UP: 0.25,
-                RESPAWN_TIME_MS: 6000,
-                SIZE: 15,
-            },
-            'mercenary': {
-                HEALTH: 60,
-                ATTACK_RADIUS: 50,
-                ATTACK_STRENGTH: 4,
-                ATTACK_SPEED: 1,
-                WIND_UP: 0.25,
-                RESPAWN_TIME_MS: 6000,
-                SIZE: 15,
-            },
-            'pyromancer': {
-                HEALTH: 60, // Low HP
-                ATTACK_RADIUS: 35, // Low range
-                ATTACK_STRENGTH: 3, // Low attack
-                ATTACK_SPEED: 0.8, // Low attack speed
-                WIND_UP: 0.25,
-                RESPAWN_TIME_MS: 6000,
-                SIZE: 15,
-            },
-            'thorndive': {
-                HEALTH: 120, // High HP tank
-                ATTACK_RADIUS: 25, // Low range (melee tank)
-                ATTACK_STRENGTH: 8, // High damage
-                ATTACK_SPEED: 0.6, // Low attack speed
-                WIND_UP: 0.25,
-                RESPAWN_TIME_MS: 6000,
-                SIZE: 15, 
-                BULLET_ARMOR: 20, // Base bullet armor
-                ABILITY_ARMOR: 20, // Base ability armor
-            },
+        HERO: {
+            HEALTH: 75,
+            ATTACK_RADIUS: 50,
+            ATTACK_STRENGTH: 5,
+            ATTACK_SPEED: 1, // attacks per second
+            WIND_UP: 0.25, // wind-up time before attack
+            RESPAWN_TIME_MS: 6000, // base respawn time
+            SIZE: 15, // visual & collision radius
         },
         ABILITIES: {
             'default': {

@@ -98,7 +98,7 @@ describe('MinionManager', () => {
         bluePlayer.attackSpeed = 1;
         bluePlayer.lastAttackTime = 0;
         bluePlayer.moveSpeed = TEST_GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
-        bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+        bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
         
         // Add all combatants to game state
         gameState.combatants.set(blueMinion.id, blueMinion);
@@ -135,7 +135,7 @@ describe('MinionManager', () => {
             redPlayer.attackSpeed = 1;
             redPlayer.lastAttackTime = 0;
             redPlayer.moveSpeed = TEST_GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
-            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             

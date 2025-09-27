@@ -13,37 +13,11 @@ GLASS_CANNON_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS = 3; // Faster h
 GLASS_CANNON_CONFIG.PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND = 2; // Faster healing (was 1)
 
 // Glass cannon hero stats - much lower health, much higher damage
-GLASS_CANNON_CONFIG.COMBAT.HEROES.default.HEALTH = 40; // Much lower health (was 75)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH = 12; // Much higher damage (was 5)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.default.ATTACK_SPEED = 1.5; // Faster attacks (was 1)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.default.WIND_UP = 0.15; // Faster wind-up (was 0.25)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.default.RESPAWN_TIME_MS = 3000; // Faster respawn (was 6000)
-
-GLASS_CANNON_CONFIG.COMBAT.HEROES.hookshot.HEALTH = 60; // Lower health (was 105)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.hookshot.ATTACK_STRENGTH = 20; // Much higher damage (was 10)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.hookshot.ATTACK_SPEED = 0.8; // Faster attacks (was 0.5)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.hookshot.WIND_UP = 0.15; // Faster wind-up
-GLASS_CANNON_CONFIG.COMBAT.HEROES.hookshot.RESPAWN_TIME_MS = 3000; // Faster respawn
-
-GLASS_CANNON_CONFIG.COMBAT.HEROES.mercenary.HEALTH = 35; // Lower health (was 60)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.mercenary.ATTACK_STRENGTH = 8; // Higher damage (was 4)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.mercenary.ATTACK_SPEED = 1.5; // Faster attacks (was 1)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.mercenary.WIND_UP = 0.15; // Faster wind-up
-GLASS_CANNON_CONFIG.COMBAT.HEROES.mercenary.RESPAWN_TIME_MS = 3000; // Faster respawn
-
-GLASS_CANNON_CONFIG.COMBAT.HEROES.pyromancer.HEALTH = 30; // Much lower health (was 60)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.pyromancer.ATTACK_STRENGTH = 6; // Higher damage (was 3)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.pyromancer.ATTACK_SPEED = 1.2; // Faster attacks (was 0.8)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.pyromancer.WIND_UP = 0.15; // Faster wind-up
-GLASS_CANNON_CONFIG.COMBAT.HEROES.pyromancer.RESPAWN_TIME_MS = 3000; // Faster respawn
-
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.HEALTH = 80; // Lower health (was 120)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.ATTACK_STRENGTH = 16; // Much higher damage (was 8)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.ATTACK_SPEED = 1.0; // Faster attacks (was 0.6)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.WIND_UP = 0.15; // Faster wind-up
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.RESPAWN_TIME_MS = 3000; // Faster respawn
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.BULLET_ARMOR = 10; // Reduced armor (was 20)
-GLASS_CANNON_CONFIG.COMBAT.HEROES.thorndive.ABILITY_ARMOR = 10; // Reduced armor (was 20)
+GLASS_CANNON_CONFIG.COMBAT.HERO.HEALTH = 40; // Much lower health (was 75)
+GLASS_CANNON_CONFIG.COMBAT.HERO.ATTACK_STRENGTH = 12; // Much higher damage (was 5)
+GLASS_CANNON_CONFIG.COMBAT.HERO.ATTACK_SPEED = 1.5; // Faster attacks (was 1)
+GLASS_CANNON_CONFIG.COMBAT.HERO.WIND_UP = 0.15; // Faster wind-up (was 0.25)
+GLASS_CANNON_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 3000; // Faster respawn (was 6000)
 
 // Glass cannon abilities - faster cooldowns, higher damage
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 600; // Faster cooldown (was 1000)

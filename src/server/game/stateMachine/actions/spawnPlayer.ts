@@ -34,8 +34,8 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
         }
     }
     
-    // Get hero config based on ability type
-    const heroConfig = gameplayConfig.COMBAT.HEROES[abilityType as keyof typeof gameplayConfig.COMBAT.HEROES] || gameplayConfig.COMBAT.HEROES.default;
+    // Get hero config (now unified for all heroes)
+    const heroConfig = gameplayConfig.COMBAT.HERO;
     
     hero.health = heroConfig.HEALTH;
     hero.maxHealth = heroConfig.HEALTH;

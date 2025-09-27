@@ -154,7 +154,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
             bluePlayer.bulletArmor = 0;
             bluePlayer.abilityArmor = 0;
-            bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             bluePlayer.lastDamageTime = 0;
             
                     // Create red player
@@ -181,7 +181,7 @@ describe('handleUpdateGame', () => {
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
             redPlayer.bulletArmor = 0;
             redPlayer.abilityArmor = 0;
-            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             redPlayer.lastDamageTime = 0;
             
             gameState.combatants.set(bluePlayer.id, bluePlayer);
@@ -290,7 +290,7 @@ describe('handleUpdateGame', () => {
             bluePlayer.roundStats.totalExperience = 0;
             bluePlayer.level = 1;
             bluePlayer.attackReadyAt = 0; // Initialize wind-up field
-            bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             bluePlayer.lastDamageTime = 0;
             
             gameState.combatants.set(deadMinion.id, deadMinion);
@@ -335,7 +335,7 @@ describe('handleUpdateGame', () => {
             redPlayer.roundStats.totalExperience = 0;
             redPlayer.level = 1;
             redPlayer.attackReadyAt = 0; // Initialize wind-up field
-            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             redPlayer.lastDamageTime = 0;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
@@ -526,7 +526,7 @@ describe('handleUpdateGame', () => {
             attacker.ability = abilityFactory.create('default');
             attacker.ability.cooldown = 5000;
             (attacker.ability as DefaultAbility).strength = 50;
-            attacker.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            attacker.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             attacker.lastDamageTime = 0;
             
             // Create a near enemy (closer to attacker)
@@ -555,7 +555,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.ability = abilityFactory.create('default');
             nearEnemy.ability.cooldown = 5000;
             (nearEnemy.ability as DefaultAbility).strength = 50;
-            nearEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            nearEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             nearEnemy.lastDamageTime = 0;
             
             // Create a far enemy (further from attacker)
@@ -584,7 +584,7 @@ describe('handleUpdateGame', () => {
             farEnemy.ability = abilityFactory.create('default');
             farEnemy.ability.cooldown = 5000;
             (farEnemy.ability as DefaultAbility).strength = 50;
-            farEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            farEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             farEnemy.lastDamageTime = 0;
             
             gameState.combatants.set(attacker.id, attacker);
@@ -679,7 +679,7 @@ describe('handleUpdateGame', () => {
             player1.ability = abilityFactory.create('default');
             player1.ability.cooldown = 1000;
             (player1.ability as DefaultAbility).strength = 5;
-            player1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            player1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             player1.lastDamageTime = 0;
 
             // Create player 2
@@ -706,7 +706,7 @@ describe('handleUpdateGame', () => {
             player2.ability = abilityFactory.create('default');
             player2.ability.cooldown = 1000;
             (player2.ability as DefaultAbility).strength = 5;
-            player2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            player2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             player2.lastDamageTime = 0;
 
             // Create minion
@@ -924,7 +924,7 @@ describe('handleUpdateGame', () => {
 
         it('should use configurable collision threshold', () => {
             // Test with units just at the threshold boundary
-            const threshold = (TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE + TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE) * TEST_GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
+            const threshold = (TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE + TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE) * TEST_GAMEPLAY_CONFIG.COMBAT.COLLISION_THRESHOLD_MULTIPLIER;
             
             // Position players exactly at the threshold
             player1.x = 100;
@@ -1000,7 +1000,7 @@ describe('handleUpdateGame', () => {
             blueHero1.ability = abilityFactory.create('default');
             blueHero1.ability.cooldown = 1000;
             (blueHero1.ability as DefaultAbility).strength = 5;
-            blueHero1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero1.lastDamageTime = 0;
 
             blueHero2 = new Hero();
@@ -1025,7 +1025,7 @@ describe('handleUpdateGame', () => {
             blueHero2.ability = abilityFactory.create('default');
             blueHero2.ability.cooldown = 1000;
             (blueHero2.ability as DefaultAbility).strength = 5;
-            blueHero2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero2.lastDamageTime = 0;
 
             blueHero3 = new Hero();
@@ -1050,7 +1050,7 @@ describe('handleUpdateGame', () => {
             blueHero3.ability = abilityFactory.create('default');
             blueHero3.ability.cooldown = 1000;
             (blueHero3.ability as DefaultAbility).strength = 5;
-            blueHero3.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            blueHero3.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero3.lastDamageTime = 0;
 
             // Create red minion to be killed
@@ -1092,7 +1092,7 @@ describe('handleUpdateGame', () => {
             redHero.ability = abilityFactory.create('default');
             redHero.ability.cooldown = 1000;
             (redHero.ability as DefaultAbility).strength = 5;
-            redHero.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            redHero.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             redHero.lastDamageTime = 0;
 
             gameState.combatants.set(blueHero1.id, blueHero1);
@@ -1257,7 +1257,7 @@ describe('handleUpdateGame', () => {
             hero.attackReadyAt = 0;
             hero.bulletArmor = 0;
             hero.abilityArmor = 0;
-            hero.size = TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.SIZE;
+            hero.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             hero.roundStats = new RoundStats();
             hero.roundStats.damageTaken = 0;
             hero.roundStats.damageDealt = 0;

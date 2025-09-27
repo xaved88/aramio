@@ -83,8 +83,8 @@ describe('TurretDestruction', () => {
             expect(updatedHero?.level).toBe(3);
             
             // Hero stats should be boosted
-            expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH);
+            expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH);
             
             // Restore original turret destruction XP
             (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;

@@ -13,40 +13,12 @@ QUICK_WIN_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS = 1; // Very fast h
 QUICK_WIN_CONFIG.PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND = 5; // Very fast healing (was 1)
 
 // Glass cannon hero stats - very low health, very high damage
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.HEALTH = 30; // Very low health (was 75)
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.ATTACK_STRENGTH = 20; // Very high damage (was 5)
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.ATTACK_SPEED = 2.0; // Very fast attacks (was 1)
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.ATTACK_RADIUS = 200; // Much larger range (was 50)
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.WIND_UP = 0.1; // Very fast wind-up (was 0.25)
-QUICK_WIN_CONFIG.COMBAT.HEROES.default.RESPAWN_TIME_MS = 2000; // Very fast respawn (was 6000)
-
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.HEALTH = 50; // Very low health (was 105)
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.ATTACK_STRENGTH = 30; // Very high damage (was 10)
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.ATTACK_SPEED = 1.2; // Very fast attacks (was 0.5)
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.ATTACK_RADIUS = 250; // Much larger range (was 25)
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.WIND_UP = 0.1; // Very fast wind-up
-QUICK_WIN_CONFIG.COMBAT.HEROES.hookshot.RESPAWN_TIME_MS = 2000; // Very fast respawn
-
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.HEALTH = 25; // Very low health (was 60)
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.ATTACK_STRENGTH = 15; // Very high damage (was 4)
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.ATTACK_SPEED = 2.0; // Very fast attacks (was 1)
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.ATTACK_RADIUS = 180; // Much larger range (was 50)
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.WIND_UP = 0.1; // Very fast wind-up
-QUICK_WIN_CONFIG.COMBAT.HEROES.mercenary.RESPAWN_TIME_MS = 2000; // Very fast respawn
-
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.HEALTH = 20; // Very low health (was 60)
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.ATTACK_STRENGTH = 10; // Very high damage (was 3)
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.ATTACK_SPEED = 1.8; // Very fast attacks (was 0.8)
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.ATTACK_RADIUS = 220; // Much larger range (was 35)
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.WIND_UP = 0.1; // Very fast wind-up
-QUICK_WIN_CONFIG.COMBAT.HEROES.pyromancer.RESPAWN_TIME_MS = 2000; // Very fast respawn
-
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.HEALTH = 60; // Very low health (was 120)
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.ATTACK_STRENGTH = 25; // Very high damage (was 8)
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.ATTACK_SPEED = 1.5; // Very fast attacks (was 0.6)
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.ATTACK_RADIUS = 160; // Much larger range (was 25)
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.WIND_UP = 0.1; // Very fast wind-up
-QUICK_WIN_CONFIG.COMBAT.HEROES.thorndive.RESPAWN_TIME_MS = 2000; // Very fast respawn
+QUICK_WIN_CONFIG.COMBAT.HERO.HEALTH = 30; // Very low health (was 75)
+QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_STRENGTH = 20; // Very high damage (was 5)
+QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_SPEED = 2.0; // Very fast attacks (was 1)
+QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_RADIUS = 200; // Much larger range (was 50)
+QUICK_WIN_CONFIG.COMBAT.HERO.WIND_UP = 0.1; // Very fast wind-up (was 0.25)
+QUICK_WIN_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 2000; // Very fast respawn (was 6000)
 
 // Very powerful abilities with fast cooldowns
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 300; // Very fast cooldown (was 1000)
