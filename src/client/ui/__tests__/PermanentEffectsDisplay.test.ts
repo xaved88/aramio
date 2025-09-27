@@ -7,6 +7,8 @@ const mockScene = {
         graphics: jest.fn().mockReturnValue({
             fillStyle: jest.fn().mockReturnThis(),
             fillRoundedRect: jest.fn().mockReturnThis(),
+            lineStyle: jest.fn().mockReturnThis(),
+            strokeRoundedRect: jest.fn().mockReturnThis(),
             setDepth: jest.fn().mockReturnThis(),
             setScrollFactor: jest.fn().mockReturnThis(),
             setVisible: jest.fn().mockReturnThis(),
@@ -17,7 +19,24 @@ const mockScene = {
             setDepth: jest.fn().mockReturnThis(),
             setScrollFactor: jest.fn().mockReturnThis(),
             setVisible: jest.fn().mockReturnThis(),
+            setInteractive: jest.fn().mockReturnThis(),
+            on: jest.fn().mockReturnThis(),
             destroy: jest.fn(),
+        }),
+        container: jest.fn().mockReturnValue({
+            setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setVisible: jest.fn().mockReturnThis(),
+            add: jest.fn().mockReturnThis(),
+            destroy: jest.fn(),
+        }),
+        text: jest.fn().mockReturnValue({
+            setDepth: jest.fn().mockReturnThis(),
+            setScrollFactor: jest.fn().mockReturnThis(),
+            setVisible: jest.fn().mockReturnThis(),
+            setOrigin: jest.fn().mockReturnThis(),
+            destroy: jest.fn(),
+            width: 100, // Mock width for text measurement
         }),
     },
 } as any;
@@ -31,6 +50,8 @@ jest.mock('../../utils/IconManager', () => ({
                 setDepth: jest.fn().mockReturnThis(),
                 setScrollFactor: jest.fn().mockReturnThis(),
                 setVisible: jest.fn().mockReturnThis(),
+                setInteractive: jest.fn().mockReturnThis(),
+                on: jest.fn().mockReturnThis(),
                 destroy: jest.fn(),
             }),
         }),

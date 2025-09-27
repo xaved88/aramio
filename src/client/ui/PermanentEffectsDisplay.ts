@@ -9,7 +9,9 @@ export class PermanentEffectsDisplay {
     private cameraManager: any = null;
     private backgrounds: Phaser.GameObjects.Graphics[] = [];
     private iconImages: Phaser.GameObjects.Image[] = [];
+    private tooltips: Phaser.GameObjects.Container[] = [];
     private isVisible = false;
+    private lastEffectIds: string[] = []; // Track effect IDs to avoid unnecessary updates
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -32,12 +34,16 @@ export class PermanentEffectsDisplay {
                 cameraManager.assignToHUDCamera(icon);
             }
         });
+        this.tooltips.forEach(tooltip => {
+            if (tooltip && cameraManager) {
+                cameraManager.assignToHUDCamera(tooltip);
+            }
+        });
     }
 
     updateDisplay(hero: HeroCombatant): void {
-        this.clearDisplay();
-        
         if (!hero.permanentEffects || hero.permanentEffects.length === 0) {
+            this.clearDisplay();
             return;
         }
 
@@ -50,12 +56,33 @@ export class PermanentEffectsDisplay {
         );
 
         if (statEffects.length === 0) {
+            this.clearDisplay();
             return;
+        }
+
+        // Create effect IDs to check if we need to update
+        const currentEffectIds = statEffects.map(effect => 
+            `${(effect as any).stat}_${(effect as any).operator}_${(effect as any).amount}`
+        );
+
+        // Only recreate if effects have changed
+        const effectsChanged = currentEffectIds.length !== this.lastEffectIds.length ||
+            currentEffectIds.some((id, index) => id !== this.lastEffectIds[index]);
+
+        if (!effectsChanged && this.isVisible) {
+            return; // No need to update
+        }
+
+        // Clear and recreate if effects changed
+        if (effectsChanged) {
+            this.clearDisplay();
         }
 
         // Create individual backgrounds and icons for each stat effect
         statEffects.forEach((effect, index) => {
             const statName = (effect as any).stat;
+            const operator = (effect as any).operator;
+            const amount = (effect as any).amount;
             const iconsPerRow = config.MAX_ICONS_PER_ROW;
             const row = Math.floor(index / iconsPerRow);
             const col = index % iconsPerRow;
@@ -98,9 +125,14 @@ export class PermanentEffectsDisplay {
                     this.cameraManager.assignToHUDCamera(iconImage);
                 }
                 this.iconImages.push(iconImage);
+                
+                // Create tooltip for this icon
+                this.createTooltip(iconImage, rewardId, operator, amount, x, y);
             }
         });
 
+        // Track the current effect IDs
+        this.lastEffectIds = currentEffectIds;
         this.isVisible = true;
     }
 
@@ -119,6 +151,14 @@ export class PermanentEffectsDisplay {
         });
         this.iconImages = [];
         
+        this.tooltips.forEach(tooltip => {
+            if (tooltip) {
+                tooltip.destroy();
+            }
+        });
+        this.tooltips = [];
+        
+        this.lastEffectIds = [];
         this.isVisible = false;
     }
 
@@ -131,6 +171,11 @@ export class PermanentEffectsDisplay {
         this.iconImages.forEach(icon => {
             if (icon) {
                 icon.setVisible(visible);
+            }
+        });
+        this.tooltips.forEach(tooltip => {
+            if (tooltip) {
+                tooltip.setVisible(visible);
             }
         });
         this.isVisible = visible;
@@ -151,5 +196,113 @@ export class PermanentEffectsDisplay {
             'abilityArmor': 'stat:ability_armor'
         };
         return statToRewardMap[statName] || statName;
+    }
+
+    private createTooltip(iconImage: Phaser.GameObjects.Image, rewardId: string, operator: string, amount: number, x: number, y: number): void {
+        // Get reward display info
+        const rewardDisplay = CLIENT_CONFIG.REWARDS.DISPLAY[rewardId as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
+        if (!rewardDisplay) return;
+
+        // Create tooltip container
+        const tooltip = this.scene.add.container(0, 0);
+        tooltip.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 100); // Above everything else
+        tooltip.setScrollFactor(0, 0);
+        tooltip.setVisible(false);
+
+        // Create tooltip background
+        const tooltipBg = this.scene.add.graphics();
+        tooltipBg.fillStyle(0x000000, 0.9);
+        tooltipBg.lineStyle(1, 0xffffff, 0.8);
+        
+        // Calculate tooltip text and dimensions
+        const title = rewardDisplay.title;
+        const description = this.formatEffectDescription(rewardDisplay.description, operator, amount);
+        
+        // Create temporary text to measure dimensions
+        const tempTitle = this.scene.add.text(0, 0, title, {
+            fontSize: '14px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        });
+        const tempDesc = this.scene.add.text(0, 0, description, {
+            fontSize: '12px',
+            color: '#cccccc',
+            wordWrap: { width: 200 }
+        });
+        
+        const titleWidth = tempTitle.width;
+        const descWidth = Math.max(tempDesc.width, 150);
+        const totalWidth = Math.max(titleWidth, descWidth) + 20;
+        const totalHeight = 60;
+        
+        // Position tooltip to the left of the icon
+        const tooltipX = x - totalWidth - 10;
+        const tooltipY = y - totalHeight / 2;
+        
+        tooltipBg.fillRoundedRect(tooltipX, tooltipY, totalWidth, totalHeight, 4);
+        tooltipBg.strokeRoundedRect(tooltipX, tooltipY, totalWidth, totalHeight, 4);
+        
+        // Create actual tooltip text
+        const titleText = this.scene.add.text(tooltipX + 10, tooltipY + 10, title, {
+            fontSize: '14px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        });
+        
+        const descText = this.scene.add.text(tooltipX + 10, tooltipY + 30, description, {
+            fontSize: '12px',
+            color: '#cccccc',
+            wordWrap: { width: totalWidth - 20 }
+        });
+        
+        // Clean up temporary text
+        tempTitle.destroy();
+        tempDesc.destroy();
+        
+        // Add elements to tooltip container
+        tooltip.add([tooltipBg, titleText, descText]);
+        
+        // Add to HUD container and camera manager
+        if (this.hudContainer) {
+            this.hudContainer.add(tooltip);
+        }
+        if (this.cameraManager) {
+            this.cameraManager.assignToHUDCamera(tooltip);
+        }
+        
+        // Make icon interactive
+        iconImage.setInteractive({ useHandCursor: false });
+        
+        // Show tooltip on hover
+        iconImage.on('pointerover', () => {
+            tooltip.setVisible(true);
+        });
+        
+        iconImage.on('pointerout', () => {
+            tooltip.setVisible(false);
+        });
+        
+        this.tooltips.push(tooltip);
+    }
+
+    private formatEffectDescription(baseDescription: string, operator: string, amount: number): string {
+        // Extract the base description without the old amount
+        // e.g., "+15% max health" -> "max health"
+        let cleanDescription = baseDescription;
+        
+        // Remove common prefixes
+        cleanDescription = cleanDescription.replace(/^\+?\d+%?\s*/, '');
+        cleanDescription = cleanDescription.replace(/^\+?\d+\s*/, '');
+        
+        // Format the new amount based on operator
+        let formattedAmount: string;
+        if (operator === 'percent') {
+            const percentage = Math.round((amount - 1) * 100);
+            formattedAmount = `${percentage > 0 ? '+' : ''}${percentage}%`;
+        } else {
+            formattedAmount = `+${Math.round(amount)}`;
+        }
+        
+        return `${formattedAmount} ${cleanDescription}`;
     }
 }
