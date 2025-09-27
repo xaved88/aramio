@@ -35,6 +35,7 @@ export class EntityManager {
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
     private processedAOEDamageEvents: Set<string> = new Set();
+    private lastProcessedTime: number = 0;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -56,9 +57,14 @@ export class EntityManager {
      * Call this when the browser tab becomes active again
      */
     forceCleanupTexts(): void {
-        // Clear processed events so new texts can be created
-        this.processedXPEvents.clear();
-        this.processedLevelUpEvents.clear();
+        // Don't clear processed events - this causes notifications to re-display
+        // when returning to the tab. The visual text objects are already cleaned up
+        // by their animation completion callbacks.
+        // The processed events should persist to prevent re-processing old events.
+        
+        // Note: We don't reset lastProcessedTime here because we need to get the current
+        // game time from the next update cycle. The timestamp comparison will handle
+        // skipping old events properly.
     }
 
     /**
@@ -290,6 +296,9 @@ export class EntityManager {
             // Skip if we've already processed this event
             if (this.processedXPEvents.has(eventKey)) return;
             
+            // Skip events that are older than when we last processed (prevents re-display after tab switch)
+            if (xpEvent.timestamp < this.lastProcessedTime) return;
+            
             // Find the player who earned XP and check if it's the current player
             const player = state.combatants.get(xpEvent.playerId);
             if (player && isHeroCombatant(player) && this.playerSessionId && player.controller === this.playerSessionId) {
@@ -299,6 +308,9 @@ export class EntityManager {
             // Mark as processed
             this.processedXPEvents.add(eventKey);
         });
+        
+        // Update last processed time to current game time
+        this.lastProcessedTime = state.gameTime;
     }
 
     /**
@@ -352,6 +364,9 @@ export class EntityManager {
             
             // Skip if we've already processed this event
             if (this.processedLevelUpEvents.has(eventKey)) return;
+            
+            // Skip events that are older than when we last processed (prevents re-display after tab switch)
+            if (levelUpEvent.timestamp < this.lastProcessedTime) return;
             
             // Find the player who leveled up and check if it's the current player
             const player = state.combatants.get(levelUpEvent.playerId);
@@ -625,6 +640,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.lastProcessedTime = 0;
     }
 
     /**
@@ -688,6 +704,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.lastProcessedTime = 0;
         
         // Force clear any remaining graphics by recreating the targeting lines graphics
         // This ensures a completely fresh state
