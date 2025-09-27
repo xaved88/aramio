@@ -21,6 +21,7 @@ export class InputHandler {
     private room: any;
     private isClickHeld: boolean = false;
     private clickDownPosition: { x: number; y: number } | null = null;
+    private wasRespawningOnClick: boolean = false;
 
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
@@ -65,6 +66,8 @@ export class InputHandler {
      */
     private handlePointerDown(pointer: Phaser.Input.Pointer): void {
         this.isClickHeld = true;
+        // Check if hero is currently respawning when click starts
+        this.wasRespawningOnClick = this.isPlayerRespawning();
         const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
         this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
         
@@ -76,8 +79,8 @@ export class InputHandler {
      * Handles pointer up events - fires ability
      */
     private handlePointerUp(pointer: Phaser.Input.Pointer): void {
-        if (this.isClickHeld) {
-            // Fire ability at release position
+        if (this.isClickHeld && !this.wasRespawningOnClick) {
+            // Only fire ability if the hero wasn't respawning when click started
             const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
             this.room.send('useAbility', {
                 x: worldPos.x,
@@ -90,6 +93,7 @@ export class InputHandler {
         
         this.isClickHeld = false;
         this.clickDownPosition = null;
+        this.wasRespawningOnClick = false; // Reset for next click
     }
 
     /**
@@ -110,6 +114,22 @@ export class InputHandler {
         if (gameScene.onPointerUp) {
             gameScene.onPointerUp(pointer);
         }
+    }
+
+    /**
+     * Checks if the player's hero is currently respawning
+     */
+    private isPlayerRespawning(): boolean {
+        const gameScene = this.scene as any;
+        if (gameScene.lastState) {
+            // Find the player's hero in the game state
+            for (const combatant of gameScene.lastState.combatants.values()) {
+                if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                    return combatant.state === 'respawning';
+                }
+            }
+        }
+        return false;
     }
 
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number; y: number } {
