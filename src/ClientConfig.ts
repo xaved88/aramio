@@ -238,7 +238,7 @@ export const CLIENT_CONFIG = {
             },
             "stat:attack_range": {
                 title: "Attack Range",
-                description: "+10 attack radius",
+                description: "+10 attack range",
                 rarity: "common"
             },
             "stat:move_speed": {
