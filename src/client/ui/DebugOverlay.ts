@@ -149,9 +149,7 @@ export class DebugOverlay {
         if (!camera) {
             return { x: screenX, y: screenY };
         }
-        return {
-            x: camera.scrollX + screenX,
-            y: camera.scrollY + screenY
-        };
+        // Use Phaser's built-in coordinate conversion that properly accounts for zoom
+        return camera.getWorldPoint(screenX, screenY);
     }
 }

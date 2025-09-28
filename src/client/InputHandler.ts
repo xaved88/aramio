@@ -138,9 +138,7 @@ export class InputHandler {
             console.warn('Camera not available for coordinate conversion');
             return { x: 0, y: 0 };
         }
-        return {
-            x: camera.scrollX + screenX,
-            y: camera.scrollY + screenY
-        };
+        // Use Phaser's built-in coordinate conversion that properly accounts for zoom
+        return camera.getWorldPoint(screenX, screenY);
     }
 }
