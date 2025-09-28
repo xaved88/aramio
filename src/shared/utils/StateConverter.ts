@@ -85,7 +85,8 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         targetId: event.targetId,
         targetType: event.targetType,
         amount: event.amount,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
+        damageSource: event.damageSource
     }));
     
     // Convert kill events

@@ -50,6 +50,7 @@ export class CombatantUtils {
             damageEvent.targetType = combatant.type;
             damageEvent.amount = actualDamage;
             damageEvent.timestamp = gameState.gameTime;
+            damageEvent.damageSource = damageSource;
             gameState.damageEvents.push(damageEvent);
 
             // Check for reflect effects and apply reflect damage (only if this isn't already reflect damage)

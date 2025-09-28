@@ -6,6 +6,7 @@ import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
 import { RespawnOverlay } from './RespawnOverlay';
 import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
+import { DamageOverlay } from './DamageOverlay';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -22,6 +23,7 @@ export class UIManager {
     private statsOverlay: StatsOverlay;
     private respawnOverlay: RespawnOverlay;
     private permanentEffectsDisplay: PermanentEffectsDisplay;
+    private damageOverlay: DamageOverlay;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
 
     // HUD elements
@@ -67,6 +69,7 @@ export class UIManager {
         this.statsOverlay = new StatsOverlay(scene);
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
         this.permanentEffectsDisplay = new PermanentEffectsDisplay(scene);
+        this.damageOverlay = new DamageOverlay(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -81,6 +84,7 @@ export class UIManager {
         this.victoryScreen.setHUDCamera(hudCamera);
         this.statsOverlay.setHUDCamera(hudCamera);
         this.respawnOverlay.setHUDCamera(hudCamera);
+        this.damageOverlay.setHUDCamera(hudCamera);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -90,6 +94,7 @@ export class UIManager {
         this.victoryScreen.setCameraManager(cameraManager);
         this.statsOverlay.setCameraManager(cameraManager);
         this.respawnOverlay.setCameraManager(cameraManager);
+        this.damageOverlay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -117,6 +122,7 @@ export class UIManager {
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.statsOverlay.setPlayerSessionId(sessionId);
+        this.damageOverlay.setPlayerSessionId(sessionId);
     }
 
     showStatsOverlay(state: SharedGameState): void {
@@ -133,6 +139,25 @@ export class UIManager {
 
     updateStatsOverlay(state: SharedGameState): void {
         this.statsOverlay.update(state);
+    }
+
+    showDamageOverlay(state: SharedGameState): void {
+        this.damageOverlay.show();
+        // Process damage events and update the overlay immediately
+        this.damageOverlay.processDamageEvents(state);
+        this.damageOverlay.updateDamageEntries(state.gameTime);
+    }
+
+    hideDamageOverlay(): void {
+        this.damageOverlay.hide();
+    }
+
+    updateDamageTracking(state: SharedGameState): void {
+        this.damageOverlay.processDamageEvents(state);
+        
+        if (this.damageOverlay.isShowing()) {
+            this.damageOverlay.updateDamageEntries(state.gameTime);
+        }
     }
 
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: ControllerId | null = null): void {
@@ -164,6 +189,7 @@ export class UIManager {
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
         this.permanentEffectsDisplay.updateDisplay(currentPlayer);
+        this.updateDamageTracking(state);
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
             const team = playerTeam || currentPlayer.team;
@@ -222,5 +248,6 @@ export class UIManager {
         this.victoryScreen.destroy();
         this.statsOverlay.destroy();
         this.permanentEffectsDisplay.destroy();
+        this.damageOverlay.destroy();
     }
 } 

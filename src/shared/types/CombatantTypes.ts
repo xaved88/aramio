@@ -240,6 +240,7 @@ export interface DamageEvent {
     targetType: string;
     amount: number;
     timestamp: number;
+    damageSource: string; // 'auto-attack' or 'ability'
 }
 
 export interface KillEvent {

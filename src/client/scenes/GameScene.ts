@@ -425,6 +425,19 @@ export class GameScene extends Phaser.Scene {
         this.input.keyboard?.on('keyup-TAB', () => {
             this.uiManager.hideStatsOverlay();
         });
+
+        // Shift key handlers for damage overlay (hold to show)
+        this.input.keyboard?.on('keydown-SHIFT', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default shift behavior
+            if (this.lastState) {
+                const sharedState = convertToSharedGameState(this.lastState);
+                this.uiManager.showDamageOverlay(sharedState);
+            }
+        });
+
+        this.input.keyboard?.on('keyup-SHIFT', () => {
+            this.uiManager.hideDamageOverlay();
+        });
     }
 
     /**
@@ -440,6 +453,7 @@ export class GameScene extends Phaser.Scene {
         // Hide ability range display
         this.hideAbilityRangeDisplay();
     }
+
 
     private setupVisibilityHandlers(): void {
         // Handle visibility change events

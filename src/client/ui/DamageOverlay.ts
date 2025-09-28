@@ -1,0 +1,290 @@
+import Phaser from 'phaser';
+import { HUDContainer } from './HUDContainer';
+import { DamageEvent } from '../../shared/types/CombatantTypes';
+import { SharedGameState } from '../../shared/types/GameStateTypes';
+
+export interface DamageEntry {
+    amount: number;
+    damageSource: 'auto-attack' | 'ability';
+    attackerId: string;
+    attackerName: string;
+    timestamp: number;
+    abilityName?: string; // For ability damage, the specific ability name
+}
+
+export class DamageOverlay {
+    private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
+    private background: Phaser.GameObjects.Graphics | null = null;
+    private titleText: Phaser.GameObjects.Text | null = null;
+    private damageEntries: Phaser.GameObjects.Text[] = [];
+    private isVisible: boolean = false;
+    
+    // Damage tracking properties
+    private damageHistory: DamageEntry[] = [];
+    private readonly maxHistoryTime = 15000; // 15 seconds in milliseconds
+    private playerSessionId: string | null = null;
+    private processedDamageEvents: Set<string> = new Set();
+
+    constructor(scene: Phaser.Scene) {
+        this.scene = scene;
+        this.createContainer();
+        
+        // No automatic cleanup - only clean up when the overlay is shown
+    }
+
+    setHUDCamera(camera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = camera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
+    }
+
+    setPlayerSessionId(sessionId: string | null): void {
+        this.playerSessionId = sessionId;
+    }
+
+    private createContainer(): void {
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(1000); // High depth to appear above other UI
+        this.hudContainer.setVisible(false);
+
+        // Set up camera manager if available
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+
+        // Position on the right side of the screen
+        this.hudContainer.setPosition(400, 20);
+
+        // Create semi-transparent background
+        this.background = this.scene.add.graphics();
+        this.background.fillStyle(0x000000, 0.7);
+        this.background.fillRoundedRect(0, 0, 300, 300, 8);
+        this.hudContainer.add(this.background);
+
+        // Create title (will be updated dynamically)
+        this.titleText = this.scene.add.text(10, 10, '', {
+            fontSize: '16px',
+            color: '#ff6b6b',
+            fontFamily: 'Arial, sans-serif'
+        });
+        this.hudContainer.add(this.titleText);
+
+        // Create damage entries container
+        this.createDamageEntries();
+    }
+
+    private createDamageEntries(): void {
+        // Clear existing entries
+        this.damageEntries.forEach(entry => entry.destroy());
+        this.damageEntries = [];
+
+        // Create placeholder entries (will be updated with real data)
+        for (let i = 0; i < 12; i++) {
+            const entry = this.scene.add.text(10, 35 + (i * 18), '', {
+                fontSize: '12px',
+                color: '#ffffff',
+                fontFamily: 'Arial, sans-serif'
+            });
+            this.hudContainer!.add(entry);
+            this.damageEntries.push(entry);
+        }
+    }
+
+    show(): void {
+        if (this.hudContainer) {
+            this.hudContainer.setVisible(true);
+            this.isVisible = true;
+        }
+    }
+
+    hide(): void {
+        if (this.hudContainer) {
+            this.hudContainer.setVisible(false);
+            this.isVisible = false;
+        }
+    }
+
+    isShowing(): boolean {
+        return this.isVisible;
+    }
+
+    updateDamageEntries(currentTime: number): void {
+        if (!this.hudContainer || !this.isVisible) return;
+
+        // Get recent damage entries
+        const recentDamage = this.getRecentDamage(currentTime);
+        
+        // Sort by timestamp (most recent first)
+        const sortedEntries = [...recentDamage].sort((a, b) => b.timestamp - a.timestamp);
+
+        // Update damage entry texts
+        for (let i = 0; i < this.damageEntries.length; i++) {
+            const entry = this.damageEntries[i];
+            
+            if (i < sortedEntries.length) {
+                const damageEntry = sortedEntries[i];
+                
+                // Format the damage entry text
+                let attackType = '';
+                if (damageEntry.damageSource === 'ability' && damageEntry.abilityName) {
+                    attackType = `'${damageEntry.abilityName}'`;
+                } else if (damageEntry.damageSource === 'auto-attack') {
+                    attackType = 'Auto Attack';
+                }
+                
+                const entryText = `${Math.round(damageEntry.amount)} ${attackType} from ${damageEntry.attackerName}`;
+                
+                entry.setText(entryText);
+                entry.setVisible(true);
+                entry.setColor('#ffffff'); // All entries use white color
+            } else {
+                entry.setVisible(false);
+            }
+        }
+
+        // Update total damage
+        const totalDamage = recentDamage.reduce((total, entry) => total + entry.amount, 0);
+        if (this.titleText) {
+            this.titleText.setText(`Recent Damage (15s) - ${Math.round(totalDamage)} total`);
+        }
+    }
+
+    /**
+     * Processes damage events and tracks damage taken by the player
+     */
+    processDamageEvents(state: SharedGameState): void {
+        if (!this.playerSessionId) return;
+
+        // Find the player's hero
+        const playerHero = Array.from(state.combatants.values()).find(c => 
+            c.type === 'hero' && c.controller === this.playerSessionId
+        );
+
+        if (!playerHero) return;
+
+        // Process damage events where the player was the target
+        state.damageEvents.forEach(event => {
+            if (event.targetId === playerHero.id) {
+                // Use the same deduplication key format as GameScene
+                const eventKey = `${event.sourceId}-${event.targetId}-${event.timestamp}`;
+                
+                // Skip if we've already processed this event
+                if (this.processedDamageEvents.has(eventKey)) return;
+                
+                this.processedDamageEvents.add(eventKey);
+                this.addDamageEntry(event, state);
+            }
+        });
+    }
+
+    /**
+     * Adds a damage entry to the history
+     */
+    private addDamageEntry(event: DamageEvent, state: SharedGameState): void {
+        const attacker = state.combatants.get(event.sourceId);
+        if (!attacker) return;
+
+        // Get damage source from event and ability name
+        const damageSource = event.damageSource as 'auto-attack' | 'ability';
+        const abilityName = this.getAbilityName(event, attacker, state);
+
+
+        const damageEntry: DamageEntry = {
+            amount: event.amount,
+            damageSource,
+            attackerId: event.sourceId,
+            attackerName: this.getCombatantName(attacker),
+            timestamp: event.timestamp,
+            abilityName
+        };
+
+        this.damageHistory.push(damageEntry);
+    }
+
+    /**
+     * Gets the ability name for ability damage at the time of damage
+     * This is called once when the damage entry is created and never again
+     */
+    private getAbilityName(event: DamageEvent, attacker: any, state: SharedGameState): string | undefined {
+        if (attacker.type !== 'hero') return undefined;
+        
+        // Get the ability type from the attacker's current ability at the time of damage
+        const hero = attacker as any;
+        if (hero.ability && hero.ability.type) {
+            return hero.ability.type;
+        }
+        
+        return undefined;
+    }
+
+    /**
+     * Gets a display name for a combatant
+     */
+    private getCombatantName(combatant: any): string {
+        if (combatant.type === 'hero') {
+            // Use the same ID truncation logic as the stats overlay
+            const id = combatant.id || 'Unknown Hero';
+            return id.length > 14 ? id.substring(0, 6) + '...' + id.substring(id.length - 5) : id;
+        } else if (combatant.type === 'minion') {
+            return 'Minion';
+        } else if (combatant.type === 'turret') {
+            return 'Turret';
+        } else if (combatant.type === 'cradle') {
+            return 'Cradle';
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * Gets recent damage entries within the time window
+     */
+    private getRecentDamage(currentTime: number): DamageEntry[] {
+        const cutoffTime = currentTime - this.maxHistoryTime;
+        return this.damageHistory.filter(entry => entry.timestamp >= cutoffTime);
+    }
+
+    /**
+     * Cleans up old damage entries and processed events
+     */
+    private cleanupOldEntries(): void {
+        // Use the most recent damage entry timestamp as reference, or current time if no entries
+        const currentTime = this.damageHistory.length > 0 
+            ? Math.max(...this.damageHistory.map(entry => entry.timestamp))
+            : Date.now();
+        const cutoffTime = currentTime - this.maxHistoryTime;
+        
+        // Clean up old damage entries (older than 15 seconds)
+        this.damageHistory = this.damageHistory.filter(entry => entry.timestamp >= cutoffTime);
+        
+        // Note: We don't clean up processedDamageEvents here because it can cause
+        // the same damage events to be processed multiple times if the cleanup
+        // removes events that are still in the damage history
+    }
+
+    /**
+     * Clears all damage history and processed events
+     */
+    clear(): void {
+        this.damageHistory = [];
+        this.processedDamageEvents.clear();
+    }
+
+    destroy(): void {
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
+        }
+        this.background = null;
+        this.titleText = null;
+        this.damageEntries = [];
+        this.clear();
+    }
+}

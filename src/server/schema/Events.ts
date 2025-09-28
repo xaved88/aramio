@@ -30,6 +30,7 @@ export class DamageEvent extends Schema {
     @type('string') targetType!: string; // Type of the target (minion, hero, turret, cradle)
     @type('number') amount!: number; // Amount of damage dealt
     @type('number') timestamp!: number; // When the damage occurred
+    @type('string') damageSource!: string; // Source of damage ('auto-attack' or 'ability')
 }
 
 export class KillEvent extends Schema {
