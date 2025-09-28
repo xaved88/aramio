@@ -73,7 +73,7 @@ export class RewardCard {
         
         // Create icon
         const iconManager = IconManager.getInstance();
-        this.iconImage = iconManager.createIconImage(this.scene, 0, -config.height / 2 + 50, config.rewardId, 50);
+        this.iconImage = iconManager.createIconImage(this.scene, 0, -config.height / 2 + 60, config.rewardId, 50);
         if (this.iconImage) {
             this.iconImage.setScrollFactor(0, 0);
             this.iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 4);
@@ -82,7 +82,7 @@ export class RewardCard {
         // Title text
         this.titleText = this.scene.add.text(
             0, 
-            config.height / 2 - 60, 
+            config.height / 2 - 80, 
             config.title || `Reward ${config.rewardId}`,
             {
                 fontSize: '16px',
@@ -97,7 +97,7 @@ export class RewardCard {
         // Description text
         this.descriptionText = this.scene.add.text(
             0, 
-            config.height / 2 - 25, 
+            config.height / 2 - 45, 
             config.description || 'Click to claim this reward',
             {
                 fontSize: '16px',
