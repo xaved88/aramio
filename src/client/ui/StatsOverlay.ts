@@ -6,6 +6,7 @@ import { HUDContainer } from './HUDContainer';
 
 interface PlayerStats {
     id: string;
+    displayName: string;
     controller: ControllerId;
     team: string;
     abilityType: string;
@@ -68,7 +69,7 @@ export class StatsOverlay {
     // Column definitions for consistent table structure
     private readonly COLUMNS = [
         { key: 'arrow', width: 'arrow', header: '', align: 'right', getValue: (player: PlayerStats) => player.isCurrentPlayer ? '▶' : '' },
-        { key: 'heroId', width: 'heroId', header: 'Hero', align: 'left', getValue: (player: PlayerStats) => player.id.length > 14 ? player.id.substring(0, 6) + '...' + player.id.substring(player.id.length - 5) : player.id },
+        { key: 'heroId', width: 'heroId', header: 'Hero', align: 'left', getValue: (player: PlayerStats) => player.displayName },
         { key: 'abilityType', width: 'abilityType', header: 'Ability', align: 'left', getValue: (player: PlayerStats) => player.abilityType },
         { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.levelRewards > 0 ? `(${player.levelRewards}) ${player.level}` : player.level.toString() },
         { key: 'totalXp', width: 'totalXp', header: 'XP', align: 'right', getValue: (player: PlayerStats) => Math.round(player.totalExperience).toString() },
@@ -332,6 +333,7 @@ export class StatsOverlay {
                 
                 stats.push({
                     id: combatant.id,
+                    displayName: combatant.displayName,
                     controller: combatant.controller,
                     team: combatant.team,
                     abilityType: combatant.ability.type,

@@ -10,6 +10,28 @@ import { calculateXPForLevel, calculateXPForSpecificLevel } from '../../../../sh
 import { grantExperience } from './updateGame';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
+/**
+ * Generates a unique display name for a hero based on existing heroes
+ * @param state The current game state
+ * @returns A unique display name like 'Hero 1', 'Hero 2', etc.
+ */
+function generateUniqueHeroName(state: GameState): string {
+    const existingHeroes = Array.from(state.combatants.values())
+        .filter(combatant => combatant.type === COMBATANT_TYPES.HERO) as Hero[];
+    
+    const existingNames = new Set(existingHeroes.map(hero => hero.displayName));
+    
+    let heroNumber = 1;
+    let displayName: string;
+    
+    do {
+        displayName = `Hero ${heroNumber}`;
+        heroNumber++;
+    } while (existingNames.has(displayName));
+    
+    return displayName;
+}
+
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, gameplayConfig: GameplayConfig): StateMachineResult {
     const { playerId, team, x, y, abilityType = 'default' } = action.payload;
     
@@ -18,6 +40,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     hero.type = COMBATANT_TYPES.HERO;
     hero.team = team;
     hero.controller = playerId; // client ID becomes the controller
+    hero.displayName = generateUniqueHeroName(state); // Generate unique display name
     
     // Handle optional coordinates
     if (x !== undefined && y !== undefined) {

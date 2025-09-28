@@ -79,6 +79,7 @@ export class Hero extends Combatant {
     @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
+    @type('string') displayName!: string; // display name for the hero (e.g., 'Hero 1', 'Hero 2')
     @type(['string']) levelRewards = new ArraySchema<string>(); // Array of level rewards
     @type(['string']) rewardsForChoice = new ArraySchema<string>(); // Array of reward options to choose from
     @type([CombatantEffect]) permanentEffects = new ArraySchema<CombatantEffect>(); // Array of permanent effects (rewards, etc.)

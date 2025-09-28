@@ -230,9 +230,8 @@ export class DamageOverlay {
      */
     private getCombatantName(combatant: any): string {
         if (combatant.type === 'hero') {
-            // Use the same ID truncation logic as the stats overlay
-            const id = combatant.id || 'Unknown Hero';
-            return id.length > 14 ? id.substring(0, 6) + '...' + id.substring(id.length - 5) : id;
+            // Use the hero's display name instead of truncated ID
+            return combatant.displayName;
         } else if (combatant.type === 'minion') {
             return 'Minion';
         } else if (combatant.type === 'turret') {

@@ -208,6 +208,7 @@ export interface HeroCombatant extends BaseCombatant {
     roundStats: RoundStats;
     ability: Ability;
     controller: ControllerId; // client ID for players, bot strategy for bots
+    displayName: string; // display name for the hero (e.g., 'Hero 1', 'Hero 2')
     levelRewards: string[]; // Array of level rewards
     rewardsForChoice: string[]; // Array of reward options to choose from
     permanentEffects: CombatantEffectUnion[]; // Array of permanent effects (rewards, etc.)

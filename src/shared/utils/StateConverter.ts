@@ -219,6 +219,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     mercenaryRageSpeedBoost: (hero.ability as any).mercenaryRageSpeedBoost,
                 } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility | SniperAbility,
                 controller: hero.controller,
+                displayName: hero.displayName,
                 levelRewards: hero.levelRewards ? Array.from(hero.levelRewards) : [],
                 rewardsForChoice: hero.rewardsForChoice ? Array.from(hero.rewardsForChoice) : [],
                 permanentEffects: hero.permanentEffects ? hero.permanentEffects.map(effect => {

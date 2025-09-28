@@ -77,6 +77,7 @@ describe('PermanentEffectsDisplay', () => {
             state: 'alive',
             respawnTime: 0,
             respawnDuration: 6000,
+            displayName: 'Hero 1',
             level: 1,
             experience: 0,
             experienceNeeded: 15,
