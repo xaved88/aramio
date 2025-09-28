@@ -454,11 +454,15 @@ export class StatsOverlay {
         
         // Add hover effects (like lobby buttons)
         this.backToLobbyButton.on('pointerover', () => {
-            this.backToLobbyButton.setStyle({ backgroundColor: '#388E3C' });
+            if (this.backToLobbyButton) {
+                this.backToLobbyButton.setStyle({ backgroundColor: '#388E3C' });
+            }
         });
         
         this.backToLobbyButton.on('pointerout', () => {
-            this.backToLobbyButton.setStyle({ backgroundColor: '#2E7D32' });
+            if (this.backToLobbyButton) {
+                this.backToLobbyButton.setStyle({ backgroundColor: '#2E7D32' });
+            }
         });
     }
 
