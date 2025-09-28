@@ -158,10 +158,7 @@ export class LobbyRoom extends Room<LobbyState> {
     }
 
     private handleSwitchTeam(playerId: string, team: 'blue' | 'red') {
-        // Remove player from current team
-        this.removePlayerFromTeam(playerId);
-        
-        // Add to new team
+        // Assign player to team
         this.assignPlayerToTeam(playerId, team);
         this.updateCanStartStatus();
     }
@@ -213,10 +210,7 @@ export class LobbyRoom extends Room<LobbyState> {
     }
 
     private handleSwitchPlayerTeam(playerId: string, targetTeam: 'blue' | 'red') {
-        // Remove player from current team
-        this.removePlayerFromTeam(playerId);
-        
-        // Add to target team
+        // Assign player to team
         this.assignPlayerToTeam(playerId, targetTeam);
         this.updateCanStartStatus();
     }
@@ -250,17 +244,58 @@ export class LobbyRoom extends Room<LobbyState> {
         }
     }
 
-    private assignPlayerToTeam(playerId: string, team: 'blue' | 'red') {
-        const teamArray = team === 'blue' ? this.state.blueTeam : this.state.redTeam;
+    private assignPlayerToTeam(playerId: string, targetTeam: 'blue' | 'red') {
+        // Find the player's current slot
+        let currentSlot = null;
+        let currentTeam = null;
         
-        // Find first empty slot
-        for (let i = 0; i < teamArray.length; i++) {
-            const slot = teamArray[i];
+        // Check blue team
+        for (let i = 0; i < this.state.blueTeam.length; i++) {
+            const slot = this.state.blueTeam[i];
+            if (slot && slot.playerId === playerId) {
+                currentSlot = slot;
+                currentTeam = 'blue';
+                break;
+            }
+        }
+        
+        // Check red team if not found in blue
+        if (!currentSlot) {
+            for (let i = 0; i < this.state.redTeam.length; i++) {
+                const slot = this.state.redTeam[i];
+                if (slot && slot.playerId === playerId) {
+                    currentSlot = slot;
+                    currentTeam = 'red';
+                    break;
+                }
+            }
+        }
+        
+        // If already on target team, do nothing
+        if (currentTeam === targetTeam) return;
+        
+        // Clear the current slot if player was on a team
+        if (currentSlot) {
+            currentSlot.playerId = '';
+        }
+        
+        // Find empty slot in target team
+        const targetTeamArray = targetTeam === 'blue' ? this.state.blueTeam : this.state.redTeam;
+        for (let i = 0; i < targetTeamArray.length; i++) {
+            const slot = targetTeamArray[i];
             if (slot && !slot.playerId) {
                 slot.playerId = playerId;
-                slot.playerDisplayName = `Player ${playerId.slice(0, 6)}`;
-                slot.isBot = false;
-                slot.isReady = false;
+                if (currentSlot) {
+                    // Move existing data (team switch)
+                    slot.playerDisplayName = currentSlot.playerDisplayName;
+                    slot.isBot = currentSlot.isBot;
+                    slot.isReady = currentSlot.isReady;
+                } else {
+                    // Set default data (new player)
+                    slot.playerDisplayName = `Player ${playerId.slice(0, 6)}`;
+                    slot.isBot = false;
+                    slot.isReady = false;
+                }
                 break;
             }
         }
@@ -268,32 +303,27 @@ export class LobbyRoom extends Room<LobbyState> {
         this.updateTeamSizes();
     }
 
+
     private removePlayerFromTeam(playerId: string) {
-        // Remove from blue team
-        for (let i = 0; i < this.state.blueTeam.length; i++) {
-            const slot = this.state.blueTeam[i];
-            if (slot && slot.playerId === playerId) {
-                slot.playerId = '';
-                slot.playerDisplayName = '';
-                slot.isBot = false;
-                slot.isReady = false;
-                break;
+        // Check both teams and remove from whichever one contains the player
+        const teams = [
+            { name: 'blue', array: this.state.blueTeam },
+            { name: 'red', array: this.state.redTeam }
+        ];
+        
+        for (const team of teams) {
+            for (let i = 0; i < team.array.length; i++) {
+                const slot = team.array[i];
+                if (slot && slot.playerId === playerId) {
+                    slot.playerId = '';
+                    slot.playerDisplayName = '';
+                    slot.isBot = false;
+                    slot.isReady = false;
+                    this.updateTeamSizes();
+                    return; // Found and removed, no need to check other team
+                }
             }
         }
-        
-        // Remove from red team
-        for (let i = 0; i < this.state.redTeam.length; i++) {
-            const slot = this.state.redTeam[i];
-            if (slot && slot.playerId === playerId) {
-                slot.playerId = '';
-                slot.playerDisplayName = '';
-                slot.isBot = false;
-                slot.isReady = false;
-                break;
-            }
-        }
-        
-        this.updateTeamSizes();
     }
 
     private resizeTeam(team: 'blue' | 'red', newSize: number) {

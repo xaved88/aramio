@@ -190,7 +190,6 @@ export const CLIENT_CONFIG = {
             ACCENT: 0x34495e, // darker accent color
             SECONDARY: 0x95a5a6, // gray secondary
             BORDER: 0x7f8c8d, // gray border
-            INPUT_BACKGROUND: 0xecf0f1, // light gray for input fields
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,

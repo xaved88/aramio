@@ -13,7 +13,6 @@ export class LobbyScene extends Phaser.Scene {
     private connectionManager!: ConnectionManager;
     
     // UI Elements
-    private teamSizeText!: Phaser.GameObjects.Text;
     private configLabel!: Phaser.GameObjects.Text;
     private configValue!: Phaser.GameObjects.Text;
     private configDropdownItems: Phaser.GameObjects.Text[] = [];
@@ -25,6 +24,15 @@ export class LobbyScene extends Phaser.Scene {
 
     constructor() {
         super({ key: 'LobbyScene' });
+    }
+
+    private addHoverEffect(button: Phaser.GameObjects.Text, normalColor: number, hoverColor: number = CLIENT_CONFIG.UI.COLORS.ACCENT) {
+        button.on('pointerover', () => {
+            button.setStyle({ backgroundColor: hexToColorString(hoverColor) });
+        });
+        button.on('pointerout', () => {
+            button.setStyle({ backgroundColor: hexToColorString(normalColor) });
+        });
     }
 
     preload() {
@@ -101,7 +109,7 @@ export class LobbyScene extends Phaser.Scene {
         const centerY = this.cameras.main.height / 2;
 
         // Title
-        this.add.text(centerX, 50, 'Game Lobby', {
+        this.add.text(centerX, 50, 'ARAM.IO Lobby', {
             fontSize: '32px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
@@ -114,21 +122,18 @@ export class LobbyScene extends Phaser.Scene {
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5);
 
-        this.teamSizeText = this.add.text(centerX, 150, '5', {
-            fontSize: '24px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }).setOrigin(0.5);
-
         // Team size buttons
         for (let i = 1; i <= 5; i++) {
-            const button = this.add.text(centerX - 100 + (i - 1) * 40, 180, i.toString(), {
-                fontSize: '18px',
+            const button = this.add.text(centerX - 80 + (i - 1) * 40, 150, i.toString(), {
+                fontSize: '20px',
                 color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                padding: { x: 10, y: 5 }
+                padding: { x: 8, y: 4 }
             }).setOrigin(0.5).setInteractive();
+
+            // Add hover effects
+            this.addHoverEffect(button, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
 
             button.on('pointerdown', () => {
                 this.room.send('setTeamSize', { size: i });
@@ -152,8 +157,19 @@ export class LobbyScene extends Phaser.Scene {
             padding: { x: 10, y: 5 }
         }).setOrigin(0.5).setInteractive();
 
+        // Add hover effects
+        this.addHoverEffect(this.configValue, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+
         this.configValue.on('pointerdown', () => {
-            this.toggleConfigDropdown(centerX, 280);
+            // Toggle dropdown - close if already open, open if closed
+            if (this.configDropdownItems.length > 0) {
+                // Close dropdown
+                this.configDropdownItems.forEach(item => item.destroy());
+                this.configDropdownItems = [];
+            } else {
+                // Open dropdown
+                this.toggleConfigDropdown(centerX, 280);
+            }
         });
 
         // Team containers
@@ -181,6 +197,20 @@ export class LobbyScene extends Phaser.Scene {
             padding: { x: 20, y: 10 }
         }).setOrigin(0.5).setInteractive();
 
+        // Add hover effects for start button - will be updated in updateUI based on state
+        this.startButton.on('pointerover', () => {
+            if (this.lobbyState?.canStart) {
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY) });
+            }
+        });
+        this.startButton.on('pointerout', () => {
+            if (this.lobbyState?.canStart) {
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS) });
+            } else {
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
+            }
+        });
+
         this.startButton.on('pointerdown', () => {
             if (this.lobbyState?.canStart) {
                 this.room.send('startGame');
@@ -191,8 +221,7 @@ export class LobbyScene extends Phaser.Scene {
     private updateUI() {
         if (!this.lobbyState) return;
 
-        // Update team size display
-        this.teamSizeText.setText(this.lobbyState.teamSize.toString());
+        // Team size is now shown by the selected button border
 
         // Update config selector
         if (this.configValue) {
@@ -203,9 +232,19 @@ export class LobbyScene extends Phaser.Scene {
         this.teamSizeButtons.forEach((button, index) => {
             const size = index + 1;
             if (size === this.lobbyState!.teamSize) {
-                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY) });
+                button.setStyle({ 
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    stroke: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS),
+                    strokeThickness: 2,
+                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS)
+                });
             } else {
-                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND) });
+                button.setStyle({ 
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    stroke: '',
+                    strokeThickness: 0,
+                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT)
+                });
             }
         });
 
@@ -230,14 +269,17 @@ export class LobbyScene extends Phaser.Scene {
         const items = this.lobbyState.availableConfigs || [];
 
         items.forEach((name, idx) => {
-            const y = startY + idx * 28;
+            const y = startY + idx * 24;
             const item = this.add.text(centerX, y, name, {
-                fontSize: '16px',
+                fontSize: '14px',
                 color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                padding: { x: 10, y: 4 }
+                padding: { x: 8, y: 3 }
             }).setOrigin(0.5).setInteractive();
+
+            // Add hover effects
+            this.addHoverEffect(item, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
 
             item.on('pointerdown', () => {
                 this.room.send('setConfig', { name });
@@ -294,90 +336,88 @@ export class LobbyScene extends Phaser.Scene {
 
             // Add team switching arrows for players (not bots)
             if (slot.playerId && !slot.isBot) {
-                const arrowLeft = this.add.text(-80, y, '←', {
-                    fontSize: '24px',
-                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    padding: { x: 8, y: 4 }
-                }).setOrigin(0.5).setInteractive();
-
-                const arrowRight = this.add.text(80, y, '→', {
-                    fontSize: '24px',
-                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    padding: { x: 8, y: 4 }
-                }).setOrigin(0.5).setInteractive();
-
-                // Add hover effects
-                arrowLeft.on('pointerover', () => {
-                    arrowLeft.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE) });
-                });
-                arrowLeft.on('pointerout', () => {
-                    arrowLeft.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND) });
-                });
-
-                arrowRight.on('pointerover', () => {
-                    arrowRight.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED) });
-                });
-                arrowRight.on('pointerout', () => {
-                    arrowRight.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND) });
-                });
-
-                // Left arrow: move to blue team
-                arrowLeft.on('pointerdown', () => {
-                    if (slot.playerId === this.playerSessionId) {
-                        // Switch own team
-                        this.room.send('switchTeam', { team: 'blue' });
-                    } else {
-                        // Switch other player's team
-                        this.room.send('switchPlayerTeam', { 
-                            playerId: slot.playerId, 
-                            targetTeam: 'blue' 
-                        });
-                    }
-                });
-
-                // Right arrow: move to red team
-                arrowRight.on('pointerdown', () => {
-                    if (slot.playerId === this.playerSessionId) {
-                        // Switch own team
-                        this.room.send('switchTeam', { team: 'red' });
-                    } else {
-                        // Switch other player's team
-                        this.room.send('switchPlayerTeam', { 
-                            playerId: slot.playerId, 
-                            targetTeam: 'red' 
-                        });
-                    }
-                });
-
-                // Add edit button for current player's own slot
-                if (slot.playerId === this.playerSessionId) {
-                    const editButton = this.add.text(120, y, '✏️', {
-                        fontSize: '16px',
+                const elementsToAdd = [slotDisplay];
+                
+                // Only show left arrow (to blue team) if player is not already on blue team
+                if (team !== 'blue') {
+                    const arrowLeft = this.add.text(-100, y, '←', {
+                        fontSize: '24px',
+                        color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                        padding: { x: 6, y: 4 }
+                        padding: { x: 4, y: 2 }
                     }).setOrigin(0.5).setInteractive();
 
                     // Add hover effects
-                    editButton.on('pointerover', () => {
-                        editButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
+                    this.addHoverEffect(arrowLeft, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+
+                    // Left arrow: move to blue team
+                    arrowLeft.on('pointerdown', () => {
+                        if (slot.playerId === this.playerSessionId) {
+                            // Switch own team
+                            this.room.send('switchTeam', { team: 'blue' });
+                        } else {
+                            // Switch other player's team
+                            this.room.send('switchPlayerTeam', { 
+                                playerId: slot.playerId, 
+                                targetTeam: 'blue' 
+                            });
+                        }
                     });
-                    editButton.on('pointerout', () => {
-                        editButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND) });
+
+                    elementsToAdd.push(arrowLeft);
+                }
+
+                // Only show right arrow (to red team) if player is not already on red team
+                if (team !== 'red') {
+                    const arrowRight = this.add.text(100, y, '→', {
+                        fontSize: '24px',
+                        color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
+                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                        padding: { x: 4, y: 2 }
+                    }).setOrigin(0.5).setInteractive();
+
+                    // Add hover effects
+                    this.addHoverEffect(arrowRight, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+
+                    // Right arrow: move to red team
+                    arrowRight.on('pointerdown', () => {
+                        if (slot.playerId === this.playerSessionId) {
+                            // Switch own team
+                            this.room.send('switchTeam', { team: 'red' });
+                        } else {
+                            // Switch other player's team
+                            this.room.send('switchPlayerTeam', { 
+                                playerId: slot.playerId, 
+                                targetTeam: 'red' 
+                            });
+                        }
                     });
+
+                    elementsToAdd.push(arrowRight);
+                }
+
+                // Add edit button for current player's own slot
+                if (slot.playerId === this.playerSessionId) {
+                    const editButton = this.add.text(70, y, '✏️', {
+                        fontSize: '12px',
+                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                        padding: { x: 3, y: 2 }
+                    }).setOrigin(0.5).setInteractive();
+
+                    // Add hover effects
+                    this.addHoverEffect(editButton, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
 
                     editButton.on('pointerdown', () => {
                         this.showNameEditDialog(slot.playerDisplayName);
                     });
 
-                    container.add([slotDisplay, arrowLeft, arrowRight, editButton]);
-                } else {
-                    container.add([slotDisplay, arrowLeft, arrowRight]);
+                    elementsToAdd.push(editButton);
                 }
+
+                container.add(elementsToAdd);
             } else {
                 container.add(slotDisplay);
             }
@@ -401,6 +441,9 @@ export class LobbyScene extends Phaser.Scene {
             backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
             padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive();
+
+        // Add hover effects
+        this.addHoverEffect(retryButton, CLIENT_CONFIG.UI.COLORS.PRIMARY);
 
         retryButton.on('pointerdown', () => {
             this.scene.restart();
