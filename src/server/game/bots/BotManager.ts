@@ -5,6 +5,7 @@ import { MercenaryBotStrategy } from './strategies/MercenaryBotStrategy';
 import { convertToSharedGameState } from '../../../shared/utils/StateConverter';
 import { GameCommand } from '../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../config/ConfigProvider';
+import { BotRewardSelector } from './BotRewardSelector';
 
 export class BotManager {
     private strategies: Map<string, any> = new Map();
@@ -38,11 +39,33 @@ export class BotManager {
                 }
                 
                 // Add reward claiming behavior for bots
-                const rewardCommands = this.generateRewardCommands(combatant);
+                const rewardCommands = this.generateRewardCommands(combatant, state);
                 commands.push(...rewardCommands);
             }
         });
 
+        return commands;
+    }
+
+    /**
+     * Generate reward claiming commands for bots
+     */
+    private generateRewardCommands(bot: any, state: GameState): GameCommand[] {
+        const commands: GameCommand[] = [];
+        
+        // Check if bot has reward choices available
+        if (bot.rewardsForChoice && bot.rewardsForChoice.length > 0) {
+            // Smart reward selection: avoid ability duplicates when 2+ team members already have the same ability
+            const selectedRewardId = BotRewardSelector.selectBestReward(bot, state);
+            commands.push({
+                type: 'choose_reward',
+                data: {
+                    heroId: bot.id,
+                    rewardId: selectedRewardId
+                }
+            });
+        }
+        
         return commands;
     }
 
@@ -70,25 +93,5 @@ export class BotManager {
         }
     }
 
-    /**
-     * Generate reward claiming commands for bots
-     */
-    private generateRewardCommands(bot: any): GameCommand[] {
-        const commands: GameCommand[] = [];
-        
-        // Check if bot has reward choices available
-        if (bot.rewardsForChoice && bot.rewardsForChoice.length > 0) {
-            // Bot always chooses the first reward option
-            const firstRewardId = bot.rewardsForChoice[0];
-            commands.push({
-                type: 'choose_reward',
-                data: {
-                    heroId: bot.id,
-                    rewardId: firstRewardId
-                }
-            });
-        }
-        
-        return commands;
-    }
+
 } 

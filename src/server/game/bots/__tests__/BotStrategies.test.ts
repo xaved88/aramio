@@ -411,4 +411,148 @@ describe('Bot Strategies', () => {
             expect(botManager.selectBotStrategyForAbility('unknown')).toBe('bot-simpleton');
         });
     });
+
+    describe('Bot Reward Selection', () => {
+        it('should avoid ability rewards when 2+ team members already have that ability', () => {
+            const mockState = {
+                combatants: new Map(),
+                projectiles: new Map(),
+                attackEvents: [],
+                xpEvents: [],
+                levelUpEvents: [],
+                damageEvents: [],
+                killEvents: [],
+                aoeDamageEvents: [],
+                warriorSpawnTimes: new Map(),
+                archerSpawned: new Map()
+            } as any;
+
+            // Create team members with different abilities
+            const createMockHero = (id: string, team: string, abilityType: string, rewardsForChoice?: string[]) => ({
+                id,
+                team,
+                type: 'hero',
+                ability: { type: abilityType },
+                effects: [],
+                state: 'alive',
+                respawnTime: 0,
+                respawnDuration: 0,
+                experience: 0,
+                level: 1,
+                experienceNeeded: 100,
+                roundStats: {
+                    totalExperience: 0,
+                    minionKills: 0,
+                    heroKills: 0,
+                    turretKills: 0,
+                    damageTaken: 0,
+                    damageDealt: 0
+                },
+                controller: 'bot',
+                displayName: id,
+                levelRewards: [],
+                rewardsForChoice: rewardsForChoice || [],
+                permanentEffects: []
+            });
+
+            const bot1 = createMockHero('bot1', 'blue', 'hookshot');
+            const bot2 = createMockHero('bot2', 'blue', 'hookshot');
+            const bot3 = createMockHero('bot3', 'blue', 'mercenary');
+            const selectingBot = createMockHero('selecting-bot', 'blue', 'default', ['ability:hookshot', 'ability:mercenary', 'ability:pyromancer']);
+
+            // Add all combatants to state
+            mockState.combatants.set('bot1', bot1);
+            mockState.combatants.set('bot2', bot2);
+            mockState.combatants.set('bot3', bot3);
+            mockState.combatants.set('selecting-bot', selectingBot);
+
+            // Test multiple times to ensure consistent behavior
+            const selections: string[] = [];
+            for (let i = 0; i < 10; i++) {
+                const commands = botManager.processBots(mockState);
+                const rewardCommand = commands.find(cmd => cmd.type === 'choose_reward' && cmd.data.heroId === 'selecting-bot');
+                if (rewardCommand && 'rewardId' in rewardCommand.data) {
+                    selections.push(rewardCommand.data.rewardId);
+                }
+            }
+
+            // Should never select ability:hookshot since 2 team members already have it
+            const hookshotSelections = selections.filter(selection => selection === 'ability:hookshot');
+            expect(hookshotSelections.length).toBe(0);
+
+            // Should select from preferred abilities (mercenary or pyromancer) since hookshot is avoided
+            const preferredSelections = selections.filter(selection => 
+                selection === 'ability:mercenary' || selection === 'ability:pyromancer'
+            );
+            expect(preferredSelections.length).toBeGreaterThan(0);
+
+            // All selections should be ability rewards since that's all that's available
+            const abilitySelections = selections.filter(selection => selection.startsWith('ability:'));
+            expect(abilitySelections.length).toBe(selections.length);
+        });
+
+        it('should fallback to random selection when no preferred ability rewards available', () => {
+            const mockState = {
+                combatants: new Map(),
+                projectiles: new Map(),
+                attackEvents: [],
+                xpEvents: [],
+                levelUpEvents: [],
+                damageEvents: [],
+                killEvents: [],
+                aoeDamageEvents: [],
+                warriorSpawnTimes: new Map(),
+                archerSpawned: new Map()
+            } as any;
+
+            // Create team where 2+ members have all available abilities
+            const createMockHero = (id: string, team: string, abilityType: string, rewardsForChoice?: string[]) => ({
+                id,
+                team,
+                type: 'hero',
+                ability: { type: abilityType },
+                effects: [],
+                state: 'alive',
+                respawnTime: 0,
+                respawnDuration: 0,
+                experience: 0,
+                level: 1,
+                experienceNeeded: 100,
+                roundStats: {
+                    totalExperience: 0,
+                    minionKills: 0,
+                    heroKills: 0,
+                    turretKills: 0,
+                    damageTaken: 0,
+                    damageDealt: 0
+                },
+                controller: 'bot',
+                displayName: id,
+                levelRewards: [],
+                rewardsForChoice: rewardsForChoice || [],
+                permanentEffects: []
+            });
+
+            const bot1 = createMockHero('bot1', 'blue', 'hookshot');
+            const bot2 = createMockHero('bot2', 'blue', 'hookshot');
+            const bot3 = createMockHero('bot3', 'blue', 'mercenary');
+            const bot4 = createMockHero('bot4', 'blue', 'mercenary');
+            const selectingBot = createMockHero('selecting-bot', 'blue', 'default', ['ability:hookshot', 'ability:mercenary']);
+
+            mockState.combatants.set('bot1', bot1);
+            mockState.combatants.set('bot2', bot2);
+            mockState.combatants.set('bot3', bot3);
+            mockState.combatants.set('bot4', bot4);
+            mockState.combatants.set('selecting-bot', selectingBot);
+
+            const commands = botManager.processBots(mockState);
+            const rewardCommand = commands.find(cmd => cmd.type === 'choose_reward' && cmd.data.heroId === 'selecting-bot');
+            
+            // Should still select something (fallback to random)
+            expect(rewardCommand).toBeDefined();
+            if (rewardCommand && 'rewardId' in rewardCommand.data) {
+                expect(rewardCommand.data.rewardId).toBeDefined();
+            }
+        });
+    });
 });
