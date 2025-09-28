@@ -56,7 +56,7 @@ export class BotManager {
         // Check if bot has reward choices available
         if (bot.rewardsForChoice && bot.rewardsForChoice.length > 0) {
             // Smart reward selection: avoid ability duplicates when 2+ team members already have the same ability
-            const selectedRewardId = BotRewardSelector.selectBestReward(bot, state);
+            const selectedRewardId = BotRewardSelector.selectBestReward(bot, state, this.gameplayConfig);
             commands.push({
                 type: 'choose_reward',
                 data: {

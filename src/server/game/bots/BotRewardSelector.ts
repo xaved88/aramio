@@ -1,10 +1,12 @@
 import { GameState } from '../../schema/GameState';
+import { BotRewardPreferences } from './BotRewardPreferences';
+import { GameplayConfig } from '../../config/ConfigProvider';
 
 export class BotRewardSelector {
     /**
-     * Select the best reward for a bot, avoiding ability duplicates when 2+ team members have the same ability
+     * Select the best reward for a bot, using preferences and avoiding ability duplicates when 2+ team members have the same ability
      */
-    static selectBestReward(bot: any, state: GameState): string {
+    static selectBestReward(bot: any, state: GameState, gameplayConfig: GameplayConfig): string {
         const availableRewards = Array.from(bot.rewardsForChoice) as string[];
         
         // If only one reward, just take it
@@ -40,8 +42,44 @@ export class BotRewardSelector {
             }
         }
 
-        // Fallback to random selection from all available rewards
-        return availableRewards[Math.floor(Math.random() * availableRewards.length)];
+        // Use preference-based selection for stat and ability stat rewards
+        return this.selectRewardByPreference(bot, availableRewards, gameplayConfig);
+    }
+    
+    /**
+     * Select a reward based on bot preferences and weights
+     */
+    private static selectRewardByPreference(bot: any, availableRewards: string[], gameplayConfig: GameplayConfig): string {
+        const abilityType = bot.ability?.type || 'default';
+        
+        // Calculate weights for each available reward
+        const weights: { rewardId: string; weight: number }[] = [];
+        
+        for (const rewardId of availableRewards) {
+            const weight = BotRewardPreferences.calculateSelectionWeight(rewardId, abilityType, gameplayConfig);
+            weights.push({ rewardId, weight });
+        }
+        
+        // Calculate total weight
+        const totalWeight = weights.reduce((sum, w) => sum + w.weight, 0);
+        
+        if (totalWeight === 0) {
+            // Fallback to random selection if no weights
+            return availableRewards[Math.floor(Math.random() * availableRewards.length)];
+        }
+        
+        // Weighted random selection
+        let random = Math.random() * totalWeight;
+        
+        for (const { rewardId, weight } of weights) {
+            random -= weight;
+            if (random <= 0) {
+                return rewardId;
+            }
+        }
+        
+        // Fallback (should never reach here)
+        return availableRewards[0];
     }
 
     /**
