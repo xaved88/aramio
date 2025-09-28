@@ -4,6 +4,7 @@ import { GameState } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
+import { isHeroCombatant } from '../../shared/types/CombatantTypes';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
@@ -190,6 +191,17 @@ export class GameScene extends Phaser.Scene {
             if (this.processedDamageEvents.has(eventKey)) return;
             
             this.processedDamageEvents.add(eventKey);
+            
+            // Track recent attackers if the player was the target
+            if (this.playerSessionId) {
+                const targetEntity = state.combatants.get(event.targetId);
+                const isPlayerTarget = !!(targetEntity && isHeroCombatant(targetEntity) && targetEntity.controller === this.playerSessionId);
+                
+                if (isPlayerTarget) {
+                    // Track the attacker as a recent attacker
+                    this.entityManager.trackRecentAttacker(event.sourceId, event.timestamp);
+                }
+            }
             
             // Animate damage target (color flash)
             this.animateDamageTarget(event.targetId, event.sourceId);

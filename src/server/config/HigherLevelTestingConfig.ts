@@ -10,3 +10,6 @@ HIGHER_LEVEL_TESTING_CONFIG.DEBUG.STARTING_LEVEL = 5; // Start at level 5 instea
 // Very fast respawn for testing
 HIGHER_LEVEL_TESTING_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 1000; // Very fast respawn (was 6000)
 
+// Increased hero movement speed for testing
+HIGHER_LEVEL_TESTING_CONFIG.HERO_MOVE_SPEED = 7.0; // 100% faster movement (was 3.5)
+

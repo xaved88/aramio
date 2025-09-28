@@ -52,7 +52,8 @@ export class EntityRenderer {
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         abilityIconText: Phaser.GameObjects.Text | undefined,
         state?: SharedGameState,
-        playerSessionId?: ControllerId | null
+        playerSessionId?: ControllerId | null,
+        isRecentAttacker?: boolean
     ): void {
         // Render the main entity graphics
         this.renderEntityGraphics(combatant, graphics);
@@ -77,7 +78,7 @@ export class EntityRenderer {
         }
         
         // Render radius indicator
-        this.renderRadiusIndicator(combatant, radiusIndicator);
+        this.renderRadiusIndicator(combatant, radiusIndicator, isRecentAttacker);
         
         // Update text display (level for heroes, nothing for others)
         this.updateTextDisplay(combatant, text);
@@ -709,26 +710,34 @@ export class EntityRenderer {
     /**
      * Renders the radius indicator for attack ranges
      */
-    private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics): void {
+    private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics, isRecentAttacker?: boolean): void {
         radiusIndicator.clear();
         
-        // Only show radius indicator for structures (cradles, turrets) and the player's hero
+        // Only show radius indicator for structures (cradles, turrets), the player's hero, and recent attackers
         const shouldShowRadius = (
             combatant.health > 0 && 
             (
-                // Structures always show radius
-                combatant.type === COMBATANT_TYPES.CRADLE || 
-                combatant.type === COMBATANT_TYPES.TURRET ||
+                // Structures always show radius (unless they're recent attackers, then they'll show red)
+                (combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET) ||
                 // Player's hero shows radius (if not respawning)
                 (combatant.type === COMBATANT_TYPES.HERO && 
                  isHeroCombatant(combatant) && 
                  combatant.state !== 'respawning' &&
-                 combatant.controller === this.playerSessionId)
+                 combatant.controller === this.playerSessionId) ||
+                // Recent attackers show radius (heroes, turrets, cradles)
+                isRecentAttacker
             )
         );
         
         if (shouldShowRadius) {
-            radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 0.2); // Lighter alpha
+            // Use different styling for recent attackers
+            if (isRecentAttacker) {
+                // Red color for recent attackers with moderate alpha
+                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 0xff0000, 0.3);
+            } else {
+                // Default black color with lower alpha
+                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 0.2);
+            }
             radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
         }
     }

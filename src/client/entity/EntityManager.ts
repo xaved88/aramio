@@ -36,6 +36,9 @@ export class EntityManager {
     private processedLevelUpEvents: Set<string> = new Set();
     private processedAOEDamageEvents: Set<string> = new Set();
     private lastProcessedTime: number = 0;
+    
+    // Track recent attackers (heroes that attacked the player in the last 1 second)
+    private recentAttackers: Map<CombatantId, number> = new Map();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -90,6 +93,9 @@ export class EntityManager {
         
         // Process AOE damage events
         this.processAOEDamageEvents(state);
+        
+        // Clean up old recent attackers
+        this.cleanupOldRecentAttackers(state.gameTime);
         
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
@@ -238,7 +244,8 @@ export class EntityManager {
             abilityReadyIndicator,
             entityAbilityIconText,
             state,
-            this.playerSessionId
+            this.playerSessionId,
+            this.isRecentAttacker(entityId)
         );
     }
 
@@ -592,6 +599,32 @@ export class EntityManager {
     }
 
     /**
+     * Tracks a hero that attacked the player
+     */
+    trackRecentAttacker(attackerId: CombatantId, timestamp: number): void {
+        this.recentAttackers.set(attackerId, timestamp);
+    }
+
+    /**
+     * Cleans up old recent attackers (older than 1 second)
+     */
+    private cleanupOldRecentAttackers(currentTime: number): void {
+        const oneSecondAgo = currentTime - 1000;
+        for (const [attackerId, timestamp] of this.recentAttackers.entries()) {
+            if (timestamp < oneSecondAgo) {
+                this.recentAttackers.delete(attackerId);
+            }
+        }
+    }
+
+    /**
+     * Checks if a combatant is a recent attacker
+     */
+    isRecentAttacker(combatantId: CombatantId): boolean {
+        return this.recentAttackers.has(combatantId);
+    }
+
+    /**
      * Animates entity movement to a new position
      */
     private animateEntityMovement(
@@ -653,6 +686,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.recentAttackers.clear();
         this.lastProcessedTime = 0;
     }
 
@@ -717,6 +751,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.recentAttackers.clear();
         this.lastProcessedTime = 0;
         
         // Force clear any remaining graphics by recreating the targeting lines graphics
