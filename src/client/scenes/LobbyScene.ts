@@ -11,7 +11,7 @@ export class LobbyScene extends Phaser.Scene {
     private lobbyState: LobbyState | null = null;
     private playerSessionId: string | null = null;
     private connectionManager!: ConnectionManager;
-    
+    private isNameDialogOpen: boolean = false;
     
     // UI Elements
     private configLabel!: Phaser.GameObjects.Text;
@@ -45,6 +45,7 @@ export class LobbyScene extends Phaser.Scene {
         this.room = null;
         this.playerSessionId = null;
         this.lobbyState = null;
+        this.isNameDialogOpen = false;
         
         // Reset UI elements
         this.configLabel = null as any;
@@ -95,6 +96,9 @@ export class LobbyScene extends Phaser.Scene {
             // Create UI
             this.createUI();
             
+            // Set up keyboard handlers
+            this.setupKeyboardHandlers();
+            
         } catch (error) {
             console.error('Failed to connect to lobby:', error);
             this.createErrorUI();
@@ -118,6 +122,42 @@ export class LobbyScene extends Phaser.Scene {
         this.room.onLeave(() => {
             console.log('Left lobby room');
         });
+    }
+
+    private setupKeyboardHandlers() {
+        // E key handler for opening name edit dialog
+        this.input.keyboard?.on('keydown-E', (event: KeyboardEvent) => {
+            // Don't open dialog if one is already open
+            if (this.isNameDialogOpen) {
+                return;
+            }
+            
+            const currentPlayerSlot = this.getCurrentPlayerSlot();
+            if (currentPlayerSlot) {
+                event.preventDefault(); // Prevent the 'E' from being typed
+                this.showNameEditDialog(currentPlayerSlot.playerDisplayName, true);
+            }
+        });
+    }
+
+    private getCurrentPlayerSlot(): PlayerSlot | null {
+        if (!this.lobbyState || !this.playerSessionId) {
+            return null;
+        }
+
+        // Check blue team first
+        const bluePlayer = this.lobbyState.blueTeam.find(slot => slot.playerId === this.playerSessionId);
+        if (bluePlayer) {
+            return bluePlayer;
+        }
+
+        // Check red team
+        const redPlayer = this.lobbyState.redTeam.find(slot => slot.playerId === this.playerSessionId);
+        if (redPlayer) {
+            return redPlayer;
+        }
+
+        return null;
     }
 
     private convertLobbyState(state: any): LobbyState {
@@ -493,7 +533,10 @@ export class LobbyScene extends Phaser.Scene {
         });
     }
 
-    private showNameEditDialog(currentName: string) {
+    private showNameEditDialog(currentName: string, autoFocus: boolean = true) {
+        // Set flag to prevent multiple dialogs
+        this.isNameDialogOpen = true;
+        
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
 
@@ -535,8 +578,12 @@ export class LobbyScene extends Phaser.Scene {
         
         // Add input to document
         document.body.appendChild(inputElement);
-        inputElement.focus();
-        inputElement.select(); // Select all text for easy editing
+        
+        // Only auto-focus and select if autoFocus is true
+        if (autoFocus) {
+            inputElement.focus();
+            inputElement.select(); // Select all text for easy editing
+        }
 
         // Buttons
         const cancelButton = this.add.text(centerX - 80, centerY + 60, 'Cancel', {
@@ -575,6 +622,7 @@ export class LobbyScene extends Phaser.Scene {
 
         // Cleanup function
         const cleanup = () => {
+            this.isNameDialogOpen = false; // Clear flag when dialog closes
             document.body.removeChild(inputElement);
             dialogElements.forEach(element => element.destroy());
         };
@@ -607,8 +655,18 @@ export class LobbyScene extends Phaser.Scene {
 
         // Handle clicking outside the dialog
         overlay.setInteractive();
-        overlay.on('pointerdown', () => {
-            cleanup();
+        overlay.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number, event: Phaser.Types.Input.EventData) => {
+            // Only close if clicking directly on the overlay (not on dialog content)
+            // Check if the pointer is within the dialog bounds
+            const dialogLeft = centerX - 200; // Half of dialog width
+            const dialogRight = centerX + 200;
+            const dialogTop = centerY - 100; // Half of dialog height
+            const dialogBottom = centerY + 100;
+            
+            if (pointer.x < dialogLeft || pointer.x > dialogRight || 
+                pointer.y < dialogTop || pointer.y > dialogBottom) {
+                cleanup();
+            }
         });
     }
 }
