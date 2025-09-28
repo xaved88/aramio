@@ -138,7 +138,7 @@ export class DebugOverlay {
     }
 
     private updateCoordinatesDebugPanel(pointer: Phaser.Input.Pointer): void {
-        if (!this.coordinatesDebugPanel) return;
+        if (!this.coordinatesDebugPanel || !this.coordinatesDebugPanel.scene) return;
 
         const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
         this.coordinatesDebugPanel.setText(`Screen: ${Math.round(pointer.x)}, ${Math.round(pointer.y)}\nWorld: ${Math.round(worldPos.x)}, ${Math.round(worldPos.y)}`);

@@ -61,6 +61,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     async create() {
+        // Reset all state for fresh scene
+        this.resetSceneState();
+        
         // Load icons and pre-generate textures
         await IconManager.getInstance().loadIconsAndTextures(this);
         
@@ -866,9 +869,42 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
-     * Clean up when scene is destroyed
+     * Reset all scene state for fresh initialization
      */
-    destroy() {
+    private resetSceneState() {
+        // Reset UI initialization flag
+        this.uiComponentsInitialized = false;
+        
+        // Reset game state
+        this.gameplayConfig = null;
+        this.lastState = null;
+        this.playerTeam = null;
+        this.playerSessionId = null;
+        
+        // Reset flags
+        this.isRestarting = false;
+        this.isReturningToLobby = false;
+        
+        // Clear event tracking
+        this.processedAttackEvents.clear();
+        this.processedDamageEvents.clear();
+        
+        // Reset UI elements
+        this.abilityRangeDisplay = null;
+        this.coordinateGrid = null;
+        this.coordinatesDebugPanel = null;
+        this.screenGrid = null;
+        
+        // Clear arrays
+        this.gridLabels = [];
+        this.screenGridLabels = [];
+    }
+
+    /**
+     * Called when scene is shut down - Phaser handles most cleanup automatically
+     */
+    shutdown() {
+        // Only clean up custom resources that Phaser doesn't handle automatically
         if (this.entityManager) {
             this.entityManager.destroy();
         }
@@ -878,10 +914,6 @@ export class GameScene extends Phaser.Scene {
         if (this.uiManager) {
             this.uiManager.destroy();
         }
-        // Clean up grid labels
-        this.gridLabels.forEach(label => label.destroy());
-        this.gridLabels = [];
-        this.screenGridLabels.forEach(label => label.destroy());
-        this.screenGridLabels = [];
+        // Other components don't have destroy methods or are handled by Phaser
     }
 } 

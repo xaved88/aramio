@@ -18,7 +18,7 @@ QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_STRENGTH = 20; // Very high damage (was 5)
 QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_SPEED = 2.0; // Very fast attacks (was 1)
 QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_RADIUS = 200; // Much larger range (was 50)
 QUICK_WIN_CONFIG.COMBAT.HERO.WIND_UP = 0.1; // Very fast wind-up (was 0.25)
-QUICK_WIN_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 2000; // Very fast respawn (was 6000)
+QUICK_WIN_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 8000; // Very fast respawn (was 6000)
 
 // Very powerful abilities with fast cooldowns
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 300; // Very fast cooldown (was 1000)
@@ -54,23 +54,23 @@ QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.RANGE = 500; // Much larger range (was 
 QUICK_WIN_CONFIG.COMBAT.CRADLE.HEALTH = 1; // 1 health for instant wins (was 2000)
 QUICK_WIN_CONFIG.COMBAT.CRADLE.ATTACK_STRENGTH = 100; // Very high damage (was 40)
 QUICK_WIN_CONFIG.COMBAT.CRADLE.ATTACK_SPEED = 2; // Very fast attacks (was 2)
-QUICK_WIN_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS = 250; // Much larger range (was 115)
+QUICK_WIN_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS = 115; // Much larger range (was 115)
 
 QUICK_WIN_CONFIG.COMBAT.TURRET.HEALTH = 50; // Very low health (was 1000)
 QUICK_WIN_CONFIG.COMBAT.TURRET.ATTACK_STRENGTH = 40; // Very high damage (was 25)
 QUICK_WIN_CONFIG.COMBAT.TURRET.ATTACK_SPEED = 2; // Very fast attacks (was 2)
-QUICK_WIN_CONFIG.COMBAT.TURRET.ATTACK_RADIUS = 300; // Much larger range (was 75)
+QUICK_WIN_CONFIG.COMBAT.TURRET.ATTACK_RADIUS = 75; // Much larger range (was 75)
 
 // Glass cannon minions - very low health, very high damage
 QUICK_WIN_CONFIG.COMBAT.MINION.WARRIOR.HEALTH = 15; // Very low health (was 50)
 QUICK_WIN_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH = 25; // Very high damage (was 10)
 QUICK_WIN_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_SPEED = 1.8; // Very fast attacks (was 0.8)
-QUICK_WIN_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS = 120; // Much larger range (was 20)
+QUICK_WIN_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS = 20; // Much larger range (was 20)
 
 QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.HEALTH = 8; // Very low health (was 25)
 QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_STRENGTH = 15; // Very high damage (was 5)
 QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_SPEED = 2.0; // Very fast attacks (was 1.2)
-QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_RADIUS = 200; // Much larger range (was 60)
+QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_RADIUS = 60; // Much larger range (was 60)
 
 // Very fast minion waves
 QUICK_WIN_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE = 2; // Same as default (was 2)

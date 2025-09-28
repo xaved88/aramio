@@ -36,12 +36,49 @@ export class LobbyScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Reset all scene state for fresh initialization
+     */
+    private resetSceneState() {
+        // Reset connection state
+        this.client = null as any;
+        this.room = null;
+        this.playerSessionId = null;
+        this.lobbyState = null;
+        
+        // Reset UI elements
+        this.configLabel = null as any;
+        this.configValue = null as any;
+        this.blueTeamContainer = null as any;
+        this.redTeamContainer = null as any;
+        this.startButton = null as any;
+        
+        // Clear arrays
+        this.configDropdownItems = [];
+        this.teamSizeButtons = [];
+        this.playerSlots = [];
+    }
+
+    /**
+     * Called when scene is shut down - Phaser handles most cleanup automatically
+     */
+    shutdown() {
+        // Phaser automatically destroys all game objects when the scene shuts down
+        // We just need to clean up any custom resources
+        if (this.connectionManager) {
+            // Connection manager cleanup if needed
+        }
+    }
+
     preload() {
         // No assets needed for basic UI
     }
 
     async create() {
         console.log('Creating lobby scene...');
+        
+        // Reset all state for fresh scene
+        this.resetSceneState();
         
         // Initialize connection manager
         this.connectionManager = new ConnectionManager();
@@ -67,7 +104,10 @@ export class LobbyScene extends Phaser.Scene {
     private setupRoomHandlers() {
         this.room.onStateChange((state: any) => {
             this.lobbyState = this.convertLobbyState(state);
-            this.updateUI();
+            // Only update UI if it's been created and is valid
+            if (this.startButton && this.startButton.scene) {
+                this.updateUI();
+            }
         });
 
         this.room.onMessage('gameStarting', (message: any) => {
@@ -254,10 +294,12 @@ export class LobbyScene extends Phaser.Scene {
         this.updateTeamDisplay('red', this.lobbyState.redTeam);
 
         // Update start button
-        if (this.lobbyState.canStart) {
-            this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS) });
-        } else {
-            this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
+        if (this.startButton && this.startButton.scene) {
+            if (this.lobbyState.canStart) {
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS) });
+            } else {
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
+            }
         }
     }
 

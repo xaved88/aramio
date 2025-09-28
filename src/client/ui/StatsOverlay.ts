@@ -428,15 +428,7 @@ export class StatsOverlay {
         const buttonX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
         const buttonY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 80;
         
-        // Create button background
-        const buttonBg = this.scene.add.graphics();
-        buttonBg.fillStyle(0x2E7D32, 0.9);
-        buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
-        buttonBg.setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
-        this.hudContainer.add(buttonBg);
-        this.overlayElements.push(buttonBg);
-        
-        // Create button text
+        // Create button text with background (like lobby buttons)
         this.backToLobbyButton = this.scene.add.text(
             buttonX,
             buttonY,
@@ -446,30 +438,27 @@ export class StatsOverlay {
                 color: '#FFFFFF',
                 fontStyle: 'bold',
                 stroke: '#000000',
-                strokeThickness: 2
+                strokeThickness: 2,
+                backgroundColor: '#2E7D32',
+                padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
+        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive({ useHandCursor: true });
         
         this.hudContainer.add(this.backToLobbyButton);
         this.overlayElements.push(this.backToLobbyButton);
         
-        // Make button interactive
-        this.backToLobbyButton.setInteractive({ useHandCursor: true });
+        // Add click handler
         this.backToLobbyButton.on('pointerdown', () => {
             this.handleBackToLobby();
         });
         
-        // Hover effects
+        // Add hover effects (like lobby buttons)
         this.backToLobbyButton.on('pointerover', () => {
-            buttonBg.clear();
-            buttonBg.fillStyle(0x388E3C, 0.9);
-            buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
+            this.backToLobbyButton.setStyle({ backgroundColor: '#388E3C' });
         });
         
         this.backToLobbyButton.on('pointerout', () => {
-            buttonBg.clear();
-            buttonBg.fillStyle(0x2E7D32, 0.9);
-            buttonBg.fillRoundedRect(buttonX - 100, buttonY - 25, 200, 50, 10);
+            this.backToLobbyButton.setStyle({ backgroundColor: '#2E7D32' });
         });
     }
 
