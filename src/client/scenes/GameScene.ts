@@ -4,7 +4,6 @@ import { GameState } from '../../server/schema/GameState';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
-import { isHeroCombatant } from '../../shared/types/CombatantTypes';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
