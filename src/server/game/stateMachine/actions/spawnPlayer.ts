@@ -13,13 +13,23 @@ import { GameplayConfig } from '../../../config/ConfigProvider';
 /**
  * Generates a unique display name for a hero based on existing heroes
  * @param state The current game state
- * @returns A unique display name like 'Hero 1', 'Hero 2', etc.
+ * @param playerDisplayName Optional player display name - if provided, this will be used
+ * @returns A unique display name like player name or 'Hero 1', 'Hero 2', etc.
  */
-function generateUniqueHeroName(state: GameState): string {
+function generateHeroName(state: GameState, playerDisplayName?: string): string {
+    // If we have a player display name, use it
+    if (playerDisplayName && playerDisplayName.trim() !== '') {
+        return playerDisplayName;
+    }
+    
+    // Otherwise, generate a generic hero name for bots or players without names
     const existingHeroes = Array.from(state.combatants.values())
         .filter(combatant => combatant.type === COMBATANT_TYPES.HERO) as Hero[];
     
-    const existingNames = new Set(existingHeroes.map(hero => hero.displayName));
+    // Filter to only generic hero names (Hero 1, Hero 2, etc.) to avoid conflicts with player names
+    const existingGenericNames = new Set(existingHeroes
+        .filter(hero => hero.displayName.startsWith('Hero '))
+        .map(hero => hero.displayName));
     
     let heroNumber = 1;
     let displayName: string;
@@ -27,20 +37,20 @@ function generateUniqueHeroName(state: GameState): string {
     do {
         displayName = `Hero ${heroNumber}`;
         heroNumber++;
-    } while (existingNames.has(displayName));
+    } while (existingGenericNames.has(displayName));
     
     return displayName;
 }
 
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, gameplayConfig: GameplayConfig): StateMachineResult {
-    const { playerId, team, x, y, abilityType = 'default' } = action.payload;
+    const { playerId, team, x, y, abilityType = 'default', playerDisplayName, isPlayer = true } = action.payload;
     
     const hero = new Hero();
     hero.id = `hero-${state.gameTime}-${Math.random()}`;
     hero.type = COMBATANT_TYPES.HERO;
     hero.team = team;
     hero.controller = playerId; // client ID becomes the controller
-    hero.displayName = generateUniqueHeroName(state); // Generate unique display name
+    hero.displayName = generateHeroName(state, playerDisplayName); // Generate unique display name
     
     // Handle optional coordinates
     if (x !== undefined && y !== undefined) {

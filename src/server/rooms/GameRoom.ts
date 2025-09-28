@@ -192,16 +192,20 @@ export class GameRoom extends Room<GameState> {
         }
         
         // Try to replace a bot on the appropriate team
-        const replacedBot = this.replaceBotWithPlayer(client.sessionId, team);
+        const replacedBot = this.replaceBotWithPlayer(client.sessionId, team, playerLobbyId);
         
         if (!replacedBot) {
-            // If no bot to replace, spawn a new hero
-            this.gameEngine.spawnControlledHero(client.sessionId, team);
+            // Get player name from lobby data if available
+            // Use playerLobbyId if available, otherwise fall back to sessionId
+            const lookupId = playerLobbyId || client.sessionId;
+            const playerDisplayName = this.getPlayerNameFromLobby(lookupId);
+            
+            console.log(`Spawning new hero for player ${client.sessionId} with name: ${playerDisplayName || 'generic name'}`);
+            
+            // If no bot to replace, spawn a new hero with player display name
+            this.gameEngine.spawnControlledHero(client.sessionId, team, undefined, undefined, playerDisplayName);
             // The hero ID will be set in the next update cycle when we process the spawn action
         }
-        
-        // Update player name from lobby data if available
-        this.updatePlayerNameFromLobby(playerLobbyId || client.sessionId, client.sessionId);
     }
 
     onLeave(client: Client, consented: boolean) {
@@ -436,7 +440,6 @@ export class GameRoom extends Room<GameState> {
             return null;
         }
         
-        console.log('Lobby data:', JSON.stringify(this.lobbyData, null, 2));
         console.log('Looking for lobby player:', lobbyPlayerId);
         
         // Check blue team
@@ -459,6 +462,28 @@ export class GameRoom extends Room<GameState> {
         return null;
     }
 
+    private getPlayerNameFromLobby(lobbyPlayerId: string): string | undefined {
+        if (!this.lobbyData) {
+            return undefined;
+        }
+        
+        // Check blue team
+        for (const slot of this.lobbyData.blueTeam) {
+            if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                return slot.playerDisplayName || undefined;
+            }
+        }
+        
+        // Check red team if not found in blue
+        for (const slot of this.lobbyData.redTeam) {
+            if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
+                return slot.playerDisplayName || undefined;
+            }
+        }
+        
+        return undefined;
+    }
+
     private updatePlayerNameFromLobby(lobbyPlayerId: string, gameSessionId: string): void {
         if (!this.lobbyData) {
             console.log('No lobby data available for name update');
@@ -468,48 +493,48 @@ export class GameRoom extends Room<GameState> {
         console.log('Updating player name for lobby player:', lobbyPlayerId);
         
         // Find player's name from lobby data
-        let playerName: string | null = null;
+        let playerDisplayName: string | null = null;
         
         // Check blue team
         for (const slot of this.lobbyData.blueTeam) {
             if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
-                playerName = slot.playerName;
-                console.log('Found player name in blue team:', playerName);
+                playerDisplayName = slot.playerDisplayName;
+                console.log('Found player display name in blue team:', playerDisplayName);
                 break;
             }
         }
         
         // Check red team if not found in blue
-        if (!playerName) {
+        if (!playerDisplayName) {
             for (const slot of this.lobbyData.redTeam) {
                 if (slot && slot.playerId === lobbyPlayerId && !slot.isBot) {
-                    playerName = slot.playerName;
-                    console.log('Found player name in red team:', playerName);
+                    playerDisplayName = slot.playerDisplayName;
+                    console.log('Found player display name in red team:', playerDisplayName);
                     break;
                 }
             }
         }
         
-        // Update the hero's name if found
-        if (playerName) {
+        // Update the hero's display name if found
+        if (playerDisplayName) {
             let heroFound = false;
             this.state.combatants.forEach((combatant: any) => {
                 if (combatant.type === COMBATANT_TYPES.HERO && combatant.controller === gameSessionId) {
-                    combatant.playerName = playerName;
-                    console.log(`Updated player ${gameSessionId} name to: ${playerName}`);
+                    combatant.displayName = playerDisplayName;
+                    console.log(`Updated player ${gameSessionId} display name to: ${playerDisplayName}`);
                     heroFound = true;
                 }
             });
             
             if (!heroFound) {
-                console.log(`No hero found for player ${gameSessionId} to update name`);
+                console.log(`No hero found for player ${gameSessionId} to update display name`);
             }
         } else {
-            console.log(`No player name found in lobby data for lobby player ${lobbyPlayerId}`);
+            console.log(`No player display name found in lobby data for lobby player ${lobbyPlayerId}`);
         }
     }
 
-    private replaceBotWithPlayer(playerId: ControllerId, team: string): boolean {
+    private replaceBotWithPlayer(playerId: ControllerId, team: string, playerLobbyId?: string): boolean {
         // Find a bot on the specified team to replace
         let botToReplace: any = null;
         this.state.combatants.forEach((combatant: any) => {
@@ -524,6 +549,15 @@ export class GameRoom extends Room<GameState> {
         if (botToReplace) {
             // Replace the bot's controller with the player
             botToReplace.controller = playerId;
+            
+            // Get player display name from lobby data and update display name
+            const lookupId = playerLobbyId || playerId;
+            const playerDisplayName = this.getPlayerNameFromLobby(lookupId);
+            if (playerDisplayName) {
+                botToReplace.displayName = playerDisplayName;
+                console.log(`Updated bot ${botToReplace.id} display name to: ${playerDisplayName}`);
+            }
+            
             console.log(`Replaced bot ${botToReplace.id} with player ${playerId} on team ${team}`);
             return true;
         }

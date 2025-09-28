@@ -87,15 +87,17 @@ export class GameEngine {
      * @param team The hero's team
      * @param position Optional position for the hero
      * @param abilityType Optional ability type for the hero
+     * @param playerDisplayName Optional player display name from lobby
      */
-    spawnControlledHero(controllerId: ControllerId, team: 'blue' | 'red', position?: { x: number, y: number }, abilityType?: string): void {
+    spawnControlledHero(controllerId: ControllerId, team: 'blue' | 'red', position?: { x: number, y: number }, abilityType?: string, playerDisplayName?: string): void {
         this.processAction({
             type: 'SPAWN_PLAYER',
             payload: { 
                 playerId: controllerId, 
                 team,
                 ...(position && { x: position.x, y: position.y }),
-                ...(abilityType && { abilityType })
+                ...(abilityType && { abilityType }),
+                ...(playerDisplayName && { playerDisplayName })
             }
         });
     }

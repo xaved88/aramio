@@ -225,7 +225,7 @@ export class LobbyRoom extends Room<LobbyState> {
             const slot = teamArray[i];
             if (slot && !slot.playerId) {
                 slot.playerId = playerId;
-                slot.playerName = `Player ${playerId.slice(0, 6)}`;
+                slot.playerDisplayName = `Player ${playerId.slice(0, 6)}`;
                 slot.isBot = false;
                 slot.isReady = false;
                 break;
@@ -241,7 +241,7 @@ export class LobbyRoom extends Room<LobbyState> {
             const slot = this.state.blueTeam[i];
             if (slot && slot.playerId === playerId) {
                 slot.playerId = '';
-                slot.playerName = '';
+                slot.playerDisplayName = '';
                 slot.isBot = false;
                 slot.isReady = false;
                 break;
@@ -253,7 +253,7 @@ export class LobbyRoom extends Room<LobbyState> {
             const slot = this.state.redTeam[i];
             if (slot && slot.playerId === playerId) {
                 slot.playerId = '';
-                slot.playerName = '';
+                slot.playerDisplayName = '';
                 slot.isBot = false;
                 slot.isReady = false;
                 break;

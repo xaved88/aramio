@@ -81,13 +81,13 @@ export class LobbyScene extends Phaser.Scene {
             gameRoomId: state.gameRoomId,
             blueTeam: Array.from(state.blueTeam).map((slot: any) => ({
                 playerId: slot.playerId,
-                playerName: slot.playerName,
+                playerDisplayName: slot.playerDisplayName,
                 isBot: slot.isBot,
                 isReady: slot.isReady
             })),
             redTeam: Array.from(state.redTeam).map((slot: any) => ({
                 playerId: slot.playerId,
-                playerName: slot.playerName,
+                playerDisplayName: slot.playerDisplayName,
                 isBot: slot.isBot,
                 isReady: slot.isReady
             })),
@@ -267,7 +267,7 @@ export class LobbyScene extends Phaser.Scene {
                     slotText = `Bot ${index + 1}`;
                     textColor = CLIENT_CONFIG.UI.COLORS.DISABLED;
                 } else {
-                    slotText = slot.playerName;
+                    slotText = slot.playerDisplayName;
                     if (slot.playerId === this.playerSessionId) {
                         // Your own name uses the character's purple color
                         textColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;

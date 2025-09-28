@@ -18,6 +18,8 @@ export interface SpawnPlayerAction extends GameAction {
         x?: number;
         y?: number;
         abilityType?: string;
+        playerDisplayName?: string; // Player display name from lobby
+        isPlayer?: boolean; // Whether this is a player (vs bot) - defaults to true for controlled heroes
     };
 }
 
