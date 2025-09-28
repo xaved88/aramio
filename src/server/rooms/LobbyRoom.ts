@@ -3,12 +3,12 @@ import { LobbyState } from '../schema/LobbyState';
 import { PlayerSlot } from '../schema/PlayerSlot';
 import { SERVER_CONFIG } from '../../ServerConfig';
 import { GameplayConfig, configProvider } from '../config/ConfigProvider';
-import { Server } from '@colyseus/core';
 
 export class LobbyRoom extends Room<LobbyState> {
     maxClients = SERVER_CONFIG.MAX_CLIENTS_PER_ROOM;
     private gameplayConfig!: GameplayConfig;
     private gameRoomId: string | null = null;
+    
 
     onCreate(options: any) {
         this.gameplayConfig = options.gameplayConfig;
@@ -222,15 +222,10 @@ export class LobbyRoom extends Room<LobbyState> {
             return;
         }
 
-        // Trim and limit length
+        // Trim and check for empty string
         const trimmedName = displayName.trim();
         if (trimmedName.length === 0) {
             console.log(`Empty display name for player ${playerId}`);
-            return;
-        }
-
-        if (trimmedName.length > 20) {
-            console.log(`Display name too long for player ${playerId}: ${trimmedName}`);
             return;
         }
 

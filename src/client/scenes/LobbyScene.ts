@@ -12,6 +12,7 @@ export class LobbyScene extends Phaser.Scene {
     private playerSessionId: string | null = null;
     private connectionManager!: ConnectionManager;
     
+    
     // UI Elements
     private configLabel!: Phaser.GameObjects.Text;
     private configValue!: Phaser.GameObjects.Text;
@@ -475,7 +476,7 @@ export class LobbyScene extends Phaser.Scene {
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
         inputElement.value = currentName;
-        inputElement.maxLength = 20;
+        inputElement.maxLength = CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH;
         inputElement.style.position = 'absolute';
         inputElement.style.left = (canvasRect.left + centerX - 150) + 'px';
         inputElement.style.top = (canvasRect.top + centerY - 25) + 'px';
@@ -543,7 +544,7 @@ export class LobbyScene extends Phaser.Scene {
 
         saveButton.on('pointerdown', () => {
             const newName = inputElement.value.trim();
-            if (newName && newName.length <= 20) {
+            if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
                 this.room.send('setPlayerDisplayName', { displayName: newName });
                 cleanup();
             }
@@ -553,7 +554,7 @@ export class LobbyScene extends Phaser.Scene {
         inputElement.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 const newName = inputElement.value.trim();
-                if (newName && newName.length <= 20) {
+                if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
                     this.room.send('setPlayerDisplayName', { displayName: newName });
                     cleanup();
                 }

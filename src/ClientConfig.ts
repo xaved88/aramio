@@ -165,6 +165,7 @@ export const CLIENT_CONFIG = {
         },
     },
     UI: {
+        MAX_DISPLAY_NAME_LENGTH: 12,
         FONTS: {
             SMALL: '10px',
             MEDIUM: '12px',

@@ -1,6 +1,6 @@
 export interface PlayerSlot {
     playerId: string;
-    playerName: string;
+    playerDisplayName: string;
     isBot: boolean;
     isReady: boolean;
 }
