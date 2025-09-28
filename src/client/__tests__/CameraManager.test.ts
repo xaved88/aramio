@@ -73,6 +73,7 @@ describe('CameraManager', () => {
             killEvents: [],
             projectiles: new Map(),
             aoeDamageEvents: [],
+            deathEffectEvents: [],
         };
     });
 

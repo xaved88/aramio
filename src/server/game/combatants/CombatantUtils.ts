@@ -1,6 +1,6 @@
 import { GameState } from '../../schema/GameState';
 import { Combatant } from '../../schema/Combatants';
-import { DamageEvent, KillEvent } from '../../schema/Events';
+import { DamageEvent, KillEvent, DeathEffectEvent } from '../../schema/Events';
 import { ReflectEffect } from '../../schema/Effects';
 
 export type DamageSource = 'auto-attack' | 'ability';
@@ -67,6 +67,16 @@ export class CombatantUtils {
             killEvent.targetType = combatant.type;
             killEvent.timestamp = gameState.gameTime;
             gameState.killEvents.push(killEvent);
+            
+            // Create death effect event for visual effects
+            const deathEffectEvent = new DeathEffectEvent();
+            deathEffectEvent.targetId = combatant.id;
+            deathEffectEvent.targetType = combatant.type;
+            deathEffectEvent.x = combatant.x;
+            deathEffectEvent.y = combatant.y;
+            deathEffectEvent.team = combatant.team;
+            deathEffectEvent.timestamp = gameState.gameTime;
+            gameState.deathEffectEvents.push(deathEffectEvent);
             
             // Update kill stats for source combatant
             if (sourceCombatant && sourceCombatant.type === 'hero') {

@@ -2,6 +2,7 @@ import { GAMEPLAY_CONFIG } from '../../GameConfig';
 import { GLASS_CANNON_CONFIG } from './GlassCannonConfig';
 import { QUICK_WIN_CONFIG } from './QuickWinConfig';
 import { HIGHER_LEVEL_TESTING_CONFIG } from './HigherLevelTestingConfig';
+import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 
 export type GameplayConfig = any; // Type alias for now, will be made strict later
 
@@ -14,6 +15,7 @@ export class ConfigProvider {
         this.registerConfig('glass-cannon', GLASS_CANNON_CONFIG);
         this.registerConfig('quick-win', QUICK_WIN_CONFIG);
         this.registerConfig('higher-level-testing', HIGHER_LEVEL_TESTING_CONFIG);
+        this.registerConfig('death-effects-testing', DEATH_EFFECTS_TESTING_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {

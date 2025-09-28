@@ -48,6 +48,15 @@ export class AOEDamageEvent extends Schema {
     @type('number') timestamp!: number; // When the AOE occurred
 }
 
+export class DeathEffectEvent extends Schema {
+    @type('string') targetId!: CombatantId; // ID of the combatant that died
+    @type('string') targetType!: string; // Type of the combatant that died (hero, minion, turret)
+    @type('number') x!: number; // X position where death occurred
+    @type('number') y!: number; // Y position where death occurred
+    @type('string') team!: string; // Team of the dead combatant
+    @type('number') timestamp!: number; // When the death effect occurred
+}
+
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
     @type('number') minionKills = 0; // number of minions killed

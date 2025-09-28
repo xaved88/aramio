@@ -25,6 +25,15 @@ export interface AOEDamageEvent {
     timestamp: number;
 }
 
+export interface DeathEffectEvent {
+    targetId: CombatantId;
+    targetType: string;
+    x: number;
+    y: number;
+    team: string;
+    timestamp: number;
+}
+
 export interface SharedGameState {
     gameTime: number;
     gamePhase: string;
@@ -39,4 +48,5 @@ export interface SharedGameState {
     killEvents: KillEvent[];
     projectiles: Map<ProjectileId, Projectile>;
     aoeDamageEvents: AOEDamageEvent[];
+    deathEffectEvents: DeathEffectEvent[];
 } 

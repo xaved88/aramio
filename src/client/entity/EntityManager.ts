@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
-import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent } from '../../shared/types/GameStateTypes';
+import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { EntityFactory } from './EntityFactory';
 import { EntityRenderer } from './EntityRenderer';
@@ -31,6 +31,7 @@ export class EntityManager {
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
+    private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
@@ -94,8 +95,14 @@ export class EntityManager {
         // Process AOE damage events
         this.processAOEDamageEvents(state);
         
+        // Process death effect events
+        this.processDeathEffectEvents(state);
+        
         // Clean up old recent attackers
         this.cleanupOldRecentAttackers(state.gameTime);
+        
+        // Clean up old processed events
+        this.cleanupOldProcessedEvents(state.gameTime);
         
         // Remove combatants that no longer exist
         this.cleanupRemovedCombatants(state);
@@ -500,7 +507,158 @@ export class EntityManager {
         });
     }
 
+    /**
+     * Processes death effect events and creates visual effects
+     */
+    private processDeathEffectEvents(state: SharedGameState): void {
+        state.deathEffectEvents.forEach(deathEffectEvent => {
+            // Create unique identifier for this death effect event
+            const eventId = `${deathEffectEvent.targetId}-${deathEffectEvent.timestamp}`;
+            
+            // Only process if we haven't seen this death effect event before
+            if (!this.processedDeathEffectEvents.has(eventId)) {
+                this.processedDeathEffectEvents.add(eventId);
+                this.createDeathEffect(deathEffectEvent);
+            }
+        });
+    }
 
+    /**
+     * Creates a visual death effect at the specified position
+     */
+    private createDeathEffect(deathEffectEvent: DeathEffectEvent): void {
+        // Create a graphics object for the death effect
+        const deathGraphics = this.scene.add.graphics();
+        deathGraphics.setPosition(deathEffectEvent.x, deathEffectEvent.y);
+        deathGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS); // High depth to appear above everything
+        
+        // Assign to main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(deathGraphics);
+        }
+        
+        // Determine color based on the dead combatant's team
+        let deathColor = 0xff6b35; // Default orange
+        if (deathEffectEvent.team === 'blue') {
+            deathColor = CLIENT_CONFIG.PROJECTILE.BLUE_COLOR;
+        } else if (deathEffectEvent.team === 'red') {
+            deathColor = CLIENT_CONFIG.PROJECTILE.RED_COLOR;
+        }
+        
+        // Scale effect based on combatant type
+        let explosionRadius: number;
+        let numRings: number;
+        let ringDuration: number;
+        let numParticles: number;
+        let particleSize: number;
+        let particleDistance: number;
+        
+        switch (deathEffectEvent.targetType) {
+            case 'minion':
+                explosionRadius = 5; // Smaller starting size
+                numRings = 1; // Minimal rings
+                ringDuration = 400; // Shorter duration
+                numParticles = 6; // More particles
+                particleSize = 2; // Particles
+                particleDistance = 15; // Shorter distance
+                break;
+            case 'turret':
+            case 'cradle':
+                explosionRadius = 20; // Smaller starting size
+                numRings = 2; // Fewer rings
+                ringDuration = 400; // Shorter duration
+                numParticles = 20; // Many more particles
+                particleSize = 3; // Larger particles
+                particleDistance = 40; // Shorter distance
+                break;
+            case 'hero':
+            default:
+                explosionRadius = 7; // Smaller starting size
+                numRings = 2; // Fewer rings
+                ringDuration = 400; // Shorter duration
+                numParticles = 12; // More particles
+                particleSize = 2; // Particles
+                particleDistance = 25; // Shorter distance
+                break;
+        }
+        
+        for (let i = 0; i < numRings; i++) {
+            const ringGraphics = this.scene.add.graphics();
+            ringGraphics.setPosition(deathEffectEvent.x, deathEffectEvent.y);
+            ringGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+            
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(ringGraphics);
+            }
+            
+            // Draw explosion ring
+            ringGraphics.lineStyle(4 - i, deathColor, 0.8 - (i * 0.2));
+            ringGraphics.strokeCircle(0, 0, explosionRadius);
+            
+            // Animate the explosion ring
+            const delay = i * 100; // Stagger the rings
+            const duration = ringDuration - (i * 50); // Each ring lasts less time
+            const scale = 1.5 + (i * 0.3); // Each ring scales more
+            
+            this.scene.tweens.add({
+                targets: ringGraphics,
+                scaleX: scale,
+                scaleY: scale,
+                alpha: 0,
+                duration: duration,
+                delay: delay,
+                ease: 'Power2',
+                onComplete: () => {
+                    ringGraphics.destroy();
+                }
+            });
+        }
+        
+        // Create particle effect (small dots scattering outward)
+        for (let i = 0; i < numParticles; i++) {
+            const particleGraphics = this.scene.add.graphics();
+            particleGraphics.setPosition(deathEffectEvent.x, deathEffectEvent.y);
+            particleGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+            
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(particleGraphics);
+            }
+            
+            // Draw particle with scaled size
+            particleGraphics.fillStyle(deathColor, 0.8);
+            particleGraphics.fillCircle(0, 0, particleSize);
+            
+            // Calculate random direction
+            const angle = (i / numParticles) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const distance = particleDistance + Math.random() * 20;
+            const targetX = Math.cos(angle) * distance;
+            const targetY = Math.sin(angle) * distance;
+            
+            // Animate particle scattering with scaled duration
+            const particleDuration = deathEffectEvent.targetType === 'minion' 
+                ? 300 + Math.random() * 100  // Even shorter for minions
+                : deathEffectEvent.targetType === 'turret' || deathEffectEvent.targetType === 'cradle'
+                ? 800 + Math.random() * 300  // Longer for turrets/cradles
+                : 500 + Math.random() * 150; // Shorter duration for heroes
+            
+            this.scene.tweens.add({
+                targets: particleGraphics,
+                x: particleGraphics.x + targetX,
+                y: particleGraphics.y + targetY,
+                alpha: 0,
+                duration: particleDuration,
+                ease: 'Power2',
+                onComplete: () => {
+                    particleGraphics.destroy();
+                }
+            });
+        }
+        
+        // Clean up the main death graphics after a short delay
+        this.scene.time.delayedCall(100, () => {
+            deathGraphics.destroy();
+        });
+    }
 
     /**
      * Removes projectiles that no longer exist in the game state
@@ -618,6 +776,30 @@ export class EntityManager {
     }
 
     /**
+     * Cleans up old processed events to prevent memory leaks
+     */
+    private cleanupOldProcessedEvents(currentTime: number): void {
+        // Keep processed events for 10 seconds, then clean them up
+        const tenSecondsAgo = currentTime - 10000;
+        
+        // Clean up processed death effect events
+        for (const eventId of this.processedDeathEffectEvents) {
+            const timestamp = parseInt(eventId.split('-').pop() || '0');
+            if (timestamp < tenSecondsAgo) {
+                this.processedDeathEffectEvents.delete(eventId);
+            }
+        }
+        
+        // Clean up processed AOE damage events
+        for (const eventKey of this.processedAOEDamageEvents) {
+            const timestamp = parseInt(eventKey.split('-').pop() || '0');
+            if (timestamp < tenSecondsAgo) {
+                this.processedAOEDamageEvents.delete(eventKey);
+            }
+        }
+    }
+
+    /**
      * Checks if a combatant is a recent attacker
      */
     isRecentAttacker(combatantId: CombatantId): boolean {
@@ -686,6 +868,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.processedDeathEffectEvents.clear();
         this.recentAttackers.clear();
         this.lastProcessedTime = 0;
     }
@@ -751,6 +934,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
+        this.processedDeathEffectEvents.clear();
         this.recentAttackers.clear();
         this.lastProcessedTime = 0;
         

@@ -1,7 +1,7 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { CombatantId } from '../../shared/types/CombatantTypes';
 import { Combatant } from './Combatants';
-import { AttackEvent, XPEvent, LevelUpEvent, DamageEvent, KillEvent, AOEDamageEvent } from './Events';
+import { AttackEvent, XPEvent, LevelUpEvent, DamageEvent, KillEvent, AOEDamageEvent, DeathEffectEvent } from './Events';
 import { Projectile } from './Projectiles';
 
 export class GameState extends Schema {
@@ -18,6 +18,7 @@ export class GameState extends Schema {
     @type([DamageEvent]) damageEvents = new ArraySchema<DamageEvent>();
     @type([KillEvent]) killEvents = new ArraySchema<KillEvent>();
     @type([AOEDamageEvent]) aoeDamageEvents = new ArraySchema<AOEDamageEvent>();
+    @type([DeathEffectEvent]) deathEffectEvents = new ArraySchema<DeathEffectEvent>();
     @type({ map: Projectile }) projectiles = new MapSchema<Projectile>();
     @type({ map: 'number' }) warriorSpawnTimes = new MapSchema<number>(); // Track when warriors were spawned for each wave
     @type({ map: 'boolean' }) archerSpawned = new MapSchema<boolean>(); // Track if archers have been spawned for each wave

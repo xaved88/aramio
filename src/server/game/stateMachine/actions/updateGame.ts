@@ -72,6 +72,20 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
         state.aoeDamageEvents.splice(index, 1);
     });
     
+    // Clear old death effect events (older than 1 second)
+    const deathEffectEventsToRemove: number[] = [];
+    
+    state.deathEffectEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 1000) { // 1 second
+            deathEffectEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove death effect events in reverse order to maintain indices
+    deathEffectEventsToRemove.reverse().forEach(index => {
+        state.deathEffectEvents.splice(index, 1);
+    });
+    
     // Handle passive healing
     handlePassiveHealing(state, gameplayConfig);
     
