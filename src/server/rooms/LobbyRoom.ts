@@ -144,6 +144,10 @@ export class LobbyRoom extends Room<LobbyState> {
             this.handleSwitchPlayerTeam(data.playerId, data.targetTeam);
         });
 
+        this.onMessage('setPlayerDisplayName', (client, data) => {
+            this.handleSetPlayerDisplayName(client.sessionId, data.displayName);
+        });
+
         this.onMessage('setConfig', (client, data) => {
             const name: string = data?.name;
             if (!name) return;
@@ -215,6 +219,35 @@ export class LobbyRoom extends Room<LobbyState> {
         // Add to target team
         this.assignPlayerToTeam(playerId, targetTeam);
         this.updateCanStartStatus();
+    }
+
+    private handleSetPlayerDisplayName(playerId: string, displayName: string) {
+        // Validate display name
+        if (!displayName || typeof displayName !== 'string') {
+            console.log(`Invalid display name for player ${playerId}: ${displayName}`);
+            return;
+        }
+
+        // Trim and limit length
+        const trimmedName = displayName.trim();
+        if (trimmedName.length === 0) {
+            console.log(`Empty display name for player ${playerId}`);
+            return;
+        }
+
+        if (trimmedName.length > 20) {
+            console.log(`Display name too long for player ${playerId}: ${trimmedName}`);
+            return;
+        }
+
+        // Find player slot and update display name
+        const slot = this.findPlayerSlot(playerId);
+        if (slot) {
+            slot.playerDisplayName = trimmedName;
+            console.log(`Updated display name for player ${playerId} to: ${trimmedName}`);
+        } else {
+            console.log(`Player slot not found for player ${playerId}`);
+        }
     }
 
     private assignPlayerToTeam(playerId: string, team: 'blue' | 'red') {

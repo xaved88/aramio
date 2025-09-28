@@ -353,7 +353,31 @@ export class LobbyScene extends Phaser.Scene {
                     }
                 });
 
-                container.add([slotDisplay, arrowLeft, arrowRight]);
+                // Add edit button for current player's own slot
+                if (slot.playerId === this.playerSessionId) {
+                    const editButton = this.add.text(120, y, '✏️', {
+                        fontSize: '16px',
+                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                        padding: { x: 6, y: 4 }
+                    }).setOrigin(0.5).setInteractive();
+
+                    // Add hover effects
+                    editButton.on('pointerover', () => {
+                        editButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
+                    });
+                    editButton.on('pointerout', () => {
+                        editButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND) });
+                    });
+
+                    editButton.on('pointerdown', () => {
+                        this.showNameEditDialog(slot.playerDisplayName);
+                    });
+
+                    container.add([slotDisplay, arrowLeft, arrowRight, editButton]);
+                } else {
+                    container.add([slotDisplay, arrowLeft, arrowRight]);
+                }
             } else {
                 container.add(slotDisplay);
             }
@@ -380,6 +404,125 @@ export class LobbyScene extends Phaser.Scene {
 
         retryButton.on('pointerdown', () => {
             this.scene.restart();
+        });
+    }
+
+    private showNameEditDialog(currentName: string) {
+        const centerX = this.cameras.main.width / 2;
+        const centerY = this.cameras.main.height / 2;
+
+        // Create semi-transparent overlay
+        const overlay = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5);
+
+        // Create dialog background
+        const dialogBg = this.add.rectangle(centerX, centerY, 400, 200, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        dialogBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
+
+        // Title
+        const title = this.add.text(centerX, centerY - 60, 'Change Display Name', {
+            fontSize: '20px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        }).setOrigin(0.5);
+
+        // Create HTML input field over the canvas
+        const canvasElement = this.game.canvas;
+        const canvasRect = canvasElement.getBoundingClientRect();
+        
+        const inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.value = currentName;
+        inputElement.maxLength = 20;
+        inputElement.style.position = 'absolute';
+        inputElement.style.left = (canvasRect.left + centerX - 150) + 'px';
+        inputElement.style.top = (canvasRect.top + centerY - 25) + 'px';
+        inputElement.style.width = '300px';
+        inputElement.style.height = '30px';
+        inputElement.style.border = '2px solid #7f8c8d';
+        inputElement.style.borderRadius = '4px';
+        inputElement.style.padding = '5px 10px';
+        inputElement.style.fontSize = '16px';
+        inputElement.style.fontFamily = 'Arial';
+        inputElement.style.backgroundColor = '#ecf0f1';
+        inputElement.style.color = '#2c3e50';
+        inputElement.style.zIndex = '1000';
+        
+        // Add input to document
+        document.body.appendChild(inputElement);
+        inputElement.focus();
+        inputElement.select(); // Select all text for easy editing
+
+        // Buttons
+        const cancelButton = this.add.text(centerX - 80, centerY + 60, 'Cancel', {
+            fontSize: '16px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY),
+            padding: { x: 12, y: 8 }
+        }).setOrigin(0.5).setInteractive();
+
+        const saveButton = this.add.text(centerX + 80, centerY + 60, 'Save', {
+            fontSize: '16px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
+            padding: { x: 12, y: 8 }
+        }).setOrigin(0.5).setInteractive();
+
+        // Button hover effects
+        cancelButton.on('pointerover', () => {
+            cancelButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
+        });
+        cancelButton.on('pointerout', () => {
+            cancelButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY) });
+        });
+
+        saveButton.on('pointerover', () => {
+            saveButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
+        });
+        saveButton.on('pointerout', () => {
+            saveButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY) });
+        });
+
+        // Store dialog elements for cleanup
+        const dialogElements = [overlay, dialogBg, title, cancelButton, saveButton];
+
+        // Cleanup function
+        const cleanup = () => {
+            document.body.removeChild(inputElement);
+            dialogElements.forEach(element => element.destroy());
+        };
+
+        // Event handlers
+        cancelButton.on('pointerdown', () => {
+            cleanup();
+        });
+
+        saveButton.on('pointerdown', () => {
+            const newName = inputElement.value.trim();
+            if (newName && newName.length <= 20) {
+                this.room.send('setPlayerDisplayName', { displayName: newName });
+                cleanup();
+            }
+        });
+
+        // Handle Enter key in input field
+        inputElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const newName = inputElement.value.trim();
+                if (newName && newName.length <= 20) {
+                    this.room.send('setPlayerDisplayName', { displayName: newName });
+                    cleanup();
+                }
+            } else if (event.key === 'Escape') {
+                cleanup();
+            }
+        });
+
+        // Handle clicking outside the dialog
+        overlay.setInteractive();
+        overlay.on('pointerdown', () => {
+            cleanup();
         });
     }
 }

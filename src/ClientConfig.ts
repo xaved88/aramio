@@ -187,6 +187,10 @@ export const CLIENT_CONFIG = {
             DISABLED: 0x7f8c8d, // gray
             BLUE: 0x3498db, // blue
             RED: 0xe74c3c, // red
+            ACCENT: 0x34495e, // darker accent color
+            SECONDARY: 0x95a5a6, // gray secondary
+            BORDER: 0x7f8c8d, // gray border
+            INPUT_BACKGROUND: 0xecf0f1, // light gray for input fields
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,
