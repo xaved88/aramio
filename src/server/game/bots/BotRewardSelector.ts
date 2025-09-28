@@ -4,7 +4,9 @@ import { GameplayConfig } from '../../config/ConfigProvider';
 
 export class BotRewardSelector {
     /**
-     * Select the best reward for a bot, using preferences and avoiding ability duplicates when 2+ team members have the same ability
+     * Select the best reward for a bot using two different systems:
+     * 1. Team composition-aware ability selection (for new abilities)
+     * 2. Preference-based selection (for stat upgrades)
      */
     static selectBestReward(bot: any, state: GameState, gameplayConfig: GameplayConfig): string {
         const availableRewards = Array.from(bot.rewardsForChoice) as string[];
@@ -14,8 +16,9 @@ export class BotRewardSelector {
             return availableRewards[0];
         }
 
-        // Check for ability rewards and count team members with each ability
-        const abilityRewards = availableRewards.filter((rewardId: string) => {
+        // === ABILITY REWARD SELECTION SYSTEM ===
+        // Handles new ability choices (e.g., ability:hookshot) with team composition awareness
+        const newAbilityRewards = availableRewards.filter((rewardId: string) => {
             // Check if the reward ID matches known ability patterns from GameConfig
             return rewardId.startsWith('ability:') && (
                 rewardId === 'ability:hookshot' || 
@@ -26,30 +29,35 @@ export class BotRewardSelector {
             );
         });
 
-        // If there are ability rewards, check team composition
-        if (abilityRewards.length > 0) {
+        // If there are new ability rewards, use team composition filtering
+        if (newAbilityRewards.length > 0) {
             const teamAbilityCounts = this.getTeamAbilityCounts(bot.team, state);
             
-            // Find ability rewards that don't have 2+ team members already
-            const preferredAbilityRewards = abilityRewards.filter((rewardId: string) => {
+            // Filter out abilities that already have 2+ team members (avoid duplicates)
+            const allowedAbilityRewards = newAbilityRewards.filter((rewardId: string) => {
                 const abilityType = this.extractAbilityTypeFromReward(rewardId);
-                return abilityType && teamAbilityCounts[abilityType] < 2;
+                if (!abilityType) return false;
+                const count = teamAbilityCounts[abilityType] || 0;
+                return count < 2;
             });
 
-            // If we have preferred ability rewards, pick one randomly
-            if (preferredAbilityRewards.length > 0) {
-                return preferredAbilityRewards[Math.floor(Math.random() * preferredAbilityRewards.length)];
+            // Pick randomly from allowed abilities
+            if (allowedAbilityRewards.length > 0) {
+                const selectedAbility = allowedAbilityRewards[Math.floor(Math.random() * allowedAbilityRewards.length)];
+                return selectedAbility;
             }
         }
 
-        // Use preference-based selection for stat and ability stat rewards
-        return this.selectRewardByPreference(bot, availableRewards, gameplayConfig);
+        // === STAT REWARD SELECTION SYSTEM ===
+        // Handles stat upgrades (e.g., stat:damage, ability_stat:cooldown) using bot preferences
+        return this.selectStatRewardByPreference(bot, availableRewards, gameplayConfig);
     }
     
     /**
-     * Select a reward based on bot preferences and weights
+     * Select a stat reward based on bot preferences and weights
+     * Handles stat upgrades (stat:damage) and ability stat upgrades (ability_stat:cooldown)
      */
-    private static selectRewardByPreference(bot: any, availableRewards: string[], gameplayConfig: GameplayConfig): string {
+    private static selectStatRewardByPreference(bot: any, availableRewards: string[], gameplayConfig: GameplayConfig): string {
         const abilityType = bot.ability?.type || 'default';
         
         // Calculate weights for each available reward
