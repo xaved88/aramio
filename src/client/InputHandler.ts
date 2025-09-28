@@ -132,6 +132,13 @@ export class InputHandler {
         return false;
     }
 
+    /**
+     * Checks if the player is currently in ability targeting mode
+     */
+    isInAbilityTargetingMode(): boolean {
+        return this.isClickHeld;
+    }
+
     private screenToWorldCoordinates(screenX: number, screenY: number): { x: number; y: number } {
         const camera = this.scene.cameras.main;
         if (!camera) {

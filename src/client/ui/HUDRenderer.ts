@@ -46,8 +46,6 @@ export class HUDRenderer {
         experienceBarBackground: Phaser.GameObjects.Graphics;
         experienceText: Phaser.GameObjects.Text;
         levelText: Phaser.GameObjects.Text;
-        abilityBar: Phaser.GameObjects.Graphics;
-        abilityBarBackground: Phaser.GameObjects.Graphics;
         heroKillIcon: Phaser.GameObjects.Graphics;
         heroKillText: Phaser.GameObjects.Text;
         minionKillIcon: Phaser.GameObjects.Graphics;
@@ -65,7 +63,6 @@ export class HUDRenderer {
         
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
-        const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
         const killConfig = CLIENT_CONFIG.HUD.KILL_COUNTERS;
         
         // Create health bar background
@@ -133,24 +130,6 @@ export class HUDRenderer {
         levelText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(levelText);
 
-        // Create ability bar background
-        const abilityBarBackground = this.scene.add.graphics();
-        abilityBarBackground.fillStyle(abilityConfig.BACKGROUND_COLOR, abilityConfig.BACKGROUND_ALPHA);
-        abilityBarBackground.fillRect(
-            abilityConfig.X,
-            abilityConfig.Y,
-            abilityConfig.WIDTH,
-            abilityConfig.HEIGHT
-        );
-        abilityBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-        abilityBarBackground.setScrollFactor(0, 0); // Fixed to screen
-        this.hudContainer!.add(abilityBarBackground);
-
-        // Create ability bar
-        const abilityBar = this.scene.add.graphics();
-        abilityBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-        abilityBar.setScrollFactor(0, 0); // Fixed to screen
-        this.hudContainer!.add(abilityBar);
 
         // Create hero kill icon (white circle)
         const heroKillIcon = this.scene.add.graphics();
@@ -243,8 +222,6 @@ export class HUDRenderer {
             experienceBarBackground,
             experienceText,
             levelText,
-            abilityBar,
-            abilityBarBackground,
             heroKillIcon,
             heroKillText,
             minionKillIcon,
@@ -267,8 +244,6 @@ export class HUDRenderer {
             experienceBarBackground: Phaser.GameObjects.Graphics;
             experienceText: Phaser.GameObjects.Text;
             levelText: Phaser.GameObjects.Text;
-            abilityBar: Phaser.GameObjects.Graphics;
-            abilityBarBackground: Phaser.GameObjects.Graphics;
             heroKillIcon: Phaser.GameObjects.Graphics;
             heroKillText: Phaser.GameObjects.Text;
             minionKillIcon: Phaser.GameObjects.Graphics;
@@ -280,7 +255,6 @@ export class HUDRenderer {
     ): void {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
         const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
-        const abilityConfig = CLIENT_CONFIG.HUD.ABILITY_BAR;
         const healthPercent = player.health / player.maxHealth;
         
         // Update health bar
@@ -320,60 +294,6 @@ export class HUDRenderer {
 
         // Update rewards counter
         hudElements.rewardsText.setText(player.levelRewards.length.toString());
-
-        // Update ability bar
-        const currentTime = gameTime;
-        const ability = player.ability as any;
-        
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
-        let isAbilityReady = false;
-        let timeSinceLastUse = 0;
-        if (ability.lastUsedTime === 0) {
-            isAbilityReady = true;
-            timeSinceLastUse = ability.cooldown; // Show as fully ready
-        } else {
-            timeSinceLastUse = currentTime - ability.lastUsedTime;
-            isAbilityReady = timeSinceLastUse >= ability.cooldown;
-        }
-        
-        hudElements.abilityBar.clear();
-        
-        if (isAbilityReady) {
-            // Ability is ready - fill bar with lighter color
-            hudElements.abilityBar.fillStyle(abilityConfig.READY_COLOR, 1);
-            hudElements.abilityBar.fillRect(
-                abilityConfig.X,
-                abilityConfig.Y,
-                abilityConfig.WIDTH,
-                abilityConfig.HEIGHT
-            );
-            
-            // Make health text bold when ability is ready
-            hudElements.healthText.setStyle({ 
-                fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
-                color: hexToColorString(healthConfig.TEXT_COLOR),
-                fontStyle: 'bold'
-            });
-        } else {
-            // Ability is on cooldown - fill bar based on progress
-            const cooldownProgress = Math.min(timeSinceLastUse / ability.cooldown, 1);
-            const fillHeight = abilityConfig.HEIGHT * cooldownProgress;
-            
-            hudElements.abilityBar.fillStyle(abilityConfig.COOLDOWN_COLOR, 1);
-            hudElements.abilityBar.fillRect(
-                abilityConfig.X,
-                abilityConfig.Y + abilityConfig.HEIGHT - fillHeight, // Fill from bottom up
-                abilityConfig.WIDTH,
-                fillHeight
-            );
-            
-            // Reset health text to normal when ability is on cooldown
-            hudElements.healthText.setStyle({ 
-                fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
-                color: hexToColorString(healthConfig.TEXT_COLOR),
-                fontStyle: 'normal'
-            });
-        }
     }
 
 } 

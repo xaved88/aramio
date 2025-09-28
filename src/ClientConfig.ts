@@ -95,6 +95,12 @@ export const CLIENT_CONFIG = {
         ALPHA: 0.8,
         COLOR: 0xd2b4de, // lighter purple to match ability bar
     },
+    CURSOR_COOLDOWN_INDICATOR: {
+        RADIUS: 15, // larger circle around cursor with buffer from crosshair
+        THICKNESS: 3,
+        COOLDOWN_COLOR: 0xe74c3c, // red when on cooldown
+        ALPHA: 0.9,
+    },
     RADIUS_INDICATOR: {
         LINE_THICKNESS: 1,
         LINE_COLOR: 0x000000, // black
@@ -136,7 +142,7 @@ export const CLIENT_CONFIG = {
             COLOR: 0xffffff,
         },
         KILL_COUNTERS: {
-            X: 20,
+            X: 30,
             Y: 80, // Below experience bar
             ICON_SIZE: 12,
             SPACING: 20, // Reduced spacing between icon and number

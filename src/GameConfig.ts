@@ -37,7 +37,7 @@ export const GAMEPLAY_CONFIG = {
         },
         ABILITIES: {
             'default': {
-                COOLDOWN_MS: 1000,
+                COOLDOWN_MS: 2000, // Increased from 1000ms to 2000ms (2 seconds)
                 STRENGTH: 10, // damage dealt by projectile
                 SPEED: 200, // pixels per second
                 RANGE: 100, // base range (infinite duration projectiles)

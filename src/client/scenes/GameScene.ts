@@ -61,6 +61,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     async create() {
+        // Hide the default cursor
+        this.input.setDefaultCursor('none');
+        
         // Reset all state for fresh scene
         this.resetSceneState();
         
@@ -163,6 +166,11 @@ export class GameScene extends Phaser.Scene {
         // Update input handling
         if (this.inputHandler) {
             this.inputHandler.update();
+        }
+        
+        // Update cursor for smooth mouse tracking
+        if (this.uiManager && this.lastState) {
+            this.uiManager.updateCursorOnly(this.playerSessionId, this.lastState.gameTime);
         }
     }
 

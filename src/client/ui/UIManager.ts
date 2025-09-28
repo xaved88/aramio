@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { COMBATANT_TYPES, isHeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
+import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
 import { RespawnOverlay } from './RespawnOverlay';
 import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
 import { DamageOverlay } from './DamageOverlay';
+import { CursorRenderer } from './CursorRenderer';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -24,7 +26,9 @@ export class UIManager {
     private respawnOverlay: RespawnOverlay;
     private permanentEffectsDisplay: PermanentEffectsDisplay;
     private damageOverlay: DamageOverlay;
+    private cursorRenderer: CursorRenderer;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
+    private lastState: SharedGameState | null = null; // Store last state for cursor updates
 
     // HUD elements
     private hudElements: {
@@ -35,8 +39,6 @@ export class UIManager {
         experienceBarBackground: Phaser.GameObjects.Graphics | null;
         experienceText: Phaser.GameObjects.Text | null;
         levelText: Phaser.GameObjects.Text | null;
-        abilityBar: Phaser.GameObjects.Graphics | null;
-        abilityBarBackground: Phaser.GameObjects.Graphics | null;
         heroKillIcon: Phaser.GameObjects.Graphics | null;
         heroKillText: Phaser.GameObjects.Text | null;
         minionKillIcon: Phaser.GameObjects.Graphics | null;
@@ -51,8 +53,6 @@ export class UIManager {
         experienceBarBackground: null,
         experienceText: null,
         levelText: null,
-        abilityBar: null,
-        abilityBarBackground: null,
         heroKillIcon: null,
         heroKillText: null,
         minionKillIcon: null,
@@ -70,6 +70,7 @@ export class UIManager {
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
         this.permanentEffectsDisplay = new PermanentEffectsDisplay(scene);
         this.damageOverlay = new DamageOverlay(scene);
+        this.cursorRenderer = new CursorRenderer(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -85,6 +86,7 @@ export class UIManager {
         this.statsOverlay.setHUDCamera(hudCamera);
         this.respawnOverlay.setHUDCamera(hudCamera);
         this.damageOverlay.setHUDCamera(hudCamera);
+        this.cursorRenderer.setCameraManager(this.cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -95,6 +97,7 @@ export class UIManager {
         this.statsOverlay.setCameraManager(cameraManager);
         this.respawnOverlay.setCameraManager(cameraManager);
         this.damageOverlay.setCameraManager(cameraManager);
+        this.cursorRenderer.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -107,6 +110,9 @@ export class UIManager {
         this.clearHUD();
         const newHudElements = this.hudRenderer.createHUDElements();
         Object.assign(this.hudElements, newHudElements);
+        
+        // Initialize cursor renderer
+        this.cursorRenderer.create();
     }
 
     clearHUD(): void {
@@ -161,6 +167,9 @@ export class UIManager {
     }
 
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: ControllerId | null = null): void {
+        // Store state for cursor updates
+        this.lastState = state;
+        
         if (Object.values(this.hudElements).some(el => !el)) return;
         
         const currentPlayer = this.findCurrentPlayer(state, playerSessionId);
@@ -175,8 +184,6 @@ export class UIManager {
             experienceBarBackground: this.hudElements.experienceBarBackground!,
             experienceText: this.hudElements.experienceText!,
             levelText: this.hudElements.levelText!,
-            abilityBar: this.hudElements.abilityBar!,
-            abilityBarBackground: this.hudElements.abilityBarBackground!,
             heroKillIcon: this.hudElements.heroKillIcon!,
             heroKillText: this.hudElements.heroKillText!,
             minionKillIcon: this.hudElements.minionKillIcon!,
@@ -190,10 +197,30 @@ export class UIManager {
         this.updateRespawnOverlay(currentPlayer, state);
         this.permanentEffectsDisplay.updateDisplay(currentPlayer);
         this.updateDamageTracking(state);
+        this.updateCursor(currentPlayer, state);
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
             const team = playerTeam || currentPlayer.team;
             this.victoryScreen.showVictory(state.winningTeam, team, state);
+        }
+    }
+
+    private updateCursor(currentPlayer: any, state: SharedGameState): void {
+        if (currentPlayer && isHeroCombatant(currentPlayer)) {
+            this.cursorRenderer.update(currentPlayer, state.gameTime);
+        }
+    }
+
+    /**
+     * Updates the cursor independently of HUD updates for smooth mouse tracking
+     */
+    updateCursorOnly(playerSessionId: ControllerId | null, gameTime: number): void {
+        if (!this.lastState || !playerSessionId) return;
+        
+        const currentPlayer = this.findCurrentPlayer(this.lastState, playerSessionId);
+        
+        if (currentPlayer && isHeroCombatant(currentPlayer)) {
+            this.cursorRenderer.update(currentPlayer, gameTime);
         }
     }
 
@@ -249,5 +276,6 @@ export class UIManager {
         this.statsOverlay.destroy();
         this.permanentEffectsDisplay.destroy();
         this.damageOverlay.destroy();
+        this.cursorRenderer.destroy();
     }
 } 
