@@ -82,6 +82,26 @@ aramio/
 - `npm start` - Start production server
 - `npm test` - Run unit tests
 
+### Testing Production Build Locally
+
+To test the production build (including static assets) locally:
+
+1. **Build the project:**
+   ```bash
+   npm run build
+   ```
+
+2. **Start the production server:**
+   ```bash
+   npm start
+   ```
+
+3. **Access the game:**
+   - Game: http://localhost:2567
+   - Monitor: http://localhost:2567/colyseus
+
+This serves the built client from `dist/client/` and is useful for testing asset loading and production behavior.
+
 ### Tech Stack
 
 - **Frontend**: Phaser 3.70 (Game engine)
