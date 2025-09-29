@@ -1,17 +1,9 @@
 // Client Configuration
 export const CLIENT_CONFIG = {
-    INTERPOLATION_DURATION_MS: 50, // duration of smooth movement tween
     ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
     CAMERA: {
         ZOOM: 1.3, // 30% zoom (1.0 = no zoom, 1.3 = 30% zoom)
         LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)
-    },
-    CONTROLS: {
-        // Control Scheme C: point-to-move + click-down-to-stop + click-up-for-ability
-        // This is the only control scheme - InputHandler is the single source of truth for all input
-        POINT_TO_MOVE: true, // Move towards mouse pointer when not clicking
-        CLICK_DOWN_TO_STOP: true, // Stop sending move events when mouse is held down
-        CLICK_UP_FOR_ABILITY: true, // Fire ability when mouse is released
     },
     // Canvas/Viewport size (what the player sees)
     GAME_CANVAS_WIDTH: 700,
@@ -45,9 +37,7 @@ export const CLIENT_CONFIG = {
     } as const,
     VICTORY_SCREEN: {
         FADE_IN_DURATION_MS: 1000, // 1 second fade in
-        DISPLAY_DURATION_MS: 3000, // 3 seconds display
         FADE_OUT_DURATION_MS: 1000, // 1 second fade out
-        BACKGROUND_ALPHA: 0.5, // 50% alpha black background
     },
     PROJECTILE: {
         RADIUS: 6,

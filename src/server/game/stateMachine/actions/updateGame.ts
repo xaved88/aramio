@@ -30,11 +30,11 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
         state.attackEvents.splice(index, 1);
     });
     
-    // Clear old XP events
+    // Clear old XP events (older than 3 seconds)
     const xpEventsToRemove: number[] = [];
     
     state.xpEvents.forEach((event, index) => {
-        if (currentTime - event.timestamp > gameplayConfig.EXPERIENCE.XP_EVENT_DURATION_MS) {
+        if (currentTime - event.timestamp > 3000) {
             xpEventsToRemove.push(index);
         }
     });
@@ -44,11 +44,11 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
         state.xpEvents.splice(index, 1);
     });
     
-    // Clear old level-up events (older than configured duration)
+    // Clear old level-up events (older than 3 seconds)
     const levelUpEventsToRemove: number[] = [];
     
     state.levelUpEvents.forEach((event, index) => {
-        if (currentTime - event.timestamp > gameplayConfig.EXPERIENCE.LEVEL_UP_EVENT_DURATION_MS) {
+        if (currentTime - event.timestamp > 3000) {
             levelUpEventsToRemove.push(index);
         }
     });

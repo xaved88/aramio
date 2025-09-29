@@ -442,7 +442,7 @@ export class StatsOverlay {
                 backgroundColor: '#2E7D32',
                 padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive({ useHandCursor: true });
+        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive();
         
         this.hudContainer.add(this.backToLobbyButton);
         this.overlayElements.push(this.backToLobbyButton);

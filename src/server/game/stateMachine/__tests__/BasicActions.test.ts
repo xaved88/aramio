@@ -848,7 +848,6 @@ describe('GameStateMachine', () => {
             // Calculate expected stat increases based on configuration
             const statBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
             const rangeBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
-            const abilityBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_STRENGTH_BOOST_PERCENTAGE; // 1.20
             
             // Calculate expected stats after multiple level-ups
             // Level 1->2: multiply by 1.15
@@ -857,7 +856,6 @@ describe('GameStateMachine', () => {
             const levelIncrease = updatedPlayer!.level - initialLevel;
             const expectedStatMultiplier = Math.pow(statBoostMultiplier, levelIncrease);
             const expectedRangeMultiplier = Math.pow(rangeBoostMultiplier, levelIncrease);
-            const expectedAbilityMultiplier = Math.pow(abilityBoostMultiplier, levelIncrease);
             // Verify stats increased correctly
             expect(updatedPlayer!.maxHealth).toBe(Math.round(initialMaxHealth * expectedStatMultiplier));
             expect(updatedPlayer!.attackStrength).toBe(Math.round(initialAttackStrength * expectedStatMultiplier));
