@@ -441,13 +441,16 @@ export class GameScene extends Phaser.Scene {
             event.preventDefault(); // Prevent default shift behavior
             if (this.lastState) {
                 const sharedState = convertToSharedGameState(this.lastState);
-                this.uiManager.showDamageOverlay(sharedState);
+                this.uiManager.showDamageTakenOverlay(sharedState);
+                this.uiManager.showDamageDealtOverlay(sharedState);
             }
         });
 
         this.input.keyboard?.on('keyup-SHIFT', () => {
-            this.uiManager.hideDamageOverlay();
+            this.uiManager.hideDamageTakenOverlay();
+            this.uiManager.hideDamageDealtOverlay();
         });
+
     }
 
     /**

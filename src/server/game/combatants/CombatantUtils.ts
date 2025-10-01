@@ -49,6 +49,7 @@ export class CombatantUtils {
             damageEvent.targetId = combatant.id;
             damageEvent.targetType = combatant.type;
             damageEvent.amount = actualDamage;
+            damageEvent.originalAmount = damage; // Store original damage before armor reduction
             damageEvent.timestamp = gameState.gameTime;
             damageEvent.damageSource = damageSource;
             gameState.damageEvents.push(damageEvent);

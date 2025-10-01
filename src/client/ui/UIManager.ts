@@ -7,7 +7,8 @@ import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
 import { RespawnOverlay } from './RespawnOverlay';
 import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
-import { DamageOverlay } from './DamageOverlay';
+import { DamageTakenOverlay } from './DamageTakenOverlay';
+import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
@@ -25,7 +26,8 @@ export class UIManager {
     private statsOverlay: StatsOverlay;
     private respawnOverlay: RespawnOverlay;
     private permanentEffectsDisplay: PermanentEffectsDisplay;
-    private damageOverlay: DamageOverlay;
+    private damageTakenOverlay: DamageTakenOverlay;
+    private damageDealtOverlay: DamageDealtOverlay;
     private cursorRenderer: CursorRenderer;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null; // Store last state for cursor updates
@@ -69,7 +71,8 @@ export class UIManager {
         this.statsOverlay = new StatsOverlay(scene);
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
         this.permanentEffectsDisplay = new PermanentEffectsDisplay(scene);
-        this.damageOverlay = new DamageOverlay(scene);
+        this.damageTakenOverlay = new DamageTakenOverlay(scene);
+        this.damageDealtOverlay = new DamageDealtOverlay(scene);
         this.cursorRenderer = new CursorRenderer(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
@@ -85,7 +88,8 @@ export class UIManager {
         this.victoryScreen.setHUDCamera(hudCamera);
         this.statsOverlay.setHUDCamera(hudCamera);
         this.respawnOverlay.setHUDCamera(hudCamera);
-        this.damageOverlay.setHUDCamera(hudCamera);
+        this.damageTakenOverlay.setHUDCamera(hudCamera);
+        this.damageDealtOverlay.setHUDCamera(hudCamera);
         this.cursorRenderer.setCameraManager(this.cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -96,7 +100,8 @@ export class UIManager {
         this.victoryScreen.setCameraManager(cameraManager);
         this.statsOverlay.setCameraManager(cameraManager);
         this.respawnOverlay.setCameraManager(cameraManager);
-        this.damageOverlay.setCameraManager(cameraManager);
+        this.damageTakenOverlay.setCameraManager(cameraManager);
+        this.damageDealtOverlay.setCameraManager(cameraManager);
         this.cursorRenderer.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
@@ -128,7 +133,8 @@ export class UIManager {
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.statsOverlay.setPlayerSessionId(sessionId);
-        this.damageOverlay.setPlayerSessionId(sessionId);
+        this.damageTakenOverlay.setPlayerSessionId(sessionId);
+        this.damageDealtOverlay.setPlayerSessionId(sessionId);
     }
 
     showStatsOverlay(state: SharedGameState): void {
@@ -147,22 +153,41 @@ export class UIManager {
         this.statsOverlay.update(state);
     }
 
-    showDamageOverlay(state: SharedGameState): void {
-        this.damageOverlay.show();
+    showDamageTakenOverlay(state: SharedGameState): void {
+        this.damageTakenOverlay.show();
         // Process damage events and update the overlay immediately
-        this.damageOverlay.processDamageEvents(state);
-        this.damageOverlay.updateDamageEntries(state.gameTime);
+        this.damageTakenOverlay.processDamageEvents(state);
+        this.damageTakenOverlay.updateDamageEntries(state.gameTime, state);
     }
 
-    hideDamageOverlay(): void {
-        this.damageOverlay.hide();
+    hideDamageTakenOverlay(): void {
+        this.damageTakenOverlay.hide();
     }
 
-    updateDamageTracking(state: SharedGameState): void {
-        this.damageOverlay.processDamageEvents(state);
+    updateDamageTakenTracking(state: SharedGameState): void {
+        this.damageTakenOverlay.processDamageEvents(state);
         
-        if (this.damageOverlay.isShowing()) {
-            this.damageOverlay.updateDamageEntries(state.gameTime);
+        if (this.damageTakenOverlay.isShowing()) {
+            this.damageTakenOverlay.updateDamageEntries(state.gameTime, state);
+        }
+    }
+
+    showDamageDealtOverlay(state: SharedGameState): void {
+        this.damageDealtOverlay.show();
+        // Process damage events and update the overlay immediately
+        this.damageDealtOverlay.processDamageEvents(state);
+        this.damageDealtOverlay.updateDamageEntries(state.gameTime, state);
+    }
+
+    hideDamageDealtOverlay(): void {
+        this.damageDealtOverlay.hide();
+    }
+
+    updateDamageDealtTracking(state: SharedGameState): void {
+        this.damageDealtOverlay.processDamageEvents(state);
+        
+        if (this.damageDealtOverlay.isShowing()) {
+            this.damageDealtOverlay.updateDamageEntries(state.gameTime, state);
         }
     }
 
@@ -196,7 +221,8 @@ export class UIManager {
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
         this.permanentEffectsDisplay.updateDisplay(currentPlayer);
-        this.updateDamageTracking(state);
+        this.updateDamageTakenTracking(state);
+        this.updateDamageDealtTracking(state);
         this.updateCursor(currentPlayer, state);
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
@@ -275,7 +301,8 @@ export class UIManager {
         this.victoryScreen.destroy();
         this.statsOverlay.destroy();
         this.permanentEffectsDisplay.destroy();
-        this.damageOverlay.destroy();
+        this.damageTakenOverlay.destroy();
+        this.damageDealtOverlay.destroy();
         this.cursorRenderer.destroy();
     }
 } 

@@ -381,7 +381,6 @@ export class GameRoom extends Room<GameState> {
                         heroCombatant.rewardsForChoice.push(...rewards);
                     }
                     
-                    console.log(`Reward applied: ${command.data.rewardId} by player ${heroCombatant.controller}, remaining chests: ${heroCombatant.levelRewards.length}`);
                 } else {
                     console.warn(`Failed to apply reward: ${command.data.rewardId} by player ${heroCombatant.controller}`);
                 }

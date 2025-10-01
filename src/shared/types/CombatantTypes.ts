@@ -239,7 +239,8 @@ export interface DamageEvent {
     sourceId: CombatantId;
     targetId: CombatantId;
     targetType: string;
-    amount: number;
+    amount: number; // final damage after armor reduction
+    originalAmount: number; // original damage before armor reduction
     timestamp: number;
     damageSource: string; // 'auto-attack' or 'ability'
 }

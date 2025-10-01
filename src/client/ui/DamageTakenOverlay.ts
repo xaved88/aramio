@@ -4,15 +4,17 @@ import { DamageEvent } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 
 export interface DamageEntry {
-    amount: number;
+    amount: number; // final damage after armor reduction
+    originalAmount: number; // original damage before armor reduction
     damageSource: 'auto-attack' | 'ability';
     attackerId: string;
     attackerName: string;
     timestamp: number;
     abilityName?: string; // For ability damage, the specific ability name
+    wasKillingBlow?: boolean; // Whether this damage entry was the killing blow
 }
 
-export class DamageOverlay {
+export class DamageTakenOverlay {
     private scene: Phaser.Scene;
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
@@ -20,6 +22,7 @@ export class DamageOverlay {
     private background: Phaser.GameObjects.Graphics | null = null;
     private titleText: Phaser.GameObjects.Text | null = null;
     private damageEntries: Phaser.GameObjects.Text[] = [];
+    private breakdownText: Phaser.GameObjects.Text | null = null;
     private isVisible: boolean = false;
     
     // Damage tracking properties
@@ -79,6 +82,14 @@ export class DamageOverlay {
 
         // Create damage entries container
         this.createDamageEntries();
+        
+        // Create breakdown text at the bottom
+        this.breakdownText = this.scene.add.text(10, 260, '', {
+            fontSize: '12px',
+            color: '#cccccc',
+            fontFamily: 'Arial, sans-serif'
+        });
+        this.hudContainer.add(this.breakdownText);
     }
 
     private createDamageEntries(): void {
@@ -116,7 +127,7 @@ export class DamageOverlay {
         return this.isVisible;
     }
 
-    updateDamageEntries(currentTime: number): void {
+    updateDamageEntries(currentTime: number, state?: SharedGameState): void {
         if (!this.hudContainer || !this.isVisible) return;
 
         // Get recent damage entries
@@ -140,9 +151,22 @@ export class DamageOverlay {
                     attackType = 'Auto Attack';
                 }
                 
+                // Calculate armor reduction percentage from stored original amount
+                const reductionPercent = damageEntry.originalAmount > 0 
+                    ? Math.round(((damageEntry.originalAmount - damageEntry.amount) / damageEntry.originalAmount) * 100)
+                    : 0;
+                
                 const entryText = `${Math.round(damageEntry.amount)} ${attackType} from ${damageEntry.attackerName}`;
                 
-                entry.setText(entryText);
+                // Use the stored wasKillingBlow flag instead of checking current state
+                let reductionText = '';
+                if (damageEntry.wasKillingBlow) {
+                    reductionText = ' (killing blow)';
+                } else if (reductionPercent > 0) {
+                    reductionText = ` (${reductionPercent}% reduced)`;
+                }
+                
+                entry.setText(entryText + reductionText);
                 entry.setVisible(true);
                 entry.setColor('#ffffff'); // All entries use white color
             } else {
@@ -153,7 +177,29 @@ export class DamageOverlay {
         // Update total damage
         const totalDamage = recentDamage.reduce((total, entry) => total + entry.amount, 0);
         if (this.titleText) {
-            this.titleText.setText(`Recent Damage (15s) - ${Math.round(totalDamage)} total`);
+            this.titleText.setText(`Damage Taken (last 15s)`);
+        }
+
+        // Calculate damage breakdown
+        let bulletDamage = 0;
+        let abilityDamage = 0;
+        
+        recentDamage.forEach(entry => {
+            if (entry.damageSource === 'auto-attack') {
+                bulletDamage += entry.amount;
+            } else if (entry.damageSource === 'ability') {
+                abilityDamage += entry.amount;
+            }
+        });
+
+        // Update breakdown text
+        if (this.breakdownText && totalDamage > 0) {
+            const bulletPercent = Math.round((bulletDamage / totalDamage) * 100);
+            const abilityPercent = Math.round((abilityDamage / totalDamage) * 100);
+            this.breakdownText.setText(`Total: ${Math.round(totalDamage)} | Bullet: ${bulletPercent}% | Ability: ${abilityPercent}%`);
+            this.breakdownText.setVisible(true);
+        } else if (this.breakdownText) {
+            this.breakdownText.setVisible(false);
         }
     }
 
@@ -196,14 +242,24 @@ export class DamageOverlay {
         const damageSource = event.damageSource as 'auto-attack' | 'ability';
         const abilityName = this.getAbilityName(event, attacker, state);
 
+        // Determine if this was a killing blow by checking if the target is dead
+        let wasKillingBlow = false;
+        if (this.playerSessionId) {
+            const playerHero = Array.from(state.combatants.values()).find(c => 
+                c.type === 'hero' && c.controller === this.playerSessionId
+            );
+            wasKillingBlow = !!(playerHero && playerHero.health <= 0);
+        }
 
         const damageEntry: DamageEntry = {
             amount: event.amount,
+            originalAmount: event.originalAmount,
             damageSource,
             attackerId: event.sourceId,
             attackerName: this.getCombatantName(attacker),
             timestamp: event.timestamp,
-            abilityName
+            abilityName,
+            wasKillingBlow
         };
 
         this.damageHistory.push(damageEntry);
@@ -241,6 +297,7 @@ export class DamageOverlay {
         }
         return 'Unknown';
     }
+
 
     /**
      * Gets recent damage entries within the time window
@@ -283,6 +340,7 @@ export class DamageOverlay {
         }
         this.background = null;
         this.titleText = null;
+        this.breakdownText = null;
         this.damageEntries = [];
         this.clear();
     }

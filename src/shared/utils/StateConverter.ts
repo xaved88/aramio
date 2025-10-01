@@ -85,6 +85,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         targetId: event.targetId,
         targetType: event.targetType,
         amount: event.amount,
+        originalAmount: event.originalAmount,
         timestamp: event.timestamp,
         damageSource: event.damageSource
     }));
