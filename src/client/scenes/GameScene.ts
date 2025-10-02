@@ -599,40 +599,98 @@ export class GameScene extends Phaser.Scene {
             targetY = currentHero.y + directionY * castRange;
         }
         
-        // Draw targeting circle for abilities at target position
-        this.drawTargetingCircle(currentHero, targetX, targetY, rangeColor);
+        // Draw targeting visual for abilities considering target position and ability type
+        this.drawTargetingVisual(currentHero, targetX, targetY, rangeColor);
         
         this.abilityRangeDisplay.setVisible(true);
     }
 
     /**
-     * Draws the targeting circle for any ability at the target location
+     * Draws the appropriate targeting visual for any ability at the target location
      */
-    private drawTargetingCircle(hero: any, targetX: number, targetY: number, color: number): void {
-        let targetingRadius: number;
-        
-        // Get targeting radius based on ability type
-        if (hero.ability.type === 'thorndive') {
-            // Get AOE radius from the hero's ability (which includes level scaling)
-            targetingRadius = (hero.ability as any).landingRadius;
+    private drawTargetingVisual(hero: any, targetX: number, targetY: number, color: number): void {
+        if (hero.ability.type === 'mercenary') {
+            // Mercenary is a self-buff ability, don't show targeting visual
+            return;
+        } else if (hero.ability.type === 'thorndive') {
+            // For thorndive, draw targeting circle with landing radius
+            const targetingRadius = (hero.ability as any).landingRadius;
+            this.drawTargetingCircle(targetX, targetY, targetingRadius, color);
         } else if (hero.ability.type === 'pyromancer') {
-            // Get AOE radius from the hero's ability (directly modified by rewards)
-            targetingRadius = (hero.ability as any).fireballRadius;
-        } else if (hero.ability.type === 'mercenary') {
-            // Mercenary is a self-buff ability, don't show targeting circle
-            return; // No targeting circle needed for self-buff
+            // For pyromancer, draw targeting circle with fireball radius
+            const targetingRadius = (hero.ability as any).fireballRadius;
+            this.drawTargetingCircle(targetX, targetY, targetingRadius, color);
         } else {
-            // Small hardcoded radius for projectile-based abilities (about projectile size)
-            targetingRadius = 8;
+            // For all other abilities, draw a targeting arrow
+            this.drawTargetingArrow(hero, targetX, targetY, color);
         }
-        
+    }
+
+    /**
+     * Draws a targeting circle at the specified location
+     */
+    private drawTargetingCircle(targetX: number, targetY: number, radius: number, color: number): void {
         // Draw targeting circle at target location
         this.abilityRangeDisplay!.lineStyle(1, color, 0.3);
-        this.abilityRangeDisplay!.strokeCircle(targetX, targetY, targetingRadius);
-        
-        // Fill with very light color
+        this.abilityRangeDisplay!.strokeCircle(targetX, targetY, radius);
         this.abilityRangeDisplay!.fillStyle(color, 0.1);
-        this.abilityRangeDisplay!.fillCircle(targetX, targetY, targetingRadius);
+        this.abilityRangeDisplay!.fillCircle(targetX, targetY, radius);
+    }
+
+    /**
+     * Draws a targeting arrow showing the direction the ability will fire
+     */
+    private drawTargetingArrow(hero: any, targetX: number, targetY: number, color: number): void {
+        
+        // Calculate direction from hero to target
+        const dx = targetX - hero.x;
+        const dy = targetY - hero.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) return; // Avoid division by zero
+        
+        // Normalize direction
+        const directionX = dx / distance;
+        const directionY = dy / distance;
+        
+        // Calculate arrow positions
+        const arrowLength = 25; // Length of the arrow
+        const arrowHeadSize = 8; // Size of the arrow head
+        const lineWidth = 3;
+        
+        // Start arrow slightly away from hero center
+        const arrowStartX = hero.x + directionX * 20;
+        const arrowStartY = hero.y + directionY * 20;
+        
+        // Calculate arrow end position
+        const arrowEndX = arrowStartX + directionX * arrowLength;
+        const arrowEndY = arrowStartY + directionY * arrowLength;
+        
+        // Draw the main arrow line
+        this.abilityRangeDisplay!.lineStyle(lineWidth, color, 1.0);
+        this.abilityRangeDisplay!.beginPath();
+        this.abilityRangeDisplay!.moveTo(arrowStartX, arrowStartY);
+        this.abilityRangeDisplay!.lineTo(arrowEndX, arrowEndY);
+        this.abilityRangeDisplay!.strokePath();
+        
+        // Draw arrow head
+        const headAngle = Math.PI / 4; // 45 degrees
+        const head1X = arrowEndX - directionX * arrowHeadSize + directionY * arrowHeadSize * Math.tan(headAngle);
+        const head1Y = arrowEndY - directionY * arrowHeadSize - directionX * arrowHeadSize * Math.tan(headAngle);
+        const head2X = arrowEndX - directionX * arrowHeadSize - directionY * arrowHeadSize * Math.tan(headAngle);
+        const head2Y = arrowEndY - directionY * arrowHeadSize + directionX * arrowHeadSize * Math.tan(headAngle);
+        
+        // Draw arrow head lines
+        this.abilityRangeDisplay!.lineStyle(lineWidth, color, 1.0);
+        this.abilityRangeDisplay!.beginPath();
+        this.abilityRangeDisplay!.moveTo(arrowEndX, arrowEndY);
+        this.abilityRangeDisplay!.lineTo(head1X, head1Y);
+        this.abilityRangeDisplay!.strokePath();
+        
+        this.abilityRangeDisplay!.beginPath();
+        this.abilityRangeDisplay!.moveTo(arrowEndX, arrowEndY);
+        this.abilityRangeDisplay!.lineTo(head2X, head2Y);
+        this.abilityRangeDisplay!.strokePath();
     }
 
 
