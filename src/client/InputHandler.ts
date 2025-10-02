@@ -57,8 +57,16 @@ export class InputHandler {
                 targetX: worldPos.x,
                 targetY: worldPos.y
             });
+        } else {
+            // When clicking (isClickHeld = true), check if we should stop movement for sniper ability
+            if (this.shouldStopMovementForSniper()) {
+                // Send a stop command to prevent server from continuing movement
+                this.sendStopCommand();
+            }
         }
-        // When clicking (isClickHeld = true), don't send move events - server will continue with last direction
+        // NOTE: The server (GameRoom.ts) has logic to replay the last move command for heroes that don't send
+        // new move commands this frame. This enables the hero to continue moving toward the last target
+        // position when the mouse is held down for ability targeting.
     }
 
     /**
@@ -147,5 +155,42 @@ export class InputHandler {
         }
         // Use Phaser's built-in coordinate conversion that properly accounts for zoom
         return camera.getWorldPoint(screenX, screenY);
+    }
+
+    /**
+     * Checks if the current hero has the sniper ability and should stop movement
+     */
+    private shouldStopMovementForSniper(): boolean {
+        const gameScene = this.scene as any;
+        if (!gameScene.lastState) return false;
+        
+        // Find the current player's hero
+        for (const combatant of gameScene.lastState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                return combatant.ability && combatant.ability.type === 'sniper';
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Sends a stop command to prevent server from continuing movement
+     */
+    private sendStopCommand(): void {
+        const gameScene = this.scene as any;
+        if (!gameScene.lastState) return;
+        
+        // Find the current player's hero position
+        for (const combatant of gameScene.lastState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                // Send move command to current position to stop movement
+                this.room.send('move', {
+                    targetX: combatant.x,
+                    targetY: combatant.y
+                });
+                break;
+            }
+        }
     }
 }
