@@ -352,16 +352,16 @@ export class EntityRenderer {
         // Render based on projectile type
         switch (projectile.type) {
             case 'hook':
-                // Render hookshot projectile as a question mark
-                this.renderHookProjectile(graphics, projectileColor, radius);
+                // Render hookshot projectile with direction
+                this.renderHookProjectile(graphics, projectileColor, radius, projectile, state);
                 break;
             case 'fireball':
-                // Render fireball projectile as an ampersand (&)
-                this.renderFireballProjectile(graphics, projectileColor, radius);
+                // Render fireball projectile as a fireball with flames
+                this.renderFireballProjectile(graphics, projectileColor, radius, projectile);
                 break;
             case 'sniper':
-                // Render sniper projectile as a star (same as default)
-                this.renderSniperProjectile(graphics, projectileColor, radius);
+                // Render sniper projectile as a rectangle oriented to direction
+                this.renderSniperProjectile(graphics, projectileColor, radius, projectile);
                 break;
             case 'default':
             default:
@@ -372,68 +372,96 @@ export class EntityRenderer {
     }
     
     /**
-     * Renders a hookshot projectile as a question mark
+     * Renders a hookshot projectile with trailing projectiles
      */
-    private renderHookProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
-        // Draw a circle with a question mark inside
-        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+    private renderHookProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number, projectile: any, state?: any): void {
+        // Main projectile as a circle
+        graphics.lineStyle(2, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
         graphics.strokeCircle(0, 0, radius);
         
         graphics.fillStyle(color, 1);
         graphics.fillCircle(0, 0, radius);
         
-        // Draw question mark in the center - make it more prominent
-        graphics.lineStyle(4, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
-        graphics.beginPath();
+        // Create trailing projectiles behind the main one
+        const trailCount = 10;
+        const trailSpacing = radius * 1.2; // Closer spacing for more projectiles
         
-        // Question mark shape - larger and more visible
-        const qRadius = radius * 0.5; // Increased size
-        const centerY = -qRadius * 0.2; // Better positioning
+        // Get projectile direction
+        const directionX = projectile.directionX || 0;
+        const directionY = projectile.directionY || 0;
         
-        // Draw the curved part of the question mark (top curve)
-        graphics.arc(0, centerY, qRadius, 0, Math.PI * 1.5);
+        // Use game time to calculate trail length dynamically
+        const currentGameTime = state?.gameTime || 0;
+        const projectileAge = currentGameTime - (projectile.createdAt || currentGameTime);
+        const ageInSeconds = projectileAge / 1000;
         
-        // Draw the stem (vertical line)
-        graphics.moveTo(0, centerY + qRadius * 0.5);
-        graphics.lineTo(0, centerY + qRadius * 1.1);
+        // Calculate trail length based on age and speed
+        const estimatedDistance = (projectile.speed || 200) * ageInSeconds;
+        const maxTrailDistance = Math.max(estimatedDistance * 0.6, radius * 3);
         
-        // Draw the dot at the bottom
-        graphics.moveTo(0, centerY + qRadius * 1.3);
-        graphics.lineTo(0, centerY + qRadius * 1.5);
-        
-        graphics.strokePath();
+        for (let i = 1; i <= trailCount; i++) {
+            const trailDistance = i * trailSpacing;
+            
+            // Skip this trail projectile if it would extend beyond our fixed limit
+            if (trailDistance > maxTrailDistance) {
+                break;
+            }
+            
+            // Calculate trail position behind the projectile based on direction
+            const trailOffsetX = -trailDistance * directionX;
+            const trailOffsetY = -trailDistance * directionY;
+            const projectileSize = radius * 0.6; // Fixed size for all trail projectiles
+            const alpha = 0.5; // Fixed opacity for all trail projectiles
+            
+            // Draw trailing projectile
+            graphics.lineStyle(2, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, alpha);
+            graphics.strokeCircle(trailOffsetX, trailOffsetY, projectileSize);
+            
+            graphics.fillStyle(color, alpha);
+            graphics.fillCircle(trailOffsetX, trailOffsetY, projectileSize);
+            
+            // Trail projectiles are just simple circles, no hook detail
+        }
     }
     
     /**
      * Renders a fireball projectile as an ampersand (&)
      */
-    private renderFireballProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
-        // Draw a circle with an ampersand inside
+    private renderFireballProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number, projectile: any): void {
+        // Get projectile direction for flame orientation
+        const directionX = projectile.directionX || 0;
+        const directionY = projectile.directionY || 0;
+        const angle = Math.atan2(directionY, directionX);
+        
+        // Draw main fireball circle
         graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
         graphics.strokeCircle(0, 0, radius);
         
-        // Use the provided color (which is already team-specific)
         graphics.fillStyle(color, 1);
         graphics.fillCircle(0, 0, radius);
         
-        // Draw ampersand (&) in the center
-        graphics.lineStyle(3, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
-        graphics.beginPath();
+        // Draw small flame trail behind the fireball
+        const trailCount = 4;
+        const trailSpacing = radius * 0.8;
         
-        const ampRadius = radius * 0.4;
+        for (let i = 1; i <= trailCount; i++) {
+            const trailDistance = i * trailSpacing;
+            const trailOffsetX = -trailDistance * directionX;
+            const trailOffsetY = -trailDistance * directionY;
+            const trailSize = radius * (0.6 - i * 0.1);
+            const alpha = 0.8 - (i * 0.15);
+            
+            // Draw trail particle
+            graphics.lineStyle(1, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, alpha);
+            graphics.strokeCircle(trailOffsetX, trailOffsetY, trailSize);
+            
+            graphics.fillStyle(color, alpha);
+            graphics.fillCircle(trailOffsetX, trailOffsetY, trailSize);
+        }
         
-        // Draw the ampersand shape - simplified version
-        // Top circle part
-        graphics.arc(-ampRadius * 0.3, -ampRadius * 0.5, ampRadius * 0.4, 0, Math.PI * 2);
-        
-        // Bottom circle part
-        graphics.arc(-ampRadius * 0.1, ampRadius * 0.3, ampRadius * 0.3, 0, Math.PI * 2);
-        
-        // Diagonal line connecting them
-        graphics.moveTo(ampRadius * 0.1, -ampRadius * 0.8);
-        graphics.lineTo(ampRadius * 0.5, ampRadius * 0.8);
-        
-        graphics.strokePath();
+        // Add inner glow
+        graphics.lineStyle(1, 0xffffff, 0.4);
+        graphics.strokeCircle(0, 0, radius * 0.6);
     }
     
     /**
@@ -454,20 +482,46 @@ export class EntityRenderer {
     }
     
     /**
-     * Renders a sniper projectile as a star (identical to default)
+     * Renders a sniper projectile as a rectangle oriented to direction of travel
      */
-    private renderSniperProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
-        const spikes = 8; // Number of spikes
-        const innerRadius = radius * 0.4; // Inner radius for the star shape
-        const outerRadius = radius; // Outer radius for the spikes
+    private renderSniperProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number, projectile: any): void {
+        // Get projectile direction
+        const directionX = projectile.directionX || 0;
+        const directionY = projectile.directionY || 0;
         
-        // Draw border first
+        // Calculate rotation angle from direction
+        const angle = Math.atan2(directionY, directionX);
+        
+        // Rectangle dimensions - comparable visual impact to star
+        const length = radius * 2.0; // Long rectangle with good visual presence
+        const width = radius * 0.8;  // Narrow rectangle
+        
+        // Calculate rectangle corners oriented to direction
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        
+        // Rectangle vertices rotated to face direction
+        const frontX = (length / 2) * cos;
+        const frontY = (length / 2) * sin;
+        const backX = (-length / 2) * cos;
+        const backY = (-length / 2) * sin;
+        const rightX = (width / 2) * (-sin);
+        const rightY = (width / 2) * cos;
+        const leftX = (-width / 2) * (-sin);
+        const leftY = (-width / 2) * cos;
+        
+        // Draw rectangle
         graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
-        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius);
+        graphics.beginPath();
+        graphics.moveTo(frontX + rightX, frontY + rightY);
+        graphics.lineTo(backX + rightX, backY + rightY);
+        graphics.lineTo(backX + leftX, backY + leftY);
+        graphics.lineTo(frontX + leftX, frontY + leftY);
+        graphics.closePath();
+        graphics.strokePath();
         
-        // Draw filled star
         graphics.fillStyle(color, 1);
-        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius, true);
+        graphics.fillPath();
     }
     
     /**
