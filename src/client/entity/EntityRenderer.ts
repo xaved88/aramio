@@ -365,8 +365,8 @@ export class EntityRenderer {
                 break;
             case 'default':
             default:
-                // Render default projectile as a star
-                this.renderDefaultProjectile(graphics, projectileColor, radius);
+                // Render default projectile as a sword strike
+                this.renderDefaultProjectile(graphics, projectileColor, radius, projectile, state);
                 break;
         }
     }
@@ -465,20 +465,59 @@ export class EntityRenderer {
     }
     
     /**
-     * Renders a default projectile as a star
+     * Renders a default projectile as a simple sword strike
      */
-    private renderDefaultProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number): void {
-        const spikes = 8; // Number of spikes
-        const innerRadius = radius * 0.4; // Inner radius for the star shape
-        const outerRadius = radius; // Outer radius for the spikes
+    private renderDefaultProjectile(graphics: Phaser.GameObjects.Graphics, color: number, radius: number, projectile: any, state?: any): void {
+        // Get projectile direction for sword orientation
+        const directionX = projectile.directionX || 0;
+        const directionY = projectile.directionY || 0;
+        const angle = Math.atan2(directionY, directionX);
         
-        // Draw border first
-        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
-        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius);
+        // Simple sword dimensions
+        const swordLength = radius * 2.0;
+        const swordWidth = radius * 1.5;
         
-        // Draw filled star
+        // Calculate sword points
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        
+        // Blade points
+        const bladeTipX = swordLength * cos;
+        const bladeTipY = swordLength * sin;
+        const bladeBaseX = 0;
+        const bladeBaseY = 0;
+        
+        // Perpendicular vectors for width
+        const perpX = -sin * swordWidth / 2;
+        const perpY = cos * swordWidth / 2;
+        
+        // Blade corners
+        const bladeTopX = bladeBaseX + perpX;
+        const bladeTopY = bladeBaseY + perpY;
+        const bladeBottomX = bladeBaseX - perpX;
+        const bladeBottomY = bladeBaseY - perpY;
+        
+        // Draw sword
+        graphics.lineStyle(CLIENT_CONFIG.PROJECTILE.BORDER_WIDTH + 1, CLIENT_CONFIG.PROJECTILE.BORDER_COLOR, 1);
+        graphics.beginPath();
+        graphics.moveTo(bladeTipX, bladeTipY);
+        graphics.lineTo(bladeTopX, bladeTopY);
+        graphics.lineTo(bladeBottomX, bladeBottomY);
+        graphics.closePath();
+        graphics.strokePath();
+        
         graphics.fillStyle(color, 1);
-        this.drawStar(graphics, 0, 0, spikes, innerRadius, outerRadius, true);
+        graphics.fillPath();
+    }
+    
+    /**
+     * Darkens a color by a percentage
+     */
+    private darkenColor(color: number, factor: number): number {
+        const r = Math.floor(((color >> 16) & 0xFF) * (1 - factor));
+        const g = Math.floor(((color >> 8) & 0xFF) * (1 - factor));
+        const b = Math.floor((color & 0xFF) * (1 - factor));
+        return (r << 16) | (g << 8) | b;
     }
     
     /**
