@@ -440,7 +440,10 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.input.keyboard?.on('keyup-TAB', () => {
-            this.uiManager.hideStatsOverlay();
+            // Don't hide stats overlay if we're in post-game mode
+            if (!this.isInPostGameMode()) {
+                this.uiManager.hideStatsOverlay();
+            }
         });
 
         // Shift key handlers for damage overlay (hold to show)
@@ -474,6 +477,12 @@ export class GameScene extends Phaser.Scene {
         this.hideAbilityRangeDisplay();
     }
 
+    /**
+     * Checks if we're currently in post-game mode (showing victory/defeat stats)
+     */
+    private isInPostGameMode(): boolean {
+        return this.lastState?.gamePhase === 'finished';
+    }
 
     private setupVisibilityHandlers(): void {
         // Handle visibility change events

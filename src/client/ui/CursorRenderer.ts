@@ -51,6 +51,12 @@ export class CursorRenderer {
         // Always draw the crosshair cursor
         this.drawCrosshair(mouseX, mouseY);
 
+        // Don't show cooldown indicator in post-game mode
+        const gameScene = this.scene as any;
+        if (gameScene.lastState?.gamePhase === 'finished') {
+            return;
+        }
+
         if (!hero || hero.state !== 'alive') {
             return; // Don't show cooldown if no hero or hero is dead/respawning
         }
