@@ -35,15 +35,8 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
     useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (ability.lastUsedTime === 0) {
-            ability.lastUsedTime = currentTime;
-            this.createFireball(heroId, x, y, state, ability, gameplayConfig);
-            return true;
-        }
-        
-        // Check cooldown
-        if (currentTime - ability.lastUsedTime < ability.cooldown) {
+        // Check if ability is ready (handles both first use and cooldown)
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
             return false;
         }
         
@@ -51,16 +44,14 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const hero = state.combatants.get(heroId);
         if (!hero) return false;
         
-        // Calculate distance to target
+        // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
         const dy = y - hero.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Clamp target to max range if beyond range
         let targetX = x;
         let targetY = y;
         if (distance > ability.range) {
-            // Calculate direction and clamp to max range
             const directionX = dx / distance;
             const directionY = dy / distance;
             targetX = hero.x + directionX * ability.range;

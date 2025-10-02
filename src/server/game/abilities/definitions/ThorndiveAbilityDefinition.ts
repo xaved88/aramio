@@ -39,46 +39,23 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
     useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Check if ability is ready (handles both first use and cooldown)
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+            return false;
+        }
+        
         // Find hero by ID
         const hero = state.combatants.get(heroId);
         if (!hero) return false;
         
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (ability.lastUsedTime === 0) {
-            ability.lastUsedTime = currentTime;
-            // Apply range clamping even on first use
-            const dx = x - hero.x;
-            const dy = y - hero.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            let targetX = x;
-            let targetY = y;
-            if (distance > ability.range) {
-                const directionX = dx / distance;
-                const directionY = dy / distance;
-                targetX = hero.x + directionX * ability.range;
-                targetY = hero.y + directionY * ability.range;
-            }
-            
-            this.executeThornDive(ability, heroId, targetX, targetY, state, 1, gameplayConfig); // Level 1 for new hero
-            return true;
-        }
-        
-        // Check cooldown
-        if (currentTime - ability.lastUsedTime < ability.cooldown) {
-            return false;
-        }
-        
-        // Calculate distance to target
+        // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
         const dy = y - hero.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Clamp target to max range if beyond range
         let targetX = x;
         let targetY = y;
         if (distance > ability.range) {
-            // Calculate direction and clamp to max range
             const directionX = dx / distance;
             const directionY = dy / distance;
             targetX = hero.x + directionX * ability.range;

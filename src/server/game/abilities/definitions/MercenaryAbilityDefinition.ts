@@ -34,17 +34,9 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
     useAbility(ability: MercenaryAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's available
-        if (ability.lastUsedTime === 0) {
-            ability.lastUsedTime = currentTime;
-            this.applyRageEffects(ability, heroId, state, 1, gameplayConfig); // Level 1 for new hero
-            return true;
-        }
-        
-        const timeSinceLastUse = currentTime - ability.lastUsedTime;
-  
-        if (timeSinceLastUse < ability.cooldown) {
-            return false; // Ability is on cooldown
+        // Check if ability is ready (handles both first use and cooldown)
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+            return false;
         }
 
         ability.lastUsedTime = currentTime;
