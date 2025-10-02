@@ -423,6 +423,13 @@ export class GameScene extends Phaser.Scene {
             }
         });
 
+        // U key handler for level up (only if enabled)
+        this.input.keyboard?.on('keydown-U', (event: KeyboardEvent) => {
+            if (this.room && this.gameplayConfig.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
+                this.room.send('debugLevelUp');
+            }
+        });
+
         // Tab key handlers for stats overlay (hold to show)
         this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
             event.preventDefault(); // Prevent default tab behavior

@@ -149,6 +149,16 @@ export class GameRoom extends Room<GameState> {
             }
         });
 
+        this.onMessage('debugLevelUp', (client) => {
+            // Only allow level up cheat if enabled in config
+            if (this.gameplayConfig.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
+                const heroId = this.findHeroByController(client.sessionId);
+                if (heroId) {
+                    this.gameEngine.debugLevelUp(heroId);
+                }
+            }
+        });
+
         this.onMessage('toggleHero', (client) => {
             this.handleToggleHero(client.sessionId);
         });

@@ -7,6 +7,9 @@ export const HIGHER_LEVEL_TESTING_CONFIG = JSON.parse(JSON.stringify(GAMEPLAY_CO
 // Override starting level for testing
 HIGHER_LEVEL_TESTING_CONFIG.DEBUG.STARTING_LEVEL = 5; // Start at level 5 instead of 1
 
+// Enable debug cheats for testing
+HIGHER_LEVEL_TESTING_CONFIG.DEBUG.CHEAT_LEVEL_UP_ENABLED = true; // Enable level up cheat
+
 // Very fast respawn for testing
 HIGHER_LEVEL_TESTING_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 1000; // Very fast respawn (was 6000)
 

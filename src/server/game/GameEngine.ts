@@ -13,6 +13,8 @@ import { AOEDamageEvent } from '../schema/Events';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
 import { GameplayConfig } from '../config/ConfigProvider';
 import { MinionManager } from './combatants/MinionManager';
+import { calculateXPForSpecificLevel } from '../../shared/utils/XPUtils';
+import { grantExperience } from './stateMachine/actions/updateGame';
 
 export class GameEngine {
     private state: GameState;
@@ -203,6 +205,34 @@ export class GameEngine {
         // Set respawn time to 1 to trigger immediate respawn
         heroCombatant.respawnTime = 1;
         console.log(`Debug instant respawn: Hero ${heroId} respawn timer set to 1`);
+    }
+
+    /**
+     * Debug method to level up a hero by granting XP for the next level (for testing)
+     * @param heroId The hero's ID
+     */
+    debugLevelUp(heroId: CombatantId): void {
+        // Only allow if level up cheat is enabled
+        if (!this.gameplayConfig.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
+            return;
+        }
+
+        const hero = this.state.combatants.get(heroId);
+        if (!hero || hero.type !== 'hero') {
+            return;
+        }
+
+        // Cast to Hero type to access hero properties
+        const heroCombatant = hero as any;
+
+        // Calculate XP needed for the next level
+        const currentLevel = heroCombatant.level;
+        const xpNeededForNextLevel = calculateXPForSpecificLevel(currentLevel, this.gameplayConfig);
+        
+        // Grant exactly the amount of XP needed to level up
+        grantExperience(heroCombatant, xpNeededForNextLevel, this.state, heroCombatant.x, heroCombatant.y, 'debug_level_up', this.gameplayConfig);
+        
+        console.log(`Debug level up: Hero ${heroId} granted ${xpNeededForNextLevel} XP to reach level ${currentLevel + 1}`);
     }
 
     private updateProjectiles(deltaTime: number): void {
