@@ -234,24 +234,21 @@ export class DamageDealtOverlay {
      */
     private addDamageEntry(event: DamageEvent, state: SharedGameState): void {
         const target = state.combatants.get(event.targetId);
-        if (!target) return;
+        
+        // If target is not found, it was likely killed and removed - use event data
+        const targetName = target ? this.getCombatantName(target) : this.getCombatantNameFromEvent(event);
+        const wasKillingBlow = !target || target.health <= 0;
 
         // Get damage source from event and ability name
         const damageSource = event.damageSource as 'auto-attack' | 'ability';
         const abilityName = this.getAbilityName(event, state);
-
-        // Determine if this was a killing blow by checking if the target is dead
-        let wasKillingBlow = false;
-        if (target.health <= 0) {
-            wasKillingBlow = true;
-        }
 
         const damageEntry: DamageDealtEntry = {
             amount: event.amount,
             originalAmount: event.originalAmount,
             damageSource,
             targetId: event.targetId,
-            targetName: this.getCombatantName(target),
+            targetName,
             timestamp: event.timestamp,
             abilityName,
             wasKillingBlow
@@ -288,6 +285,23 @@ export class DamageDealtOverlay {
         } else if (combatant.type === 'turret') {
             return 'Turret';
         } else if (combatant.type === 'cradle') {
+            return 'Cradle';
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * Gets a display name for a combatant from damage event data
+     * Used when the target has been removed from the game state
+     */
+    private getCombatantNameFromEvent(event: DamageEvent): string {
+        if (event.targetType === 'hero') {
+            return 'Hero';
+        } else if (event.targetType === 'minion') {
+            return 'Minion';
+        } else if (event.targetType === 'turret') {
+            return 'Turret';
+        } else if (event.targetType === 'cradle') {
             return 'Cradle';
         }
         return 'Unknown';
