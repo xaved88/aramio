@@ -104,6 +104,15 @@ export const CLIENT_CONFIG = {
         SPREAD_RADIUS: 8, // how far particles spread from center
         FADE_OUT_DURATION_MS: 300, // how long particles take to fade out
     },
+    MUZZLE_FLASH: {
+        DURATION_MS: 120, // how long the flash lasts
+        SIZE: 8, // size of the flash effect
+        PARTICLE_COUNT: 6, // number of spark particles
+        PARTICLE_SIZE: 1.5, // size of each spark
+        SPREAD_RADIUS: 10, // how far sparks spread
+        COLOR: 0xffffff, // white sparks for all abilities
+        FADE_OUT_DURATION_MS: 80, // how long sparks take to fade out
+    },
     RESPAWN_RING: {
         RADIUS: 25, // slightly larger than player radius
         THICKNESS: 3,

@@ -281,6 +281,14 @@ export class EntityManager {
         let projectileGraphics = this.projectileGraphics.get(entityId);
         
         if (!projectileGraphics) {
+            // Trigger muzzle flash effect when new projectile is created (ability fired)
+            if (this.animationManager) {
+                this.animationManager.createMuzzleFlashEffect(
+                    projectileData.x, 
+                    projectileData.y
+                );
+            }
+            
             projectileGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             projectileGraphics.setPosition(projectileData.x, projectileData.y);

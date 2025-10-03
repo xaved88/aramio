@@ -246,6 +246,75 @@ export class AnimationManager {
     }
 
     /**
+     * Creates a muzzle flash effect when an ability is fired
+     */
+    createMuzzleFlashEffect(x: number, y: number): void {
+        const config = CLIENT_CONFIG.MUZZLE_FLASH;
+        
+        // Use the same color for all abilities
+        const color = config.COLOR;
+        
+        // Create main flash effect (bright circle)
+        const flash = this.scene.add.graphics();
+        flash.setPosition(x, y);
+        flash.fillStyle(color, 0.6); // Slightly more prominent
+        flash.fillCircle(0, 0, config.SIZE);
+        flash.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+        
+        // Ensure it only appears on main camera
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(flash);
+        }
+        
+        // Animate the main flash
+        this.scene.tweens.add({
+            targets: flash,
+            alpha: 0,
+            scaleX: 1.5,
+            scaleY: 1.5,
+            duration: config.DURATION_MS,
+            ease: 'Power2.easeOut',
+            onComplete: () => {
+                flash.destroy();
+            }
+        });
+        
+        // Create spark particles
+        for (let i = 0; i < config.PARTICLE_COUNT; i++) {
+            const particle = this.scene.add.graphics();
+            
+            // Random position around the flash center
+            const angle = (Math.PI * 2 * i) / config.PARTICLE_COUNT + Math.random() * 0.5;
+            const distance = Math.random() * config.SPREAD_RADIUS;
+            const particleX = x + Math.cos(angle) * distance;
+            const particleY = y + Math.sin(angle) * distance;
+            
+            particle.setPosition(particleX, particleY);
+            particle.fillStyle(color, 0.8); // Slightly more prominent sparks
+            particle.fillCircle(0, 0, config.PARTICLE_SIZE);
+            particle.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+            
+            // Ensure it only appears on main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(particle);
+            }
+            
+            // Animate spark particles
+            this.scene.tweens.add({
+                targets: particle,
+                alpha: 0,
+                scaleX: 0.3,
+                scaleY: 0.3,
+                duration: config.FADE_OUT_DURATION_MS,
+                ease: 'Power2.easeOut',
+                onComplete: () => {
+                    particle.destroy();
+                }
+            });
+        }
+    }
+
+    /**
      * Clears all animations without destroying the manager
      */
     clearAllAnimations(): void {
