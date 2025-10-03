@@ -34,8 +34,8 @@ export const CLIENT_CONFIG = {
         PROJECTILES: 12,        // Enemy projectiles
         PLAYER_PROJECTILES: 15, // Player-owned projectiles (higher than heroes)
         ABILITY_INDICATORS: 18, // Ability ready indicators, range indicators
-        EFFECTS: 20,            // AOE effects, explosions
-        OVERLAY: 25,            // XP text, level up text
+        EFFECTS: 20,            // AOE effects, explosions, hit markers
+        OVERLAY: 30,            // XP text, level up text
         HUD: 500,               // Health bars, experience bars, ability bars
         GAME_UI: 1000,          // Stats overlay, game interface
         MODALS: 2000            // Victory screen, modals
@@ -96,6 +96,13 @@ export const CLIENT_CONFIG = {
             END_SCALE: 1.0, // grow to normal size
             FADE_OUT_START: 0.6, // when to start fading out (60% through animation)
         },
+    },
+    PROJECTILE_MISS_EFFECT: {
+        DURATION_MS: 400, // how long the effect lasts
+        PARTICLE_COUNT: 6, // number of particles in the puff
+        PARTICLE_SIZE: 3, // size of each particle
+        SPREAD_RADIUS: 8, // how far particles spread from center
+        FADE_OUT_DURATION_MS: 300, // how long particles take to fade out
     },
     RESPAWN_RING: {
         RADIUS: 25, // slightly larger than player radius

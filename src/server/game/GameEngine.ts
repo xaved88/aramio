@@ -9,7 +9,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { CombatantUtils } from './combatants/CombatantUtils';
 import { ControllerId, CombatantId } from '../../shared/types/CombatantTypes';
 import { AbilityUseManager } from './abilities/AbilityUseManager';
-import { AOEDamageEvent } from '../schema/Events';
+import { AOEDamageEvent, ProjectileMissEvent } from '../schema/Events';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
 import { GameplayConfig } from '../config/ConfigProvider';
 import { MinionManager } from './combatants/MinionManager';
@@ -272,6 +272,16 @@ export class GameEngine {
                 );
                 
                 if (distanceTraveled >= projectile.range) {
+                    // Create projectile miss event before removing
+                    const missEvent = new ProjectileMissEvent();
+                    missEvent.projectileId = projectile.id;
+                    missEvent.x = projectile.x;
+                    missEvent.y = projectile.y;
+                    missEvent.team = projectile.team || 'neutral';
+                    missEvent.ownerId = projectile.ownerId;
+                    missEvent.timestamp = this.state.gameTime;
+                    this.state.projectileMissEvents.push(missEvent);
+                    
                     projectilesToRemove.push(projectile.id);
                     return;
                 }
@@ -326,6 +336,16 @@ export class GameEngine {
                     if (this.canReceiveProjectileEffects(closestCombatant)) {
                         // Apply projectile effects
                         this.applyProjectileEffects(projectile, closestCombatant);
+                    } else {
+                        // Target can't receive effects (like turrets) - create miss event
+                        const missEvent = new ProjectileMissEvent();
+                        missEvent.projectileId = projectile.id;
+                        missEvent.x = projectile.x;
+                        missEvent.y = projectile.y;
+                        missEvent.team = projectile.team || 'neutral';
+                        missEvent.ownerId = projectile.ownerId;
+                        missEvent.timestamp = this.state.gameTime;
+                        this.state.projectileMissEvents.push(missEvent);
                     }
                     // For structures (turrets, cradles), just destroy the projectile without applying effects
                 }

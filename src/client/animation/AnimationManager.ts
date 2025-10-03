@@ -187,6 +187,65 @@ export class AnimationManager {
     }
 
     /**
+     * Creates a projectile miss effect (puff of particles)
+     */
+    createProjectileMissEffect(x: number, y: number, teamColor: 'blue' | 'red' | 'player'): void {
+        const config = CLIENT_CONFIG.PROJECTILE_MISS_EFFECT;
+        
+        // Get color based on team (using same colors as projectiles)
+        let color: number;
+        switch (teamColor) {
+            case 'blue':
+                color = CLIENT_CONFIG.PROJECTILE.BLUE_COLOR;
+                break;
+            case 'red':
+                color = CLIENT_CONFIG.PROJECTILE.RED_COLOR;
+                break;
+            case 'player':
+                color = CLIENT_CONFIG.SELF_COLORS.PROJECTILE; // Purple for player projectiles
+                break;
+        }
+        
+        // Create particles
+        for (let i = 0; i < config.PARTICLE_COUNT; i++) {
+            const particle = this.scene.add.graphics();
+            
+            // Random position within spread radius
+            const angle = (i / config.PARTICLE_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const distance = Math.random() * config.SPREAD_RADIUS;
+            const particleX = x + Math.cos(angle) * distance;
+            const particleY = y + Math.sin(angle) * distance;
+            
+            particle.setPosition(particleX, particleY);
+            
+            // Draw small circle particle
+            particle.fillStyle(color, 1);
+            particle.fillCircle(0, 0, config.PARTICLE_SIZE);
+            
+            // Set depth
+            particle.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+            
+            // Ensure it only appears on main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(particle);
+            }
+            
+            // Animate particle
+            this.scene.tweens.add({
+                targets: particle,
+                alpha: 0,
+                scaleX: 0.2,
+                scaleY: 0.2,
+                duration: config.FADE_OUT_DURATION_MS,
+                ease: 'Power2',
+                onComplete: () => {
+                    particle.destroy();
+                }
+            });
+        }
+    }
+
+    /**
      * Clears all animations without destroying the manager
      */
     clearAllAnimations(): void {

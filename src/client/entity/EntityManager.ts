@@ -22,6 +22,7 @@ export class EntityManager {
     private entityRenderer: EntityRenderer;
     private playerSessionId: ControllerId | null = null;
     private cameraManager: any = null;
+    private animationManager: any = null;
     
     // Entity storage
     private entityGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -31,6 +32,7 @@ export class EntityManager {
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
+    private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
@@ -54,6 +56,10 @@ export class EntityManager {
 
     setCameraManager(cameraManager: any): void {
         this.cameraManager = cameraManager;
+    }
+
+    setAnimationManager(animationManager: any): void {
+        this.animationManager = animationManager;
     }
 
     /**
@@ -299,6 +305,16 @@ export class EntityManager {
             
             this.projectileGraphics.set(entityId, projectileGraphics);
         }
+        
+        // Track projectile position for miss detection
+        this.projectileLastPositions.set(entityId, {
+            x: projectileData.x,
+            y: projectileData.y,
+            range: projectileData.range,
+            startX: projectileData.startX,
+            startY: projectileData.startY,
+            team: projectileData.team
+        });
         
         // Create smooth movement animation
         this.animateEntityMovement(
@@ -671,6 +687,7 @@ export class EntityManager {
         });
     }
 
+
     /**
      * Destroys a projectile entity
      */
@@ -684,6 +701,9 @@ export class EntityManager {
             projectileGraphics.destroy();
             this.projectileGraphics.delete(entityId);
         }
+        
+        // Clean up position tracking
+        this.projectileLastPositions.delete(entityId);
     }
 
     /**

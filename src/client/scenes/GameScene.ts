@@ -32,6 +32,7 @@ export class GameScene extends Phaser.Scene {
     private gameObjectFactory!: GameObjectFactory;
     private processedAttackEvents: Set<string> = new Set();
     private processedDamageEvents: Set<string> = new Set();
+    private processedProjectileMissEvents: Set<string> = new Set();
     private lastState: GameState|null = null
     private playerTeam: string | null = null;
     private playerSessionId: ControllerId | null = null;
@@ -123,6 +124,7 @@ export class GameScene extends Phaser.Scene {
         
         // Set up manager relationships
         this.entityManager.setCameraManager(this.cameraManager);
+        this.entityManager.setAnimationManager(this.animationManager);
         this.cameraManager.setEntityManager(this.entityManager);
         this.gameObjectFactory.setCameraManager(this.cameraManager);
         this.animationManager.setCameraManager(this.cameraManager);
@@ -218,6 +220,37 @@ export class GameScene extends Phaser.Scene {
             
             // Animate damage target (color flash)
             this.animateDamageTarget(event.targetId, event.sourceId);
+        });
+    }
+
+    private processProjectileMissEvents(state: SharedGameState) {
+        state.projectileMissEvents.forEach(event => {
+            const eventKey = `${event.projectileId}-${event.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedProjectileMissEvents.has(eventKey)) return;
+            
+            this.processedProjectileMissEvents.add(eventKey);
+            
+            console.log(`Processing projectile miss event:`, event);
+            
+            // Determine the correct color using the same logic as projectile rendering
+            let teamColor: 'blue' | 'red' | 'player' = event.team as 'blue' | 'red';
+            
+            // Check if projectile owner is the current player (same logic as EntityRenderer.renderProjectile)
+            if (this.playerSessionId && event.ownerId) {
+                const owner = state.combatants.get(event.ownerId);
+                if (owner && owner.type === 'hero' && owner.controller === this.playerSessionId) {
+                    teamColor = 'player';
+                }
+            }
+            
+            // Trigger the miss effect
+            this.animationManager.createProjectileMissEffect(
+                event.x, 
+                event.y, 
+                teamColor
+            );
         });
     }
 
@@ -341,6 +374,7 @@ export class GameScene extends Phaser.Scene {
         this.updateCombatantEntities(sharedState);
         this.processAttackEvents(sharedState);
         this.processDamageEvents(sharedState);
+        this.processProjectileMissEvents(sharedState);
         this.updateHUD(sharedState);
         
         // Update camera to follow player
@@ -395,6 +429,7 @@ export class GameScene extends Phaser.Scene {
             this.lastState = null;
             this.processedAttackEvents.clear();
             this.processedDamageEvents.clear();
+            this.processedProjectileMissEvents.clear();
             // Input state cleanup handled by InputHandler
             this.uiComponentsInitialized = false; // Reset UI initialization flag
             
@@ -955,6 +990,7 @@ export class GameScene extends Phaser.Scene {
         // Clear event tracking
         this.processedAttackEvents.clear();
         this.processedDamageEvents.clear();
+        this.processedProjectileMissEvents.clear();
         
         // Reset UI elements
         this.abilityRangeDisplay = null;

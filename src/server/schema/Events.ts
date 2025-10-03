@@ -58,6 +58,15 @@ export class DeathEffectEvent extends Schema {
     @type('number') timestamp!: number; // When the death effect occurred
 }
 
+export class ProjectileMissEvent extends Schema {
+    @type('string') projectileId!: string; // ID of the projectile that missed
+    @type('number') x!: number; // X position where projectile missed
+    @type('number') y!: number; // Y position where projectile missed
+    @type('string') team!: string; // Team color of the projectile (blue/red)
+    @type('string') ownerId!: string; // ID of the projectile owner for color detection
+    @type('number') timestamp!: number; // When the miss occurred
+}
+
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
     @type('number') minionKills = 0; // number of minions killed
