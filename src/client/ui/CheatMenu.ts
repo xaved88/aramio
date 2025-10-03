@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { hexToColorString } from '../utils/ColorUtils';
 import { HUDContainer } from './HUDContainer';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
@@ -45,17 +46,13 @@ export class CheatMenu {
             fontSize: '18px',
             color: '#FFFFFF',
             fontStyle: 'bold',
-            stroke: '#000000',
-            strokeThickness: 1,
-            backgroundColor: '#3498db',
+            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON),
             padding: { x: 15, y: 8 }
         },
         BUTTON_DISABLED: {
             fontSize: '18px',
             color: '#888888',
             fontStyle: 'bold',
-            stroke: '#000000',
-            strokeThickness: 1,
             backgroundColor: '#4A4A4A',
             padding: { x: 15, y: 8 }
         },
@@ -264,11 +261,11 @@ export class CheatMenu {
             
             // Add hover effects
             button.on('pointerover', () => {
-                button.setStyle({ backgroundColor: '#5dade2' });
+                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON_HOVER) });
             });
             
             button.on('pointerout', () => {
-                button.setStyle({ backgroundColor: '#3498db' });
+                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON) });
             });
         } else {
             // Disabled state - no interactivity

@@ -180,7 +180,10 @@ export const CLIENT_CONFIG = {
             PRIMARY: 0x3498db, // blue
             TEXT: 0xffffff, // white
             BACKGROUND: 0x2c3e50, // dark blue-gray
-            SUCCESS: 0x2ecc71, // green
+            PROCEED_BUTTON: 0x4CAF50, // green for proceed/action buttons
+            PROCEED_BUTTON_HOVER: 0x388E3C, // green hover for proceed/action buttons
+            ACTION_BUTTON: 0x3498db, // blue for general action buttons
+            ACTION_BUTTON_HOVER: 0x5dade2, // blue hover for general action buttons
             DISABLED: 0x7f8c8d, // gray
             BLUE: 0x3498db, // blue
             RED: 0xe74c3c, // red

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { hexToColorString } from '../utils/ColorUtils';
 import { HUDContainer } from './HUDContainer';
 
 interface PlayerStats {
@@ -46,6 +47,8 @@ export class StatsOverlay {
     private playerSessionId: ControllerId | null = null;
     private victoryDefeatText: Phaser.GameObjects.Text | null = null;
     private backToLobbyButton: Phaser.GameObjects.Text | null = null;
+    private damageHintText: Phaser.GameObjects.Text | null = null;
+    private cheatHintText: Phaser.GameObjects.Text | null = null;
     private isPostGameMode: boolean = false;
     private room: any = null;
 
@@ -144,6 +147,14 @@ export class StatsOverlay {
         this.isVisible = true;
         this.isPostGameMode = false;
         this.createOverlay(state);
+        
+        // Show control hints in regular stats mode
+        if (this.damageHintText) {
+            this.damageHintText.setVisible(true);
+        }
+        if (this.cheatHintText) {
+            this.cheatHintText.setVisible(true);
+        }
     }
 
     showPostGame(state: SharedGameState, winningTeam: string, playerTeam: string): void {
@@ -154,6 +165,14 @@ export class StatsOverlay {
         this.createOverlay(state);
         this.addVictoryDefeatDisplay(winningTeam, playerTeam);
         this.addBackToLobbyButton();
+        
+        // Hide control hints in post-game mode
+        if (this.damageHintText) {
+            this.damageHintText.setVisible(false);
+        }
+        if (this.cheatHintText) {
+            this.cheatHintText.setVisible(false);
+        }
     }
 
     /**
@@ -234,6 +253,50 @@ export class StatsOverlay {
 
         this.createTeamTable(redTeamStats, tableX, 120, '#e74c3c');
         this.createTeamTable(blueTeamStats, tableX, 420, '#3498db');
+
+        // Add hints about additional overlays at the bottom
+        this.createOverlayHints();
+    }
+
+    /**
+     * Creates hints about additional overlays at the bottom of the stats screen
+     */
+    private createOverlayHints(): void {
+        // Damage overlay hint
+        this.damageHintText = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 50,
+            'Hold "Shift" to view recent damage',
+            {
+                fontSize: '14px',
+                color: '#888888',
+                fontStyle: 'italic'
+            }
+        );
+        
+        this.damageHintText.setOrigin(0.5, 0.5);
+        this.damageHintText.setDepth(this.DEPTHS.UI_CONTENT);
+        this.damageHintText.setScrollFactor(0, 0); // Fixed to screen
+        this.overlayElements.push(this.damageHintText);
+        this.hudContainer!.add(this.damageHintText);
+
+        // Cheat menu hint
+        this.cheatHintText = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 30,
+            'Hold "Ctrl" for cheat menu',
+            {
+                fontSize: '14px',
+                color: '#888888',
+                fontStyle: 'italic'
+            }
+        );
+        
+        this.cheatHintText.setOrigin(0.5, 0.5);
+        this.cheatHintText.setDepth(this.DEPTHS.UI_CONTENT);
+        this.cheatHintText.setScrollFactor(0, 0); // Fixed to screen
+        this.overlayElements.push(this.cheatHintText);
+        this.hudContainer!.add(this.cheatHintText);
     }
 
     /**
@@ -437,9 +500,7 @@ export class StatsOverlay {
                 fontSize: '24px',
                 color: '#FFFFFF',
                 fontStyle: 'bold',
-                stroke: '#000000',
-                strokeThickness: 2,
-                backgroundColor: '#2E7D32',
+                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
                 padding: { x: 20, y: 10 }
             }
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive();
@@ -455,13 +516,13 @@ export class StatsOverlay {
         // Add hover effects (like lobby buttons)
         this.backToLobbyButton.on('pointerover', () => {
             if (this.backToLobbyButton) {
-                this.backToLobbyButton.setStyle({ backgroundColor: '#388E3C' });
+                this.backToLobbyButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON_HOVER) });
             }
         });
         
         this.backToLobbyButton.on('pointerout', () => {
             if (this.backToLobbyButton) {
-                this.backToLobbyButton.setStyle({ backgroundColor: '#2E7D32' });
+                this.backToLobbyButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
             }
         });
     }

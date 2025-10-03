@@ -72,7 +72,8 @@ export class LobbyScene extends Phaser.Scene {
     }
 
     preload() {
-        // No assets needed for basic UI
+        // Load pyromancer icon for the title
+        this.load.image('pyromancer-icon', '/assets/icons/pyromancer.svg');
     }
 
     async create() {
@@ -192,8 +193,12 @@ export class LobbyScene extends Phaser.Scene {
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
 
-        // Title
-        this.add.text(centerX, 50, 'ARAM.IO Lobby', {
+        // Add pyromancer icon and title
+        const pyromancerIcon = this.add.image(centerX - 115, 50, 'pyromancer-icon');
+        pyromancerIcon.setScale(0.6);
+        pyromancerIcon.setOrigin(0.5);
+
+        const titleText = this.add.text(centerX + 25, 50, 'ARAM.IO Lobby', {
             fontSize: '32px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
@@ -203,7 +208,8 @@ export class LobbyScene extends Phaser.Scene {
         this.add.text(centerX, 120, 'Team Size:', {
             fontSize: '20px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Team size buttons
@@ -230,7 +236,8 @@ export class LobbyScene extends Phaser.Scene {
         this.configLabel = this.add.text(centerX, 220, 'Config:', {
             fontSize: '20px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.configValue = this.add.text(centerX, 250, 'default', {
@@ -257,39 +264,41 @@ export class LobbyScene extends Phaser.Scene {
         });
 
         // Team containers
-        this.blueTeamContainer = this.add.container(centerX - 200, 310);
-        this.redTeamContainer = this.add.container(centerX + 200, 310);
+        this.blueTeamContainer = this.add.container(centerX - 200, 320);
+        this.redTeamContainer = this.add.container(centerX + 200, 320);
 
         this.add.text(centerX - 200, 280, 'Blue Team', {
-            fontSize: '20px',
+            fontSize: '22px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(centerX + 200, 280, 'Red Team', {
-            fontSize: '20px',
+            fontSize: '22px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Start button
-        this.startButton = this.add.text(centerX, 520, 'Start Game', {
+        this.startButton = this.add.text(centerX, 540, 'Start Game', {
             fontSize: '24px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
+            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
             padding: { x: 20, y: 10 }
         }).setOrigin(0.5).setInteractive();
 
         // Add hover effects for start button - will be updated in updateUI based on state
         this.startButton.on('pointerover', () => {
             if (this.lobbyState?.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY) });
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON_HOVER) });
             }
         });
         this.startButton.on('pointerout', () => {
             if (this.lobbyState?.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS) });
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
             } else {
                 this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
             }
@@ -300,6 +309,20 @@ export class LobbyScene extends Phaser.Scene {
                 this.room.send('startGame');
             }
         });
+
+        // Game controls info
+        this.add.text(centerX, 620, 'Game Controls:', {
+            fontSize: '18px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        this.add.text(centerX, 650, 'Move with mouse • Click to use ability', {
+            fontSize: '14px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        }).setOrigin(0.5);
     }
 
     private updateUI() {
@@ -318,9 +341,9 @@ export class LobbyScene extends Phaser.Scene {
             if (size === this.lobbyState!.teamSize) {
                 button.setStyle({ 
                     backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    stroke: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS),
+                    stroke: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
                     strokeThickness: 2,
-                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS)
+                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
                 });
             } else {
                 button.setStyle({ 
@@ -339,7 +362,7 @@ export class LobbyScene extends Phaser.Scene {
         // Update start button
         if (this.startButton && this.startButton.scene) {
             if (this.lobbyState.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SUCCESS) });
+                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
             } else {
                 this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
             }
