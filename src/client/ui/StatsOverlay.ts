@@ -158,7 +158,10 @@ export class StatsOverlay {
     }
 
     showPostGame(state: SharedGameState, winningTeam: string, playerTeam: string): void {
-        if (this.isVisible) return;
+        // If stats screen is already visible, hide it first to allow post-game stats to show
+        if (this.isVisible) {
+            this.hide();
+        }
         
         this.isVisible = true;
         this.isPostGameMode = true;
