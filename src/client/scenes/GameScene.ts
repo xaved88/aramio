@@ -143,7 +143,6 @@ export class GameScene extends Phaser.Scene {
         this.abilityRangeDisplay.setVisible(false);
         
         // Set up remaining handlers
-        this.setupInputHandlers();
         this.setupVisibilityHandlers();
         
         console.log('Game initialization complete');
@@ -274,6 +273,9 @@ export class GameScene extends Phaser.Scene {
         
         // Create HUD
         this.uiManager.createHUD();
+        
+        // Set up InputHandler dependencies now that UI is initialized
+        this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager);
     }
 
     private processStateChange(colyseusState: GameState) {
@@ -396,72 +398,6 @@ export class GameScene extends Phaser.Scene {
         this.uiManager.setPlayerSessionId(this.playerSessionId);
     }
 
-    /**
-     * Sets up keyboard handlers only
-     * All mouse/pointer input is now handled by InputHandler
-     */
-    private setupInputHandlers(): void {
-
-        // S key handler for hero cycling
-        this.input.keyboard?.on('keydown-S', (event: KeyboardEvent) => {
-            if (this.room) {
-                this.room.send('toggleHero');
-            }
-        });
-
-        // D key handler for debug kill (only if enabled)
-        this.input.keyboard?.on('keydown-D', (event: KeyboardEvent) => {
-            if (this.room && this.gameplayConfig.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
-                this.room.send('debugKill');
-            }
-        });
-
-        // L key handler for instant respawn (only if enabled)
-        this.input.keyboard?.on('keydown-L', (event: KeyboardEvent) => {
-            if (this.room && this.gameplayConfig.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
-                this.room.send('instantRespawn');
-            }
-        });
-
-        // U key handler for level up (only if enabled)
-        this.input.keyboard?.on('keydown-U', (event: KeyboardEvent) => {
-            if (this.room && this.gameplayConfig.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
-                this.room.send('debugLevelUp');
-            }
-        });
-
-        // Tab key handlers for stats overlay (hold to show)
-        this.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default tab behavior
-            if (this.lastState) {
-                const sharedState = convertToSharedGameState(this.lastState);
-                this.uiManager.showStatsOverlay(sharedState);
-            }
-        });
-
-        this.input.keyboard?.on('keyup-TAB', () => {
-            // Don't hide stats overlay if we're in post-game mode
-            if (!this.isInPostGameMode()) {
-                this.uiManager.hideStatsOverlay();
-            }
-        });
-
-        // Shift key handlers for damage overlay (hold to show)
-        this.input.keyboard?.on('keydown-SHIFT', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default shift behavior
-            if (this.lastState) {
-                const sharedState = convertToSharedGameState(this.lastState);
-                this.uiManager.showDamageTakenOverlay(sharedState);
-                this.uiManager.showDamageDealtOverlay(sharedState);
-            }
-        });
-
-        this.input.keyboard?.on('keyup-SHIFT', () => {
-            this.uiManager.hideDamageTakenOverlay();
-            this.uiManager.hideDamageDealtOverlay();
-        });
-
-    }
 
     /**
      * Callback methods for InputHandler
@@ -477,12 +413,6 @@ export class GameScene extends Phaser.Scene {
         this.hideAbilityRangeDisplay();
     }
 
-    /**
-     * Checks if we're currently in post-game mode (showing victory/defeat stats)
-     */
-    private isInPostGameMode(): boolean {
-        return this.lastState?.gamePhase === 'finished';
-    }
 
     private setupVisibilityHandlers(): void {
         // Handle visibility change events

@@ -10,6 +10,7 @@ import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
 import { DamageTakenOverlay } from './DamageTakenOverlay';
 import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
+import { CheatMenu } from './CheatMenu';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -29,6 +30,7 @@ export class UIManager {
     private damageTakenOverlay: DamageTakenOverlay;
     private damageDealtOverlay: DamageDealtOverlay;
     private cursorRenderer: CursorRenderer;
+    private cheatMenu: CheatMenu;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null; // Store last state for cursor updates
 
@@ -64,7 +66,7 @@ export class UIManager {
     constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
         this.gameplayConfig = gameplayConfig;
-        this.hudRenderer = new HUDRenderer(scene, gameplayConfig);
+        this.hudRenderer = new HUDRenderer(scene);
         this.victoryScreen = new VictoryScreen(scene);
         this.statsOverlay = new StatsOverlay(scene);
         this.respawnOverlay = new RespawnOverlay(scene, onRewardChosen);
@@ -72,6 +74,7 @@ export class UIManager {
         this.damageTakenOverlay = new DamageTakenOverlay(scene);
         this.damageDealtOverlay = new DamageDealtOverlay(scene);
         this.cursorRenderer = new CursorRenderer(scene);
+        this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -89,6 +92,7 @@ export class UIManager {
         this.damageTakenOverlay.setHUDCamera(hudCamera);
         this.damageDealtOverlay.setHUDCamera(hudCamera);
         this.cursorRenderer.setCameraManager(this.cameraManager);
+        this.cheatMenu.setHUDCamera(hudCamera);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -101,12 +105,14 @@ export class UIManager {
         this.damageTakenOverlay.setCameraManager(cameraManager);
         this.damageDealtOverlay.setCameraManager(cameraManager);
         this.cursorRenderer.setCameraManager(cameraManager);
+        this.cheatMenu.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
     setRoom(room: any): void {
         this.statsOverlay.setRoom(room);
+        this.cheatMenu.setRoom(room);
     }
 
     createHUD(): void {
@@ -135,12 +141,24 @@ export class UIManager {
         this.damageDealtOverlay.setPlayerSessionId(sessionId);
     }
 
-    showStatsOverlay(state: SharedGameState): void {
-        this.statsOverlay.show(state);
+    showStatsOverlay(state?: SharedGameState): void {
+        if (state) {
+            // Called with state parameter (from GameScene)
+            this.statsOverlay.show(state);
+        } else {
+            // Called without state parameter (from InputHandler)
+            if (this.lastState) {
+                // this.lastState is already a SharedGameState when called from InputHandler
+                this.statsOverlay.show(this.lastState);
+            }
+        }
     }
 
     hideStatsOverlay(): void {
-        this.statsOverlay.hide();
+        // Don't hide stats overlay if we're in post-game mode
+        if (!this.isInPostGameMode()) {
+            this.statsOverlay.hide();
+        }
     }
 
     showPostGameStats(state: SharedGameState, winningTeam: string, playerTeam: string): void {
@@ -292,6 +310,41 @@ export class UIManager {
         }
     }
 
+    // Cheat menu methods
+    toggleCheatMenu(): void {
+        this.cheatMenu.toggle();
+    }
+
+    showCheatMenu(): void {
+        this.cheatMenu.show();
+    }
+
+    hideCheatMenu(): void {
+        this.cheatMenu.hide();
+    }
+
+    isCheatMenuVisible(): boolean {
+        return this.cheatMenu.isMenuVisible();
+    }
+
+    // Input handler methods (no state parameters)
+    showDamageOverlays(): void {
+        if (this.lastState) {
+            // this.lastState is already a SharedGameState when called from InputHandler
+            this.showDamageTakenOverlay(this.lastState);
+            this.showDamageDealtOverlay(this.lastState);
+        }
+    }
+
+    hideDamageOverlays(): void {
+        this.hideDamageTakenOverlay();
+        this.hideDamageDealtOverlay();
+    }
+
+    private isInPostGameMode(): boolean {
+        return this.lastState?.gamePhase === 'finished';
+    }
+
     destroy(): void {
         Object.values(this.hudElements).forEach(el => el?.destroy());
         this.respawnOverlay.destroy();
@@ -301,5 +354,6 @@ export class UIManager {
         this.damageTakenOverlay.destroy();
         this.damageDealtOverlay.destroy();
         this.cursorRenderer.destroy();
+        this.cheatMenu.destroy();
     }
 } 

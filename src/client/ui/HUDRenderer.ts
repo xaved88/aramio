@@ -3,21 +3,18 @@ import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
 import { HUDContainer } from './HUDContainer';
-import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
  * HUDRenderer handles all HUD rendering logic
  */
 export class HUDRenderer {
     private scene: Phaser.Scene;
-    private gameplayConfig: GameplayConfig; // Deserialized gameplay configuration
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
     private hudContainer: HUDContainer | null = null;
 
-    constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig) {
+    constructor(scene: Phaser.Scene) {
         this.scene = scene;
-        this.gameplayConfig = gameplayConfig;
     }
 
     setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {

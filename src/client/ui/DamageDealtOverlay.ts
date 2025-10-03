@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { HUDContainer } from './HUDContainer';
 import { DamageEvent } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 
 export interface DamageDealtEntry {
     amount: number; // final damage after target's armor reduction
@@ -53,7 +54,7 @@ export class DamageDealtOverlay {
 
     private createContainer(): void {
         this.hudContainer = new HUDContainer(this.scene);
-        this.hudContainer.setDepth(1000); // High depth to appear above other UI
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS); // Above stats overlay
         this.hudContainer.setVisible(false);
 
         // Set up camera manager if available

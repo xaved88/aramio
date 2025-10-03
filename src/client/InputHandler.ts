@@ -22,10 +22,22 @@ export class InputHandler {
     private isClickHeld: boolean = false;
     private clickDownPosition: { x: number; y: number } | null = null;
     private wasRespawningOnClick: boolean = false;
+    
+    // Dependencies for keyboard input handling
+    private gameplayConfig: any = null;
+    private uiManager: any = null;
 
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
         this.room = room;
+    }
+
+    /**
+     * Sets dependencies needed for keyboard input handling
+     */
+    setDependencies(gameplayConfig: any, uiManager: any): void {
+        this.gameplayConfig = gameplayConfig;
+        this.uiManager = uiManager;
     }
 
     /**
@@ -42,7 +54,87 @@ export class InputHandler {
         this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
             this.handlePointerUp(pointer);
         });
+
+        // Keyboard input handlers
+        this.setupKeyboardHandlers();
     }
+
+    /**
+     * Sets up all keyboard input handlers
+     */
+    private setupKeyboardHandlers(): void {
+        // S key handler for hero cycling
+        this.scene.input.keyboard?.on('keydown-S', (event: KeyboardEvent) => {
+            if (this.room) {
+                this.room.send('toggleHero');
+            }
+        });
+
+        // D key handler for debug kill (only if enabled)
+        this.scene.input.keyboard?.on('keydown-D', (event: KeyboardEvent) => {
+            if (this.room && this.gameplayConfig?.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
+                this.room.send('debugKill');
+            }
+        });
+
+        // L key handler for instant respawn (only if enabled)
+        this.scene.input.keyboard?.on('keydown-L', (event: KeyboardEvent) => {
+            if (this.room && this.gameplayConfig?.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
+                this.room.send('instantRespawn');
+            }
+        });
+
+        // U key handler for level up (only if enabled)
+        this.scene.input.keyboard?.on('keydown-U', (event: KeyboardEvent) => {
+            if (this.room && this.gameplayConfig?.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
+                this.room.send('debugLevelUp');
+            }
+        });
+
+        // Tab key handlers for stats overlay (hold to show)
+        this.scene.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default tab behavior
+            if (this.uiManager) {
+                this.uiManager.showStatsOverlay();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keyup-TAB', () => {
+            if (this.uiManager) {
+                this.uiManager.hideStatsOverlay();
+            }
+        });
+
+        // Shift key handlers for damage overlay (hold to show)
+        this.scene.input.keyboard?.on('keydown-SHIFT', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default shift behavior
+            if (this.uiManager) {
+                this.uiManager.showDamageOverlays();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keyup-SHIFT', () => {
+            if (this.uiManager) {
+                this.uiManager.hideDamageOverlays();
+            }
+        });
+
+        // Ctrl key handlers for cheat menu (hold to show)
+        this.scene.input.keyboard?.on('keydown-CTRL', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default behavior
+            if (this.uiManager) {
+                this.uiManager.showCheatMenu();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keyup-CTRL', (event: KeyboardEvent) => {
+            event.preventDefault(); // Prevent default behavior
+            if (this.uiManager) {
+                this.uiManager.hideCheatMenu();
+            }
+        });
+    }
+
 
     /**
      * Called every frame to handle continuous input (movement)
