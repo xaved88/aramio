@@ -5,8 +5,8 @@ import { GAMEPLAY_CONFIG } from '../../GameConfig';
 export const QUICK_WIN_CONFIG = JSON.parse(JSON.stringify(GAMEPLAY_CONFIG));
 
 // Very fast movement
-QUICK_WIN_CONFIG.HERO_MOVE_SPEED = 6.0; // Much faster movement (was 3.5)
-QUICK_WIN_CONFIG.MINION_MOVE_SPEED = 4.0; // Much faster minions (was 2.5)
+QUICK_WIN_CONFIG.HERO_MOVE_SPEED = 12.0;
+QUICK_WIN_CONFIG.MINION_MOVE_SPEED = 8.0;
 
 // Very fast passive healing
 QUICK_WIN_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS = 1; // Very fast healing trigger (was 5)
@@ -16,7 +16,7 @@ QUICK_WIN_CONFIG.PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND = 5; // Very fast heali
 QUICK_WIN_CONFIG.COMBAT.HERO.HEALTH = 30; // Very low health (was 75)
 QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_STRENGTH = 20; // Very high damage (was 5)
 QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_SPEED = 2.0; // Very fast attacks (was 1)
-QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_RADIUS = 200; // Much larger range (was 50)
+QUICK_WIN_CONFIG.COMBAT.HERO.ATTACK_RADIUS = 300;
 QUICK_WIN_CONFIG.COMBAT.HERO.WIND_UP = 0.1; // Very fast wind-up (was 0.25)
 QUICK_WIN_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 8000; // Very fast respawn (was 6000)
 
@@ -73,8 +73,8 @@ QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_SPEED = 2.0; // Very fast attacks (
 QUICK_WIN_CONFIG.COMBAT.MINION.ARCHER.ATTACK_RADIUS = 60; // Much larger range (was 60)
 
 // Very fast minion waves
-QUICK_WIN_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE = 2; // Same as default (was 2)
-QUICK_WIN_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE = 3; // Same as default (was 3)
+QUICK_WIN_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE = 1; // Only 1 warrior per wave
+QUICK_WIN_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE = 1; // Only 1 archer per wave
 QUICK_WIN_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS = 5000; // Very fast waves (was 12000)
 
 // Very fast experience gain

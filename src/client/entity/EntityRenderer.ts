@@ -383,7 +383,7 @@ export class EntityRenderer {
         graphics.fillCircle(0, 0, radius);
         
         // Create trailing projectiles behind the main one
-        const trailCount = 10;
+        const trailCount = 25;
         const trailSpacing = radius * 1.2; // Closer spacing for more projectiles
         
         // Get projectile direction
@@ -397,7 +397,7 @@ export class EntityRenderer {
         
         // Calculate trail length based on age and speed
         const estimatedDistance = (projectile.speed || 200) * ageInSeconds;
-        const maxTrailDistance = Math.max(estimatedDistance * 0.6, radius * 3);
+        const maxTrailDistance = Math.max(estimatedDistance * 0.80, radius * 3);
         
         for (let i = 1; i <= trailCount; i++) {
             const trailDistance = i * trailSpacing;
