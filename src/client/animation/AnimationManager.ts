@@ -7,9 +7,15 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 export class AnimationManager {
     private scene: Phaser.Scene;
     private entityTweens: Map<string, Phaser.Tweens.Tween> = new Map();
+    private hitMarkerGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private cameraManager: any = null;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
     }
 
     /**
@@ -61,10 +67,135 @@ export class AnimationManager {
     }
 
     /**
+     * Creates a hit marker at the specified location
+     */
+    createHitMarker(x: number, y: number, damageType: 'auto-attack' | 'ability' = 'auto-attack'): void {
+        // Create hit marker graphics
+        const hitMarker = this.scene.add.graphics();
+        
+        // Position the graphics object at the world coordinates
+        hitMarker.setPosition(x, y);
+        
+        // Set color based on damage type
+        let color: number;
+        switch (damageType) {
+            case 'ability':
+                color = CLIENT_CONFIG.HIT_MARKERS.COLORS.ABILITY;
+                break;
+            case 'auto-attack':
+            default:
+                color = CLIENT_CONFIG.HIT_MARKERS.COLORS.AUTO_ATTACK;
+                break;
+        }
+        
+        // Draw crosshair hit marker centered at (0, 0) since we positioned the graphics object
+        const size = CLIENT_CONFIG.HIT_MARKERS.SIZE;
+        const thickness = CLIENT_CONFIG.HIT_MARKERS.THICKNESS;
+        
+        // For ability damage, draw white outline first, then purple main lines
+        if (damageType === 'ability') {
+            const outlineThickness = CLIENT_CONFIG.HIT_MARKERS.OUTLINE.THICKNESS;
+            const outlineColor = CLIENT_CONFIG.HIT_MARKERS.OUTLINE.COLOR;
+            
+            // Draw white outline (thicker)
+            hitMarker.lineStyle(thickness + outlineThickness, outlineColor, 1);
+            hitMarker.beginPath();
+            hitMarker.moveTo(-size, -size);
+            hitMarker.lineTo(size, size);
+            hitMarker.moveTo(size, -size);
+            hitMarker.lineTo(-size, size);
+            hitMarker.strokePath();
+            
+            // Draw purple main lines on top (thicker for abilities)
+            hitMarker.lineStyle(thickness + 1, color, 1);
+            hitMarker.beginPath();
+            hitMarker.moveTo(-size, -size);
+            hitMarker.lineTo(size, size);
+            hitMarker.moveTo(size, -size);
+            hitMarker.lineTo(-size, size);
+            hitMarker.strokePath();
+        } else {
+            // Auto-attack: just draw white lines
+            hitMarker.lineStyle(thickness, color, 1);
+            hitMarker.beginPath();
+            hitMarker.moveTo(-size, -size);
+            hitMarker.lineTo(size, size);
+            hitMarker.moveTo(size, -size);
+            hitMarker.lineTo(-size, size);
+            hitMarker.strokePath();
+        }
+        
+        // Set depth to appear above entities but below projectiles
+        hitMarker.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+        
+        // Ensure hit markers only appear on the main camera, not the HUD camera
+        // This prevents them from appearing in both world space and screen space
+        if (this.cameraManager) {
+            this.cameraManager.assignToMainCamera(hitMarker);
+        }
+        
+        // Generate unique ID for this hit marker
+        const markerId = `hit_marker_${Date.now()}_${Math.random()}`;
+        this.hitMarkerGraphics.set(markerId, hitMarker);
+        
+        // Animate the hit marker
+        this.animateHitMarker(markerId, hitMarker);
+    }
+    
+    /**
+     * Animates a hit marker with scale and fade effects
+     */
+    private animateHitMarker(markerId: string, hitMarker: Phaser.GameObjects.Graphics): void {
+        const config = CLIENT_CONFIG.HIT_MARKERS;
+        const duration = config.DURATION_MS;
+        
+        // Set initial scale
+        hitMarker.setScale(config.SCALE_ANIMATION.START_SCALE);
+        
+        // Scale up animation
+        this.scene.tweens.add({
+            targets: hitMarker,
+            scaleX: config.SCALE_ANIMATION.END_SCALE,
+            scaleY: config.SCALE_ANIMATION.END_SCALE,
+            duration: duration * config.SCALE_ANIMATION.FADE_OUT_START,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                // Start fade out
+                this.scene.tweens.add({
+                    targets: hitMarker,
+                    alpha: 0,
+                    duration: duration * (1 - config.SCALE_ANIMATION.FADE_OUT_START),
+                    ease: 'Power2',
+                    onComplete: () => {
+                        // Clean up
+                        this.cleanupHitMarker(markerId);
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Cleans up a hit marker
+     */
+    private cleanupHitMarker(markerId: string): void {
+        const hitMarker = this.hitMarkerGraphics.get(markerId);
+        if (hitMarker) {
+            hitMarker.destroy();
+            this.hitMarkerGraphics.delete(markerId);
+        }
+    }
+
+    /**
      * Clears all animations without destroying the manager
      */
     clearAllAnimations(): void {
         this.entityTweens.forEach(tween => tween.stop());
         this.entityTweens.clear();
+        
+        // Clean up all hit markers
+        this.hitMarkerGraphics.forEach((marker, markerId) => {
+            this.cleanupHitMarker(markerId);
+        });
     }
 } 

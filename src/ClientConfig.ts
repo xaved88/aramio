@@ -79,6 +79,24 @@ export const CLIENT_CONFIG = {
         ATTACK_TARGET_FLASH_ALPHA: 0.65, // alpha value when flashing (reduced fade - was 0.3)
         ATTACK_TARGET_QUICK_JUMP_DURATION_MS: 150, // quick jump duration for attack flash (increased from 50)
     },
+    HIT_MARKERS: {
+        DURATION_MS: 400, // how long hit markers stay visible
+        SIZE: 8, // size of the hit marker crosshair
+        THICKNESS: 2, // thickness of hit marker lines
+        COLORS: {
+            AUTO_ATTACK: 0xffffff, // white for auto-attacks
+            ABILITY: 0x9b59b6, // purple for abilities
+        },
+        OUTLINE: {
+            COLOR: 0xffffff, // white outline
+            THICKNESS: 3, // outline thickness
+        },
+        SCALE_ANIMATION: {
+            START_SCALE: 0.5, // start smaller
+            END_SCALE: 1.0, // grow to normal size
+            FADE_OUT_START: 0.6, // when to start fading out (60% through animation)
+        },
+    },
     RESPAWN_RING: {
         RADIUS: 25, // slightly larger than player radius
         THICKNESS: 3,

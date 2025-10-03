@@ -125,6 +125,7 @@ export class GameScene extends Phaser.Scene {
         this.entityManager.setCameraManager(this.cameraManager);
         this.cameraManager.setEntityManager(this.entityManager);
         this.gameObjectFactory.setCameraManager(this.cameraManager);
+        this.animationManager.setCameraManager(this.cameraManager);
         
         // Set player session ID in managers
         this.entityManager.setPlayerSessionId(this.playerSessionId!);
@@ -228,7 +229,44 @@ export class GameScene extends Phaser.Scene {
             const isPlayerInvolved = this.isPlayerInvolvedInAttack(combatantId, sourceId);
             
             this.animationManager.animateDamageTarget(combatantId, combatantGraphics, isPlayerInvolved);
+            
+            // Add hit marker only if player is the attacker (dealing damage), not the target
+            // combatantId is the target, sourceId is the attacker
+            if (this.isPlayerAttacking(combatantId, sourceId) && this.lastState) {
+                const sharedState = convertToSharedGameState(this.lastState);
+                const target = sharedState.combatants.get(combatantId);
+                
+                if (target) {
+                    // Determine damage type from the damage event
+                    const damageType = this.getDamageTypeFromEvent(combatantId, sourceId);
+                    
+                    // Create hit marker at target location (where the hit occurred)
+                    this.animationManager.createHitMarker(target.x, target.y, damageType);
+                }
+            }
         }
+    }
+    
+    /**
+     * Determines the damage type (auto-attack vs ability) from damage events
+     */
+    private getDamageTypeFromEvent(targetId: CombatantId, sourceId?: CombatantId): 'auto-attack' | 'ability' {
+        if (!this.lastState || !sourceId) return 'auto-attack';
+        
+        const sharedState = convertToSharedGameState(this.lastState);
+        
+        // Look for recent damage events involving these combatants
+        const recentEvents = sharedState.damageEvents.filter(event => 
+            event.sourceId === sourceId && event.targetId === targetId &&
+            event.timestamp >= sharedState.gameTime - 100 // Within last 100ms
+        );
+        
+        if (recentEvents.length > 0) {
+            const latestEvent = recentEvents[recentEvents.length - 1];
+            return latestEvent.damageSource as 'auto-attack' | 'ability';
+        }
+        
+        return 'auto-attack'; // Default fallback
     }
     
     /**
@@ -246,6 +284,17 @@ export class GameScene extends Phaser.Scene {
         const isPlayerSource = !!(sourceEntity && isHeroCombatant(sourceEntity) && sourceEntity.controller === this.playerSessionId);
         
         return isPlayerTarget || isPlayerSource;
+    }
+    
+    /**
+     * Helper method to check if the player is the attacker (dealing damage)
+     */
+    private isPlayerAttacking(targetId: CombatantId, sourceId?: CombatantId): boolean {
+        if (!this.playerSessionId || !sourceId) return false;
+        
+        // Check if player is the source (attacker)
+        const sourceEntity = this.lastState ? convertToSharedGameState(this.lastState).combatants.get(sourceId) : null;
+        return !!(sourceEntity && isHeroCombatant(sourceEntity) && sourceEntity.controller === this.playerSessionId);
     }
 
     private updateHUD(state: SharedGameState) {
