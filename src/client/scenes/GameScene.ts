@@ -209,6 +209,9 @@ export class GameScene extends Phaser.Scene {
                 if (isPlayerTarget) {
                     // Track the attacker as a recent attacker
                     this.entityManager.trackRecentAttacker(event.sourceId, event.timestamp);
+                    
+                    // Trigger camera shake when player takes damage
+                    this.cameraManager.triggerShake();
                 }
             }
             

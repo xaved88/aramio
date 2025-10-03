@@ -179,4 +179,21 @@ export class CameraManager {
     assignToMainCamera(object: Phaser.GameObjects.GameObject): void {
         this.hudCamera.ignore(object);
     }
+
+    /**
+     * Triggers a camera shake effect
+     */
+    triggerShake(): void {
+        if (!CLIENT_CONFIG.CAMERA.SHAKE.ENABLED) return;
+        
+        // Use Phaser's built-in camera shake
+        this.camera.shake(
+            CLIENT_CONFIG.CAMERA.SHAKE.DURATION_MS,
+            CLIENT_CONFIG.CAMERA.SHAKE.INTENSITY,
+            true, // force shake even if already shaking
+            undefined, // callback
+            true // shake on both X and Y axes
+        );
+    }
+
 }
