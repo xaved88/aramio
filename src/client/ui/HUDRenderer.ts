@@ -44,7 +44,6 @@ export class HUDRenderer {
         healthText: Phaser.GameObjects.Text;
         experienceBar: Phaser.GameObjects.Graphics;
         experienceBarBackground: Phaser.GameObjects.Graphics;
-        experienceText: Phaser.GameObjects.Text;
         levelText: Phaser.GameObjects.Text;
         heroKillIcon: Phaser.GameObjects.Graphics;
         heroKillText: Phaser.GameObjects.Text;
@@ -62,7 +61,7 @@ export class HUDRenderer {
         }
         
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
-        const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
+        const levelConfig = CLIENT_CONFIG.HUD.LEVEL_INDICATOR;
         const killConfig = CLIENT_CONFIG.HUD.KILL_COUNTERS;
         
         // Create health bar background
@@ -87,45 +86,56 @@ export class HUDRenderer {
         // Create health text
         const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100/100', {
             fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
-            color: hexToColorString(healthConfig.TEXT_COLOR)
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            color: hexToColorString(healthConfig.TEXT_COLOR),
+            stroke: '#000000',
+            strokeThickness: 1,
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: false,
+                fill: true
+            }
         }).setOrigin(0.5);
         healthText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         healthText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(healthText);
         
-        // Create experience bar background
+        // Create circular XP bar background (dark circle)
         const experienceBarBackground = this.scene.add.graphics();
-        experienceBarBackground.fillStyle(expConfig.BACKGROUND_COLOR, CLIENT_CONFIG.HUD.EXPERIENCE_BAR.BACKGROUND_ALPHA);
-        experienceBarBackground.fillRect(
-            expConfig.X, 
-            expConfig.Y, 
-            expConfig.WIDTH, 
-            expConfig.HEIGHT
-        );
+        const circleRadius = levelConfig.RADIUS;
+        const circleX = levelConfig.X + circleRadius;
+        const circleY = levelConfig.Y + circleRadius;
+        
+        experienceBarBackground.lineStyle(levelConfig.LINE_WIDTH, levelConfig.BACKGROUND_COLOR, levelConfig.BACKGROUND_ALPHA);
+        experienceBarBackground.strokeCircle(circleX, circleY, circleRadius);
         experienceBarBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         experienceBarBackground.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(experienceBarBackground);
         
-        // Create experience bar
+        // Create circular XP bar (progress indicator)
         const experienceBar = this.scene.add.graphics();
         experienceBar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         experienceBar.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(experienceBar);
         
-        // Create experience text
-        const experienceText = this.scene.add.text(expConfig.X + expConfig.WIDTH / 2, expConfig.Y + expConfig.HEIGHT / 2, '0/10 XP', {
-            fontSize: CLIENT_CONFIG.UI.FONTS.SMALL,
-            color: hexToColorString(expConfig.TEXT_COLOR)
-        }).setOrigin(0.5);
-        experienceText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-        experienceText.setScrollFactor(0, 0); // Fixed to screen
-        this.hudContainer!.add(experienceText);
-        
-        // Create level text
-        const levelText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH + 10, healthConfig.Y + healthConfig.HEIGHT / 2, 'Lv.1', {
+        // Create level text (centered in the circular XP bar)
+        const levelText = this.scene.add.text(circleX, circleY, '1', {
             fontSize: CLIENT_CONFIG.HUD.LEVEL_TEXT.FONT_SIZE,
-            color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR)
-        }).setOrigin(0, 0.5);
+            color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR),
+            stroke: '#000000',
+            strokeThickness: 1,
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: true,
+                fill: true
+            }
+        }).setOrigin(0.5, 0.5);
         levelText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         levelText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(levelText);
@@ -142,7 +152,15 @@ export class HUDRenderer {
         // Create hero kill text
         const heroKillText = this.scene.add.text(killConfig.X + killConfig.SPACING, killConfig.Y, '0', {
             fontSize: killConfig.FONT_SIZE,
-            color: hexToColorString(killConfig.TEXT_COLOR)
+            color: hexToColorString(killConfig.TEXT_COLOR),
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0, 0.5);
         heroKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         heroKillText.setScrollFactor(0, 0); // Fixed to screen
@@ -172,7 +190,15 @@ export class HUDRenderer {
         // Create minion kill text
         const minionKillText = this.scene.add.text(minionX + killConfig.SPACING, minionY, '0', {
             fontSize: killConfig.FONT_SIZE,
-            color: hexToColorString(killConfig.TEXT_COLOR)
+            color: hexToColorString(killConfig.TEXT_COLOR),
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0, 0.5);
         minionKillText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         minionKillText.setScrollFactor(0, 0); // Fixed to screen
@@ -181,35 +207,56 @@ export class HUDRenderer {
         // Create rewards counter configuration
         const rewardsConfig = CLIENT_CONFIG.HUD.REWARDS_COUNTER;
         
-        // Create rewards icon (half-square/half-circle)
+        // Create rewards icon (gift box outline)
         const rewardsIcon = this.scene.add.graphics();
-        rewardsIcon.fillStyle(rewardsConfig.ICON_COLOR, 1);
+        rewardsIcon.lineStyle(2, rewardsConfig.ICON_COLOR, 1);
         
-        // Position rewards icon horizontally after minion kill counter
-        const rewardsX = minionX + killConfig.SPACING + 40; // Position after minion text
-        const rewardsY = rewardsConfig.Y; // Same Y as kill counters
-        const rewardsHalfSize = rewardsConfig.ICON_SIZE / 2;
+        // Position rewards icon centered under level indicator
+        const rewardsIconX = rewardsConfig.X - rewardsConfig.SPACING / 2; // Center icon to the left
+        const rewardsTextX = rewardsConfig.X + rewardsConfig.SPACING / 2 + 8; // Center text to the right with more spacing
+        const rewardsY = rewardsConfig.Y;
+        const rewardsSize = rewardsConfig.ICON_SIZE;
+        const rewardsHalfSize = rewardsSize / 2;
         
-        // Draw half-square/half-circle shape
+        // Draw gift box outline
+        // Main box
+        rewardsIcon.strokeRect(rewardsIconX - rewardsHalfSize, rewardsY - rewardsHalfSize, rewardsSize, rewardsSize);
+        
+        // Ribbon/bow (vertical line)
         rewardsIcon.beginPath();
-        // Bottom half (square)
-        rewardsIcon.moveTo(rewardsX - rewardsHalfSize, rewardsY);
-        rewardsIcon.lineTo(rewardsX - rewardsHalfSize, rewardsY + rewardsHalfSize);
-        rewardsIcon.lineTo(rewardsX + rewardsHalfSize, rewardsY + rewardsHalfSize);
-        rewardsIcon.lineTo(rewardsX + rewardsHalfSize, rewardsY);
-        // Top half (circle)
-        rewardsIcon.arc(rewardsX, rewardsY, rewardsHalfSize, 0, Math.PI, true);
-        rewardsIcon.closePath();
-        rewardsIcon.fillPath();
+        rewardsIcon.moveTo(rewardsIconX, rewardsY - rewardsHalfSize);
+        rewardsIcon.lineTo(rewardsIconX, rewardsY + rewardsHalfSize);
+        rewardsIcon.strokePath();
+        
+        // Ribbon/bow (horizontal line)
+        rewardsIcon.beginPath();
+        rewardsIcon.moveTo(rewardsIconX - rewardsHalfSize, rewardsY);
+        rewardsIcon.lineTo(rewardsIconX + rewardsHalfSize, rewardsY);
+        rewardsIcon.strokePath();
+        
+        // Bow on top (inverted V shape)
+        rewardsIcon.beginPath();
+        rewardsIcon.moveTo(rewardsIconX - rewardsHalfSize / 2, rewardsY - rewardsHalfSize - 4);
+        rewardsIcon.lineTo(rewardsIconX, rewardsY - rewardsHalfSize - 2);
+        rewardsIcon.lineTo(rewardsIconX + rewardsHalfSize / 2, rewardsY - rewardsHalfSize - 4);
+        rewardsIcon.strokePath();
         rewardsIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         rewardsIcon.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(rewardsIcon);
 
         // Create rewards text
-        const rewardsText = this.scene.add.text(rewardsX + rewardsConfig.SPACING, rewardsY, '0', {
+        const rewardsText = this.scene.add.text(rewardsTextX, rewardsY, '0', {
             fontSize: rewardsConfig.FONT_SIZE,
-            color: hexToColorString(rewardsConfig.TEXT_COLOR)
-        }).setOrigin(0, 0.5);
+            color: hexToColorString(rewardsConfig.TEXT_COLOR),
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: false,
+                fill: true
+            }
+        }).setOrigin(0.5, 0.5);
         rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         rewardsText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(rewardsText);
@@ -220,7 +267,6 @@ export class HUDRenderer {
             healthText,
             experienceBar,
             experienceBarBackground,
-            experienceText,
             levelText,
             heroKillIcon,
             heroKillText,
@@ -242,7 +288,6 @@ export class HUDRenderer {
             healthText: Phaser.GameObjects.Text;
             experienceBar: Phaser.GameObjects.Graphics;
             experienceBarBackground: Phaser.GameObjects.Graphics;
-            experienceText: Phaser.GameObjects.Text;
             levelText: Phaser.GameObjects.Text;
             heroKillIcon: Phaser.GameObjects.Graphics;
             heroKillText: Phaser.GameObjects.Text;
@@ -254,7 +299,7 @@ export class HUDRenderer {
         gameTime: number
     ): void {
         const healthConfig = CLIENT_CONFIG.HUD.HEALTH_BAR;
-        const expConfig = CLIENT_CONFIG.HUD.EXPERIENCE_BAR;
+        const levelConfig = CLIENT_CONFIG.HUD.LEVEL_INDICATOR;
         const healthPercent = player.health / player.maxHealth;
         
         // Update health bar
@@ -267,33 +312,68 @@ export class HUDRenderer {
             healthConfig.HEIGHT
         );
         
-        // Update health text
-        hudElements.healthText.setText(`${Math.round(player.health)}/${Math.round(player.maxHealth)}`);
+        // Update health text with thousand separators
+        const currentHealth = Math.round(player.health).toLocaleString();
+        const maxHealth = Math.round(player.maxHealth).toLocaleString();
+        hudElements.healthText.setText(`${currentHealth}/${maxHealth}`);
         
-        // Update experience bar
+        // Update circular experience bar
         const experiencePercent = player.experience / player.experienceNeeded;
         
         hudElements.experienceBar.clear();
-        hudElements.experienceBar.fillStyle(expConfig.EXPERIENCE_COLOR, 1);
-        hudElements.experienceBar.fillRect(
-            expConfig.X, 
-            expConfig.Y, 
-            expConfig.WIDTH * experiencePercent, 
-            expConfig.HEIGHT
-        );
+        const circleRadius = levelConfig.RADIUS;
+        const circleX = levelConfig.X + circleRadius;
+        const circleY = levelConfig.Y + circleRadius;
         
-        // Update experience text
-        hudElements.experienceText.setText(`${Math.floor(player.experience)}/${Math.round(player.experienceNeeded)} XP`);
+        // Draw circular progress (gold arc)
+        hudElements.experienceBar.lineStyle(levelConfig.LINE_WIDTH, levelConfig.EXPERIENCE_COLOR, 1);
+        hudElements.experienceBar.beginPath();
+        hudElements.experienceBar.arc(circleX, circleY, circleRadius, -Math.PI / 2, -Math.PI / 2 + (2 * Math.PI * experiencePercent), false);
+        hudElements.experienceBar.strokePath();
+        
+        // No experience text to update - removed XP counter
         
         // Update level text
-        hudElements.levelText.setText(`Lv.${player.level}`);
+        hudElements.levelText.setText(`${player.level}`);
 
         // Update kill counters
-        hudElements.heroKillText.setText(player.roundStats.heroKills.toString());
-        hudElements.minionKillText.setText(player.roundStats.minionKills.toString());
+        // hudElements.heroKillText.setText(player.roundStats.heroKills.toString());
+        // hudElements.minionKillText.setText(player.roundStats.minionKills.toString());
+        
+        // Hide kill counters
+        hudElements.heroKillText.setVisible(false);
+        hudElements.heroKillIcon.setVisible(false);
+        hudElements.minionKillText.setVisible(false);
+        hudElements.minionKillIcon.setVisible(false);
 
-        // Update rewards counter
-        hudElements.rewardsText.setText(player.levelRewards.length.toString());
+        // Update rewards counter (hide if 0, add pulse animation)
+        const rewardsCount = player.levelRewards.length;
+        if (rewardsCount > 0) {
+            hudElements.rewardsText.setText(rewardsCount.toString());
+            hudElements.rewardsText.setVisible(true);
+            hudElements.rewardsIcon.setVisible(true);
+            
+            // Add very subtle pulsing animation (icon only)
+            if (!hudElements.rewardsIcon.getData('isPulsing')) {
+                hudElements.rewardsIcon.setData('isPulsing', true);
+                
+                this.scene.tweens.add({
+                    targets: [hudElements.rewardsIcon],
+                    scaleX: 1.02,
+                    scaleY: 1.02,
+                    duration: 2000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        } else {
+            hudElements.rewardsText.setVisible(false);
+            hudElements.rewardsIcon.setVisible(false);
+            // Stop any existing animation and reset pulsing data
+            this.scene.tweens.killTweensOf([hudElements.rewardsIcon]);
+            hudElements.rewardsIcon.setData('isPulsing', false);
+        }
     }
 
 } 

@@ -97,23 +97,23 @@ export const CLIENT_CONFIG = {
         LINE_ALPHA: 0.3,
     },
     HUD: {
+        LEVEL_INDICATOR: {
+            X: 25, // Left side (level indicator first)
+            Y: 25, // Top-left corner (circle center will be at Y: 45)
+            RADIUS: 16, // Radius of the circular XP indicator
+            BACKGROUND_COLOR: 0x333333,
+            EXPERIENCE_COLOR: 0xf1c40f, // yellow/gold
+            TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
+            LINE_WIDTH: 8, // Thickness of the circular indicator
+        },
         HEALTH_BAR: {
-            X: 20,
-            Y: 20,
+            X: 62, // Closer to level indicator
+            Y: 31, // Health bar center will be at Y: 34 (same as level indicator center)
             WIDTH: 200,
             HEIGHT: 20,
             BACKGROUND_COLOR: 0x333333,
             HEALTH_COLOR: 0x2ecc71, // green
-            TEXT_COLOR: 0xffffff,
-            BACKGROUND_ALPHA: 0.8,
-        },
-        EXPERIENCE_BAR: {
-            X: 20,
-            Y: 50,
-            WIDTH: 200,
-            HEIGHT: 15,
-            BACKGROUND_COLOR: 0x333333,
-            EXPERIENCE_COLOR: 0xf1c40f, // yellow
             TEXT_COLOR: 0xffffff,
             BACKGROUND_ALPHA: 0.8,
         },
@@ -132,18 +132,18 @@ export const CLIENT_CONFIG = {
             COLOR: 0xffffff,
         },
         KILL_COUNTERS: {
-            X: 30,
-            Y: 80, // Below experience bar
+            X: 127, // Centered below health bar (adjusted for group width)
+            Y: 67, // Below health bar
             ICON_SIZE: 12,
             SPACING: 20, // Reduced spacing between icon and number
             TEXT_COLOR: 0xffffff,
             FONT_SIZE: '14px',
         },
         REWARDS_COUNTER: {
-            X: 20,
-            Y: 80, // Same Y as kill counters
+            X: 40, // Centered under level indicator (level indicator center is at X: 36)
+            Y: 77, // Below level indicator circle with more spacing
             ICON_SIZE: 12,
-            SPACING: 20, // Reduced spacing between icon and number
+            SPACING: 8, // Closer spacing between icon and number
             TEXT_COLOR: 0xf1c40f, // yellow/gold
             FONT_SIZE: '14px',
             ICON_COLOR: 0xf1c40f, // yellow/gold

@@ -39,7 +39,6 @@ export class UIManager {
         healthText: Phaser.GameObjects.Text | null;
         experienceBar: Phaser.GameObjects.Graphics | null;
         experienceBarBackground: Phaser.GameObjects.Graphics | null;
-        experienceText: Phaser.GameObjects.Text | null;
         levelText: Phaser.GameObjects.Text | null;
         heroKillIcon: Phaser.GameObjects.Graphics | null;
         heroKillText: Phaser.GameObjects.Text | null;
@@ -53,7 +52,6 @@ export class UIManager {
         healthText: null,
         experienceBar: null,
         experienceBarBackground: null,
-        experienceText: null,
         levelText: null,
         heroKillIcon: null,
         heroKillText: null,
@@ -207,7 +205,6 @@ export class UIManager {
             healthText: this.hudElements.healthText!,
             experienceBar: this.hudElements.experienceBar!,
             experienceBarBackground: this.hudElements.experienceBarBackground!,
-            experienceText: this.hudElements.experienceText!,
             levelText: this.hudElements.levelText!,
             heroKillIcon: this.hudElements.heroKillIcon!,
             heroKillText: this.hudElements.heroKillText!,

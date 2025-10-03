@@ -989,6 +989,9 @@ export class GameScene extends Phaser.Scene {
      * Called when scene is shut down - Phaser handles most cleanup automatically
      */
     shutdown() {
+        // Reset cursor visibility when leaving game scene
+        this.input.setDefaultCursor('default');
+        
         // Only clean up custom resources that Phaser doesn't handle automatically
         if (this.entityManager) {
             this.entityManager.destroy();

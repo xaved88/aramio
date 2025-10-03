@@ -78,6 +78,9 @@ export class LobbyScene extends Phaser.Scene {
     async create() {
         console.log('Creating lobby scene...');
         
+        // Reset cursor visibility (in case coming from game scene)
+        this.input.setDefaultCursor('default');
+        
         // Reset all state for fresh scene
         this.resetSceneState();
         
