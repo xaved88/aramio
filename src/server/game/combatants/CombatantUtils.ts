@@ -218,6 +218,11 @@ export class CombatantUtils {
             return;
         }
 
+        // Only reflect auto-attack damage, not ability damage
+        if (damageSource !== 'auto-attack') {
+            return;
+        }
+
         // Find all reflect effects on the combatant that took damage
         const reflectEffects = Array.from(combatant.effects).filter(effect => 
             effect != null && effect.type === 'reflect'
