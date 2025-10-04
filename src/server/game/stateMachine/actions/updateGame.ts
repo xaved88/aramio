@@ -728,7 +728,18 @@ function handlePassiveHealing(state: GameState, gameplayConfig: GameplayConfig):
             }
             
             // Apply healing (percentage of max health per second, adjusted for update rate)
-            const healAmount = (hero.getMaxHealth() * PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND / 100) * (SERVER_CONFIG.UPDATE_RATE_MS / 1000);
+            // Check for ability-specific passive regen multiplier
+            const baseHealPercent = PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND;
+            let healPercent = baseHealPercent;
+            
+            // Get ability-specific passive regen multiplier from config
+            if (hero.ability.type === 'mercenary') {
+                const mercenaryConfig = gameplayConfig.COMBAT.ABILITIES.mercenary;
+                const multiplier = mercenaryConfig.PASSIVE_REGEN_MULTIPLIER || 1.0;
+                healPercent = baseHealPercent * multiplier;
+            }
+            
+            const healAmount = (hero.getMaxHealth() * healPercent / 100) * (SERVER_CONFIG.UPDATE_RATE_MS / 1000);
             CombatantUtils.healCombatant(hero, healAmount);
         } else {
             // Remove passive healing effect if not enough time has passed

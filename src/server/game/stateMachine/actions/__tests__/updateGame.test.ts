@@ -8,6 +8,7 @@ import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../../abilities/AbilityFactory';
 import { MinionManager } from '../../../combatants/MinionManager';
 import { TEST_GAMEPLAY_CONFIG } from '../../../../config/TestGameplayConfig';
+import { SERVER_CONFIG } from '../../../../../ServerConfig';
 
 describe('handleUpdateGame', () => {
     let gameState: GameState;
@@ -1310,6 +1311,32 @@ describe('handleUpdateGame', () => {
             // Check that passive healing effect was not applied
             const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
             expect(hasPassiveHealing).toBe(false);
+        });
+
+        it('should increase passive healing for mercenary', () => {
+            // Set hero to have mercenary ability
+            hero.ability.type = 'mercenary';
+            
+            // Set hero to be damaged but not at max health
+            hero.health = hero.maxHealth * 0.5; // 50% health
+            
+            // Set last damage time to be past the threshold
+            const thresholdMs = TEST_GAMEPLAY_CONFIG.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
+            hero.lastDamageTime = gameState.gameTime - thresholdMs - 1000;
+
+            const initialHealth = hero.health;
+            
+            result = handleUpdateGame(gameState, action, TEST_GAMEPLAY_CONFIG, minionManager);
+
+            // Check that passive healing effect was applied
+            const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
+            expect(hasPassiveHealing).toBe(true);
+            
+            // Check that healing amount is increased for mercenary using config multiplier
+            const mercenaryConfig = TEST_GAMEPLAY_CONFIG.COMBAT.ABILITIES.mercenary;
+            const multiplier = mercenaryConfig.PASSIVE_REGEN_MULTIPLIER || 1.0;
+            const expectedHealAmount = (hero.maxHealth * TEST_GAMEPLAY_CONFIG.PASSIVE_HEALING.HEAL_PERCENT_PER_SECOND * multiplier / 100) * (SERVER_CONFIG.UPDATE_RATE_MS / 1000);
+            expect(hero.health).toBe(initialHealth + expectedHealAmount);
         });
     });
 }); 

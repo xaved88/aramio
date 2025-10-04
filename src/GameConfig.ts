@@ -55,6 +55,7 @@ export const GAMEPLAY_CONFIG = {
                 ATTACK_BOOST_BASE: 3.0, // Reduced from 6.0 (300% attack boost instead of 600%)
                 MOVE_SPEED_BOOST_BASE: 0.7, //+70% move speed boost (no level scaling)
                 RAGE_ATTACK_RADIUS: 25,
+                PASSIVE_REGEN_MULTIPLIER: 3.0, // Increased passive regeneration
                 RAGE_WIND_UP: 0.1,
                 // Removed armor values - no longer grants bullet or ability armor during rage
             },
