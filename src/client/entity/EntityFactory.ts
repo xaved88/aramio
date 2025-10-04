@@ -1,15 +1,19 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
+import { ColorManager } from '../shaders/ColorManager';
 
 /**
  * EntityFactory creates the appropriate graphics objects for different entity types
  */
 export class EntityFactory {
     private scene: Phaser.Scene;
+    private colorManager: ColorManager;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+        this.colorManager = new ColorManager(scene);
+        this.colorManager.initialize();
     }
 
     /**
@@ -62,11 +66,17 @@ export class EntityFactory {
     /**
      * Creates a sprite for hero entities
      */
-    createHeroSprite(abilityType: string = 'default'): Phaser.GameObjects.Sprite {
+    createHeroSprite(abilityType: string = 'default', combatant?: any): Phaser.GameObjects.Sprite {
         const textureKey = this.getHeroTextureKey(abilityType);
         const sprite = this.scene.add.sprite(0, 0, textureKey);
         sprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
         sprite.setOrigin(0.5, 0.5);
+        
+        // Apply colors if combatant data is provided
+        if (combatant) {
+            this.colorManager.applyHeroColors(sprite, combatant);
+        }
+        
         return sprite;
     }
 
@@ -98,5 +108,12 @@ export class EntityFactory {
         const graphics = this.scene.add.graphics();
         graphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 1); // Slightly above heroes
         return graphics;
+    }
+
+    /**
+     * Gets the color manager for external use
+     */
+    getColorManager(): ColorManager {
+        return this.colorManager;
     }
 } 

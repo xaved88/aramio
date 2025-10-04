@@ -54,6 +54,9 @@ export class EntityManager {
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
         this.entityRenderer.setPlayerSessionId(sessionId);
+        // Also set it in the color manager
+        const colorManager = this.entityFactory.getColorManager();
+        colorManager.setPlayerSessionId(sessionId);
     }
 
     setCameraManager(cameraManager: any): void {
@@ -157,7 +160,7 @@ export class EntityManager {
         // Create sprite and health bar for heroes
         if (!entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
             const abilityType = combatantData.ability?.type || 'default';
-            entitySprite = this.entityFactory.createHeroSprite(abilityType);
+            entitySprite = this.entityFactory.createHeroSprite(abilityType, combatantData);
             // Set initial position immediately to avoid spawning at (0,0)
             entitySprite.setPosition(combatantData.x, combatantData.y);
             
@@ -170,6 +173,9 @@ export class EntityManager {
         } else if (entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
             // Check if ability type has changed and update texture accordingly
             this.updateHeroSpriteTexture(entitySprite, combatantData);
+            
+            // Update hero colors based on current state
+            this.updateHeroColors(entitySprite, combatantData);
         }
         
         // Create health bar for heroes
@@ -865,6 +871,14 @@ export class EntityManager {
         if (sprite.texture.key !== expectedTextureKey) {
             sprite.setTexture(expectedTextureKey);
         }
+    }
+
+    /**
+     * Updates hero colors based on current state
+     */
+    private updateHeroColors(sprite: Phaser.GameObjects.Sprite, combatant: HeroCombatant): void {
+        const colorManager = this.entityFactory.getColorManager();
+        colorManager.updateHeroColors(sprite, combatant);
     }
 
     /**
