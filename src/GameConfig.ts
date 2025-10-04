@@ -86,11 +86,11 @@ export const GAMEPLAY_CONFIG = {
             }
         },
         CRADLE: {
-            HEALTH: 5000,
+            HEALTH: 4000,
             ATTACK_RADIUS: 115,
-            ATTACK_STRENGTH: 100,
+            ATTACK_STRENGTH: 150,
             ATTACK_SPEED: 1, // attacks per second
-            WIND_UP: 0.1, // 0.1 seconds wind-up time for cradles
+            WIND_UP: 1,
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
@@ -126,9 +126,9 @@ export const GAMEPLAY_CONFIG = {
         LEVEL_UP_QUADRATIC_THRESHOLD: 10, // Level where quadratic scaling kicks in
         LEVEL_UP_QUADRATIC_MULTIPLIER: 5, // Additional XP per level above threshold
         STAT_BOOST_PERCENTAGE: 0.10, // 10% boost per level
-        RANGE_BOOST_PERCENTAGE: 0.035, // reduced from 0.10 to prevent excessive late-game range at higher levels
+        RANGE_BOOST_PERCENTAGE: 0.025, // reduced from 0.10 to prevent excessive late-game range at higher levels
         RESPAWN_LEVEL_MULTIPLIER: 0.10, // 10% increase per level
-        RESPAWN_MAX_TIME_MS: 18000, // Maximum respawn time cap
+        RESPAWN_MAX_TIME_MS: 20000, // Maximum respawn time cap
         MINION_KILLED: 3,
         HERO_KILL_MULTIPLIER: 4,
         TOWER_DESTROYED: 100,
