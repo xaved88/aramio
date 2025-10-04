@@ -56,6 +56,7 @@ export class EntityRenderer {
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         abilityIconText: Phaser.GameObjects.Text | undefined,
         healthBar: Phaser.GameObjects.Graphics | undefined,
+        effectOverlay?: Phaser.GameObjects.Graphics,
         state?: SharedGameState,
         playerSessionId?: ControllerId | null,
         isRecentAttacker?: boolean
@@ -63,9 +64,11 @@ export class EntityRenderer {
         // Render the main entity graphics or sprite
         this.renderEntityGraphics(combatant, graphics);
         
-        // Apply effects to the entity (only for graphics, not sprites)
+        // Apply effects to the entity (graphics directly, sprites via overlay)
         if (graphics instanceof Phaser.GameObjects.Graphics) {
-            this.applyEffectsToEntity(combatant, graphics);
+            this.applyEffectsToEntity(combatant, graphics, false);
+        } else if (graphics instanceof Phaser.GameObjects.Sprite && effectOverlay) {
+            this.applyEffectsToEntity(combatant, effectOverlay, true);
         }
         
         // Render respawn ring for heroes
@@ -109,7 +112,11 @@ export class EntityRenderer {
     /**
      * Applies visual effects to an entity based on its active effects
      */
-    private applyEffectsToEntity(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
+    private applyEffectsToEntity(combatant: Combatant, graphics: Phaser.GameObjects.Graphics, isOverlay: boolean = false): void {
+        // Only clear if this is an overlay (for hero sprites), not the main entity graphics
+        if (isOverlay) {
+            graphics.clear();
+        }
 
         // Check for nocollision effect
         const hasNoCollision = combatant.effects.some(effect => effect.type === 'nocollision');
