@@ -29,6 +29,18 @@ export class SimpletonBotStrategy {
             return commands;
         }
 
+        // Check if we're outnumbered and should play defensively
+        const allCombatants = Array.from(state.combatants.values());
+        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime)) {
+            // Retreat to nearest friendly structure for defensive positioning
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            commands.push({
+                type: 'move',
+                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
+            });
+            return commands;
+        }
+
         // Find all enemies (not just in range)
         const allEnemies = this.findAllEnemies(bot, state);
         
@@ -274,4 +286,5 @@ export class SimpletonBotStrategy {
         const allCombatants = Array.from(state.combatants.values());
         return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
     }
+
 } 

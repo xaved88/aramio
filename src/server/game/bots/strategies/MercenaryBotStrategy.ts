@@ -44,11 +44,23 @@ export class MercenaryBotStrategy {
             return commands;
         }
 
+        // Find all enemies first
+        const allEnemies = this.findAllEnemies(bot, state);
+        const allCombatants = Array.from(state.combatants.values());
+        
+        // Check if we're outnumbered and should play defensively
+        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime)) {
+            // Retreat to nearest friendly structure for defensive positioning
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            commands.push({
+                type: 'move',
+                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
+            });
+            return commands;
+        }
+
         // Check if we're currently in rage mode
         const isInRageMode = this.isInRageMode(bot, state);
-        
-        // Find all enemies
-        const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length > 0) {
             // Check if it's time to use rage

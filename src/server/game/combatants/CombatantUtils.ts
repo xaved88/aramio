@@ -296,4 +296,181 @@ export class CombatantUtils {
             y: basePosition.y + offsetY
         };
     }
+
+    /**
+     * Determines if a combatant should play defensively based on nearby enemy/friend ratio
+     * @param combatant The combatant to evaluate
+     * @param allCombatants Array of all combatants in the game
+     * @param currentTime Current game time for cooldown calculation
+     * @param nearbyRadius Radius to check for nearby units (default: 200)
+     * @returns true if the combatant should play defensively (more enemies than friends nearby)
+     */
+    static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number, nearbyRadius: number = 150): boolean {
+        // Count nearby enemies - only count heroes, not minions
+        const nearbyEnemies = allCombatants.filter((other: any) => {
+            if (other.team === combatant.team || other.health <= 0) {
+                return false;
+            }
+            
+            // Only count heroes as tactical threats
+            if (other.type !== 'hero') {
+                return false;
+            }
+            
+            const dx = other.x - combatant.x;
+            const dy = other.y - combatant.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance <= nearbyRadius;
+        });
+
+        // Count nearby friends (allies) - only count heroes, not minions
+        const nearbyFriends = allCombatants.filter((other: any) => {
+            if (other.team !== combatant.team || other.health <= 0 || other.id === combatant.id) {
+                return false;
+            }
+            
+            // Only count heroes as tactical allies
+            if (other.type !== 'hero') {
+                return false;
+            }
+            
+            const dx = other.x - combatant.x;
+            const dy = other.y - combatant.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance <= nearbyRadius;
+        });
+
+        // Require at least 2 more enemies than friends to trigger retreat behavior
+        // This allows safe fighting for smaller disadvantages
+        const shouldRetreat = nearbyEnemies.length > nearbyFriends.length + 2;
+        
+        // For extreme disadvantages, always retreat regardless of position
+        const extremeDisadvantage = nearbyEnemies.length > nearbyFriends.length + 3;
+        if (extremeDisadvantage) {
+            return true; // Always retreat when extremely outnumbered
+        }
+        
+        // If we're in a safe defensive position (near a friendly structure), allow fighting
+        // Apply this logic for any disadvantage to encourage safe fighting
+        if (nearbyEnemies.length > nearbyFriends.length && this.isNearFriendlyStructure(combatant, allCombatants)) {
+            // We're outnumbered but near safety - don't retreat, allow fighting
+            return false;
+        }
+        
+        // Only retreat if there's a significant disadvantage
+        const shouldBeDefensive = shouldRetreat;
+
+        
+        // Only apply cooldown when switching FROM defensive TO offensive
+        // Allow immediate switching TO defensive (when situation gets worse)
+        if (!shouldBeDefensive && combatant.wasDefensive) {
+            // Switching from defensive to offensive - check cooldown
+            const DEFENSIVE_COOLDOWN = 1000; // 1 second in milliseconds
+            if (combatant.lastDefensiveExitTime && (currentTime - combatant.lastDefensiveExitTime) < DEFENSIVE_COOLDOWN) {
+                return true; // Still in cooldown, stay defensive
+            }
+            combatant.lastDefensiveExitTime = currentTime;
+        }
+        
+        combatant.wasDefensive = shouldBeDefensive;
+        return shouldBeDefensive;
+    }
+
+    /**
+     * Gets the defensive retreat position for a combatant (nearest friendly structure)
+     * @param combatant The combatant that needs to retreat
+     * @param allCombatants Array of all combatants in the game
+     * @param gameplayConfig Game configuration containing cradle positions
+     * @returns Position of the nearest friendly structure for defensive retreat
+     */
+    static getDefensiveRetreatPosition(combatant: any, allCombatants: any[], gameplayConfig: any): { x: number, y: number } {
+        // Find all friendly defensive structures (turrets and cradles)
+        const friendlyStructures = allCombatants.filter((other: any) => 
+            other.team === combatant.team && 
+            other.health > 0 && 
+            (other.type === 'cradle' || other.type === 'turret')
+        );
+
+        if (friendlyStructures.length === 0) {
+            // Fallback to team spawn position if no structures found
+            return combatant.team === 'blue' 
+                ? gameplayConfig.CRADLE_POSITIONS.BLUE 
+                : gameplayConfig.CRADLE_POSITIONS.RED;
+        }
+
+        // Find the closest friendly structure
+        let closestStructure = friendlyStructures[0];
+        let closestDistance = Infinity;
+
+        friendlyStructures.forEach((structure: any) => {
+            const dx = structure.x - combatant.x;
+            const dy = structure.y - combatant.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestStructure = structure;
+            }
+        });
+
+        // Return position inside the friendly structure's attack range for protection
+        // Use the same logic as isNearFriendlyStructure for consistency
+        const defensiveRange = Math.max(closestStructure.attackRadius - 80, 80);
+        const dx = combatant.x - closestStructure.x;
+        const dy = combatant.y - closestStructure.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) {
+            // Combatant is at structure position, move to random position in protection range
+            const randomAngle = Math.random() * 2 * Math.PI;
+            return {
+                x: closestStructure.x + (Math.cos(randomAngle) * defensiveRange),
+                y: closestStructure.y + (Math.sin(randomAngle) * defensiveRange)
+            };
+        }
+
+        // Normalize direction and scale to retreat distance (toward structure)
+        const normalizedDx = -dx / distance; // Negative to move toward structure
+        const normalizedDy = -dy / distance; // Negative to move toward structure
+        
+        // Add randomness to prevent all bots from clustering at the same spot
+        const randomOffset = (Math.random() - 0.5) * 60; // ±30 pixels random offset
+        const randomAngle = Math.random() * 2 * Math.PI; // Random angle for offset
+        
+        const offsetX = Math.cos(randomAngle) * randomOffset;
+        const offsetY = Math.sin(randomAngle) * randomOffset;
+        
+        return {
+            x: closestStructure.x + (normalizedDx * defensiveRange) + offsetX,
+            y: closestStructure.y + (normalizedDy * defensiveRange) + offsetY
+        };
+    }
+
+    /**
+     * Checks if a combatant is near a friendly structure (turrets or cradles)
+     * Uses the same logic as defensive retreat positioning - inside attack range with buffer
+     * @param combatant The combatant to check
+     * @param allCombatants Array of all combatants in the game
+     * @returns true if the combatant is near a friendly structure in a defensive position
+     */
+    private static isNearFriendlyStructure(combatant: any, allCombatants: any[]): boolean {
+        return allCombatants.some((other: any) => {
+            if (other.team !== combatant.team || other.health <= 0) {
+                return false;
+            }
+            
+            // Only check turrets and cradles
+            if (other.type !== 'turret' && other.type !== 'cradle') {
+                return false;
+            }
+            
+            const dx = other.x - combatant.x;
+            const dy = other.y - combatant.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Expanded safe area for fighting - within attack range plus some buffer
+            const safeFightingRange = Math.max(other.attackRadius - 80, 60); // Smaller safe fighting area
+            return distance <= safeFightingRange;
+        });
+    }
 } 
