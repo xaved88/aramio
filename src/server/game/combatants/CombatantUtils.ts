@@ -241,4 +241,59 @@ export class CombatantUtils {
             }
         }
     }
+
+    /**
+     * Finds the nearest enemy turret within detection range, prioritizing by health
+     * @param source The source combatant (bot or minion)
+     * @param allCombatants Array of all combatants in the game
+     * @param detectionRange Range within which to detect turrets
+     * @returns The turret with lowest health within range, or null if none found
+     */
+    static findNearbyEnemyTurret(source: any, allCombatants: any[], detectionRange: number = 150): any | null {
+        const enemyTeam = source.team === 'blue' ? 'red' : 'blue';
+        
+        const enemyTurrets = allCombatants.filter(combatant => 
+            combatant.type === 'turret' && 
+            combatant.team === enemyTeam &&
+            combatant.health > 0
+        );
+        
+        // Find enemy turrets within detection range
+        const nearbyTurrets = enemyTurrets.filter(turret => {
+            const dx = turret.x - source.x;
+            const dy = turret.y - source.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < detectionRange;
+        });
+        
+        if (nearbyTurrets.length === 0) {
+            return null;
+        }
+        
+        // Prioritize the turret with the lowest health
+        return nearbyTurrets.reduce((lowestHealthTurret, turret) => {
+            return turret.health < lowestHealthTurret.health ? turret : lowestHealthTurret;
+        });
+    }
+
+    /**
+     * Gets the enemy cradle position for a given team
+     * @param team The team to get enemy cradle position for
+     * @param gameplayConfig Game configuration containing cradle positions
+     * @returns Position of the enemy cradle
+     */
+    static getEnemyCradlePosition(team: string, gameplayConfig: any): { x: number, y: number } {
+        const basePosition = team === 'blue' 
+            ? gameplayConfig.CRADLE_POSITIONS.RED 
+            : gameplayConfig.CRADLE_POSITIONS.BLUE;
+        
+        // Add some randomization to avoid all units targeting the exact same spot
+        const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
+        const offsetY = (Math.random() - 0.5) * 60; // ±30 pixels
+        
+        return {
+            x: basePosition.x + offsetX,
+            y: basePosition.y + offsetY
+        };
+    }
 } 

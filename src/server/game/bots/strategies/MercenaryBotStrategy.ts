@@ -1,6 +1,7 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { CombatantUtils } from '../../combatants/CombatantUtils';
 
 /**
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability
@@ -171,12 +172,21 @@ export class MercenaryBotStrategy {
             // Perfect distance or closer, stay in place
             return null;
         } else {
-            // No nearby enemies, move toward enemy base to find targets
-            const targetPosition = this.getEnemyCradlePosition(bot.team);
-            return {
-                type: 'move',
-                data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-            };
+            // No nearby enemies, check for nearby turrets first
+            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+            if (nearbyEnemyTurret) {
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                };
+            } else {
+                // Move toward enemy base to find targets
+                const targetPosition = this.getEnemyCradlePosition(bot.team);
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                };
+            }
         }
     }
 
@@ -185,12 +195,21 @@ export class MercenaryBotStrategy {
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length === 0) {
-            // No enemies, move toward enemy base to find targets
-            const targetPosition = this.getEnemyCradlePosition(bot.team);
-            return {
-                type: 'move',
-                data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-            };
+            // No enemies, check for nearby turrets first
+            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+            if (nearbyEnemyTurret) {
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                };
+            } else {
+                // Move toward enemy base to find targets
+                const targetPosition = this.getEnemyCradlePosition(bot.team);
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                };
+            }
         }
 
         // Find enemies that are safe to approach (not too many attackers)
@@ -376,52 +395,9 @@ export class MercenaryBotStrategy {
     }
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
-        const basePosition = team === 'blue' 
-            ? this.gameplayConfig.CRADLE_POSITIONS.RED 
-            : this.gameplayConfig.CRADLE_POSITIONS.BLUE;
-        
-        // Add some randomization to avoid all bots targeting the exact same spot
-        const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
-        const offsetY = (Math.random() - 0.5) * 60; // ±30 pixels
-        
-        return {
-            x: basePosition.x + offsetX,
-            y: basePosition.y + offsetY
-        };
+        return CombatantUtils.getEnemyCradlePosition(team, this.gameplayConfig);
     }
 
-    private getDistanceToBase(combatant: any, team: string): number {
-        const basePosition = team === 'blue' 
-            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
-            : this.gameplayConfig.CRADLE_POSITIONS.RED;
-        
-        const dx = combatant.x - basePosition.x;
-        const dy = combatant.y - basePosition.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    private getDirectionToBase(combatant: any, team: string): { x: number, y: number } {
-        const basePosition = team === 'blue' 
-            ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
-            : this.gameplayConfig.CRADLE_POSITIONS.RED;
-        
-        const dx = basePosition.x - combatant.x;
-        const dy = basePosition.y - combatant.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance === 0) {
-            return { x: 0, y: 0 };
-        }
-        
-        return {
-            x: dx / distance,
-            y: dy / distance
-        };
-    }
-
-    private getEnemyTeam(team: string): string {
-        return team === 'blue' ? 'red' : 'blue';
-    }
 
     private countEnemiesAttackingPosition(x: number, y: number, state: SharedGameState, bot: any): number {
         let count = 0;
@@ -441,7 +417,10 @@ export class MercenaryBotStrategy {
         return count;
     }
 
-
+    private findNearbyEnemyTurret(bot: any, state: SharedGameState): any | null {
+        const allCombatants = Array.from(state.combatants.values());
+        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
+    }
 
     private getDirectionFromTo(from: any, to: any): { x: number, y: number } {
         const dx = to.x - from.x;

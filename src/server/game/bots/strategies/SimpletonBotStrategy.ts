@@ -1,6 +1,7 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { CombatantUtils } from '../../combatants/CombatantUtils';
 
 export class SimpletonBotStrategy {
     private gameplayConfig: GameplayConfig;
@@ -53,12 +54,21 @@ export class SimpletonBotStrategy {
             // Stay in place to attack (combat system handles basic attacks automatically)
             // No movement command needed
         } else {
-            // Move toward enemy cradle
-            const targetPosition = this.getEnemyCradlePosition(bot.team);
-            commands.push({
-                type: 'move',
-                data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-            });
+            // Check if there's a nearby enemy turret to prioritize
+            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+            if (nearbyEnemyTurret) {
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                });
+            } else {
+                // Move toward enemy cradle
+                const targetPosition = this.getEnemyCradlePosition(bot.team);
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                });
+            }
         }
 
         return commands;
@@ -257,17 +267,11 @@ export class SimpletonBotStrategy {
     }
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
-        const basePosition = team === 'blue' 
-            ? this.gameplayConfig.CRADLE_POSITIONS.RED 
-            : this.gameplayConfig.CRADLE_POSITIONS.BLUE;
-        
-        // Add some randomization to avoid all bots targeting the exact same spot
-        const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
-        const offsetY = (Math.random() - 0.5) * 60; // ±30 pixels
-        
-        return {
-            x: basePosition.x + offsetX,
-            y: basePosition.y + offsetY
-        };
+        return CombatantUtils.getEnemyCradlePosition(team, this.gameplayConfig);
+    }
+
+    private findNearbyEnemyTurret(bot: any, state: SharedGameState): any | null {
+        const allCombatants = Array.from(state.combatants.values());
+        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
     }
 } 

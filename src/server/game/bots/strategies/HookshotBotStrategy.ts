@@ -1,6 +1,7 @@
 import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { CombatantUtils } from '../../combatants/CombatantUtils';
 
 /**
  * HookshotBotStrategy - A specialized bot behavior for heroes with Hookshot ability
@@ -64,12 +65,21 @@ export class HookshotBotStrategy {
             // Stay in place to fight the target we just hooked
             // No movement command needed
         } else {
-            // Position behind teammates for optimal Hookshot opportunities
-            const targetPosition = this.getOptimalPosition(bot, state);
-            commands.push({
-                type: 'move',
-                data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-            });
+            // Check if there's a nearby enemy turret to prioritize
+            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+            if (nearbyEnemyTurret) {
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                });
+            } else {
+                // Position behind teammates for optimal Hookshot opportunities
+                const targetPosition = this.getOptimalPosition(bot, state);
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                });
+            }
         }
 
         return commands;
@@ -299,53 +309,6 @@ export class HookshotBotStrategy {
         return team === 'blue' ? 'red' : 'blue';
     }
 
-    private countNearbyAllies(combatant: any, state: SharedGameState, radius: number): number {
-        let count = 0;
-        
-        Array.from(state.combatants.values()).forEach((ally: any) => {
-            if (ally.team === combatant.team && ally.id !== combatant.id && ally.health > 0) {
-                const dx = ally.x - combatant.x;
-                const dy = ally.y - combatant.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance <= radius) {
-                    count++;
-                }
-            }
-        });
-        
-        return count;
-    }
-
-    private findBestHookshotTarget(bot: any, state: SharedGameState): any | null {
-        let bestTarget: any = null;
-        let bestScore = -1;
-
-        state.combatants.forEach((enemy: any) => {
-            // Skip if not an enemy or if dead/respawning
-            if (enemy.team === bot.team || enemy.health <= 0 || enemy.state === 'respawning') {
-                return;
-            }
-
-            // Skip minions - only target heroes
-            if (enemy.type !== 'hero') {
-                return;
-            }
-
-            // Calculate target score
-            let score = 0;
-            
-            // Health bonus: lower health = higher score (easier to kill)
-            score += (100 - enemy.health) * 2;
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestTarget = enemy;
-            }
-        });
-
-        return bestTarget;
-    }
 
     private findEnemiesInRange(bot: any, state: SharedGameState): any[] {
         const enemies: any[] = [];
@@ -393,5 +356,10 @@ export class HookshotBotStrategy {
         // Check if there are enemies nearby that we could be fighting
         const enemiesInRange = this.findEnemiesInRange(bot, state);
         return enemiesInRange.length > 0;
+    }
+
+    private findNearbyEnemyTurret(bot: any, state: SharedGameState): any | null {
+        const allCombatants = Array.from(state.combatants.values());
+        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
     }
 }
