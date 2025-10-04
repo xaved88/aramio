@@ -33,10 +33,11 @@ export class RewardCard {
     private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     private cameraManager: any = null;
     private hudContainer: HUDContainer | null = null;
-    private background!: Phaser.GameObjects.Rectangle;
+    private background!: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Graphics;
     private titleText!: Phaser.GameObjects.Text;
     private descriptionText!: Phaser.GameObjects.Text;
     private iconImage: Phaser.GameObjects.Image | null = null;
+    private cornerDecorations: Phaser.GameObjects.Graphics[] = [];
     private rewardId: string;
     private onClick?: (rewardId: string) => void;
     private _isInteractive: boolean = false;
@@ -160,14 +161,77 @@ export class RewardCard {
             this.hudContainer.setCameraManager(this.cameraManager);
         }
         
-        // Background rectangle with dynamic styling
-        this.background = this.scene.add.rectangle(
-            0, 0, 
-            config.width, config.height, 
-            this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha
-        );
-        this.background.setStrokeStyle(this.cardStyle.borderWidth, this.cardStyle.borderColor);
+        // Background shape with dynamic styling
+        if (this.rewardType === 'ability_stat') {
+            // Rounded rectangle for ability stat rewards
+            this.background = this.scene.add.graphics();
+            this.background.fillStyle(this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha);
+            this.background.fillRoundedRect(
+                -config.width / 2, 
+                -config.height / 2, 
+                config.width, 
+                config.height, 
+                12
+            );
+            this.background.lineStyle(this.cardStyle.borderWidth, this.cardStyle.borderColor);
+            this.background.strokeRoundedRect(
+                -config.width / 2, 
+                -config.height / 2, 
+                config.width, 
+                config.height, 
+                12
+            );
+        } else if (this.rewardType === 'ability') {
+            // Rectangle with greebles for ability rewards
+            this.background = this.scene.add.graphics();
+            this.background.fillStyle(this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha);
+            this.background.lineStyle(this.cardStyle.borderWidth, this.cardStyle.borderColor);
+            
+            // Main rectangle
+            this.background.fillRect(-config.width / 2, -config.height / 2, config.width, config.height);
+            this.background.strokeRect(-config.width / 2, -config.height / 2, config.width, config.height);
+            
+            // Top greebles (diamonds)
+            const greebleSize = 8;
+            const greebleSpacing = 20;
+            for (let i = 0; i < 3; i++) {
+                const x = -config.width / 2 + greebleSpacing + (i * greebleSpacing);
+                const y = -config.height / 2 - greebleSize;
+                this.background.beginPath();
+                this.background.moveTo(x + greebleSize/2, y);
+                this.background.lineTo(x + greebleSize, y + greebleSize/2);
+                this.background.lineTo(x + greebleSize/2, y + greebleSize);
+                this.background.lineTo(x, y + greebleSize/2);
+                this.background.closePath();
+                this.background.fillPath();
+                this.background.strokePath();
+            }
+            
+            // Bottom greebles (diamonds)
+            for (let i = 0; i < 3; i++) {
+                const x = -config.width / 2 + greebleSpacing + (i * greebleSpacing);
+                const y = config.height / 2;
+                this.background.beginPath();
+                this.background.moveTo(x + greebleSize/2, y);
+                this.background.lineTo(x + greebleSize, y + greebleSize/2);
+                this.background.lineTo(x + greebleSize/2, y + greebleSize);
+                this.background.lineTo(x, y + greebleSize/2);
+                this.background.closePath();
+                this.background.fillPath();
+                this.background.strokePath();
+            }
+        } else {
+            // Regular rectangle for stat rewards
+            this.background = this.scene.add.rectangle(
+                0, 0, 
+                config.width, config.height, 
+                this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha
+            );
+            this.background.setStrokeStyle(this.cardStyle.borderWidth, this.cardStyle.borderColor);
+        }
         
+        // Add corner decorations based on reward type
+        this.createCornerDecorations(config);
         
         this.hudContainer.add(this.background);
         
@@ -210,7 +274,7 @@ export class RewardCard {
         this.hudContainer.add(this.descriptionText);
         
         // Add all elements to HUD container
-        const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText];
+        const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText, ...this.cornerDecorations];
         if (this.iconImage) {
             elements.push(this.iconImage);
         }
@@ -231,19 +295,17 @@ export class RewardCard {
         this.hudContainer!.getContainer().removeAllListeners();
         
         if (interactive) {
+            // Rectangle interactive area
             this.hudContainer!.getContainer().setInteractive(new Phaser.Geom.Rectangle(-80, -100, 160, 200), Phaser.Geom.Rectangle.Contains);
-            this.background.setFillStyle(this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha);
             
             // Set up event listeners when becoming interactive
             this.hudContainer!.getContainer().on('pointerover', () => {
-                this.background.setFillStyle(this.cardStyle.hoverBackgroundColor, 0.95);
-                this.background.setStrokeStyle(this.cardStyle.borderWidth + 1, this.cardStyle.hoverBorderColor);
+                this.applyHoverEffect(true);
                 this.hudContainer!.getContainer().setScale(1.05);
             });
             
             this.hudContainer!.getContainer().on('pointerout', () => {
-                this.background.setFillStyle(this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha);
-                this.background.setStrokeStyle(this.cardStyle.borderWidth, this.cardStyle.borderColor);
+                this.applyHoverEffect(false);
                 this.hudContainer!.getContainer().setScale(1.0);
             });
             
@@ -256,12 +318,141 @@ export class RewardCard {
             this.hudContainer!.getContainer().disableInteractive();
             // Use a dimmed version of the card's normal colors for non-interactive state
             const dimmedColor = this.dimColor(this.cardStyle.backgroundColor, 0.6);
-            this.background.setFillStyle(dimmedColor, 0.7);
+            this.applyHoverEffect(false, dimmedColor, 0.7);
         }
     }
 
     setVisible(visible: boolean): void {
         this.hudContainer!.setVisible(visible);
+    }
+
+    private applyHoverEffect(isHover: boolean, customColor?: number, customAlpha?: number): void {
+        const backgroundColor = customColor || (isHover ? this.cardStyle.hoverBackgroundColor : this.cardStyle.backgroundColor);
+        const backgroundAlpha = customAlpha || (isHover ? 0.95 : this.cardStyle.backgroundAlpha);
+        const borderColor = isHover ? this.cardStyle.hoverBorderColor : this.cardStyle.borderColor;
+        const borderWidth = isHover ? this.cardStyle.borderWidth + 1 : this.cardStyle.borderWidth;
+
+        if (this.rewardType === 'ability_stat') {
+            // For rounded rectangles, clear and redraw
+            if (this.background instanceof Phaser.GameObjects.Graphics) {
+                this.background.clear();
+                this.background.fillStyle(backgroundColor, backgroundAlpha);
+                this.background.fillRoundedRect(-80, -100, 160, 200, 12);
+                this.background.lineStyle(borderWidth, borderColor);
+                this.background.strokeRoundedRect(-80, -100, 160, 200, 12);
+            }
+        } else if (this.rewardType === 'ability') {
+            // For ability cards with greebles, clear and redraw
+            if (this.background instanceof Phaser.GameObjects.Graphics) {
+                this.background.clear();
+                this.background.fillStyle(backgroundColor, backgroundAlpha);
+                this.background.lineStyle(borderWidth, borderColor);
+                
+                // Main rectangle
+                this.background.fillRect(-80, -100, 160, 200);
+                this.background.strokeRect(-80, -100, 160, 200);
+                
+                // Top greebles (diamonds)
+                const greebleSize = 8;
+                const greebleSpacing = 20;
+                for (let i = 0; i < 3; i++) {
+                    const x = -80 + greebleSpacing + (i * greebleSpacing);
+                    const y = -100 - greebleSize;
+                    this.background.beginPath();
+                    this.background.moveTo(x + greebleSize/2, y);
+                    this.background.lineTo(x + greebleSize, y + greebleSize/2);
+                    this.background.lineTo(x + greebleSize/2, y + greebleSize);
+                    this.background.lineTo(x, y + greebleSize/2);
+                    this.background.closePath();
+                    this.background.fillPath();
+                    this.background.strokePath();
+                }
+                
+                // Bottom greebles (diamonds)
+                for (let i = 0; i < 3; i++) {
+                    const x = -80 + greebleSpacing + (i * greebleSpacing);
+                    const y = 100;
+                    this.background.beginPath();
+                    this.background.moveTo(x + greebleSize/2, y);
+                    this.background.lineTo(x + greebleSize, y + greebleSize/2);
+                    this.background.lineTo(x + greebleSize/2, y + greebleSize);
+                    this.background.lineTo(x, y + greebleSize/2);
+                    this.background.closePath();
+                    this.background.fillPath();
+                    this.background.strokePath();
+                }
+            }
+        } else {
+            // For regular rectangles, use setFillStyle
+            if (this.background instanceof Phaser.GameObjects.Rectangle) {
+                this.background.setFillStyle(backgroundColor, backgroundAlpha);
+                this.background.setStrokeStyle(borderWidth, borderColor);
+            }
+        }
+    }
+
+    private createCornerDecorations(config: RewardCardConfig): void {
+        const cornerSize = 12;
+        const offset = 6;
+        
+        switch (this.rewardType) {
+            case 'stat':
+                // Green corner triangles
+                this.createCornerTriangles(config, cornerSize, offset, 0x28a745);
+                break;
+            case 'ability_stat':
+                // Blue corner circles
+                this.createCornerCircles(config, cornerSize, offset, 0x007bff);
+                break;
+            case 'ability':
+                // Purple corner diamonds
+                this.createCornerDiamonds(config, cornerSize, offset, 0x6f42c1);
+                break;
+        }
+    }
+
+    private createCornerTriangles(config: RewardCardConfig, size: number, offset: number, color: number): void {
+        const halfWidth = config.width / 2;
+        const halfHeight = config.height / 2;
+        
+        // Top-left triangle only
+        const topLeft = this.scene.add.graphics();
+        topLeft.fillStyle(color);
+        topLeft.beginPath();
+        topLeft.moveTo(-halfWidth + offset, -halfHeight + offset);
+        topLeft.lineTo(-halfWidth + offset + size, -halfHeight + offset);
+        topLeft.lineTo(-halfWidth + offset, -halfHeight + offset + size);
+        topLeft.closePath();
+        topLeft.fillPath();
+        this.cornerDecorations.push(topLeft);
+    }
+
+    private createCornerCircles(config: RewardCardConfig, size: number, offset: number, color: number): void {
+        const halfWidth = config.width / 2;
+        const halfHeight = config.height / 2;
+        
+        // Top-left circle only
+        const topLeft = this.scene.add.graphics();
+        topLeft.fillStyle(color);
+        topLeft.fillCircle(-halfWidth + offset + size/2, -halfHeight + offset + size/2, size/2);
+        this.cornerDecorations.push(topLeft);
+    }
+
+    private createCornerDiamonds(config: RewardCardConfig, size: number, offset: number, color: number): void {
+        const halfWidth = config.width / 2;
+        const halfHeight = config.height / 2;
+        
+        // Top-left diamond only
+        const topLeft = this.scene.add.graphics();
+        topLeft.fillStyle(color);
+        topLeft.beginPath();
+        topLeft.moveTo(-halfWidth + offset + size/2, -halfHeight + offset);
+        topLeft.lineTo(-halfWidth + offset + size, -halfHeight + offset + size/2);
+        topLeft.lineTo(-halfWidth + offset + size/2, -halfHeight + offset + size);
+        topLeft.lineTo(-halfWidth + offset, -halfHeight + offset + size/2);
+        topLeft.closePath();
+        topLeft.fillPath();
+        this.cornerDecorations.push(topLeft);
     }
 
     destroy(): void {
