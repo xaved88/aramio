@@ -58,7 +58,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // No assets needed for basic circles
+        // Load hero assets
+        this.load.image('hero-base', '/assets/heroes/hero_base.png');
+        this.load.image('hero-hookshot', '/assets/heroes/hero_hookshot.png');
+        this.load.image('hero-mercenary', '/assets/heroes/hero_mercenary.png');
+        this.load.image('hero-pyromancer', '/assets/heroes/hero_pyromancer.png');
+        this.load.image('hero-sniper', '/assets/heroes/hero_sniper.png');
+        this.load.image('hero-thorndive', '/assets/heroes/hero_thorndive.png');
     }
 
     async create() {

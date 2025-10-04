@@ -49,21 +49,24 @@ export class EntityRenderer {
      */
     renderEntity(
         combatant: Combatant,
-        graphics: Phaser.GameObjects.Graphics,
+        graphics: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite,
         text: Phaser.GameObjects.Text,
         radiusIndicator: Phaser.GameObjects.Graphics,
         respawnRing: Phaser.GameObjects.Graphics | undefined,
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         abilityIconText: Phaser.GameObjects.Text | undefined,
+        healthBar: Phaser.GameObjects.Graphics | undefined,
         state?: SharedGameState,
         playerSessionId?: ControllerId | null,
         isRecentAttacker?: boolean
     ): void {
-        // Render the main entity graphics
+        // Render the main entity graphics or sprite
         this.renderEntityGraphics(combatant, graphics);
         
-        // Apply effects to the entity
-        this.applyEffectsToEntity(combatant, graphics);
+        // Apply effects to the entity (only for graphics, not sprites)
+        if (graphics instanceof Phaser.GameObjects.Graphics) {
+            this.applyEffectsToEntity(combatant, graphics);
+        }
         
         // Render respawn ring for heroes
         if (respawnRing && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
@@ -79,6 +82,11 @@ export class EntityRenderer {
                 // Clear the indicator if this hero is not controlled by the current player
                 abilityReadyIndicator.clear();
             }
+        }
+        
+        // Render health bar for heroes
+        if (healthBar && combatant.type === COMBATANT_TYPES.HERO) {
+            this.renderHealthBar(combatant, healthBar);
         }
         
         // Render radius indicator
@@ -277,7 +285,13 @@ export class EntityRenderer {
     /**
      * Renders the main graphics for an entity based on its type
      */
-    private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics): void {
+    private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite): void {
+        // For sprites, scale them to the appropriate size
+        if (graphics instanceof Phaser.GameObjects.Sprite) {
+            this.scaleHeroSprite(graphics, combatant.size);
+            return;
+        }
+        
         graphics.clear();
         
         // Calculate health percentage
@@ -314,6 +328,80 @@ export class EntityRenderer {
         
         // Use the configured combatant renderer
         this.combatantRenderer.renderCombatant(combatant, graphics, primaryColor, respawnColor, healthPercentage, combatant.size);
+    }
+
+    /**
+     * Scales a hero sprite to the appropriate size
+     */
+    private scaleHeroSprite(sprite: Phaser.GameObjects.Sprite, targetSize: number): void {
+        // Get the texture dimensions
+        const texture = sprite.texture;
+        const textureWidth = texture.source[0].width;
+        const textureHeight = texture.source[0].height;
+        
+        // Calculate scale to fit the target size (diameter)
+        const maxDimension = Math.max(textureWidth, textureHeight);
+        const scale = (targetSize * 2) / maxDimension; // targetSize is radius, so *2 for diameter
+        
+        sprite.setScale(scale);
+    }
+
+    /**
+     * Renders health bar for heroes
+     */
+    private renderHealthBar(combatant: Combatant, healthBar: Phaser.GameObjects.Graphics): void {
+        healthBar.clear();
+        
+        // Calculate health percentage
+        const healthPercentage = combatant.health / combatant.maxHealth;
+        
+        // Determine colors based on team, state, and player control
+        let primaryColor, respawnColor;
+        
+        // Check if this hero is controlled by the current player
+        const isControlledByPlayer = combatant.type === COMBATANT_TYPES.HERO && 
+                                   isHeroCombatant(combatant) && 
+                                   this.playerSessionId && 
+                                   combatant.controller === this.playerSessionId;
+        
+        if (isControlledByPlayer) {
+            // Use purple palette for player-controlled heroes
+            if (combatant.state === 'respawning') {
+                primaryColor = CLIENT_CONFIG.SELF_COLORS.RESPAWNING;
+                respawnColor = primaryColor;
+            } else {
+                primaryColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;
+                respawnColor = CLIENT_CONFIG.SELF_COLORS.RESPAWNING;
+            }
+        } else {
+            // Use team colors for other heroes
+            if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
+                primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+                respawnColor = primaryColor;
+            } else {
+                primaryColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED;
+                respawnColor = combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            }
+        }
+        
+        // Health bar dimensions
+        const heroSize = combatant.size;
+        const barWidth = heroSize * 1.5; // Slightly wider than the hero
+        const barHeight = 4; // Thin bar
+        const barY = heroSize + 8; // Position below the hero
+        
+        // Draw background bar (total health) - lighter color
+        healthBar.fillStyle(respawnColor, 0.6);
+        healthBar.fillRect(-barWidth / 2, barY, barWidth, barHeight);
+        
+        // Draw current health bar - darker color
+        const currentHealthWidth = barWidth * healthPercentage;
+        healthBar.fillStyle(primaryColor, 1);
+        healthBar.fillRect(-barWidth / 2, barY, currentHealthWidth, barHeight);
+        
+        // Add border to health bar
+        healthBar.lineStyle(1, 0x000000, 0.8);
+        healthBar.strokeRect(-barWidth / 2, barY, barWidth, barHeight);
     }
 
     /**

@@ -22,7 +22,7 @@ export class SVGRenderer implements CombatantRenderer {
         size: number
     ): void {
         if (combatant.type === COMBATANT_TYPES.HERO) {
-            this.renderHeroSVG(graphics, primaryColor, respawnColor, healthPercentage, size);
+            this.renderHeroPNG(graphics, primaryColor, respawnColor, healthPercentage, size);
         } else {
             // Fallback to shape renderer for unsupported types
             this.shapeRenderer.renderCombatant(combatant, graphics, primaryColor, respawnColor, healthPercentage, size);
@@ -34,20 +34,16 @@ export class SVGRenderer implements CombatantRenderer {
         this.shapeRenderer.renderProjectile(projectile, graphics, color, radius, state);
     }
 
-    private renderHeroSVG(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, size: number): void {
+    private renderHeroPNG(graphics: Phaser.GameObjects.Graphics, primaryColor: number, respawnColor: number, healthPercentage: number, size: number): void {
+        // This method is no longer used since heroes now use sprites
+        // Keep as fallback for non-sprite rendering
         graphics.clear();
         
-        // For now, render as a simple circle with SVG-style border
-        // This will be replaced with actual PNG sprite rendering later
-        const radius = size;
-        
-        // Draw the hero as a simple circle (placeholder for PNG sprite)
         graphics.fillStyle(primaryColor, 1);
-        graphics.fillCircle(0, 0, radius);
+        graphics.fillCircle(0, 0, size);
         
-        // Add border to mimic SVG stroke
         graphics.lineStyle(2, 0x000000, 1);
-        graphics.strokeCircle(0, 0, radius);
+        graphics.strokeCircle(0, 0, size);
         
         // Render health bar underneath the hero
         this.renderHealthBar(graphics, primaryColor, respawnColor, healthPercentage, size);

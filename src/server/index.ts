@@ -23,6 +23,9 @@ app.use(express.json());
 // Serve static files from the Vite build output
 app.use(express.static(path.join(__dirname, '../../dist/client')));
 
+// Serve assets from public directory
+app.use('/assets', express.static(path.join(__dirname, '../../public/assets')));
+
 const server = new Server({
     transport: new WebSocketTransport({
         server: app.listen(port)

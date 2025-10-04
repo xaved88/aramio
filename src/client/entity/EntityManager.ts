@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isHeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { EntityFactory } from './EntityFactory';
@@ -26,6 +26,8 @@ export class EntityManager {
     
     // Entity storage
     private entityGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entitySprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
+    private entityHealthBars: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityAbilityIconTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -123,21 +125,22 @@ export class EntityManager {
     private updateCombatantEntity(combatantData: Combatant, state: SharedGameState): void {
         const entityId = combatantData.id;
         
-        // Get or create entity graphics
+        // Get or create entity graphics and sprites
         let entityGraphics = this.entityGraphics.get(entityId);
+        let entitySprite = this.entitySprites.get(entityId);
+        let entityHealthBar = this.entityHealthBars.get(entityId);
         let entityText = this.entityTexts.get(entityId);
         let entityAbilityIconText = this.entityAbilityIconTexts.get(entityId);
         let radiusIndicator = this.entityRadiusIndicators.get(entityId);
         
-        if (!entityGraphics) {
+        // Create graphics for non-hero entities or as fallback
+        if (!entityGraphics && combatantData.type !== COMBATANT_TYPES.HERO) {
             entityGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             entityGraphics.setPosition(combatantData.x, combatantData.y);
             
             // Set depth based on entity type
-            if (combatantData.type === COMBATANT_TYPES.HERO) {
-                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
-            } else if (combatantData.type === COMBATANT_TYPES.MINION) {
+            if (combatantData.type === COMBATANT_TYPES.MINION) {
                 entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
             } else {
                 entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
@@ -149,6 +152,38 @@ export class EntityManager {
             }
             
             this.entityGraphics.set(entityId, entityGraphics);
+        }
+        
+        // Create sprite and health bar for heroes
+        if (!entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
+            const abilityType = combatantData.ability?.type || 'default';
+            entitySprite = this.entityFactory.createHeroSprite(abilityType);
+            // Set initial position immediately to avoid spawning at (0,0)
+            entitySprite.setPosition(combatantData.x, combatantData.y);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entitySprite);
+            }
+            
+            this.entitySprites.set(entityId, entitySprite);
+        } else if (entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
+            // Check if ability type has changed and update texture accordingly
+            this.updateHeroSpriteTexture(entitySprite, combatantData);
+        }
+        
+        // Create health bar for heroes
+        if (!entityHealthBar && combatantData.type === COMBATANT_TYPES.HERO) {
+            entityHealthBar = this.entityFactory.createHealthBar();
+            // Set initial position immediately to avoid spawning at (0,0)
+            entityHealthBar.setPosition(combatantData.x, combatantData.y);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entityHealthBar);
+            }
+            
+            this.entityHealthBars.set(entityId, entityHealthBar);
         }
         
         if (!entityText) {
@@ -235,14 +270,18 @@ export class EntityManager {
         }
         
         // Create smooth movement animation
-        const targets = [entityGraphics, entityText, radiusIndicator];
+        const targets = [];
+        if (entityGraphics) targets.push(entityGraphics);
+        if (entitySprite) targets.push(entitySprite);
+        if (entityHealthBar) targets.push(entityHealthBar);
+        targets.push(entityText, radiusIndicator);
         if (entityAbilityIconText) targets.push(entityAbilityIconText);
         if (respawnRing) targets.push(respawnRing);
         if (abilityReadyIndicator) targets.push(abilityReadyIndicator);
         
         this.animateEntityMovement(
             entityId,
-            targets,
+            targets as (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text)[],
             combatantData.x,
             combatantData.y
         );
@@ -250,12 +289,13 @@ export class EntityManager {
         // Render the entity
         this.entityRenderer.renderEntity(
             combatantData,
-            entityGraphics,
+            (entitySprite || entityGraphics)!,
             entityText,
             radiusIndicator,
             respawnRing,
             abilityReadyIndicator,
             entityAbilityIconText,
+            entityHealthBar,
             state,
             this.playerSessionId,
             this.isRecentAttacker(entityId)
@@ -718,7 +758,22 @@ export class EntityManager {
      * Removes combatants that no longer exist in the game state
      */
     private cleanupRemovedCombatants(state: SharedGameState): void {
+        // Check graphics entities
         this.entityGraphics.forEach((entityGraphics, entityId) => {
+            if (!state.combatants.has(entityId)) {
+                this.destroyCombatantEntity(entityId);
+            }
+        });
+        
+        // Check sprite entities
+        this.entitySprites.forEach((entitySprite, entityId) => {
+            if (!state.combatants.has(entityId)) {
+                this.destroyCombatantEntity(entityId);
+            }
+        });
+        
+        // Check health bar entities
+        this.entityHealthBars.forEach((entityHealthBar, entityId) => {
             if (!state.combatants.has(entityId)) {
                 this.destroyCombatantEntity(entityId);
             }
@@ -737,6 +792,20 @@ export class EntityManager {
         if (entityGraphics) {
             entityGraphics.destroy();
             this.entityGraphics.delete(entityId);
+        }
+        
+        // Destroy sprite
+        const entitySprite = this.entitySprites.get(entityId);
+        if (entitySprite) {
+            entitySprite.destroy();
+            this.entitySprites.delete(entityId);
+        }
+        
+        // Destroy health bar
+        const entityHealthBar = this.entityHealthBars.get(entityId);
+        if (entityHealthBar) {
+            entityHealthBar.destroy();
+            this.entityHealthBars.delete(entityId);
         }
         
         const entityText = this.entityTexts.get(entityId);
@@ -772,9 +841,51 @@ export class EntityManager {
 
     /**
      * Gets an entity's graphics for external use (e.g., animations)
+     * Returns sprite for heroes, graphics for other entities
      */
-    getEntityGraphics(entityId: CombatantId): Phaser.GameObjects.Graphics | undefined {
+    getEntityGraphics(entityId: CombatantId): Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite | undefined {
+        // Return sprite for heroes if it exists
+        const sprite = this.entitySprites.get(entityId);
+        if (sprite) {
+            return sprite;
+        }
+        
+        // Fallback to graphics for non-hero entities
         return this.entityGraphics.get(entityId);
+    }
+
+    /**
+     * Updates hero sprite texture based on ability type
+     */
+    private updateHeroSpriteTexture(sprite: Phaser.GameObjects.Sprite, combatant: HeroCombatant): void {
+        const currentAbilityType = combatant.ability?.type || 'default';
+        const expectedTextureKey = this.getHeroTextureKey(currentAbilityType);
+        
+        // Only update if the texture has changed
+        if (sprite.texture.key !== expectedTextureKey) {
+            sprite.setTexture(expectedTextureKey);
+        }
+    }
+
+    /**
+     * Gets the appropriate texture key based on hero ability type
+     */
+    private getHeroTextureKey(abilityType: string): string {
+        switch (abilityType) {
+            case 'hookshot':
+                return 'hero-hookshot';
+            case 'mercenary':
+                return 'hero-mercenary';
+            case 'pyromancer':
+                return 'hero-pyromancer';
+            case 'sniper':
+                return 'hero-sniper';
+            case 'thorndive':
+                return 'hero-thorndive';
+            case 'default':
+            default:
+                return 'hero-base';
+        }
     }
 
     /**

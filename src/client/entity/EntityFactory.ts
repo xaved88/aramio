@@ -58,4 +58,45 @@ export class EntityFactory {
         indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
         return indicator;
     }
+
+    /**
+     * Creates a sprite for hero entities
+     */
+    createHeroSprite(abilityType: string = 'default'): Phaser.GameObjects.Sprite {
+        const textureKey = this.getHeroTextureKey(abilityType);
+        const sprite = this.scene.add.sprite(0, 0, textureKey);
+        sprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
+        sprite.setOrigin(0.5, 0.5);
+        return sprite;
+    }
+
+    /**
+     * Gets the appropriate texture key based on hero ability type
+     */
+    private getHeroTextureKey(abilityType: string): string {
+        switch (abilityType) {
+            case 'hookshot':
+                return 'hero-hookshot';
+            case 'mercenary':
+                return 'hero-mercenary';
+            case 'pyromancer':
+                return 'hero-pyromancer';
+            case 'sniper':
+                return 'hero-sniper';
+            case 'thorndive':
+                return 'hero-thorndive';
+            case 'default':
+            default:
+                return 'hero-base';
+        }
+    }
+
+    /**
+     * Creates a health bar graphics object for heroes
+     */
+    createHealthBar(): Phaser.GameObjects.Graphics {
+        const graphics = this.scene.add.graphics();
+        graphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 1); // Slightly above heroes
+        return graphics;
+    }
 } 
