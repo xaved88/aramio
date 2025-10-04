@@ -562,12 +562,26 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
     // Calculate experience multiplier based on number of heroes
     // Formula: (100% + 40% * (number of heroes - 1)) / number of heroes
     const totalMultiplier = 1 + (0.4 * (heroesInRange.length - 1));
-    const experiencePerHero = amount * totalMultiplier / heroesInRange.length;
+    const baseExperiencePerHero = amount * totalMultiplier / heroesInRange.length;
     
     // Grant experience to each hero in range
     heroesInRange.forEach(hero => {
         let bonusExperience = 0;
         let xpType: string | undefined = undefined;
+        
+        // Apply catch-up mechanic for hero kills based on each hero's level
+        let catchUpMultiplier = 1;
+        if (dyingUnit.type === COMBATANT_TYPES.HERO) {
+            const victimHero = dyingUnit as Hero;
+            const levelDifference = victimHero.level - hero.level;
+            
+            // If victim was higher level by more than 1, apply catch-up bonus
+            if (levelDifference > 1) {
+                catchUpMultiplier = 1 + (levelDifference * 0.25); // 25% bonus per level difference
+            }
+        }
+        
+        const adjustedExperiencePerHero = baseExperiencePerHero * catchUpMultiplier;
         
         // Grant additional bonus to the killer (ONLY if killer is a hero)
         if (killerHero && hero.id === killerHero.id) {
@@ -581,7 +595,7 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
             }
         }
         
-        const totalExperience = experiencePerHero + bonusExperience;
+        const totalExperience = adjustedExperiencePerHero + bonusExperience;
         grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType, gameplayConfig);
     });
 }
