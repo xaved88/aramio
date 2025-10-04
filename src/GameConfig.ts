@@ -172,19 +172,26 @@ export const GAMEPLAY_CONFIG = {
         LEVEL_CHESTS: {
             // Override default chest type at specific levels - ability_chest gives new abilities, ability_stats gives stat upgrades
             3: "ability_chest",
+            4: "mainly_normal_stats",
             5: "ability_stats",
-            7: "ability_stats",
+            7: "mainly_ability_stats",
+            8: "mainly_normal_stats",
             10: "ability_stats",
-            12: "ability_stats",
+            12: "mainly_ability_stats",
+            14: "mainly_normal_stats",
             15: "ability_stats",
+            16: "mainly_normal_stats",
             18: "ability_stats",
-            20: "ability_stats",
+            20: "mainly_ability_stats",
             22: "ability_stats",
+            24: "mainly_normal_stats",
             25: "ability_stats",
-            28: "ability_stats",
+            26: "mainly_normal_stats",
+            28: "mainly_ability_stats",
             30: "ability_stats",
             32: "ability_stats",
-            35: "ability_stats",
+            34: "mainly_normal_stats",
+            35: "mainly_ability_stats",
         },
         CHESTS: {
             common: {
@@ -216,6 +223,45 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability_stat:cooldown", weight: 1 },
                     { id: "ability_stat:mercenary_rage_speed", weight: 1 },
                     { id: "ability_stat:pyromancer_radius", weight: 1 },
+                ]
+            },
+            mainly_ability_stats: {
+                rewards: [
+                    // Ability stats (higher weights)
+                    { id: "ability_stat:range", weight: 1.5 },
+                    { id: "ability_stat:strength", weight: 1.5 },
+                    { id: "ability_stat:duration", weight: 1.5 },
+                    { id: "ability_stat:speed", weight: 1.5 },
+                    { id: "ability_stat:cooldown", weight: 1.5 },
+                    { id: "ability_stat:mercenary_rage_speed", weight: 1.5 },
+                    { id: "ability_stat:pyromancer_radius", weight: 1.5 },
+                    // Normal stats (lower weights)
+                    { id: "stat:health", weight: 0.9 },
+                    { id: "stat:bullet_armor", weight: 0.5 },
+                    { id: "stat:ability_armor", weight: 0.5 },
+                    { id: "stat:damage", weight: 0.9 },
+                    { id: "stat:attack_speed", weight: 0.9 },
+                    { id: "stat:move_speed", weight: 0.5 },
+                ]
+            },
+            mainly_normal_stats: {
+                rewards: [
+                    // Normal stats (higher weights)
+                    { id: "stat:health", weight: 1.5 },
+                    { id: "stat:bullet_armor", weight: 1.5 },
+                    { id: "stat:ability_armor", weight: 1.5 },
+                    { id: "stat:damage", weight: 1.5 },
+                    { id: "stat:attack_speed", weight: 1.5 },
+                    { id: "stat:attack_range", weight: 1.5 },
+                    { id: "stat:move_speed", weight: 1.5 },
+                    // Ability stats (lower weights)
+                    { id: "ability_stat:range", weight: 0.9 },
+                    { id: "ability_stat:strength", weight: 0.9 },
+                    { id: "ability_stat:duration", weight: 0.9 },
+                    { id: "ability_stat:speed", weight: 0.9 },
+                    { id: "ability_stat:cooldown", weight: 0.45 },
+                    { id: "ability_stat:mercenary_rage_speed", weight: 0.9 },
+                    { id: "ability_stat:pyromancer_radius", weight: 0.45 },
                 ]
             }
         },
