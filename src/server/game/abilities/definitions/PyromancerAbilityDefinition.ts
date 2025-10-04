@@ -24,6 +24,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         ability.radius = config.RADIUS;
         ability.range = config.RANGE;
         ability.fireballRadius = config.RADIUS; // Initialize reward-modifiable radius
+        ability.speed = config.SPEED;
         
         return ability;
     }
@@ -83,9 +84,8 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const directionX = dx / distance;
         const directionY = dy / distance;
         
-        // Use base speed (no level scaling)
-        const config = gameplayConfig.COMBAT.ABILITIES.pyromancer;
-        const speed = config.SPEED;
+        // Use ability speed
+        const speed = ability.speed;
         
         // Create projectile
         const projectile = new Projectile();

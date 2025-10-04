@@ -4,6 +4,7 @@ import { QUICK_WIN_CONFIG } from './QuickWinConfig';
 import { HIGHER_LEVEL_TESTING_CONFIG } from './HigherLevelTestingConfig';
 import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 import { STATIONARY_CONFIG } from './StationaryConfig';
+import { STATIONARY_NORMAL_RANGE_CONFIG } from './StationaryNormalRangeConfig';
 
 export type GameplayConfig = any; // Type alias for now, will be made strict later
 
@@ -17,7 +18,8 @@ export class ConfigProvider {
         this.registerConfig('quick-win', QUICK_WIN_CONFIG);
         this.registerConfig('higher-level-testing', HIGHER_LEVEL_TESTING_CONFIG);
         this.registerConfig('death-effects-testing', DEATH_EFFECTS_TESTING_CONFIG);
-        this.registerConfig('stationary', STATIONARY_CONFIG);
+        this.registerConfig('stationary-high-range', STATIONARY_CONFIG);
+        this.registerConfig('stationary-normal-range', STATIONARY_NORMAL_RANGE_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {

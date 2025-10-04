@@ -22,6 +22,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         ability.lastUsedTime = 0;
         ability.strength = config.STRENGTH;
         ability.range = config.RANGE;
+        ability.speed = config.SPEED;
         
         return ability;
     }
@@ -86,7 +87,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         projectile.startY = hero.y;
         projectile.directionX = directionX;
         projectile.directionY = directionY;
-        projectile.speed = gameplayConfig.COMBAT.ABILITIES.sniper.SPEED;
+        projectile.speed = ability.speed;
         projectile.team = hero.team;
         projectile.type = 'sniper';
         projectile.duration = -1; // Infinite duration

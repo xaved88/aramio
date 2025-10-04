@@ -26,6 +26,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         ability.strength = config.STRENGTH;
         ability.range = config.RANGE;
         ability.duration = config.STUN_DURATION_MS;
+        ability.speed = config.SPEED;
         
         return ability;
     }
@@ -81,11 +82,8 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         const directionX = dx / distance;
         const directionY = dy / distance;
         
-        // Get config and calculate scaled values based on hero level
-        const config = gameplayConfig.COMBAT.ABILITIES.hookshot;
-        const heroLevel = (hero as Hero).level || 1;
-        
-        const speed = config.SPEED;
+        // Use ability speed
+        const speed = ability.speed;
         
         // Use flat duration (no level scaling)
         const stunDuration = ability.duration;

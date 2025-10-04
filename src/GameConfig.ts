@@ -211,9 +211,10 @@ export const GAMEPLAY_CONFIG = {
                     { id: "ability_stat:range", weight: 1 },
                     { id: "ability_stat:strength", weight: 1 },
                     { id: "ability_stat:duration", weight: 1 },
+                    { id: "ability_stat:speed", weight: 1 },
+                    { id: "ability_stat:cooldown", weight: 1 },
                     { id: "ability_stat:mercenary_rage_speed", weight: 1 },
                     { id: "ability_stat:pyromancer_radius", weight: 1 },
-                    { id: "ability_stat:cooldown", weight: 1 },
                 ]
             }
         },
@@ -309,6 +310,11 @@ export const GAMEPLAY_CONFIG = {
             "ability_stat:pyromancer_radius": {
                 type: "ability_stat",
                 ability_stat: "fireballRadius",
+                modifier: { type: "percent", value: 1.25 }
+            },
+            "ability_stat:speed": {
+                type: "ability_stat",
+                ability_stat: "speed",
                 modifier: { type: "percent", value: 1.25 }
             }
         }

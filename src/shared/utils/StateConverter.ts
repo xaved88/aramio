@@ -240,6 +240,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     landingRadius: (hero.ability as any).landingRadius,
                     fireballRadius: (hero.ability as any).fireballRadius,
                     mercenaryRageSpeedBoost: (hero.ability as any).mercenaryRageSpeedBoost,
+                    speed: (hero.ability as any).speed,
                 } as DefaultAbility | HookshotAbility | MercenaryAbility | PyromancerAbility | ThorndiveAbility | SniperAbility,
                 controller: hero.controller,
                 displayName: hero.displayName,

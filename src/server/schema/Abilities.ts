@@ -24,6 +24,7 @@ export class HookshotAbility extends Ability {
   @type('number') strength!: number; // damage dealt by ability
   @type('number') range!: number; // projectile range
   @type('number') duration!: number; // stun duration in ms
+  @type('number') speed!: number; // projectile speed
 }
 
 export class MercenaryAbility extends Ability {
@@ -44,6 +45,7 @@ export class PyromancerAbility extends Ability {
     @type('number') radius!: number; // AOE radius
     @type('number') range!: number; // projectile range
     @type('number') fireballRadius!: number; // AOE radius (can be modified by rewards)
+    @type('number') speed!: number; // projectile speed
 }
 
 export class ThorndiveAbility extends Ability {
@@ -65,4 +67,5 @@ export class SniperAbility extends Ability {
     }
     @type('number') strength!: number; // damage dealt by ability
     @type('number') range!: number; // projectile range
+    @type('number') speed!: number; // projectile speed
 }

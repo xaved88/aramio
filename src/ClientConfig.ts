@@ -353,6 +353,11 @@ export const CLIENT_CONFIG = {
                 title: "Fire Radius",
                 description: "+25% fireball radius",
                 rarity: "upgrade"
+            },
+            "ability_stat:speed": {
+                title: "Projectile Speed",
+                description: "+25% projectile speed",
+                rarity: "upgrade"
             }
         }
     },

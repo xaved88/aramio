@@ -4,7 +4,6 @@ import { AbilityDefinition } from './AbilityDefinition';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
-import { ArraySchema } from '@colyseus/schema';
 
 export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAbility> {
     private static _instance: ThorndiveAbilityDefinition | null = null;
