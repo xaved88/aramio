@@ -215,6 +215,9 @@ export class GameScene extends Phaser.Scene {
                     
                     // Trigger camera shake when player takes damage
                     this.cameraManager.triggerShake();
+                    
+                    // Trigger red flash effect when player takes damage
+                    this.cameraManager.triggerRedFlash();
                 }
             }
             

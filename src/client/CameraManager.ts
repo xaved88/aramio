@@ -196,4 +196,38 @@ export class CameraManager {
         );
     }
 
+    /**
+     * Triggers a red flash effect when taking damage
+     */
+    triggerRedFlash(): void {
+        if (!CLIENT_CONFIG.CAMERA.RED_FLASH.ENABLED) return;
+        
+        // Create a red overlay rectangle that covers the entire screen
+        const flashOverlay = this.scene.add.rectangle(
+            this.viewportWidth / 2,
+            this.viewportHeight / 2,
+            this.viewportWidth,
+            this.viewportHeight,
+            CLIENT_CONFIG.CAMERA.RED_FLASH.COLOR,
+            CLIENT_CONFIG.CAMERA.RED_FLASH.ALPHA
+        );
+        
+        // Set high depth to appear above everything
+        flashOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
+        
+        // Assign to HUD camera so it doesn't move with the game world
+        this.assignToHUDCamera(flashOverlay);
+        
+        // Fade out the overlay
+        this.scene.tweens.add({
+            targets: flashOverlay,
+            alpha: 0,
+            duration: CLIENT_CONFIG.CAMERA.RED_FLASH.DURATION_MS,
+            ease: 'Power2',
+            onComplete: () => {
+                flashOverlay.destroy();
+            }
+        });
+    }
+
 }

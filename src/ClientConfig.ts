@@ -5,9 +5,15 @@ export const CLIENT_CONFIG = {
         ZOOM: 1.3, // 30% zoom (1.0 = no zoom, 1.3 = 30% zoom)
         LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)
         SHAKE: {
-            ENABLED: true,
+            ENABLED: false,
             INTENSITY: .003,
             DURATION_MS: 50, // how long the shake lasts
+        },
+        RED_FLASH: {
+            ENABLED: true,
+            COLOR: 0xff0000, // red color
+            ALPHA: 0.10, // opacity of the flash overlay
+            DURATION_MS: 200, // how long the flash lasts
         },
     },
     // Canvas/Viewport size (what the player sees)
