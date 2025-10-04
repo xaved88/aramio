@@ -127,6 +127,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
@@ -142,7 +143,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         projectiles: sharedProjectiles,
         aoeDamageEvents: sharedAOEDamageEvents,
         deathEffectEvents: sharedDeathEffectEvents,
-        projectileMissEvents: sharedProjectileMissEvents
+        projectileMissEvents: sharedProjectileMissEvents,
+        blueSuperMinionsTriggered: colyseusState.blueSuperMinionsTriggered,
+        redSuperMinionsTriggered: colyseusState.redSuperMinionsTriggered
     };
 }
 
@@ -302,7 +305,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
             return {
                 ...baseCombatant,
                 type: COMBATANT_TYPES.MINION,
-                minionType: minion.minionType
+                minionType: minion.minionType,
+                isBuffed: minion.isBuffed // TODO: Not used yet, but will be for visual distinction of buffed minions
             } as MinionCombatant;
             
         default:

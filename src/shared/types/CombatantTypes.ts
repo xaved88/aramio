@@ -225,6 +225,7 @@ export interface TurretCombatant extends BaseCombatant {
 export interface MinionCombatant extends BaseCombatant {
     type: typeof COMBATANT_TYPES.MINION;
     minionType: MinionType;
+    isBuffed?: boolean; // Whether this minion has buffed stats (2x health/damage, 4x XP)
 }
 
 export type Combatant = HeroCombatant | CradleCombatant | TurretCombatant | MinionCombatant;

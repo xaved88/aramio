@@ -67,6 +67,11 @@ export class ProjectileMissEvent extends Schema {
     @type('number') timestamp!: number; // When the miss occurred
 }
 
+export class SuperMinionTriggerEvent extends Schema {
+    @type('string') triggeredTeam!: string; // Team whose super minions were triggered (blue/red)
+    @type('number') timestamp!: number; // When the trigger occurred
+}
+
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
     @type('number') minionKills = 0; // number of minions killed

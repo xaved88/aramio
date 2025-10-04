@@ -59,4 +59,6 @@ export interface SharedGameState {
     aoeDamageEvents: AOEDamageEvent[];
     deathEffectEvents: DeathEffectEvent[];
     projectileMissEvents: ProjectileMissEvent[];
+    blueSuperMinionsTriggered: boolean;
+    redSuperMinionsTriggered: boolean;
 } 

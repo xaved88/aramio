@@ -442,17 +442,24 @@ function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig):
         }
     });
     
-    // Remove destroyed turrets
+    // Remove destroyed turrets (triggers super minions)
     turretsToRemove.forEach(id => {
         state.combatants.delete(id);
     });
+    
+    // Check super minion triggers (based on turret destruction)
+    checkSuperMinionTriggers(state, gameplayConfig);
     
     // Handle minion death and grant experience
     const minionsToRemove: string[] = [];
     state.combatants.forEach((combatant, id) => {
         if (combatant.type === COMBATANT_TYPES.MINION) {
             if (!CombatantUtils.isCombatantAlive(combatant)) {
-                grantExperienceToTeamForUnitKill(gameplayConfig.EXPERIENCE.MINION_KILLED, combatant.team, state, combatant, gameplayConfig);
+                // Check if minion is buffed for increased XP
+                const minion = combatant as any;
+                const xpMultiplier = minion.isBuffed ? gameplayConfig.SUPER_MINIONS.XP_MULTIPLIER : 1;
+                const xpAmount = gameplayConfig.EXPERIENCE.MINION_KILLED * xpMultiplier;
+                grantExperienceToTeamForUnitKill(xpAmount, combatant.team, state, combatant, gameplayConfig);
                 minionsToRemove.push(id);
             }
         }
@@ -760,6 +767,31 @@ function handlePassiveHealing(state: GameState, gameplayConfig: GameplayConfig):
             CombatantUtils.removePassiveHealingEffects(hero);
         }
     });
-} 
+}
+
+/**
+ * Checks super minion trigger conditions and activates super minions
+ */
+function checkSuperMinionTriggers(state: GameState, gameplayConfig: GameplayConfig): void {
+    // Check if super minions are enabled
+    if (!gameplayConfig.SUPER_MINIONS.ENABLED) {
+        // If super minions are disabled, never trigger super minions
+        state.blueSuperMinionsTriggered = false;
+        state.redSuperMinionsTriggered = false;
+        return;
+    }
+    
+    // Check blue turret destruction - triggers red super minions
+    const blueTurrets = Array.from(state.combatants.values()).filter(combatant => 
+        combatant.type === COMBATANT_TYPES.TURRET && combatant.team === 'blue'
+    );
+    state.redSuperMinionsTriggered = blueTurrets.length === 0;
+
+    // Check red turret destruction - triggers blue super minions
+    const redTurrets = Array.from(state.combatants.values()).filter(combatant => 
+        combatant.type === COMBATANT_TYPES.TURRET && combatant.team === 'red'
+    );
+    state.blueSuperMinionsTriggered = redTurrets.length === 0;
+}
 
 

@@ -11,6 +11,7 @@ import { DamageTakenOverlay } from './DamageTakenOverlay';
 import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
+import { NotificationOverlay } from './NotificationOverlay';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -31,8 +32,11 @@ export class UIManager {
     private damageDealtOverlay: DamageDealtOverlay;
     private cursorRenderer: CursorRenderer;
     private cheatMenu: CheatMenu;
+    private notificationOverlay: NotificationOverlay;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null; // Store last state for cursor updates
+    private lastBlueSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
+    private lastRedSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
 
     // HUD elements
     private hudElements: {
@@ -75,6 +79,7 @@ export class UIManager {
         this.damageDealtOverlay = new DamageDealtOverlay(scene);
         this.cursorRenderer = new CursorRenderer(scene);
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
+        this.notificationOverlay = new NotificationOverlay(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -93,6 +98,7 @@ export class UIManager {
         this.damageDealtOverlay.setHUDCamera(hudCamera);
         this.cursorRenderer.setCameraManager(this.cameraManager);
         this.cheatMenu.setHUDCamera(hudCamera);
+        this.notificationOverlay.setHUDCamera(hudCamera);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -106,6 +112,7 @@ export class UIManager {
         this.damageDealtOverlay.setCameraManager(cameraManager);
         this.cursorRenderer.setCameraManager(cameraManager);
         this.cheatMenu.setCameraManager(cameraManager);
+        this.notificationOverlay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -139,6 +146,26 @@ export class UIManager {
         this.statsOverlay.setPlayerSessionId(sessionId);
         this.damageTakenOverlay.setPlayerSessionId(sessionId);
         this.damageDealtOverlay.setPlayerSessionId(sessionId);
+    }
+
+    showSuperMinionTriggerNotification(triggeredTeam: string): void {
+        this.notificationOverlay.showSuperMinionTriggerNotification(triggeredTeam);
+    }
+
+    private checkSuperMinionTriggerNotifications(state: SharedGameState): void {
+        // Check if blue super minions were just triggered
+        if (state.blueSuperMinionsTriggered && !this.lastBlueSuperMinionsTriggered) {
+            this.showSuperMinionTriggerNotification('blue');
+        }
+        
+        // Check if red super minions were just triggered
+        if (state.redSuperMinionsTriggered && !this.lastRedSuperMinionsTriggered) {
+            this.showSuperMinionTriggerNotification('red');
+        }
+        
+        // Update tracking variables
+        this.lastBlueSuperMinionsTriggered = state.blueSuperMinionsTriggered;
+        this.lastRedSuperMinionsTriggered = state.redSuperMinionsTriggered;
     }
 
     showStatsOverlay(state?: SharedGameState): void {
@@ -210,6 +237,9 @@ export class UIManager {
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: ControllerId | null = null): void {
         // Store state for cursor updates
         this.lastState = state;
+        
+        // Check for super minion trigger notifications
+        this.checkSuperMinionTriggerNotifications(state);
         
         if (Object.values(this.hudElements).some(el => !el)) return;
         

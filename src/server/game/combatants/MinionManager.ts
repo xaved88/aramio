@@ -158,10 +158,16 @@ export class MinionManager {
         minion.type = COMBATANT_TYPES.MINION;
         minion.team = team;
         minion.minionType = minionType;
-        minion.health = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].HEALTH;
+        
+        // Check if minions should be buffed (super minions triggered)
+        const isBuffed = this.shouldApplyMinionBuffs(state, team);
+        const healthMultiplier = isBuffed ? this.gameplayConfig.SUPER_MINIONS.HEALTH_MULTIPLIER : 1;
+        const damageMultiplier = isBuffed ? this.gameplayConfig.SUPER_MINIONS.DAMAGE_MULTIPLIER : 1;
+        
+        minion.health = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].HEALTH * healthMultiplier;
         minion.maxHealth = minion.health;
         minion.attackRadius = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_RADIUS;
-        minion.attackStrength = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_STRENGTH;
+        minion.attackStrength = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_STRENGTH * damageMultiplier;
         minion.attackSpeed = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].ATTACK_SPEED;
         minion.windUp = this.gameplayConfig.COMBAT.MINION[minionType.toUpperCase() as keyof typeof this.gameplayConfig.COMBAT.MINION].WIND_UP;
         minion.moveSpeed = this.gameplayConfig.MINION_MOVE_SPEED;
@@ -170,6 +176,9 @@ export class MinionManager {
         minion.lastAttackTime = 0;
         minion.bulletArmor = 0;
         minion.abilityArmor = 0;
+        
+        // Mark minion as buffed for XP calculation
+        minion.isBuffed = isBuffed;
 
         // Random position near cradle
         const angle = Math.random() * 2 * Math.PI;
@@ -182,6 +191,20 @@ export class MinionManager {
         minion.y = Math.max(getMinY(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(this.gameplayConfig.GAME_BOUND_BUFFER), minion.y));
 
         state.combatants.set(minion.id, minion);
+    }
+
+    private shouldApplyMinionBuffs(state: GameState, team: string): boolean {
+        // Check if super minions are enabled
+        if (!this.gameplayConfig.SUPER_MINIONS.ENABLED) {
+            return false;
+        }
+        
+        // Minions get buffed when their own team's super minions are triggered
+        if (team === 'blue') {
+            return state.blueSuperMinionsTriggered;
+        } else {
+            return state.redSuperMinionsTriggered;
+        }
     }
 
     checkAndSpawnWave(state: GameState): void {

@@ -11,16 +11,28 @@ export const GAMEPLAY_CONFIG = {
         HEAL_PERCENT_PER_SECOND: 2, // Percentage of max health to heal per second
     },
 
+    // Super minions configuration
+    SUPER_MINIONS: {
+        ENABLED: true, // Whether minions are buffed, currently triggered by destruction of all enemy turrets
+        HEALTH_MULTIPLIER: 2, // 2x health when super minions triggered
+        DAMAGE_MULTIPLIER: 2, // 2x damage when super minions triggered
+        XP_MULTIPLIER: 4, // 4x XP when super minions are killed
+    },
+
     CRADLE_POSITIONS: {
         BLUE: { x: 100, y: 600 }, // bottom left
         RED: { x: 600, y: 100 },  // top right
     },
     TURRET_POSITIONS: {
         BLUE: [
-            { x: 250, y: 450 }  // Blue turret - on diagonal line from bottom-left to top-right
+            { x: 250, y: 450 },  // Blue turret - on diagonal line from bottom-left to top-right
+            { x: 125, y: 475 },  // Blue turret 2 - off path, equidistant from blue cradle
+            { x: 225, y: 575 }   // Blue turret 3 - off path, equidistant from blue cradle
         ],
         RED: [
-            { x: 450, y: 250 }   // Red turret - on diagonal line from bottom-left to top-right
+            { x: 450, y: 250 },  // Red turret - on diagonal line from bottom-left to top-right
+            { x: 575, y: 225 },  // Red turret 2 - mirrored from blue turret 2
+            { x: 475, y: 125 }   // Red turret 3 - mirrored from blue turret 3
         ]
     },
 
@@ -95,11 +107,11 @@ export const GAMEPLAY_CONFIG = {
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
-            HEALTH: 1000,
+            HEALTH: 750,
             ATTACK_RADIUS: 75,
             ATTACK_STRENGTH: 25,
             ATTACK_SPEED: 2, // attacks per second
-            WIND_UP: 0.5, // 0.5 seconds wind-up time for turrets
+            WIND_UP: 1,
             SIZE: 25, // collision radius matches width
         },
         MINION: {

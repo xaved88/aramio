@@ -97,4 +97,5 @@ export class Hero extends Combatant {
 
 export class Minion extends Combatant {
     @type('string') minionType!: MinionType;
+    @type('boolean') isBuffed = false; // Whether this minion has buffed stats (2x health/damage, 4x XP)
 }
