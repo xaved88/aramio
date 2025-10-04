@@ -60,9 +60,9 @@ export const GAMEPLAY_CONFIG = {
             },
             'pyromancer': {
                 COOLDOWN_MS: 2000,
-                STRENGTH: 15,
+                STRENGTH: 20,
                 RADIUS: 30,
-                RANGE: 150,
+                RANGE: 110,
                 SPEED: 200
             },
             'thorndive': {
