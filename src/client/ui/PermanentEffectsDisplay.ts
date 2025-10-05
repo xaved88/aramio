@@ -60,9 +60,39 @@ export class PermanentEffectsDisplay {
             return;
         }
 
+        // Group effects by stat type and operator to handle stacking
+        const groupedEffects = new Map<string, {
+            stat: string;
+            operator: string;
+            totalAmount: number;
+            count: number;
+            effects: any[];
+        }>();
+
+        statEffects.forEach(effect => {
+            const statName = (effect as any).stat;
+            const operator = (effect as any).operator;
+            const amount = (effect as any).amount;
+            const key = `${statName}_${operator}`;
+            
+            if (groupedEffects.has(key)) {
+                const group = groupedEffects.get(key)!;
+                group.count++;
+                group.effects.push(effect);
+            } else {
+                groupedEffects.set(key, {
+                    stat: statName,
+                    operator,
+                    totalAmount: amount,
+                    count: 1,
+                    effects: [effect]
+                });
+            }
+        });
+
         // Create effect IDs to check if we need to update
-        const currentEffectIds = statEffects.map(effect => 
-            `${(effect as any).stat}_${(effect as any).operator}_${(effect as any).amount}`
+        const currentEffectIds = Array.from(groupedEffects.entries()).map(([key, group]) => 
+            `${key}_${group.count}`
         );
 
         // Only recreate if effects have changed
@@ -78,57 +108,80 @@ export class PermanentEffectsDisplay {
             this.clearDisplay();
         }
 
-        // Create individual backgrounds and icons for each stat effect
-        statEffects.forEach((effect, index) => {
-            const statName = (effect as any).stat;
-            const operator = (effect as any).operator;
-            const amount = (effect as any).amount;
+        // Create stacked icons for each unique stat effect
+        let index = 0;
+        groupedEffects.forEach((group) => {
+            const statName = group.stat;
+            const operator = group.operator;
+            const count = group.count;
             const iconsPerRow = config.MAX_ICONS_PER_ROW;
             const row = Math.floor(index / iconsPerRow);
             const col = index % iconsPerRow;
             
             // Calculate right-aligned position (start from right, go left)
-            const x = config.START_X - col * (config.ICON_SIZE + config.SPACING) - config.ICON_SIZE / 2;
-            const y = config.Y + row * (config.ICON_SIZE + config.SPACING) + config.ICON_SIZE / 2;
+            const baseX = config.START_X - col * (config.ICON_SIZE + config.SPACING) - config.ICON_SIZE / 2;
+            const baseY = config.Y + row * (config.ICON_SIZE + config.SPACING) + config.ICON_SIZE / 2;
             
-            // Create individual background for this icon
-            const background = this.scene.add.graphics();
-            background.fillStyle(config.BACKGROUND_COLOR, config.BACKGROUND_ALPHA);
-            background.fillRoundedRect(
-                x - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
-                y - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
-                config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
-                config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
-                4
-            );
-            background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-            background.setScrollFactor(0, 0);
-            if (this.hudContainer) {
-                this.hudContainer.add(background);
-            }
-            if (this.cameraManager) {
-                this.cameraManager.assignToHUDCamera(background);
-            }
-            this.backgrounds.push(background);
+            // Create stacked icons with slight offsets to show stacking (going down)
+            const stackOffset = 3; // Pixels to offset each stack layer
+            const maxVisibleStacks = count; // Show all layers
             
-            // Map stat names to reward IDs
-            const rewardId = this.mapStatToRewardId(statName);
-            
-            const iconImage = iconManager.createIconImage(this.scene, x, y, rewardId, config.ICON_SIZE);
-            if (iconImage) {
-                iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-                iconImage.setScrollFactor(0, 0);
+            for (let stackLayer = 0; stackLayer < maxVisibleStacks; stackLayer++) {
+                const x = baseX; // Keep X the same to avoid overlapping other stacks
+                const y = baseY + stackLayer * stackOffset; // Stack downward
+                
+                // Create individual background for this stack layer
+                const background = this.scene.add.graphics();
+                background.fillStyle(config.BACKGROUND_COLOR, 1.0); // Full opacity
+                background.lineStyle(1, 0x333333, 1.0); // Small dark border
+                background.fillRoundedRect(
+                    x - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
+                    y - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
+                    config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
+                    config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
+                    4
+                );
+                background.strokeRoundedRect(
+                    x - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
+                    y - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
+                    config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
+                    config.ICON_SIZE + config.BACKGROUND_PADDING * 2,
+                    4
+                );
+                background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + stackLayer);
+                background.setScrollFactor(0, 0);
                 if (this.hudContainer) {
-                    this.hudContainer.add(iconImage);
+                    this.hudContainer.add(background);
                 }
                 if (this.cameraManager) {
-                    this.cameraManager.assignToHUDCamera(iconImage);
+                    this.cameraManager.assignToHUDCamera(background);
                 }
-                this.iconImages.push(iconImage);
+                this.backgrounds.push(background);
                 
-                // Create tooltip for this icon
-                this.createTooltip(iconImage, rewardId, operator, amount, x, y);
+                // Map stat names to reward IDs
+                const rewardId = this.mapStatToRewardId(statName);
+                
+                const iconImage = iconManager.createIconImage(this.scene, x, y, rewardId, config.ICON_SIZE);
+                if (iconImage) {
+                    iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + stackLayer);
+                    iconImage.setScrollFactor(0, 0);
+                    if (this.hudContainer) {
+                        this.hudContainer.add(iconImage);
+                    }
+                    if (this.cameraManager) {
+                        this.cameraManager.assignToHUDCamera(iconImage);
+                    }
+                    this.iconImages.push(iconImage);
+                    
+                    // Create tooltip for the top layer only (most visible)
+                    if (stackLayer === maxVisibleStacks - 1) {
+                        this.createTooltip(iconImage, rewardId, operator, group.totalAmount, x, y, count);
+                    }
+                }
             }
+            
+            
+            index++;
         });
 
         // Track the current effect IDs
@@ -198,7 +251,7 @@ export class PermanentEffectsDisplay {
         return statToRewardMap[statName] || statName;
     }
 
-    private createTooltip(iconImage: Phaser.GameObjects.Image, rewardId: string, operator: string, amount: number, x: number, y: number): void {
+    private createTooltip(iconImage: Phaser.GameObjects.Image, rewardId: string, operator: string, amount: number, x: number, y: number, count?: number): void {
         // Get reward display info
         const rewardDisplay = CLIENT_CONFIG.REWARDS.DISPLAY[rewardId as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
         if (!rewardDisplay) return;
@@ -215,7 +268,7 @@ export class PermanentEffectsDisplay {
         tooltipBg.lineStyle(1, 0xffffff, 0.8);
         
         // Calculate tooltip text and dimensions
-        const title = rewardDisplay.title;
+        const title = count && count > 1 ? `${rewardDisplay.title} (×${count})` : rewardDisplay.title;
         const description = this.formatEffectDescription(rewardDisplay.description, operator, amount);
         
         // Create temporary text to measure dimensions
