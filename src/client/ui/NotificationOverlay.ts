@@ -43,11 +43,9 @@ export class NotificationOverlay {
         
         // Create title text
         this.titleText = this.scene.add.text(0, 0, '', {
-            fontSize: '32px',
+            fontSize: '24px',
             fontFamily: 'Arial',
             color: '#FFFFFF',
-            stroke: '#000000',
-            strokeThickness: 3,
             align: 'center'
         });
         this.titleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
@@ -58,11 +56,9 @@ export class NotificationOverlay {
         
         // Create subtitle text
         this.subtitleText = this.scene.add.text(0, 0, '', {
-            fontSize: '18px',
+            fontSize: '14px',
             fontFamily: 'Arial',
             color: '#FFFFFF',
-            stroke: '#000000',
-            strokeThickness: 2,
             align: 'center'
         });
         this.subtitleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
@@ -90,8 +86,8 @@ export class NotificationOverlay {
         const teamName = isBlue ? 'Blue' : 'Red';
         
         // Create background with team color
-        const overlayWidth = 600;
-        const overlayHeight = 150;
+        const overlayWidth = 400;
+        const overlayHeight = 80;
         const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
         const centerY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 4; // Top quarter of screen
         
@@ -122,7 +118,7 @@ export class NotificationOverlay {
         this.subtitleText?.setText(`All ${destroyedTeamName} turrets destroyed!`);
         
         // Position text in center of overlay
-        this.titleText?.setPosition(centerX, centerY - 15);
+        this.titleText?.setPosition(centerX, centerY - 10);
         this.subtitleText?.setPosition(centerX, centerY + 15);
         
         // Fade in animation
@@ -133,8 +129,8 @@ export class NotificationOverlay {
             duration: 500,
             ease: 'Power2',
             onComplete: () => {
-                // Auto-hide after 4 seconds
-                this.scene.time.delayedCall(4000, () => {
+                // Auto-hide after 2 seconds
+                this.scene.time.delayedCall(2000, () => {
                     this.hide();
                 });
             }
