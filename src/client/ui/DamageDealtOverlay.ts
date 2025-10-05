@@ -83,10 +83,12 @@ export class DamageDealtOverlay {
         this.createDamageEntries();
         
         // Create breakdown text at the bottom
-        this.breakdownText = this.scene.add.text(10, 260, '', {
-            fontSize: '12px',
-            color: '#cccccc',
-            fontFamily: 'Arial, sans-serif'
+        this.breakdownText = this.scene.add.text(10, 275, '', {
+            fontSize: '13px',
+            color: '#ffffff',
+            fontFamily: 'Arial, sans-serif',
+            stroke: '#000000',
+            strokeThickness: 1
         });
         this.hudContainer.add(this.breakdownText);
     }
@@ -195,7 +197,7 @@ export class DamageDealtOverlay {
         if (this.breakdownText && totalDamage > 0) {
             const bulletPercent = Math.round((bulletDamage / totalDamage) * 100);
             const abilityPercent = Math.round((abilityDamage / totalDamage) * 100);
-            this.breakdownText.setText(`Total: ${Math.round(totalDamage)} | Bullet: ${bulletPercent}% | Ability: ${abilityPercent}%`);
+            this.breakdownText.setText(`Total: ${Math.round(totalDamage)} • Bullet: ${bulletPercent}% • Ability: ${abilityPercent}%`);
             this.breakdownText.setVisible(true);
         } else if (this.breakdownText) {
             this.breakdownText.setVisible(false);
