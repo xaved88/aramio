@@ -146,6 +146,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     hero.roundStats.totalExperience = 0;
     hero.roundStats.minionKills = 0;
     hero.roundStats.heroKills = 0;
+    hero.roundStats.currentKillStreak = 0;
     hero.roundStats.turretKills = 0;
     hero.roundStats.damageTaken = 0;
     hero.roundStats.damageDealt = 0;

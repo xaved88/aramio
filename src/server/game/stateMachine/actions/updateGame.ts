@@ -86,6 +86,20 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
         state.deathEffectEvents.splice(index, 1);
     });
     
+    // Clear old kill streak events (older than 3 seconds)
+    const killStreakEventsToRemove: number[] = [];
+    
+    state.killStreakEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 3000) {
+            killStreakEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove kill streak events in reverse order
+    killStreakEventsToRemove.reverse().forEach(index => {
+        state.killStreakEvents.splice(index, 1);
+    });
+    
     // Handle passive healing
     handlePassiveHealing(state, gameplayConfig);
     
@@ -398,7 +412,8 @@ function handleDeadCombatants(state: GameState, gameplayConfig: GameplayConfig):
             const hero = combatant as Hero;
             
             if (hero.getHealth() <= 0 && hero.state === 'alive') {
-                // Hero died, start respawn
+                // Hero died, reset kill streak and start respawn
+                hero.roundStats.currentKillStreak = 0;
                 startPlayerRespawn(hero, state, gameplayConfig);
             } else if (hero.state === 'respawning') {
                 // Generate reward choices for respawning heroes who have unspent rewards but no choices

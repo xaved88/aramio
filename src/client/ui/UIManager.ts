@@ -11,7 +11,7 @@ import { DamageTakenOverlay } from './DamageTakenOverlay';
 import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
-import { NotificationOverlay } from './NotificationOverlay';
+import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -40,6 +40,7 @@ export class UIManager {
     private currentPlayerHeroId: string | null = null; // Track the currently controlled hero ID // Store last state for cursor updates
     private lastBlueSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
     private lastRedSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
+    private processedKillStreakEvents: Set<string> = new Set(); // Track processed kill streak events
 
     // HUD elements
     private hudElements: {
@@ -154,7 +155,14 @@ export class UIManager {
     }
 
     showSuperMinionTriggerNotification(triggeredTeam: string): void {
-        this.notificationOverlay.showSuperMinionTriggerNotification(triggeredTeam);
+        this.notificationOverlay.showNotification({
+            type: NotificationType.SUPERMINION_SPAWN,
+            team: triggeredTeam
+        });
+    }
+
+    showNotification(config: NotificationConfig): void {
+        this.notificationOverlay.showNotification(config);
     }
 
     private checkSuperMinionTriggerNotifications(state: SharedGameState): void {
@@ -171,6 +179,40 @@ export class UIManager {
         // Update tracking variables
         this.lastBlueSuperMinionsTriggered = state.blueSuperMinionsTriggered;
         this.lastRedSuperMinionsTriggered = state.redSuperMinionsTriggered;
+    }
+
+    private checkKillStreakNotifications(state: SharedGameState): void {
+        // Process kill streak events
+        state.killStreakEvents.forEach(event => {
+            const eventKey = `${event.heroId}-${event.killStreak}-${event.timestamp}`;
+            
+            // Skip if we've already processed this event
+            if (this.processedKillStreakEvents.has(eventKey)) {
+                return;
+            }
+            
+            // Mark as processed
+            this.processedKillStreakEvents.add(eventKey);
+            
+            // Determine notification type based on kill streak
+            let notificationType: NotificationType;
+            if (event.killStreak === 5) {
+                notificationType = NotificationType.KILLING_SPREE;
+            } else if (event.killStreak === 10) {
+                notificationType = NotificationType.RAMPAGE;
+            } else if (event.killStreak === 15) {
+                notificationType = NotificationType.UNSTOPPABLE;
+            } else {
+                return; // Skip unknown kill streak values
+            }
+            
+            // Show the notification
+            this.showNotification({
+                type: notificationType,
+                team: event.team,
+                heroName: event.heroName
+            });
+        });
     }
 
     showStatsOverlay(state?: SharedGameState): void {
@@ -256,6 +298,9 @@ export class UIManager {
         
         // Check for super minion trigger notifications
         this.checkSuperMinionTriggerNotifications(state);
+        
+        // Check for kill streak notifications
+        this.checkKillStreakNotifications(state);
         
         if (Object.values(this.hudElements).some(el => !el)) return;
         

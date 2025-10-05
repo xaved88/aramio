@@ -1,6 +1,6 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
-import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent, ProjectileMissEvent } from '../types/GameStateTypes';
+import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent, ProjectileMissEvent, KillStreakEvent } from '../types/GameStateTypes';
 import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility, SniperAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
 import { applyStatModifications } from './StatModification';
 
@@ -127,6 +127,14 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    // Convert kill streak events
+    const sharedKillStreakEvents: KillStreakEvent[] = (colyseusState.killStreakEvents || []).map(event => ({
+        heroId: event.heroId,
+        heroName: event.heroName,
+        team: event.team,
+        killStreak: event.killStreak,
+        timestamp: event.timestamp
+    }));
     
     return {
         gameTime: colyseusState.gameTime,
@@ -144,6 +152,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         aoeDamageEvents: sharedAOEDamageEvents,
         deathEffectEvents: sharedDeathEffectEvents,
         projectileMissEvents: sharedProjectileMissEvents,
+        killStreakEvents: sharedKillStreakEvents,
         blueSuperMinionsTriggered: colyseusState.blueSuperMinionsTriggered,
         redSuperMinionsTriggered: colyseusState.redSuperMinionsTriggered
     };

@@ -75,6 +75,7 @@ describe('CameraManager', () => {
             aoeDamageEvents: [],
             deathEffectEvents: [],
             projectileMissEvents: [],
+            killStreakEvents: [],
             blueSuperMinionsTriggered: false,
             redSuperMinionsTriggered: false,
         };

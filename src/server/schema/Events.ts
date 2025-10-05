@@ -72,6 +72,14 @@ export class SuperMinionTriggerEvent extends Schema {
     @type('number') timestamp!: number; // When the trigger occurred
 }
 
+export class KillStreakEvent extends Schema {
+    @type('string') heroId!: string; // ID of the hero who achieved the kill streak
+    @type('string') heroName!: string; // Display name of the hero
+    @type('string') team!: string; // Team of the hero
+    @type('number') killStreak!: number; // Number of kills in the streak (5 or 10)
+    @type('number') timestamp!: number; // When the kill streak was achieved
+}
+
 export class RoundStats extends Schema {
     @type('number') totalExperience = 0; // total XP earned throughout the match
     @type('number') minionKills = 0; // number of minions killed
@@ -79,4 +87,5 @@ export class RoundStats extends Schema {
     @type('number') turretKills = 0; // number of turrets destroyed
     @type('number') damageTaken = 0; // total damage taken
     @type('number') damageDealt = 0; // total damage dealt
+    @type('number') currentKillStreak = 0; // current kills without dying
 }

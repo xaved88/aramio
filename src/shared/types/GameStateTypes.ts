@@ -43,6 +43,14 @@ export interface ProjectileMissEvent {
     timestamp: number;
 }
 
+export interface KillStreakEvent {
+    heroId: string;
+    heroName: string;
+    team: string;
+    killStreak: number;
+    timestamp: number;
+}
+
 export interface SharedGameState {
     gameTime: number;
     gamePhase: string;
@@ -59,6 +67,7 @@ export interface SharedGameState {
     aoeDamageEvents: AOEDamageEvent[];
     deathEffectEvents: DeathEffectEvent[];
     projectileMissEvents: ProjectileMissEvent[];
+    killStreakEvents: KillStreakEvent[];
     blueSuperMinionsTriggered: boolean;
     redSuperMinionsTriggered: boolean;
 } 

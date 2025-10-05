@@ -423,6 +423,7 @@ describe('Bot Strategies', () => {
                 damageEvents: [],
                 killEvents: [],
                 aoeDamageEvents: [],
+                killStreakEvents: [],
                 warriorSpawnTimes: new Map(),
                 archerSpawned: new Map()
             } as any;
@@ -501,6 +502,7 @@ describe('Bot Strategies', () => {
                 damageEvents: [],
                 killEvents: [],
                 aoeDamageEvents: [],
+                killStreakEvents: [],
                 warriorSpawnTimes: new Map(),
                 archerSpawned: new Map()
             } as any;

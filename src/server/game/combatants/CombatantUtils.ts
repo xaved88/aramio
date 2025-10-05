@@ -1,6 +1,6 @@
 import { GameState } from '../../schema/GameState';
 import { Combatant } from '../../schema/Combatants';
-import { DamageEvent, KillEvent, DeathEffectEvent } from '../../schema/Events';
+import { DamageEvent, KillEvent, DeathEffectEvent, KillStreakEvent } from '../../schema/Events';
 import { ReflectEffect } from '../../schema/Effects';
 
 export type DamageSource = 'auto-attack' | 'ability';
@@ -88,6 +88,19 @@ export class CombatantUtils {
                         break;
                     case 'hero':
                         hero.roundStats.heroKills++;
+                        // Only count hero kills for kill streaks
+                        hero.roundStats.currentKillStreak++;
+                        
+                        // Check for kill streak achievements (5, 10, and 15 kills)
+                        if (hero.roundStats.currentKillStreak === 5 || hero.roundStats.currentKillStreak === 10 || hero.roundStats.currentKillStreak === 15) {
+                            const killStreakEvent = new KillStreakEvent();
+                            killStreakEvent.heroId = hero.id;
+                            killStreakEvent.heroName = hero.displayName;
+                            killStreakEvent.team = hero.team;
+                            killStreakEvent.killStreak = hero.roundStats.currentKillStreak;
+                            killStreakEvent.timestamp = gameState.gameTime;
+                            gameState.killStreakEvents.push(killStreakEvent);
+                        }
                         break;
                     case 'turret':
                         hero.roundStats.turretKills++;
