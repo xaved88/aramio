@@ -4,6 +4,7 @@ import { LobbyState, PlayerSlot } from '../../shared/types/LobbyTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ConnectionManager } from '../ConnectionManager';
+import { PlayerNameStorage } from '../utils/PlayerNameStorage';
 
 export class LobbyScene extends Phaser.Scene {
     private client!: Client;
@@ -12,6 +13,7 @@ export class LobbyScene extends Phaser.Scene {
     private playerSessionId: string | null = null;
     private connectionManager!: ConnectionManager;
     private isNameDialogOpen: boolean = false;
+    private hasLoadedSavedName: boolean = false;
     
     // UI Elements
     private configLabel!: Phaser.GameObjects.Text;
@@ -46,6 +48,7 @@ export class LobbyScene extends Phaser.Scene {
         this.playerSessionId = null;
         this.lobbyState = null;
         this.isNameDialogOpen = false;
+        this.hasLoadedSavedName = false;
         
         // Reset UI elements
         this.configLabel = null as any;
@@ -103,6 +106,9 @@ export class LobbyScene extends Phaser.Scene {
             // Set up keyboard handlers
             this.setupKeyboardHandlers();
             
+            // Load and set saved player name
+            this.loadAndSetSavedPlayerName();
+            
         } catch (error) {
             console.error('Failed to connect to lobby:', error);
             this.createErrorUI();
@@ -116,6 +122,8 @@ export class LobbyScene extends Phaser.Scene {
             if (this.startButton && this.startButton.scene) {
                 this.updateUI();
             }
+            // Try to load saved name on first state change
+            this.loadAndSetSavedPlayerName();
         });
 
         this.room.onMessage('gameStarting', (message: any) => {
@@ -559,6 +567,82 @@ export class LobbyScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Load saved player name from localStorage and set it if the player has a default name
+     * If the saved name is already in use, append a number to make it unique
+     */
+    private loadAndSetSavedPlayerName() {
+        // Only try once per session
+        if (this.hasLoadedSavedName) {
+            return;
+        }
+
+        const savedName = PlayerNameStorage.getPlayerName();
+        if (savedName) {
+            const currentPlayerSlot = this.getCurrentPlayerSlot();
+            if (currentPlayerSlot) {
+                const currentName = currentPlayerSlot.playerDisplayName;
+                const isDefaultName = !currentName || 
+                                    currentName.trim() === '' || 
+                                    currentName.startsWith('Player ') ||
+                                    currentName.startsWith('Hero ');
+                
+                if (isDefaultName) {
+                    const uniqueName = this.generateUniqueDisplayName(savedName);
+                    console.log(`Loading saved player name: ${uniqueName} (replacing default name: ${currentName})`);
+                    this.room.send('setPlayerDisplayName', { displayName: uniqueName });
+                    this.hasLoadedSavedName = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate a unique display name by checking if the base name is already in use
+     * If it's in use, append a number (e.g., "PlayerName", "PlayerName 2", "PlayerName 3")
+     * 
+     * NOTE: This modification of the name is just for testing purposes
+     */
+    private generateUniqueDisplayName(baseName: string): string {
+        if (!this.lobbyState) {
+            return baseName;
+        }
+
+        // Get all existing display names in the lobby
+        const existingNames = new Set<string>();
+        
+        // Check blue team
+        this.lobbyState.blueTeam.forEach(slot => {
+            if (slot.playerDisplayName && slot.playerDisplayName.trim() !== '') {
+                existingNames.add(slot.playerDisplayName);
+            }
+        });
+        
+        // Check red team
+        this.lobbyState.redTeam.forEach(slot => {
+            if (slot.playerDisplayName && slot.playerDisplayName.trim() !== '') {
+                existingNames.add(slot.playerDisplayName);
+            }
+        });
+
+        // If the base name is not in use, use it
+        if (!existingNames.has(baseName)) {
+            return baseName;
+        }
+
+        // Otherwise, find a unique name by appending numbers
+        let counter = 2;
+        let uniqueName: string;
+        
+        do {
+            uniqueName = `${baseName} ${counter}`;
+            counter++;
+        } while (existingNames.has(uniqueName));
+
+        return uniqueName;
+    }
+
+
     private showNameEditDialog(currentName: string, autoFocus: boolean = true) {
         // Set flag to prevent multiple dialogs
         this.isNameDialogOpen = true;
@@ -586,7 +670,9 @@ export class LobbyScene extends Phaser.Scene {
         
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
-        inputElement.value = currentName;
+        // Use current name, or fall back to stored name if current is empty
+        const defaultValue = currentName || PlayerNameStorage.getPlayerName() || '';
+        inputElement.value = defaultValue;
         inputElement.maxLength = CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH;
         inputElement.style.position = 'absolute';
         inputElement.style.left = (canvasRect.left + centerX - 150) + 'px';
@@ -661,6 +747,9 @@ export class LobbyScene extends Phaser.Scene {
         saveButton.on('pointerdown', () => {
             const newName = inputElement.value.trim();
             if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
+                // Save to localStorage for persistence
+                PlayerNameStorage.savePlayerName(newName);
+                // Send to server
                 this.room.send('setPlayerDisplayName', { displayName: newName });
                 cleanup();
             }
@@ -671,6 +760,9 @@ export class LobbyScene extends Phaser.Scene {
             if (event.key === 'Enter') {
                 const newName = inputElement.value.trim();
                 if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
+                    // Save to localStorage for persistence
+                    PlayerNameStorage.savePlayerName(newName);
+                    // Send to server
                     this.room.send('setPlayerDisplayName', { displayName: newName });
                     cleanup();
                 }
