@@ -10,19 +10,39 @@ import { calculateXPForLevel, calculateXPForSpecificLevel } from '../../../../sh
 import { grantExperience } from './updateGame';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
+// Fun bot names for randomized assignment - focused on attributes and personality
+const BOT_NAMES = [
+    'Zephyr', 'Nova', 'Blaze', 'Storm', 'Vortex',
+    'Shadow', 'Raven', 'Phoenix', 'Orion',
+    'Mystic', 'Rogue', 'Sage', 'Guardian', 'Champion', 'Warrior', 'Hunter',
+    'Nimble Boom', 'Swift Action', 'Fierce Looks', 'Bill the Clever', 'Jim the Wise', 'Jane the Strong', 'Ann the Cleaver',
+    'Destroyer', 'Crusher', 'Slayer', 'Berserker', 'Ravager', 'Conqueror', 'Annihilator', 'Devastator',
+    'Thunder', 'Lightning', 'I cast Fireball', 'Ice Cube', 'Wind', 'Earth', 'Water',
+    'Ghost', 'Phantom', 'Specter', 'Wraith', 'Demon', 'Angel', 'Titan', 'Giant'
+];
+
+// Set to track used bot names to ensure uniqueness
+const usedBotNames = new Set<string>();
+
 /**
  * Generates a unique display name for a hero based on existing heroes
  * @param state The current game state
  * @param playerDisplayName Optional player display name - if provided, this will be used
- * @returns A unique display name like player name or 'Hero 1', 'Hero 2', etc.
+ * @param controllerId The controller ID to determine if this is a bot
+ * @returns A unique display name like player name or randomized bot name
  */
-function generateHeroName(state: GameState, playerDisplayName?: string): string {
+function generateHeroName(state: GameState, playerDisplayName?: string, controllerId?: string): string {
     // If we have a player display name, use it
     if (playerDisplayName && playerDisplayName.trim() !== '') {
         return playerDisplayName;
     }
     
-    // Otherwise, generate a generic hero name for bots or players without names
+    // Check if this is a bot (controllerId starts with 'bot')
+    if (controllerId && controllerId.startsWith('bot')) {
+        return generateBotName();
+    }
+    
+    // For players without names, generate a generic hero name
     const existingHeroes = Array.from(state.combatants.values())
         .filter(combatant => combatant.type === COMBATANT_TYPES.HERO) as Hero[];
     
@@ -42,6 +62,37 @@ function generateHeroName(state: GameState, playerDisplayName?: string): string 
     return displayName;
 }
 
+/**
+ * Generates a unique bot name from the randomized list
+ * @returns A unique bot name
+ */
+function generateBotName(): string {
+    // Get available names (not yet used)
+    const availableNames = BOT_NAMES.filter(name => !usedBotNames.has(name));
+    
+    // If we've used all names, reset the used names set and start over
+    if (availableNames.length === 0) {
+        usedBotNames.clear();
+        return BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+    }
+    
+    // Pick a random name from available ones
+    const randomIndex = Math.floor(Math.random() * availableNames.length);
+    const selectedName = availableNames[randomIndex];
+    
+    // Mark it as used
+    usedBotNames.add(selectedName);
+    
+    return selectedName;
+}
+
+/**
+ * Resets the used bot names set - should be called when starting a new game
+ */
+export function resetBotNames(): void {
+    usedBotNames.clear();
+}
+
 export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, gameplayConfig: GameplayConfig): StateMachineResult {
     const { playerId, team, x, y, abilityType = 'default', playerDisplayName, isPlayer = true } = action.payload;
     
@@ -50,7 +101,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     hero.type = COMBATANT_TYPES.HERO;
     hero.team = team;
     hero.controller = playerId; // client ID becomes the controller
-    hero.displayName = generateHeroName(state, playerDisplayName); // Generate unique display name
+    hero.displayName = generateHeroName(state, playerDisplayName, playerId); // Generate unique display name
     
     // Handle optional coordinates
     if (x !== undefined && y !== undefined) {

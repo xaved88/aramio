@@ -3,8 +3,12 @@ import { Combatant, Hero } from '../../../schema/Combatants';
 import { SetupGameAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { resetBotNames } from './spawnPlayer';
 
 export function handleSetupGame(state: GameState, action: SetupGameAction, gameplayConfig: GameplayConfig): StateMachineResult {
+    // Reset bot names for new game
+    resetBotNames();
+    
     // Clear existing state
     state.combatants.clear();
     state.attackEvents.clear();
