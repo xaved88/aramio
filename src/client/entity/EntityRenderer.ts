@@ -397,8 +397,10 @@ export class EntityRenderer {
         const barHeight = 4; // Thin bar
         const barY = heroSize + 8; // Position below the hero
         
-        // Draw background bar (total health) - lighter color
-        healthBar.fillStyle(respawnColor, 0.6);
+        // Draw background bar (total health) - use darker contrasting color
+        const backgroundColor = combatant.team === 'blue' ? 0x1a4a6b : respawnColor; // Dark blue for blue team, respawn color for red
+        const backgroundAlpha = combatant.team === 'blue' ? 0.8 : 0.6;
+        healthBar.fillStyle(backgroundColor, backgroundAlpha);
         healthBar.fillRect(-barWidth / 2, barY, barWidth, barHeight);
         
         // Draw current health bar - darker color
