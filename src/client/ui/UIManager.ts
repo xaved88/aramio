@@ -34,7 +34,10 @@ export class UIManager {
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
-    private lastState: SharedGameState | null = null; // Store last state for cursor updates
+    private lastState: SharedGameState | null = null;
+    private wasPlayerAlive: boolean = true; // Track previous alive state to detect death transitions
+    private playerSessionId: ControllerId | null = null;
+    private currentPlayerHeroId: string | null = null; // Track the currently controlled hero ID // Store last state for cursor updates
     private lastBlueSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
     private lastRedSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
 
@@ -143,6 +146,8 @@ export class UIManager {
     }
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
+        this.playerSessionId = sessionId;
+        this.currentPlayerHeroId = null; // Reset hero ID when session changes
         this.statsOverlay.setPlayerSessionId(sessionId);
         this.damageTakenOverlay.setPlayerSessionId(sessionId);
         this.damageDealtOverlay.setPlayerSessionId(sessionId);
@@ -199,7 +204,8 @@ export class UIManager {
     showDamageTakenOverlay(state: SharedGameState): void {
         this.damageTakenOverlay.show();
         // Process damage events and update the overlay immediately
-        this.damageTakenOverlay.processDamageEvents(state);
+        const currentHeroId = this.getCurrentPlayerHeroId();
+        this.damageTakenOverlay.processDamageEvents(state, currentHeroId);
         this.damageTakenOverlay.updateDamageEntries(state.gameTime, state);
     }
 
@@ -208,7 +214,8 @@ export class UIManager {
     }
 
     updateDamageTakenTracking(state: SharedGameState): void {
-        this.damageTakenOverlay.processDamageEvents(state);
+        const currentHeroId = this.getCurrentPlayerHeroId();
+        this.damageTakenOverlay.processDamageEvents(state, currentHeroId);
         
         if (this.damageTakenOverlay.isShowing()) {
             this.damageTakenOverlay.updateDamageEntries(state.gameTime, state);
@@ -218,7 +225,8 @@ export class UIManager {
     showDamageDealtOverlay(state: SharedGameState): void {
         this.damageDealtOverlay.show();
         // Process damage events and update the overlay immediately
-        this.damageDealtOverlay.processDamageEvents(state);
+        const currentHeroId = this.getCurrentPlayerHeroId();
+        this.damageDealtOverlay.processDamageEvents(state, currentHeroId);
         this.damageDealtOverlay.updateDamageEntries(state.gameTime, state);
     }
 
@@ -227,7 +235,8 @@ export class UIManager {
     }
 
     updateDamageDealtTracking(state: SharedGameState): void {
-        this.damageDealtOverlay.processDamageEvents(state);
+        const currentHeroId = this.getCurrentPlayerHeroId();
+        this.damageDealtOverlay.processDamageEvents(state, currentHeroId);
         
         if (this.damageDealtOverlay.isShowing()) {
             this.damageDealtOverlay.updateDamageEntries(state.gameTime, state);
@@ -237,6 +246,13 @@ export class UIManager {
     updateHUD(state: SharedGameState, playerTeam: string | null = null, playerSessionId: ControllerId | null = null): void {
         // Store state for cursor updates
         this.lastState = state;
+        
+        // Process damage events BEFORE death detection to ensure final damage is captured
+        this.updateDamageTakenTracking(state);
+        this.updateDamageDealtTracking(state);
+        
+        // Check for death/respawn transitions
+        this.checkDeathRespawnTransitions(state);
         
         // Check for super minion trigger notifications
         this.checkSuperMinionTriggerNotifications(state);
@@ -266,8 +282,6 @@ export class UIManager {
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
         this.permanentEffectsDisplay.updateDisplay(currentPlayer);
-        this.updateDamageTakenTracking(state);
-        this.updateDamageDealtTracking(state);
         this.updateCursor(currentPlayer, state);
         
         if (state.gamePhase === 'finished' && state.winningTeam && !this.victoryScreen.isShowing()) {
@@ -360,15 +374,117 @@ export class UIManager {
     // Input handler methods (no state parameters)
     showDamageOverlays(): void {
         if (this.lastState) {
-            // this.lastState is already a SharedGameState when called from InputHandler
-            this.showDamageTakenOverlay(this.lastState);
-            this.showDamageDealtOverlay(this.lastState);
+            const isPlayerDead = this.isPlayerDead(this.lastState);
+            
+            // Check if player is dead/respawning
+            if (isPlayerDead) {
+                this.showDeathSummary(this.lastState);
+            } else {
+                // Normal live damage overlays
+                this.showDamageTakenOverlay(this.lastState);
+                this.showDamageDealtOverlay(this.lastState);
+            }
         }
     }
 
     hideDamageOverlays(): void {
         this.hideDamageTakenOverlay();
         this.hideDamageDealtOverlay();
+    }
+
+    /**
+     * Shows death summary instead of live damage overlays
+     */
+    showDeathSummary(state: SharedGameState): void {
+        this.damageTakenOverlay.show();
+        this.damageDealtOverlay.show();
+        // Update with death summary data
+        this.damageTakenOverlay.updateDamageEntries(state.gameTime, state);
+        this.damageDealtOverlay.updateDamageEntries(state.gameTime, state);
+    }
+
+    /**
+     * Gets the current player hero ID for damage overlays
+     */
+    getCurrentPlayerHeroId(): string | null {
+        return this.currentPlayerHeroId;
+    }
+
+    /**
+     * Captures current damage history for death summary when player dies
+     */
+    captureDeathSummary(): void {
+        if (this.lastState) {
+            this.damageTakenOverlay.captureDeathSummary(this.lastState.gameTime);
+            this.damageDealtOverlay.captureDeathSummary(this.lastState.gameTime);
+        }
+    }
+
+    /**
+     * Clears death summary when player respawns
+     */
+    clearDeathSummary(): void {
+        this.damageTakenOverlay.clearDeathSummary();
+        this.damageDealtOverlay.clearDeathSummary();
+    }
+
+
+    /**
+     * Checks for death/respawn transitions and handles death summary capture
+     */
+    private checkDeathRespawnTransitions(state: SharedGameState): void {
+        const isPlayerDead = this.isPlayerDead(state);
+        
+        // Check for death transition (alive -> dead)
+        if (this.wasPlayerAlive && isPlayerDead) {
+            // Player just died, capture death summary
+            this.captureDeathSummary();
+        }
+        
+        // Check for respawn transition (dead -> alive)
+        if (!this.wasPlayerAlive && !isPlayerDead) {
+            // Player just respawned, clear death summary
+            this.clearDeathSummary();
+        }
+        
+        // Update previous state
+        this.wasPlayerAlive = !isPlayerDead;
+    }
+
+    /**
+     * Gets the currently controlled hero for the player
+     */
+    private getCurrentPlayerHero(state: SharedGameState): any | null {
+        if (!state || !this.playerSessionId) return null;
+        
+        // Always find the current hero (in case player switched heroes)
+        for (const combatant of state.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
+                // Update cached hero ID if it changed
+                if (this.currentPlayerHeroId !== combatant.id) {
+                    this.currentPlayerHeroId = combatant.id;
+                    // Clear damage overlays when switching heroes to avoid confusion
+                    this.hideDamageOverlays();
+                    this.damageTakenOverlay.clear();
+                    this.damageDealtOverlay.clear();
+                }
+                return combatant;
+            }
+        }
+        
+        // No hero found - player might be disconnected or dead
+        this.currentPlayerHeroId = null;
+        return null;
+    }
+
+    /**
+     * Checks if the player is currently dead/respawning
+     */
+    private isPlayerDead(state: SharedGameState): boolean {
+        const playerHero = this.getCurrentPlayerHero(state);
+        if (!playerHero) return false;
+        
+        return playerHero.state === 'respawning' || playerHero.health <= 0;
     }
 
     private isInPostGameMode(): boolean {

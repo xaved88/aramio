@@ -16,6 +16,7 @@ export class RespawnOverlay {
     private text: Phaser.GameObjects.Text | null = null;
     private timer: Phaser.GameObjects.Text | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
+    private deathSummaryHint: Phaser.GameObjects.Text | null = null;
     private rewardCardManager: RewardCardManager;
     private isVisible: boolean = false;
     private onRewardChosen?: (rewardId: string) => void;
@@ -56,7 +57,7 @@ export class RespawnOverlay {
         
         this.text = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 5,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Moved up more
             'Respawning',
             {
                 fontSize: '36px',
@@ -74,7 +75,7 @@ export class RespawnOverlay {
         
         this.timer = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 5 + 50,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 45, // Moved up with text
             '',
             {
                 fontSize: '32px',
@@ -85,14 +86,14 @@ export class RespawnOverlay {
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
             }
         );
-        this.timer.setOrigin(0.5);
+        this.timer.setOrigin(0.5); // Center-aligned
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.timer.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.timer);
         
         this.rewardsText = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 5 + 100,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 6 + 140, // Moved down more to be closer to reward cards
             'Choose your rewards',
             {
                 fontSize: '24px',
@@ -108,12 +109,31 @@ export class RespawnOverlay {
         this.rewardsText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.rewardsText);
         
+        // Create death summary hint text
+        this.deathSummaryHint = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 85, // Moved up with text
+            'Hold "Shift" for Death Summary',
+            {
+                fontSize: '18px',
+                color: '#cccccc',
+                fontStyle: 'normal',
+                stroke: '#000000',
+                strokeThickness: 1,
+                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true }
+            }
+        );
+        this.deathSummaryHint.setOrigin(0.5);
+        this.deathSummaryHint.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.deathSummaryHint.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.deathSummaryHint);
+        
         this.hide();
     }
 
     show(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText) {
-            const elements = [this.overlay, this.text, this.timer, this.rewardsText];
+        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint) {
+            const elements = [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint];
             elements.forEach(el => el.setAlpha(0).setVisible(true));
             
             this.scene.tweens.add({
@@ -128,8 +148,8 @@ export class RespawnOverlay {
     }
 
     hide(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText) {
-            [this.overlay, this.text, this.timer, this.rewardsText].forEach(el => el.setVisible(false));
+        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint) {
+            [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint].forEach(el => el.setVisible(false));
             this.rewardCardManager.setVisible(false);
             this.isVisible = false;
         }
@@ -180,7 +200,7 @@ export class RespawnOverlay {
             this.hudContainer = null;
         }
         
-        [this.overlay, this.text, this.timer, this.rewardsText] = [null, null, null, null];
+        [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint] = [null, null, null, null, null];
         this.rewardCardManager.destroy();
         this.isVisible = false;
     }

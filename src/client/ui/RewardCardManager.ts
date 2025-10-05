@@ -41,7 +41,7 @@ export class RewardCardManager {
         const numCards = Math.min(3, hero.rewardsForChoice.length);
         const totalWidth = (cardWidth * numCards) + (cardSpacing * (numCards - 1));
         const startX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2 - totalWidth / 2;
-        const cardY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 + 40;
+        const cardY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 + 60; // Moved down to accommodate text repositioning
 
         // Display chest name if available
         if (hero.levelRewards && hero.levelRewards.length > 0) {

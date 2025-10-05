@@ -28,6 +28,8 @@ export class DamageDealtOverlay {
     
     // Damage tracking properties
     private damageHistory: DamageDealtEntry[] = [];
+    private deathSummaryHistory: DamageDealtEntry[] = []; // Frozen damage history for death summary
+    private isDeathSummaryMode: boolean = false;
     private readonly maxHistoryTime = 15000; // 15 seconds in milliseconds
     private playerSessionId: string | null = null;
     private processedDamageEvents: Set<string> = new Set();
@@ -62,8 +64,8 @@ export class DamageDealtOverlay {
             this.hudContainer.setCameraManager(this.cameraManager);
         }
 
-        // Position on the right side below the damage taken overlay
-        this.hudContainer.setPosition(400, 350);
+        // Position on the right side of the screen, vertically centered
+        this.hudContainer.setPosition(CLIENT_CONFIG.GAME_CANVAS_WIDTH - 320, CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 - 150);
 
         // Create semi-transparent background
         this.background = this.scene.add.graphics();
@@ -178,7 +180,9 @@ export class DamageDealtOverlay {
         // Update total damage
         const totalDamage = recentDamage.reduce((total, entry) => total + entry.amount, 0);
         if (this.titleText) {
-            this.titleText.setText(`Damage Dealt (last 15s)`);
+            const baseTitle = 'Damage Dealt (last 15s)';
+            const title = this.isDeathSummaryMode ? `${baseTitle} before death` : baseTitle;
+            this.titleText.setText(title);
         }
 
         // Calculate damage breakdown
@@ -207,14 +211,11 @@ export class DamageDealtOverlay {
     /**
      * Processes damage events and tracks damage dealt by the player
      */
-    processDamageEvents(state: SharedGameState): void {
-        if (!this.playerSessionId) return;
+    processDamageEvents(state: SharedGameState, playerHeroId?: string | null): void {
+        if (!playerHeroId || this.isDeathSummaryMode) return;
 
-        // Find the player's hero
-        const playerHero = Array.from(state.combatants.values()).find(c => 
-            c.type === 'hero' && c.controller === this.playerSessionId
-        );
-
+        // Get the player's hero by ID
+        const playerHero = state.combatants.get(playerHeroId);
         if (!playerHero) return;
 
         // Process damage events where the player was the source
@@ -314,8 +315,35 @@ export class DamageDealtOverlay {
      * Gets recent damage entries within the time window
      */
     private getRecentDamage(currentTime: number): DamageDealtEntry[] {
+        if (this.isDeathSummaryMode) {
+            return this.deathSummaryHistory;
+        }
         const cutoffTime = currentTime - this.maxHistoryTime;
         return this.damageHistory.filter(entry => entry.timestamp >= cutoffTime);
+    }
+
+    /**
+     * Captures current damage history for death summary
+     */
+    captureDeathSummary(currentGameTime: number): void {
+        const cutoffTime = currentGameTime - this.maxHistoryTime;
+        this.deathSummaryHistory = this.damageHistory.filter(entry => entry.timestamp >= cutoffTime);
+        this.isDeathSummaryMode = true;
+    }
+
+    /**
+     * Clears death summary and returns to normal mode
+     */
+    clearDeathSummary(): void {
+        this.deathSummaryHistory = [];
+        this.isDeathSummaryMode = false;
+    }
+
+    /**
+     * Returns true if currently in death summary mode
+     */
+    isInDeathSummaryMode(): boolean {
+        return this.isDeathSummaryMode;
     }
 
     /**
@@ -323,6 +351,8 @@ export class DamageDealtOverlay {
      */
     clear(): void {
         this.damageHistory = [];
+        this.deathSummaryHistory = [];
+        this.isDeathSummaryMode = false;
         this.processedDamageEvents.clear();
     }
 
