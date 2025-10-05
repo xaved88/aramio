@@ -48,6 +48,10 @@ export class RewardCard {
         return this._isInteractive;
     }
 
+    get container(): HUDContainer | null {
+        return this.hudContainer;
+    }
+
     constructor(scene: Phaser.Scene, config: RewardCardConfig) {
         this.scene = scene;
         this.rewardId = config.rewardId;
@@ -165,7 +169,7 @@ export class RewardCard {
         if (this.rewardType === 'ability_stat') {
             // Rounded rectangle for ability stat rewards
             this.background = this.scene.add.graphics();
-            this.background.fillStyle(this.cardStyle.backgroundColor, this.cardStyle.backgroundAlpha);
+            this.background.fillStyle(0x333333, 1.0); // Start with solid dark background for face-down
             this.background.fillRoundedRect(
                 -config.width / 2, 
                 -config.height / 2, 
@@ -316,15 +320,20 @@ export class RewardCard {
             });
         } else {
             this.hudContainer!.getContainer().disableInteractive();
-            // Use a dimmed version of the card's normal colors for non-interactive state
-            const dimmedColor = this.dimColor(this.cardStyle.backgroundColor, 0.6);
-            this.applyHoverEffect(false, dimmedColor, 0.7);
+            // Keep normal colors even when non-interactive
+            this.applyHoverEffect(false);
         }
     }
 
     setVisible(visible: boolean): void {
         this.hudContainer!.setVisible(visible);
     }
+
+    setPosition(x: number, y: number): void {
+        this.hudContainer!.setPosition(x, y);
+    }
+
+
 
     private applyHoverEffect(isHover: boolean, customColor?: number, customAlpha?: number): void {
         const backgroundColor = customColor || (isHover ? this.cardStyle.hoverBackgroundColor : this.cardStyle.backgroundColor);

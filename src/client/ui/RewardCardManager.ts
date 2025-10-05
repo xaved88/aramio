@@ -72,6 +72,7 @@ export class RewardCardManager {
             }
         }
 
+        // Create cards off-screen initially
         for (let i = 0; i < numCards; i++) {
             const cardX = startX + (cardWidth + cardSpacing) * i + cardWidth / 2;
             const rewardId = hero.rewardsForChoice[i];
@@ -79,7 +80,7 @@ export class RewardCardManager {
             
             const card = new RewardCard(this.scene, {
                 x: cardX,
-                y: cardY,
+                y: CLIENT_CONFIG.GAME_CANVAS_HEIGHT + 300, // Start off-screen at bottom
                 width: cardWidth,
                 height: cardHeight,
                 rewardId: rewardId,
@@ -92,6 +93,11 @@ export class RewardCardManager {
                 }
             });
             
+            // Make cards visible immediately (they're off-screen but visible)
+            card.setVisible(true);
+            // Keep cards non-interactive until animation completes
+            card.setInteractive(false);
+            
             if (this.hudCamera) {
                 card.setHUDCamera(this.hudCamera);
             }
@@ -102,12 +108,14 @@ export class RewardCardManager {
             
             this.rewardCards.push(card);
         }
+
+        // Animate cards sliding up from bottom one by one
+        this.slideUpCards(cardY);
     }
 
     setVisible(visible: boolean): void {
         this.rewardCards.forEach(card => {
             card.setVisible(visible);
-            card.setInteractive(visible);
         });
         
         if (this.chestNameText) {
@@ -123,6 +131,48 @@ export class RewardCardManager {
             this.chestNameText.destroy();
             this.chestNameText = null;
         }
+    }
+
+    private slideUpCards(targetY: number): void {
+        // Animate cards sliding up from bottom one by one
+        this.rewardCards.forEach((card, index) => {
+            // Check if card still exists
+            if (!card.container) {
+                return;
+            }
+            
+            const container = card.container.getContainer();
+            const delay = index * 200; // Staggered animation
+            
+            this.scene.time.delayedCall(delay, () => {
+                // Check if card still exists
+                if (!card.container) {
+                    return;
+                }
+                
+                // Animate the card sliding up to its position
+                this.scene.tweens.add({
+                    targets: container,
+                    y: targetY,
+                    duration: 500,
+                    ease: 'Back.easeOut',
+                    onComplete: () => {
+                        // Check if card still exists before making it interactive
+                        if (card.container) {
+                            // Make the card interactive after it's fully animated
+                            if (index === this.rewardCards.length - 1) {
+                                // Last card - make all remaining cards interactive
+                                this.rewardCards.forEach(c => {
+                                    if (c.container) {
+                                        c.setInteractive(true);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        });
     }
 
     private getChestDisplayName(chestType: string): string {

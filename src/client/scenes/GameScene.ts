@@ -241,7 +241,6 @@ export class GameScene extends Phaser.Scene {
             
             this.processedProjectileMissEvents.add(eventKey);
             
-            console.log(`Processing projectile miss event:`, event);
             
             // Determine the correct color using the same logic as projectile rendering
             let teamColor: 'blue' | 'red' | 'player' = event.team as 'blue' | 'red';
