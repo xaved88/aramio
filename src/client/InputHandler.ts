@@ -45,14 +45,27 @@ export class InputHandler {
      * This is the ONLY place where input events should be registered
      */
     setupHandlers(): void {
-        // Pointer down: Start ability targeting, stop movement
+        // Pointer down: Start ability targeting, stop movement (left click only)
         this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            this.handlePointerDown(pointer);
+            // Only handle left mouse button (button 0)
+            if (pointer.button === 0) {
+                this.handlePointerDown(pointer);
+            }
         });
 
-        // Pointer up: Fire ability, resume movement
+        // Pointer up: Fire ability, resume movement (left click only)
         this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-            this.handlePointerUp(pointer);
+            // Only handle left mouse button (button 0)
+            if (pointer.button === 0) {
+                this.handlePointerUp(pointer);
+            }
+        });
+
+        // Prevent right-click context menu
+        this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            if (pointer.button === 2) { // Right mouse button
+                pointer.event.preventDefault();
+            }
         });
 
         // Keyboard input handlers

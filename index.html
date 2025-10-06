@@ -22,10 +22,23 @@
             justify-content: center;
             align-items: center;
         }
+        /* Disable right-click context menu */
+        #game-container {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
     <div id="game-container"></div>
     <script type="module" src="/src/client/main.ts"></script>
+    <script>
+        // Prevent right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    </script>
 </body>
 </html> 
