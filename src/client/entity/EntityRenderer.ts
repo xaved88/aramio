@@ -224,6 +224,34 @@ export class EntityRenderer {
             
             graphics.strokePath();
         }
+
+        // Check for rage mode effect - add pulsing red border and rage icon
+        const isInRageMode = combatant.effects.some(effect => effect.type === 'hunter');
+        if (isInRageMode) {
+            // Add pulsing red border for rage mode effect (matching stun style)
+            const pulseIntensity = Math.sin(Date.now() * 0.008) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (faster than stun)
+            const borderThickness = 3 + (pulseIntensity * 4); // Pulsing between 3px and 7px (thicker than stun)
+            
+            // Draw border matching stun style but with red color
+            graphics.lineStyle(borderThickness, 0xFF4444, 0.6); // Bright red border with more opacity
+            graphics.strokeCircle(0, 0, combatant.size + 3); // Slightly larger than stun border
+            
+            // Add rage icon above the entity (matching stun icon style)
+            graphics.lineStyle(4, 0xFF4444); // Bright red lines for icon, thicker than other icons
+            
+            // Draw a simple flame/anger symbol for rage icon
+            const iconSize = 8; // Slightly larger icon
+            const iconY = -combatant.size - 18; // Position higher than other icons
+            
+            // Draw flame-like shape (zigzag pattern)
+            graphics.moveTo(-iconSize, iconY + iconSize/2);
+            graphics.lineTo(-iconSize/2, iconY);
+            graphics.lineTo(0, iconY + iconSize/3);
+            graphics.lineTo(iconSize/2, iconY);
+            graphics.lineTo(iconSize, iconY + iconSize/2);
+            
+            graphics.strokePath();
+        }
     }
 
     /**

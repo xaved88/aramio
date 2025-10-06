@@ -6,6 +6,7 @@ import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 import { STATIONARY_CONFIG } from './StationaryConfig';
 import { STATIONARY_NORMAL_RANGE_CONFIG } from './StationaryNormalRangeConfig';
 import { SUPERMINIONS_DISABLED_CONFIG } from './SuperminionsDisabledConfig';
+import { MERCENARY_ONLY_CONFIG } from './MercenaryOnlyConfig';
 
 export type GameplayConfig = any; // Type alias for now, will be made strict later
 
@@ -22,6 +23,7 @@ export class ConfigProvider {
         this.registerConfig('stationary-high-range', STATIONARY_CONFIG);
         this.registerConfig('stationary-normal-range', STATIONARY_NORMAL_RANGE_CONFIG);
         this.registerConfig('superminions-disabled', SUPERMINIONS_DISABLED_CONFIG);
+        this.registerConfig('mercenary-only', MERCENARY_ONLY_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {

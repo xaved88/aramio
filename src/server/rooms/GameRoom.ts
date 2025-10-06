@@ -102,7 +102,6 @@ export class GameRoom extends Room<GameState> {
         this.onMessage('useAbility', (client, data) => {
             const heroId = this.findHeroByController(client.sessionId);
             if (heroId) {
-                console.log(`Ability used by ${client.sessionId} (hero: ${heroId}) at (${data.x}, ${data.y})`);
                 this.commands.push({
                     type: 'useAbility',
                     data: {
