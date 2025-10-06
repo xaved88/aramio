@@ -20,6 +20,7 @@ import { CombatantUtils } from '../../combatants/CombatantUtils';
  */
 export class MercenaryBotStrategy {
     private gameplayConfig: GameplayConfig;
+    private botHealingState: Map<string, { isHealing: boolean, lastDamageTime: number, lastKnownHealth?: number }> = new Map();
 
     constructor(gameplayConfig: GameplayConfig) {
         this.gameplayConfig = gameplayConfig;
@@ -33,20 +34,35 @@ export class MercenaryBotStrategy {
             return commands;
         }
 
+        // Track healing state for this bot
+        this.updateBotHealingState(bot, state);
+
         // Check if bot is being targeted by defensive structures
         if (this.isBeingTargetedByDefensiveStructure(bot, state)) {
             // Retreat to safe position
-            const safePosition = this.getSafeRetreatPosition(bot, state);
+            const allCombatants = Array.from(state.combatants.values());
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
             commands.push({
                 type: 'move',
-                data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
             });
             return commands;
         }
 
-        // Find all enemies first
+        // Find all enemies and combatants first
         const allEnemies = this.findAllEnemies(bot, state);
         const allCombatants = Array.from(state.combatants.values());
+
+        // Check if bot needs to heal up (fast regeneration strategy)
+        if (this.shouldHeal(bot, state)) {
+            // Retreat to safe position to heal up using fast regeneration
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            commands.push({
+                type: 'move',
+                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
+            });
+            return commands;
+        }
         
         // Check if we're outnumbered and should play defensively
         if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime)) {
@@ -83,8 +99,8 @@ export class MercenaryBotStrategy {
                 commands.push(movementCommand);
             }
         } else {
-            // NORMAL MODE: Defensive backline positioning
-            const movementCommand = this.generateDefensiveMovement(bot, state);
+            // NORMAL MODE: Defensive backline positioning (but avoid combat if healing)
+            const movementCommand = this.generateDefensiveMovement(bot, state, this.isCurrentlyHealing(bot, state));
             if (movementCommand) {
                 commands.push(movementCommand);
             }
@@ -105,11 +121,6 @@ export class MercenaryBotStrategy {
         const lastUsedTime = bot.ability.lastUsedTime;
         const baseCooldown = bot.getAbilityCooldown();
 
-        // If never used, fire immediately if enemies are nearby
-        if (lastUsedTime === 0) {
-            return enemies.some(enemy => enemy.distance <= 150); // Use rage if enemies within 150 pixels
-        }
-
         // Calculate time since last use
         const timeSinceLastUse = currentTime - lastUsedTime;
         if (timeSinceLastUse < baseCooldown) {
@@ -117,7 +128,7 @@ export class MercenaryBotStrategy {
         }
 
         // Only use rage if we have good targets nearby
-        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 150);
+        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 100);
         if (nearbyEnemies.length === 0) {
             return false; // No good targets
         }
@@ -164,7 +175,7 @@ export class MercenaryBotStrategy {
 
     private generateRageModeMovement(bot: any, state: SharedGameState, enemies: any[]): GameCommand | null {
         // During rage mode, be aggressive and chase enemies
-        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 150);
+        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 100);
         
         if (nearbyEnemies.length > 0) {
             // Chase the closest enemy
@@ -202,25 +213,40 @@ export class MercenaryBotStrategy {
         }
     }
 
-    private generateDefensiveMovement(bot: any, state: SharedGameState): GameCommand | null {
+    private generateDefensiveMovement(bot: any, state: SharedGameState, isHealing: boolean = false): GameCommand | null {
+        // When healing, avoid combat and stay safe
+        if (isHealing) {
+            const allCombatants = Array.from(state.combatants.values());
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            return {
+                type: 'move',
+                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
+            };
+        }
+
         // When not in rage mode, position aggressively for auto-attack opportunities
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length === 0) {
-            // No enemies, check for nearby turrets first
-            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
-            if (nearbyEnemyTurret) {
-                return {
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
-                };
+            // No enemies, check for nearby turrets first (unless healing)
+            if (!isHealing) {
+                const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+                if (nearbyEnemyTurret) {
+                    return {
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                    };
+                } else {
+                    // Move toward enemy base to find targets
+                    const targetPosition = this.getEnemyCradlePosition(bot.team);
+                    return {
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                    };
+                }
             } else {
-                // Move toward enemy base to find targets
-                const targetPosition = this.getEnemyCradlePosition(bot.team);
-                return {
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-                };
+                // When healing and no enemies, stay in healing position
+                return null;
             }
         }
 
@@ -232,12 +258,14 @@ export class MercenaryBotStrategy {
 
         if (safeEnemies.length === 0) {
             // All positions are too dangerous, fall back to safe position
+            const allCombatants = Array.from(state.combatants.values());
+            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
             return {
                 type: 'move',
                 data: { 
                     heroId: bot.id, 
-                    targetX: this.getSafeRetreatPosition(bot, state).x, 
-                    targetY: this.getSafeRetreatPosition(bot, state).y 
+                    targetX: retreatPosition.x, 
+                    targetY: retreatPosition.y 
                 }
             };
         }
@@ -352,59 +380,8 @@ export class MercenaryBotStrategy {
         });
     }
 
-    private getSafeRetreatPosition(bot: any, state: SharedGameState): { x: number, y: number } {
-        // Find the closest friendly defensive structure to retreat to
-        const friendlyStructures = Array.from(state.combatants.values()).filter((combatant: any) => 
-            combatant.team === bot.team && 
-            combatant.health > 0 && 
-            (combatant.type === 'cradle' || combatant.type === 'turret')
-        );
 
-        if (friendlyStructures.length === 0) {
-            // Fallback to team spawn position
-            return bot.team === 'blue' 
-                ? this.gameplayConfig.CRADLE_POSITIONS.BLUE 
-                : this.gameplayConfig.CRADLE_POSITIONS.RED;
-        }
 
-        // Find closest friendly structure
-        let closestStructure = friendlyStructures[0];
-        let closestDistance = Infinity;
-
-        friendlyStructures.forEach((structure: any) => {
-            const dx = structure.x - bot.x;
-            const dy = structure.y - bot.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestStructure = structure;
-            }
-        });
-
-        // Return position near the closest friendly structure, but outside its attack range
-        const retreatDistance = closestStructure.attackRadius + 50; // 50 pixels buffer
-        const dx = bot.x - closestStructure.x;
-        const dy = bot.y - closestStructure.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance === 0) {
-            // Bot is at structure position, move away
-            return {
-                x: closestStructure.x + retreatDistance,
-                y: closestStructure.y + retreatDistance
-            };
-        }
-
-        // Normalize direction and scale to retreat distance
-        const normalizedDx = dx / distance;
-        const normalizedDy = dy / distance;
-        
-        return {
-            x: closestStructure.x + (normalizedDx * retreatDistance),
-            y: closestStructure.y + (normalizedDy * retreatDistance)
-        };
-    }
 
     private getEnemyCradlePosition(team: string): { x: number, y: number } {
         return CombatantUtils.getEnemyCradlePosition(team, this.gameplayConfig);
@@ -447,5 +424,51 @@ export class MercenaryBotStrategy {
             x: dx / distance,
             y: dy / distance
         };
+    }
+
+    private updateBotHealingState(bot: any, state: SharedGameState): void {
+        const botId = bot.id;
+        const currentTime = state.gameTime;
+        
+        // Initialize healing state if not exists
+        if (!this.botHealingState.has(botId)) {
+            this.botHealingState.set(botId, { isHealing: false, lastDamageTime: 0 });
+        }
+        
+        const healingState = this.botHealingState.get(botId)!;
+        
+        // Check if bot was recently damaged (within last 2 seconds)
+        // This is a simple heuristic - in a real game you'd track actual damage events
+        const timeSinceLastDamage = currentTime - healingState.lastDamageTime;
+        const wasRecentlyDamaged = timeSinceLastDamage < 2000; // 2 seconds
+        
+        // Update healing state based on health and damage
+        if (bot.health <= 33) {
+            // Start healing if health drops to 33% or below
+            healingState.isHealing = true;
+        } else if (bot.health >= 70) {
+            // Stop healing if health reaches 70% or above
+            healingState.isHealing = false;
+        } else if (wasRecentlyDamaged && healingState.isHealing && bot.health > 33) {
+            // Stop healing if we were recently damaged (healing interrupted) - but only if above critical health
+            healingState.isHealing = false;
+        }
+        
+        // Update last damage time (simplified - assumes any health decrease is damage)
+        // In a real implementation, you'd track actual damage events from the game state
+        const previousHealth = healingState.lastKnownHealth || bot.health;
+        if (bot.health < previousHealth) {
+            healingState.lastDamageTime = currentTime;
+        }
+        healingState.lastKnownHealth = bot.health;
+    }
+
+    private shouldHeal(bot: any, state: SharedGameState): boolean {
+        const healingState = this.botHealingState.get(bot.id);
+        return healingState ? healingState.isHealing : false;
+    }
+
+    private isCurrentlyHealing(bot: any, state: SharedGameState): boolean {
+        return this.shouldHeal(bot, state);
     }
 }
