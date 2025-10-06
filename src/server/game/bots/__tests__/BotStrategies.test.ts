@@ -23,8 +23,15 @@ describe('Bot Strategies', () => {
                 y: 100,
                 health: 100,
                 state: 'alive',
-                ability: { lastUsedTime: 0, cooldown: 5000 },
-                getAttackRadius: () => 25 // Hookshot has 25 base attack radius
+                ability: { lastUsedTime: 0, cooldown: 5000, range: 200, strength: 50 },
+                getAttackRadius: () => 25, // Hookshot has 25 base attack radius
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             const mockTeammate = {
@@ -64,8 +71,15 @@ describe('Bot Strategies', () => {
                 y: 400, // Closer to enemy base (red at 1100,100)
                 health: 100,
                 state: 'alive',
-                ability: { lastUsedTime: 0, cooldown: 5000 }, // Hookshot available
-                level: 1
+                ability: { lastUsedTime: 0, cooldown: 5000, range: 200, strength: 50 }, // Hookshot available
+                level: 1,
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             // Teammate is positioned behind bot (closer to our base)
@@ -128,10 +142,19 @@ describe('Bot Strategies', () => {
                 state: 'alive',
                 ability: { 
                     lastUsedTime: 0, 
-                    cooldown: 10000 // Rage is ready - mercenary ability has no range
+                    cooldown: 10000, // Rage is ready - mercenary ability has no range
+                    range: 0,
+                    strength: 50
                 },
                 effects: [],
-                getAttackRadius: () => 50
+                getAttackRadius: () => 50,
+                getAbilityCooldown: () => 10000,
+                getAbilityRange: () => 0,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             const simpletonBot = {
@@ -144,10 +167,18 @@ describe('Bot Strategies', () => {
                 ability: { 
                     lastUsedTime: 0, 
                     cooldown: 10000,
-                    range: 50 // Simpleton uses a projectile ability with range
+                    range: 50, // Simpleton uses a projectile ability with range
+                    strength: 50
                 },
                 effects: [],
-                getAttackRadius: () => 50
+                getAttackRadius: () => 50,
+                getAbilityCooldown: () => 10000,
+                getAbilityRange: () => 50,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             // Only minions nearby, no heroes
@@ -193,9 +224,16 @@ describe('Bot Strategies', () => {
                 y: 200,
                 health: 100,
                 state: 'alive',
-                ability: { lastUsedTime: 5000, cooldown: 10000 }, // Not in rage mode
+                ability: { lastUsedTime: 5000, cooldown: 10000, range: 200, strength: 50 }, // Not in rage mode
                 effects: [],
-                getAttackRadius: () => 50 // Mock attack radius
+                getAttackRadius: () => 50, // Mock attack radius
+                getAbilityCooldown: () => 10000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             // Multiple enemies targeting the bot at enemy base area
@@ -264,8 +302,15 @@ describe('Bot Strategies', () => {
                 y: 300,
                 health: 100,
                 state: 'alive',
-                ability: { lastUsedTime: 1000, cooldown: 10000 },
-                effects: []
+                ability: { lastUsedTime: 1000, cooldown: 10000, range: 200, strength: 50 },
+                effects: [],
+                getAbilityCooldown: () => 10000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             const mockEnemyTurret = {
@@ -308,9 +353,17 @@ describe('Bot Strategies', () => {
                 ability: { 
                     lastUsedTime: 0, // Ready to use
                     cooldown: 5000,
-                    range: 100 // Ability range is 100
+                    range: 100, // Ability range is 100
+                    strength: 50
                 },
-                effects: []
+                effects: [],
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 100,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             // Enemy is 200 units away (beyond ability range of 100)
@@ -352,9 +405,17 @@ describe('Bot Strategies', () => {
                 ability: { 
                     lastUsedTime: 0, // Ready to use
                     cooldown: 5000,
-                    range: 100 // Ability range is 100
+                    range: 100, // Ability range is 100
+                    strength: 50
                 },
-                effects: []
+                effects: [],
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 100,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0
             } as any;
 
             // Enemy is 50 units away (within ability range of 100)
@@ -433,7 +494,7 @@ describe('Bot Strategies', () => {
                 id,
                 team,
                 type: 'hero',
-                ability: { type: abilityType },
+                ability: { type: abilityType, lastUsedTime: 0, cooldown: 5000, range: 200, strength: 50 },
                 effects: [],
                 state: 'alive',
                 respawnTime: 0,
@@ -453,7 +514,23 @@ describe('Bot Strategies', () => {
                 displayName: id,
                 levelRewards: [],
                 rewardsForChoice: rewardsForChoice || [],
-                permanentEffects: []
+                permanentEffects: [],
+                // Add getter methods for ability stats
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0,
+                getAttackRadius: () => 25,
+                getAttackStrength: () => 20,
+                getAttackSpeed: () => 1000,
+                getMoveSpeed: () => 100,
+                getHealth: () => 100,
+                getMaxHealth: () => 100,
+                getBulletArmor: () => 0,
+                getAbilityArmor: () => 0
             });
 
             const bot1 = createMockHero('bot1', 'blue', 'hookshot');
@@ -512,7 +589,7 @@ describe('Bot Strategies', () => {
                 id,
                 team,
                 type: 'hero',
-                ability: { type: abilityType },
+                ability: { type: abilityType, lastUsedTime: 0, cooldown: 5000, range: 200, strength: 50 },
                 effects: [],
                 state: 'alive',
                 respawnTime: 0,
@@ -532,7 +609,23 @@ describe('Bot Strategies', () => {
                 displayName: id,
                 levelRewards: [],
                 rewardsForChoice: rewardsForChoice || [],
-                permanentEffects: []
+                permanentEffects: [],
+                // Add getter methods for ability stats
+                getAbilityCooldown: () => 5000,
+                getAbilityRange: () => 200,
+                getAbilityStrength: () => 50,
+                getAbilityDuration: () => 0,
+                getAbilitySpeed: () => 0,
+                getMercenaryRageSpeed: () => 1.0,
+                getPyromancerRadius: () => 0,
+                getAttackRadius: () => 25,
+                getAttackStrength: () => 20,
+                getAttackSpeed: () => 1000,
+                getMoveSpeed: () => 100,
+                getHealth: () => 100,
+                getMaxHealth: () => 100,
+                getBulletArmor: () => 0,
+                getAbilityArmor: () => 0
             });
 
             const bot1 = createMockHero('bot1', 'blue', 'hookshot');

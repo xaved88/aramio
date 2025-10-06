@@ -93,6 +93,37 @@ export class Hero extends Combatant {
         const result = applyStatModifications(statType, baseStat, allEffects);
         return result;
     }
+
+    // Ability stat getters - use the same permanent effects system as base stats
+    getAbilityRange(): number {
+        return this.getModifiedStat('ability:range', (this.ability as any).range || 0);
+    }
+
+    getAbilityStrength(): number {
+        return this.getModifiedStat('ability:strength', (this.ability as any).strength || 0);
+    }
+
+    getAbilityCooldown(): number {
+        return this.getModifiedStat('ability:cooldown', this.ability.cooldown);
+    }
+
+    getAbilityDuration(): number {
+        return this.getModifiedStat('ability:duration', (this.ability as any).duration || 0);
+    }
+
+    getAbilitySpeed(): number {
+        return this.getModifiedStat('ability:speed', (this.ability as any).speed || 0);
+    }
+
+    // Specialized getters for specific abilities
+    getMercenaryRageSpeed(): number {
+        return this.getModifiedStat('ability:mercenaryRageSpeed', (this.ability as any).mercenaryRageSpeedBoost || 1.0);
+    }
+
+    getPyromancerRadius(): number {
+        return this.getModifiedStat('ability:pyromancerRadius', (this.ability as any).fireballRadius || 0);
+    }
+
 }
 
 export class Minion extends Combatant {

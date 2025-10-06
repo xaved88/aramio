@@ -22,17 +22,13 @@ export interface AbilityReward {
 
 export interface AbilityStatReward {
     type: 'ability_stat';
-    ability_stat: string; // Ability-specific stats like 'range'
-    modifier: RewardModifier;
+    stats: StatRewardConfig[]; // Same structure as base stats
 }
 
 export interface RewardDefinition {
     type: 'stat' | 'ability' | 'ability_stat';
     stats?: StatRewardConfig[];
     abilityType?: string;
-    stat?: string;
-    ability_stat?: string;
-    modifier?: RewardModifier;
 }
 
 export interface ChestReward {

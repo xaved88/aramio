@@ -4,6 +4,14 @@ import { COMBATANT_EFFECT_TYPES } from '../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../abilities/AbilityFactory';
 import { GameplayConfig } from '../../config/ConfigProvider';
 
+/**
+ * Checks if an ability type supports a specific stat type
+ */
+function isAbilityStatSupported(abilityType: string, statType: string, gameplayConfig: GameplayConfig): boolean {
+    const abilityStatSupport = gameplayConfig.REWARDS.ABILITY_STAT_SUPPORT;
+    return abilityStatSupport[abilityType]?.includes(statType) || false;
+}
+
 export class RewardManager {
     /**
      * Generates 3 random rewards from a chest based on weights
@@ -24,8 +32,10 @@ export class RewardManager {
             availableRewards = availableRewards.filter(reward => {
                 const rewardType = gameplayConfig.REWARDS.REWARD_TYPES[reward.id as keyof typeof gameplayConfig.REWARDS.REWARD_TYPES];
                 if (rewardType?.type === 'ability_stat') {
-                    // Check if the hero's ability supports this stat
-                    return rewardType.ability_stat in hero.ability;
+                    // Check if this ability type supports any of the stats in this reward
+                    return rewardType.stats?.some((statConfig: any) => 
+                        isAbilityStatSupported(hero.ability.type, statConfig.stat, gameplayConfig)
+                    ) || false;
                 } else if (rewardType?.type === 'stat') {
                     // Filter out attack range for mercenary (melee-focused)
                     if (hero.ability.type === 'mercenary' && reward.id === 'stat:attack_range') {
@@ -86,18 +96,18 @@ export class RewardManager {
             hero.ability = abilityFactory.create(rewardType.abilityType);
             return true;
         } else if (rewardType.type === 'ability_stat') {
-            // Apply stat modification directly to the hero's current ability
-            const statName = rewardType.ability_stat as keyof typeof hero.ability;
-            if (statName in hero.ability && typeof (hero.ability as any)[statName] === 'number') {
-                const currentValue = (hero.ability as any)[statName] as number;
-                if (rewardType.modifier.type === 'percent') {
-                    (hero.ability as any)[statName] = Math.round(currentValue * rewardType.modifier.value);
-                } else if (rewardType.modifier.type === 'flat') {
-                    (hero.ability as any)[statName] = currentValue + rewardType.modifier.value;
-                }
-                return true;
-            }
-            return false;
+            // Apply all stats in the reward (same as base stats)          
+            rewardType.stats.forEach((statConfig: any) => {
+                const statEffect = new StatModEffect();
+                statEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
+                statEffect.stat = statConfig.stat;
+                statEffect.operator = statConfig.modifier.type === 'flat' ? 'relative' : 'percent';
+                statEffect.amount = statConfig.modifier.value;
+                statEffect.duration = -1; // Permanent
+                statEffect.appliedAt = gameTime;
+                hero.permanentEffects.push(statEffect);
+            });
+            return true;
         }
 
         // This should never be reached since we handle all known reward types above

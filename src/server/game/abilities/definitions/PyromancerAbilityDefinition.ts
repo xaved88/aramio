@@ -1,6 +1,7 @@
 import { PyromancerAbility } from '../../../schema/Abilities';
 import { AbilityDefinition } from './AbilityDefinition';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
+import { Hero } from '../../../schema/Combatants';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
 export class PyromancerAbilityDefinition implements AbilityDefinition<PyromancerAbility> {
@@ -36,14 +37,14 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
     useAbility(ability: PyromancerAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Find hero by ID first
+        const hero = state.combatants.get(heroId) as Hero;
+        if (!hero) return false;
+        
         // Check if ability is ready (handles both first use and cooldown)
-        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < hero.getAbilityCooldown()) {
             return false;
         }
-        
-        // Find hero by ID
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
@@ -52,11 +53,11 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         
         let targetX = x;
         let targetY = y;
-        if (distance > ability.range) {
+        if (distance > hero.getAbilityRange()) {
             const directionX = dx / distance;
             const directionY = dy / distance;
-            targetX = hero.x + directionX * ability.range;
-            targetY = hero.y + directionY * ability.range;
+            targetX = hero.x + directionX * hero.getAbilityRange();
+            targetY = hero.y + directionY * hero.getAbilityRange();
         }
         
         // Update last used time
@@ -85,7 +86,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         const directionY = dy / distance;
         
         // Use ability speed
-        const speed = ability.speed;
+        const speed = hero.getAbilitySpeed();
         
         // Create projectile
         const projectile = new Projectile();
@@ -99,17 +100,17 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         projectile.team = hero.team;
         projectile.type = 'fireball';
         // Calculate max duration based on range and speed (with safety margin)
-        const maxTravelTime = (ability.range / speed) * 1000; // Convert to milliseconds
+        const maxTravelTime = hero.getAbilityRange() / speed * 1000; // Convert to milliseconds
         projectile.duration = maxTravelTime * 2; // Double the expected time as safety margin
         projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
-        projectile.aoeRadius = ability.fireballRadius;
+        projectile.aoeRadius = hero.getPyromancerRadius();
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();
         damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = ability.strength;
+        damageEffect.damage = hero.getAbilityStrength();
         projectile.effects.push(damageEffect);
         
         state.projectiles.set(projectile.id, projectile);

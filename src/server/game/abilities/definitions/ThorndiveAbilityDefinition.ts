@@ -1,5 +1,6 @@
 import { ThorndiveAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, MoveEffect, ReflectEffect, TauntEffect } from '../../../schema/Effects';
+import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -38,14 +39,14 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
     useAbility(ability: ThorndiveAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Find hero by ID first
+        const hero = state.combatants.get(heroId) as Hero;
+        if (!hero) return false;
+        
         // Check if ability is ready (handles both first use and cooldown)
-        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < hero.getAbilityCooldown()) {
             return false;
         }
-        
-        // Find hero by ID
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
@@ -54,11 +55,11 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         
         let targetX = x;
         let targetY = y;
-        if (distance > ability.range) {
+        if (distance > hero.getAbilityRange()) {
             const directionX = dx / distance;
             const directionY = dy / distance;
-            targetX = hero.x + directionX * ability.range;
-            targetY = hero.y + directionY * ability.range;
+            targetX = hero.x + directionX * hero.getAbilityRange();
+            targetY = hero.y + directionY * hero.getAbilityRange();
         }
         
         // Update last used time
@@ -77,7 +78,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         
         // Calculate scaled values
         const tauntDuration = ability.tauntDuration; // Flat duration, no level scaling
-        const reflectDuration = ability.duration; // Use flat duration (no level scaling)
+        const reflectDuration = hero.getAbilityDuration(); // Use flat duration (no level scaling)
 
         // 1. Create dash movement effect
         const moveEffect = new MoveEffect();
@@ -131,7 +132,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         // Add landing damage effect
         const damageEffect = new ProjectileEffect();
         damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = ability.strength;
+        damageEffect.damage = hero.getAbilityStrength();
         projectile.effects.push(damageEffect);
 
         // Add taunt effect - appliedAt will be set when projectile lands

@@ -100,7 +100,7 @@ export class HookshotBotStrategy {
     private shouldUseHookshot(bot: any, state: SharedGameState): boolean {
         const currentTime = state.gameTime;
         const lastUsedTime = bot.ability.lastUsedTime;
-        const baseCooldown = bot.ability.cooldown;
+        const baseCooldown = bot.getAbilityCooldown();
 
         // If never used, fire immediately
         if (lastUsedTime === 0) {
@@ -123,7 +123,7 @@ export class HookshotBotStrategy {
 
             
             // Don't hookshot enemies that are too far (outside Hookshot range)
-            const hookshotRange = bot.ability.range;
+            const hookshotRange = bot.getAbilityRange();
             
             if (enemy.distance > hookshotRange) {
                 return false;

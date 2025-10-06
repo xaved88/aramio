@@ -132,8 +132,15 @@ export class PermanentEffectsDisplay {
                 
                 // Create individual background for this stack layer
                 const background = this.scene.add.graphics();
-                background.fillStyle(config.BACKGROUND_COLOR, 1.0); // Full opacity
-                background.lineStyle(1, 0x333333, 1.0); // Small dark border
+                
+                // Determine styling based on stat type
+                const isAbilityStat = statName.startsWith('ability:');
+                const backgroundColor = isAbilityStat ? 0x4a5568 : 0x4a5568; // Light gray background for both
+                const borderColor = isAbilityStat ? 0x3182ce : 0x38a169; // Darker blue for ability stats, darker green for base stats
+                const borderWidth = 1
+                
+                background.fillStyle(backgroundColor, 1.0); // Full opacity
+                background.lineStyle(borderWidth, borderColor, 1.0);
                 background.fillRoundedRect(
                     x - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
                     y - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,
@@ -240,13 +247,22 @@ export class PermanentEffectsDisplay {
 
     private mapStatToRewardId(statName: string): string {
         const statToRewardMap: Record<string, string> = {
+            // Base stats
             'maxHealth': 'stat:health',
             'attackStrength': 'stat:damage',
             'attackSpeed': 'stat:attack_speed',
             'attackRadius': 'stat:attack_range',
             'moveSpeed': 'stat:move_speed',
             'bulletArmor': 'stat:bullet_armor',
-            'abilityArmor': 'stat:ability_armor'
+            'abilityArmor': 'stat:ability_armor',
+            // Ability stats
+            'ability:range': 'ability_stat:range',
+            'ability:strength': 'ability_stat:strength',
+            'ability:cooldown': 'ability_stat:cooldown',
+            'ability:duration': 'ability_stat:duration',
+            'ability:speed': 'ability_stat:speed',
+            'ability:mercenaryRageSpeed': 'ability_stat:mercenary_rage_speed',
+            'ability:pyromancerRadius': 'ability_stat:pyromancer_radius'
         };
         return statToRewardMap[statName] || statName;
     }

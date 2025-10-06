@@ -343,39 +343,56 @@ export const GAMEPLAY_CONFIG = {
             },
             "ability_stat:range": {
                 type: "ability_stat",
-                ability_stat: "range",
-                modifier: { type: "percent", value: 1.20 }
+                stats: [
+                    { stat: "ability:range", modifier: { type: "percent", value: 1.20 } }
+                ]
             },
             "ability_stat:strength": {
                 type: "ability_stat",
-                ability_stat: "strength",
-                modifier: { type: "percent", value: 1.20 }
+                stats: [
+                    { stat: "ability:strength", modifier: { type: "percent", value: 1.20 } }
+                ]
             },
             "ability_stat:duration": {
                 type: "ability_stat",
-                ability_stat: "duration",
-                modifier: { type: "percent", value: 1.25 }
+                stats: [
+                    { stat: "ability:duration", modifier: { type: "percent", value: 1.25 } }
+                ]
             },
             "ability_stat:cooldown": {
                 type: "ability_stat",
-                ability_stat: "cooldown",
-                modifier: { type: "percent", value: 0.80 }
+                stats: [
+                    { stat: "ability:cooldown", modifier: { type: "percent", value: 0.80 } }
+                ]
             },
             "ability_stat:mercenary_rage_speed": {
                 type: "ability_stat",
-                ability_stat: "mercenaryRageSpeedBoost",
-                modifier: { type: "percent", value: 1.15 }
+                stats: [
+                    { stat: "ability:mercenaryRageSpeed", modifier: { type: "percent", value: 1.15 } }
+                ]
             },
             "ability_stat:pyromancer_radius": {
                 type: "ability_stat",
-                ability_stat: "fireballRadius",
-                modifier: { type: "percent", value: 1.25 }
+                stats: [
+                    { stat: "ability:pyromancerRadius", modifier: { type: "percent", value: 1.25 } }
+                ]
             },
             "ability_stat:speed": {
                 type: "ability_stat",
-                ability_stat: "speed",
-                modifier: { type: "percent", value: 1.25 }
+                stats: [
+                    { stat: "ability:speed", modifier: { type: "percent", value: 1.25 } }
+                ]
             }
+        },
+        
+        // Ability stat support mapping - defines which ability stats each ability type can receive
+        ABILITY_STAT_SUPPORT: {
+            'default': ['ability:range', 'ability:strength', 'ability:cooldown'],
+            'hookshot': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:duration', 'ability:speed'],
+            'mercenary': ['ability:duration', 'ability:cooldown', 'ability:mercenaryRageSpeed'],
+            'pyromancer': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:speed', 'ability:pyromancerRadius'],
+            'thorndive': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:duration'],
+            'sniper': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:speed']
         }
     },
     

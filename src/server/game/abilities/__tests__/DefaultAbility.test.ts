@@ -25,6 +25,7 @@ describe('DefaultAbility', () => {
         hero.health = 100;
         hero.maxHealth = 100;
         hero.state = 'alive';
+        hero.ability = defaultAbility;
         
         gameState.combatants.set(hero.id, hero);
     });

@@ -71,7 +71,7 @@ export interface NoCollisionEffect extends CombatantEffect {
     type: 'nocollision';
 }
 
-export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed' | 'bulletArmor' | 'abilityArmor';
+export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed' | 'bulletArmor' | 'abilityArmor' | 'ability:range' | 'ability:strength' | 'ability:duration' | 'ability:cooldown' | 'ability:speed' | 'ability:mercenaryRageSpeed' | 'ability:pyromancerRadius';
 export type StatOperator = 'relative' | 'absolute' | 'percent';
 
 export interface StatModEffect extends CombatantEffect {

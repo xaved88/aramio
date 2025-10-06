@@ -37,14 +37,14 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
     useAbility(ability: HookshotAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Find hero by ID first
+        const hero = state.combatants.get(heroId) as Hero;
+        if (!hero) return false;
+        
         // Check if ability is ready (handles both first use and cooldown)
-        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < hero.getAbilityCooldown()) {
             return false;
         }
-        
-        // Find hero by ID
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
@@ -53,11 +53,11 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         
         let targetX = x;
         let targetY = y;
-        if (distance > ability.range) {
+        if (distance > hero.getAbilityRange()) {
             const directionX = dx / distance;
             const directionY = dy / distance;
-            targetX = hero.x + directionX * ability.range;
-            targetY = hero.y + directionY * ability.range;
+            targetX = hero.x + directionX * hero.getAbilityRange();
+            targetY = hero.y + directionY * hero.getAbilityRange();
         }
 
         ability.lastUsedTime = currentTime;
@@ -83,10 +83,10 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         const directionY = dy / distance;
         
         // Use ability speed
-        const speed = ability.speed;
+        const speed = (hero as Hero).getAbilitySpeed();
         
         // Use flat duration (no level scaling)
-        const stunDuration = ability.duration;
+        const stunDuration = (hero as Hero).getAbilityDuration();
         
         // Create projectile
         const projectile = new Projectile();
@@ -102,13 +102,13 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         projectile.duration = -1; // Infinite duration - use range-based removal
         projectile.startX = hero.x; // Track starting position for range calculation
         projectile.startY = hero.y; // Track starting position for range calculation
-        projectile.range = ability.range; // Set range for range-based removal
+        projectile.range = (hero as Hero).getAbilityRange(); // Set range for range-based removal
         projectile.createdAt = state.gameTime;
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();
         damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = ability.strength;
+        damageEffect.damage = (hero as Hero).getAbilityStrength();
         projectile.effects.push(damageEffect);
         
         // Create stun effect
@@ -125,7 +125,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         nocollisionEffect.combatantEffect = new NoCollisionEffect();
         nocollisionEffect.combatantEffect.type = 'nocollision';
         // Calculate duration based on range and speed (with safety margin)
-        const maxTravelTime = (ability.range / speed) * 1000; // Convert to milliseconds
+        const maxTravelTime = (hero as Hero).getAbilityRange() / speed * 1000; // Convert to milliseconds
         nocollisionEffect.combatantEffect.duration = maxTravelTime * 2; // Double the expected time as safety margin
         nocollisionEffect.combatantEffect.appliedAt = state.gameTime;
 

@@ -103,7 +103,7 @@ export class MercenaryBotStrategy {
     private shouldUseRage(bot: any, state: SharedGameState, enemies: any[]): boolean {
         const currentTime = state.gameTime;
         const lastUsedTime = bot.ability.lastUsedTime;
-        const baseCooldown = bot.ability.cooldown;
+        const baseCooldown = bot.getAbilityCooldown();
 
         // If never used, fire immediately if enemies are nearby
         if (lastUsedTime === 0) {

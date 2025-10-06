@@ -1,5 +1,6 @@
 import { DefaultAbility } from '../../../schema/Abilities';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
+import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 
@@ -32,14 +33,14 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
     useAbility(ability: DefaultAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Find hero by ID first
+        const hero = state.combatants.get(heroId) as Hero;
+        if (!hero) return false;
+        
         // Check if ability is ready (handles both first use and cooldown)
-        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < hero.getAbilityCooldown()) {
             return false;
         }
-        
-        // Find hero by ID
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         // Calculate distance to target and clamp to max range if beyond range
         const dx = x - hero.x;
@@ -48,11 +49,11 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         
         let targetX = x;
         let targetY = y;
-        if (distance > ability.range) {
+        if (distance > hero.getAbilityRange()) {
             const directionX = dx / distance;
             const directionY = dy / distance;
-            targetX = hero.x + directionX * ability.range;
-            targetY = hero.y + directionY * ability.range;
+            targetX = hero.x + directionX * hero.getAbilityRange();
+            targetY = hero.y + directionY * hero.getAbilityRange();
         }
 
         ability.lastUsedTime = currentTime;
@@ -91,13 +92,13 @@ export class DefaultAbilityDefinition implements AbilityDefinition<DefaultAbilit
         projectile.team = hero.team;
         projectile.type = 'default';
         projectile.duration = -1; // Infinite duration
-        projectile.range = ability.range; // Set range for range-based removal
+        projectile.range = hero.getAbilityRange(); // Set range for range-based removal
         projectile.createdAt = state.gameTime;
         
         // Add applyDamage effect
         const damageEffect = new ProjectileEffect();
         damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = ability.strength;
+        damageEffect.damage = hero.getAbilityStrength();
         projectile.effects.push(damageEffect);
         
         state.projectiles.set(projectile.id, projectile);

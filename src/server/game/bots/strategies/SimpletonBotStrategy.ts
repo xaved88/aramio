@@ -89,7 +89,7 @@ export class SimpletonBotStrategy {
     private shouldUseAbility(bot: any, state: SharedGameState): boolean {
         const currentTime = state.gameTime;
         const lastUsedTime = bot.ability.lastUsedTime;
-        const baseCooldown = bot.ability.cooldown;
+        const baseCooldown = bot.getAbilityCooldown();
 
         // If never used, fire immediately
         if (lastUsedTime === 0) {
@@ -177,7 +177,7 @@ export class SimpletonBotStrategy {
     private findEnemiesInAbilityRange(enemies: any[], bot: any): any[] {
         // Filter enemies to only those within ability range
         return enemies.filter(enemy => {
-            const abilityRange = bot.ability.range;
+            const abilityRange = bot.getAbilityRange();
             return enemy.distance <= abilityRange;
         });
     }

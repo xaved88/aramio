@@ -1,5 +1,6 @@
 import { MercenaryAbility } from '../../../schema/Abilities';
 import { StatModEffect, NoCollisionEffect, HunterEffect } from '../../../schema/Effects';
+import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
@@ -34,16 +35,16 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
     useAbility(ability: MercenaryAbility, heroId: string, x: number, y: number, state: any, gameplayConfig: GameplayConfig): boolean {
         const currentTime = state.gameTime;
         
+        // Find hero level for scaling
+        const hero = state.combatants.get(heroId) as Hero;
+        if (!hero) return false;
+        
         // Check if ability is ready (handles both first use and cooldown)
-        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < ability.cooldown) {
+        if (ability.lastUsedTime !== 0 && currentTime - ability.lastUsedTime < hero.getAbilityCooldown()) {
             return false;
         }
 
         ability.lastUsedTime = currentTime;
-        
-        // Find hero level for scaling
-        const hero = state.combatants.get(heroId);
-        if (!hero) return false;
         
         this.applyRageEffects(ability, heroId, state, hero.level, gameplayConfig);
         return true;
@@ -59,9 +60,9 @@ export class MercenaryAbilityDefinition implements AbilityDefinition<MercenaryAb
         // Calculate ability values
         const attackBoost = config.ATTACK_BOOST_BASE; // Fixed attack boost (no level scaling)
         const baseMoveSpeedBoost = 1 + config.MOVE_SPEED_BOOST_BASE; // Fixed move speed boost (no level scaling)
-        const rageSpeedMultiplier = ability.mercenaryRageSpeedBoost || 1.0; // Get reward-based speed boost from ability
+        const rageSpeedMultiplier = hero.getMercenaryRageSpeed(); // Get reward-based speed boost from ability
         const moveSpeedBoost = baseMoveSpeedBoost * rageSpeedMultiplier; // Apply reward multiplier
-        const duration = ability.duration; // Use flat duration (no level scaling)
+        const duration = hero.getAbilityDuration(); // Use flat duration (no level scaling)
 
         // Attack strength boost (300% base, no level scaling)
         const attackStrengthEffect = new StatModEffect();
