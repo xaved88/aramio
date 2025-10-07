@@ -20,8 +20,9 @@ export class CombatantUtils {
         const reducedDamage = this.calculateArmorReduction(combatant, damage, damageSource);
         
         const previousHealth = combatant.getHealth();
-        combatant.health = Math.max(0, combatant.health - reducedDamage);
-        const actualDamage = previousHealth - combatant.getHealth();
+        const newHealth = Math.max(0, previousHealth - reducedDamage);
+        combatant.health = newHealth;
+        const actualDamage = previousHealth - newHealth;
         
         // Find the source combatant
         const sourceCombatant = gameState.combatants.get(sourceId);

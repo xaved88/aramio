@@ -670,8 +670,8 @@ function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayC
     player.maxHealth = Math.round(player.maxHealth * boostMultiplier);
     
     // Increase current health by the same amount max health increased, but don't heal to full
-    const healthIncrease = player.maxHealth - oldMaxHealth;
-    player.health = Math.min(player.health + healthIncrease, player.maxHealth);
+    const healthIncrease = player.getMaxHealth() - oldMaxHealth;
+    player.health = Math.min(player.health + healthIncrease, player.getMaxHealth());
     
     player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
     player.attackRadius = Math.round(player.attackRadius * rangeBoostMultiplier); // Use separate range scaling
