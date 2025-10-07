@@ -183,16 +183,15 @@ export class MercenaryBotStrategy {
             
             // Move toward the enemy, but be aware of reduced attack range during rage
             const rageAttackRange = bot.getAttackRadius();
-            const optimalDistance = rageAttackRange + 10; // Stay slightly outside attack range
             
-            if (closestEnemy.distance > optimalDistance) {
-                // Move closer to get in range
+            if (closestEnemy.distance > rageAttackRange) {
+                // Move closer to get in attack range
                 return {
                     type: 'move',
                     data: { heroId: bot.id, targetX: closestEnemy.x, targetY: closestEnemy.y }
                 };
             }
-            // Perfect distance or closer, stay in place
+            // Within attack range, stay in place and let auto-attack handle it
             return null;
         } else {
             // No nearby enemies, check for nearby turrets first
