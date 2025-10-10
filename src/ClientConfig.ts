@@ -4,6 +4,14 @@ export const CLIENT_CONFIG = {
     RENDERER: {
         TYPE: 'svg' as 'shape' | 'svg', // 'shape' for original shape rendering, 'svg' for SVG-based rendering
     },
+    HERO_SPRITE_SCALES: {
+        'default': 1.0,
+        'hookshot': 1.1,
+        'mercenary': 1.1,
+        'pyromancer': 1.1,
+        'sniper': 1.1,
+        'thorndive': 1.25,
+    } as Record<string, number>,
     CAMERA: {
         ZOOM: 1.3, // 30% zoom (1.0 = no zoom, 1.3 = 30% zoom)
         LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)

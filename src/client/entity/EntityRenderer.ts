@@ -5,6 +5,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { AbilityIconManager } from '../abilities/AbilityIconManager';
 import { RendererFactory } from './RendererFactory';
 import { CombatantRenderer } from './CombatantRenderer';
+import { getSpriteScale } from '../utils/SpriteScaleUtils';
 
 /**
  * EntityRenderer handles all rendering logic for different entity types
@@ -199,20 +200,22 @@ export class EntityRenderer {
         // Check for passive healing effect - add pulsing green border and healing icon
         const hasPassiveHealing = combatant.effects.some(effect => effect.type === 'passive_healing');
         if (hasPassiveHealing) {
+            const spriteScale = getSpriteScale(combatant);
+            
             // Add pulsing green border for passive healing effect (matching stun style)
             const pulseIntensity = Math.sin(Date.now() * 0.006) * 0.3 + 0.7; // Pulsing between 0.4 and 1.0 (slower, ~1 per second)
             const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px (matching stun)
             
             // Draw border matching stun style
             graphics.lineStyle(borderThickness, 0x228B22, 0.4); // Darker green border with transparency
-            graphics.strokeCircle(0, 0, combatant.size + 2); // Same positioning as stun
+            graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
             
             // Add healing icon above the entity (matching stun icon style)
             graphics.lineStyle(3, 0x228B22); // Darker green lines for icon
             
             // Draw a simple cross/plus shape for healing icon
-            const iconSize = 6; // Slightly smaller icon
-            const iconY = -combatant.size - 15;
+            const iconSize = 6 * spriteScale; // Scale icon
+            const iconY = -(combatant.size + 15) * spriteScale; // Scale position
             
             // Draw horizontal line
             graphics.moveTo(-iconSize, iconY);
@@ -228,20 +231,22 @@ export class EntityRenderer {
         // Check for rage mode effect - add pulsing red border and rage icon
         const isInRageMode = combatant.effects.some(effect => effect.type === 'hunter');
         if (isInRageMode) {
+            const spriteScale = getSpriteScale(combatant);
+            
             // Add pulsing red border for rage mode effect (matching stun style)
             const pulseIntensity = Math.sin(Date.now() * 0.008) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (faster than stun)
             const borderThickness = 3 + (pulseIntensity * 4); // Pulsing between 3px and 7px (thicker than stun)
             
             // Draw border matching stun style but with red color
             graphics.lineStyle(borderThickness, 0xFF4444, 0.6); // Bright red border with more opacity
-            graphics.strokeCircle(0, 0, combatant.size + 3); // Slightly larger than stun border
+            graphics.strokeCircle(0, 0, (combatant.size + 3) * spriteScale); // Scale with sprite
             
             // Add rage icon above the entity (matching stun icon style)
             graphics.lineStyle(4, 0xFF4444); // Bright red lines for icon, thicker than other icons
             
             // Draw a simple flame/anger symbol for rage icon
-            const iconSize = 8; // Slightly larger icon
-            const iconY = -combatant.size - 18; // Position higher than other icons
+            const iconSize = 8 * spriteScale; // Scale icon
+            const iconY = -(combatant.size + 18) * spriteScale; // Scale position
             
             // Draw flame-like shape (zigzag pattern)
             graphics.moveTo(-iconSize, iconY + iconSize/2);
@@ -323,7 +328,7 @@ export class EntityRenderer {
     private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite): void {
         // For sprites, scale them to the appropriate size
         if (graphics instanceof Phaser.GameObjects.Sprite) {
-            this.scaleHeroSprite(graphics, combatant.size);
+            this.scaleSprite(graphics, combatant);
             return;
         }
         
@@ -366,19 +371,22 @@ export class EntityRenderer {
     }
 
     /**
-     * Scales a hero sprite to the appropriate size
+     * Scales a sprite to the appropriate size
      */
-    private scaleHeroSprite(sprite: Phaser.GameObjects.Sprite, targetSize: number): void {
+    private scaleSprite(sprite: Phaser.GameObjects.Sprite, combatant: Combatant): void {
         // Get the texture dimensions
         const texture = sprite.texture;
         const textureWidth = texture.source[0].width;
         const textureHeight = texture.source[0].height;
         
-        // Calculate scale to fit the target size (diameter)
+        // Calculate base scale to fit the target size (diameter)
         const maxDimension = Math.max(textureWidth, textureHeight);
-        const scale = (targetSize * 2) / maxDimension; // targetSize is radius, so *2 for diameter
+        const baseScale = (combatant.size * 2) / maxDimension; // size is radius, so *2 for diameter
         
-        sprite.setScale(scale);
+        // Apply additional sprite scale using utility function
+        const additionalScale = getSpriteScale(combatant);
+        
+        sprite.setScale(baseScale * additionalScale);
     }
 
     /**
@@ -485,9 +493,13 @@ export class EntityRenderer {
                 ? CLIENT_CONFIG.SELF_COLORS.PRIMARY
                 : (hero.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED);
             
+            // Scale radius based on sprite scale
+            const spriteScale = getSpriteScale(hero);
+            const scaledRadius = CLIENT_CONFIG.RESPAWN_RING.RADIUS * spriteScale;
+            
             respawnRing.lineStyle(CLIENT_CONFIG.RESPAWN_RING.THICKNESS, ringColor, CLIENT_CONFIG.RESPAWN_RING.ALPHA);
             respawnRing.beginPath();
-            respawnRing.arc(0, 0, CLIENT_CONFIG.RESPAWN_RING.RADIUS, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
+            respawnRing.arc(0, 0, scaledRadius, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
             respawnRing.strokePath();
         }
     }
@@ -511,12 +523,16 @@ export class EntityRenderer {
         }
         
         if (isAbilityReady && hero.state === 'alive') {
+            // Scale radius based on sprite scale
+            const spriteScale = getSpriteScale(hero);
+            const scaledRadius = CLIENT_CONFIG.ABILITY_READY_INDICATOR.RADIUS * spriteScale;
+            
             abilityReadyIndicator.lineStyle(
                 CLIENT_CONFIG.ABILITY_READY_INDICATOR.THICKNESS, 
                 CLIENT_CONFIG.ABILITY_READY_INDICATOR.COLOR, 
                 CLIENT_CONFIG.ABILITY_READY_INDICATOR.ALPHA
             );
-            abilityReadyIndicator.strokeCircle(0, 0, CLIENT_CONFIG.ABILITY_READY_INDICATOR.RADIUS);
+            abilityReadyIndicator.strokeCircle(0, 0, scaledRadius);
         }
     }
 

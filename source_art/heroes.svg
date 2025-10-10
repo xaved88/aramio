@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="heroes.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.49827319"
+     inkscape:cx="284.98423"
+     inkscape:cy="448.54912"
+     inkscape:window-width="1920"
+     inkscape:window-height="1000"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:type="star"
+       style="fill:#880088;fill-opacity:1;stroke:#000000;stroke-width:0.965;stroke-dasharray:none;stroke-opacity:1"
+       id="path1"
+       inkscape:flatsided="false"
+       sodipodi:sides="11"
+       sodipodi:cx="46.183311"
+       sodipodi:cy="99.12516"
+       sodipodi:r1="38.731201"
+       sodipodi:r2="31.577369"
+       sodipodi:arg1="0.67549794"
+       sodipodi:arg2="0.57669386"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 76.408974,123.34324 -3.755303,-7.00035 -14.136195,19.49704 0.625509,-7.91933 -22.433017,8.75934 4.807726,-6.32399 -23.607515,-4.75937 7.463525,-2.72083 -17.2867937,-16.76703 7.7497077,1.74618 -5.477638,-23.451262 5.575412,5.658789 8.070629,-22.689895 1.630963,7.774771 19.056529,-14.724642 -2.831305,7.422319 23.992115,-2.08442 -6.394654,4.713332 21.310374,11.217591 -7.927745,0.507897 11.86274,20.9581 -6.943834,-3.858797 z"
+       inkscape:transform-center-x="-0.019818391"
+       inkscape:transform-center-y="1.8984709"
+       inkscape:export-filename="..\public\assets\heroes\hero_thorndive.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+  </g>
+</svg>
