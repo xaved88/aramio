@@ -71,7 +71,7 @@ export const CLIENT_CONFIG = {
     TEAM_COLORS: {
         BLUE: 0x3498db,
         RED: 0xe74c3c,
-        BLUE_RESPAWNING: 0x85c1e9, // much lighter blue
+        BLUE_RESPAWNING: 0xb3d9f2, // much lighter blue
         RED_RESPAWNING: 0xf5b7b1, // much lighter red
     },
     SELF_COLORS: {

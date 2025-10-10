@@ -23,6 +23,7 @@ interface PlayerStats {
     isBot: boolean;
     isCurrentPlayer: boolean;
     levelRewards: number; // number of level rewards available
+    state: 'alive' | 'respawning'; // current hero state
 }
 
 interface TableCell {
@@ -332,6 +333,13 @@ export class StatsOverlay {
     }
 
     /**
+     * Converts hex number to hex color string
+     */
+    private hexNumberToString(hex: number): string {
+        return `#${hex.toString(16).padStart(6, '0')}`;
+    }
+
+    /**
      * Creates a table cell with consistent styling
      */
     private createCell(
@@ -341,11 +349,25 @@ export class StatsOverlay {
         color: string, 
         width: number, 
         align: 'left' | 'right' = 'left',
-        isHighlighted: boolean = false
+        isHighlighted: boolean = false,
+        isDead: boolean = false,
+        team?: string
     ): Phaser.GameObjects.Text {
+        // Determine final color: yellow for highlighted (current player), respawn color for dead, normal otherwise
+        let finalColor = color;
+        if (isHighlighted) {
+            finalColor = '#ffff00';
+        } else if (isDead && team) {
+            // Use the same respawn colors as the game renderer
+            const respawnColor = team === 'blue' 
+                ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING 
+                : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+            finalColor = this.hexNumberToString(respawnColor);
+        }
+        
         const cell = this.scene.add.text(x, y, text, {
             fontSize: '14px',
-            color: isHighlighted ? '#ffff00' : color,
+            color: finalColor,
             fontFamily: 'monospace'
         });
         
@@ -371,8 +393,10 @@ export class StatsOverlay {
             const x = column.align === 'right' ? currentX + this.COLUMN_WIDTHS[column.width] - 5 : currentX;
             const text = player ? column.getValue(player) : column.header;
             const isHighlighted = player && (column.key === 'arrow' || column.key === 'heroId' || column.key === 'abilityType') ? player.isCurrentPlayer : false;
+            const isDead = player && !player.isCurrentPlayer ? player.state === 'respawning' : false;
+            const team = player?.team;
             
-            cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted));
+            cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted, isDead, team));
             currentX += this.COLUMN_WIDTHS[column.width];
         });
 
@@ -414,7 +438,8 @@ export class StatsOverlay {
                     damageDealt: combatant.roundStats.damageDealt,
                     isBot: combatant.controller.startsWith('bot'),
                     isCurrentPlayer: this.playerSessionId === combatant.controller,
-                    levelRewards: combatant.levelRewards.length
+                    levelRewards: combatant.levelRewards.length,
+                    state: combatant.state
                 });
             }
         });
