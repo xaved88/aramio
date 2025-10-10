@@ -137,21 +137,6 @@ export class EntityManager {
         let entityAbilityIconText = this.entityAbilityIconTexts.get(entityId);
         let radiusIndicator = this.entityRadiusIndicators.get(entityId);
         
-        // Create graphics for structure entities only (turrets, cradles)
-        if (!entityGraphics && combatantData.type !== COMBATANT_TYPES.HERO && combatantData.type !== COMBATANT_TYPES.MINION) {
-            entityGraphics = this.entityFactory.createEntityGraphics();
-            // Set initial position immediately to avoid spawning at (0,0)
-            entityGraphics.setPosition(combatantData.x, combatantData.y);
-            entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
-            
-            // Assign to main camera
-            if (this.cameraManager) {
-                this.cameraManager.assignToMainCamera(entityGraphics);
-            }
-            
-            this.entityGraphics.set(entityId, entityGraphics);
-        }
-        
         // Create sprite for heroes
         if (!entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
             const abilityType = combatantData.ability?.type || 'default';
@@ -191,8 +176,26 @@ export class EntityManager {
             this.updateMinionColors(entitySprite, combatantData);
         }
         
-        // Create health bar for heroes
-        if (!entityHealthBar && combatantData.type === COMBATANT_TYPES.HERO) {
+        // Create sprite for structures
+        if (!entitySprite && (combatantData.type === COMBATANT_TYPES.CRADLE || combatantData.type === COMBATANT_TYPES.TURRET)) {
+            const structureType = combatantData.type === COMBATANT_TYPES.CRADLE ? 'cradle' : 'turret';
+            entitySprite = this.entityFactory.createStructureSprite(structureType, combatantData);
+            // Set initial position immediately to avoid spawning at (0,0)
+            entitySprite.setPosition(combatantData.x, combatantData.y);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entitySprite);
+            }
+            
+            this.entitySprites.set(entityId, entitySprite);
+        } else if (entitySprite && (combatantData.type === COMBATANT_TYPES.CRADLE || combatantData.type === COMBATANT_TYPES.TURRET)) {
+            // Update structure colors based on team and health
+            this.updateStructureColors(entitySprite, combatantData);
+        }
+        
+        // Create health bar for heroes and structures
+        if (!entityHealthBar && (combatantData.type === COMBATANT_TYPES.HERO || combatantData.type === COMBATANT_TYPES.CRADLE || combatantData.type === COMBATANT_TYPES.TURRET)) {
             entityHealthBar = this.entityFactory.createHealthBar();
             // Set initial position immediately to avoid spawning at (0,0)
             entityHealthBar.setPosition(combatantData.x, combatantData.y);
@@ -925,6 +928,14 @@ export class EntityManager {
     private updateMinionColors(sprite: Phaser.GameObjects.Sprite, combatant: MinionCombatant): void {
         const colorManager = this.entityFactory.getColorManager();
         colorManager.updateMinionColors(sprite, combatant);
+    }
+
+    /**
+     * Updates structure sprite colors based on team and health
+     */
+    private updateStructureColors(sprite: Phaser.GameObjects.Sprite, combatant: Combatant): void {
+        const colorManager = this.entityFactory.getColorManager();
+        colorManager.updateStructureColors(sprite, combatant);
     }
 
     /**

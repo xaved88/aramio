@@ -186,6 +186,54 @@ export class ColorManager {
     }
 
     /**
+     * Apply team colors to a structure sprite using shader-based color replacement
+     */
+    applyStructureColors(sprite: Phaser.GameObjects.Sprite, combatant: any): void {
+        // Create a unique pipeline instance for this sprite
+        const uniquePipelineId = this.createUniquePipeline(sprite);
+        sprite.setPipeline(uniquePipelineId);
+
+        // Update structure colors based on team
+        this.updateStructureColors(sprite, combatant);
+    }
+
+    /**
+     * Update structure colors based on team and health
+     */
+    updateStructureColors(sprite: Phaser.GameObjects.Sprite, combatant: any): void {
+        // Calculate health factor (0.0 = low health, 1.0 = full health)
+        const healthPercentage = combatant.health / combatant.maxHealth;
+        const healthFactor = Math.max(0.0, Math.min(1.0, healthPercentage));
+
+        // Structures use team colors with health-based fading
+        const primaryColor = combatant.team === 'blue' 
+            ? CLIENT_CONFIG.TEAM_COLORS.BLUE 
+            : CLIENT_CONFIG.TEAM_COLORS.RED;
+        
+        const respawnColor = combatant.team === 'blue' 
+            ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING 
+            : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
+
+        // Interpolate between respawn color (low health) and primary color (full health)
+        const primaryR = (primaryColor >> 16) & 0xFF;
+        const primaryG = (primaryColor >> 8) & 0xFF;
+        const primaryB = primaryColor & 0xFF;
+        
+        const respawnR = (respawnColor >> 16) & 0xFF;
+        const respawnG = (respawnColor >> 8) & 0xFF;
+        const respawnB = respawnColor & 0xFF;
+        
+        const finalR = Math.round(respawnR + (primaryR - respawnR) * healthFactor);
+        const finalG = Math.round(respawnG + (primaryG - respawnG) * healthFactor);
+        const finalB = Math.round(respawnB + (primaryB - respawnB) * healthFactor);
+        
+        const finalColor = (finalR << 16) | (finalG << 8) | finalB;
+
+        // Use shader to replace only the placeholder color while preserving other colors
+        this.applyShaderColors(sprite, finalColor);
+    }
+
+    /**
      * Set the player session ID for determining player-controlled heroes
      */
     setPlayerSessionId(sessionId: string | null): void {

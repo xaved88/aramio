@@ -142,6 +142,37 @@ export class EntityFactory {
     }
 
     /**
+     * Creates a sprite for structure entities
+     */
+    createStructureSprite(structureType: string, combatant?: any): Phaser.GameObjects.Sprite {
+        const textureKey = this.getStructureTextureKey(structureType);
+        const sprite = this.scene.add.sprite(0, 0, textureKey);
+        sprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
+        sprite.setOrigin(0.5, 0.5);
+        
+        // Apply colors if combatant data is provided
+        if (combatant) {
+            this.colorManager.applyStructureColors(sprite, combatant);
+        }
+        
+        return sprite;
+    }
+
+    /**
+     * Gets the appropriate texture key based on structure type
+     */
+    private getStructureTextureKey(structureType: string): string {
+        switch (structureType) {
+            case 'cradle':
+                return 'structure-cradle';
+            case 'turret':
+                return 'structure-turret';
+            default:
+                return 'structure-cradle';
+        }
+    }
+
+    /**
      * Gets the color manager for external use
      */
     getColorManager(): ColorManager {

@@ -87,8 +87,8 @@ export class EntityRenderer {
             }
         }
         
-        // Render health bar for heroes
-        if (healthBar && combatant.type === COMBATANT_TYPES.HERO) {
+        // Render health bar for heroes and structures
+        if (healthBar && (combatant.type === COMBATANT_TYPES.HERO || combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET)) {
             this.renderHealthBar(combatant, healthBar);
         }
         
