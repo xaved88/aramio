@@ -282,12 +282,12 @@ export const CLIENT_CONFIG = {
             },
             "stat:bullet_armor": {
                 title: "Bullet Armor", 
-                description: "+25 bullet armor",
+                description: "+30 bullet armor",
                 rarity: "common"
             },
             "stat:ability_armor": {
                 title: "Ability Armor", 
-                description: "+25 ability armor",
+                description: "+30 ability armor",
                 rarity: "common"
             },
             "stat:damage": {

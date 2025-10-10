@@ -103,7 +103,7 @@ export const GAMEPLAY_CONFIG = {
             ATTACK_RADIUS: 115,
             ATTACK_STRENGTH: 150,
             ATTACK_SPEED: 1, // attacks per second
-            WIND_UP: 1,
+            WIND_UP: 0.5,
             SIZE: 25, // collision radius (matches CRADLE_SIZE)
         },
         TURRET: {
@@ -288,13 +288,13 @@ export const GAMEPLAY_CONFIG = {
             "stat:bullet_armor": { 
                 type: "stat", 
                 stats: [
-                    { stat: "bulletArmor", modifier: { type: "flat", value: 25 } }
+                    { stat: "bulletArmor", modifier: { type: "flat", value: 30 } }
                 ]
             },
             "stat:ability_armor": { 
                 type: "stat", 
                 stats: [
-                    { stat: "abilityArmor", modifier: { type: "flat", value: 25 } }
+                    { stat: "abilityArmor", modifier: { type: "flat", value: 30 } }
                 ]
             },
             "stat:damage": { 
