@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
+import { Combatant, COMBATANT_TYPES, isHeroCombatant, isMinionCombatant, HeroCombatant, MinionCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { EntityFactory } from './EntityFactory';
@@ -137,18 +137,12 @@ export class EntityManager {
         let entityAbilityIconText = this.entityAbilityIconTexts.get(entityId);
         let radiusIndicator = this.entityRadiusIndicators.get(entityId);
         
-        // Create graphics for non-hero entities or as fallback
-        if (!entityGraphics && combatantData.type !== COMBATANT_TYPES.HERO) {
+        // Create graphics for structure entities only (turrets, cradles)
+        if (!entityGraphics && combatantData.type !== COMBATANT_TYPES.HERO && combatantData.type !== COMBATANT_TYPES.MINION) {
             entityGraphics = this.entityFactory.createEntityGraphics();
             // Set initial position immediately to avoid spawning at (0,0)
             entityGraphics.setPosition(combatantData.x, combatantData.y);
-            
-            // Set depth based on entity type
-            if (combatantData.type === COMBATANT_TYPES.MINION) {
-                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
-            } else {
-                entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
-            }
+            entityGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES);
             
             // Assign to main camera
             if (this.cameraManager) {
@@ -158,7 +152,7 @@ export class EntityManager {
             this.entityGraphics.set(entityId, entityGraphics);
         }
         
-        // Create sprite and health bar for heroes
+        // Create sprite for heroes
         if (!entitySprite && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
             const abilityType = combatantData.ability?.type || 'default';
             entitySprite = this.entityFactory.createHeroSprite(abilityType, combatantData);
@@ -177,6 +171,24 @@ export class EntityManager {
             
             // Update hero colors based on current state
             this.updateHeroColors(entitySprite, combatantData);
+        }
+        
+        // Create sprite for minions
+        if (!entitySprite && combatantData.type === COMBATANT_TYPES.MINION && isMinionCombatant(combatantData)) {
+            const minionType = combatantData.minionType || 'warrior';
+            entitySprite = this.entityFactory.createMinionSprite(minionType, combatantData);
+            // Set initial position immediately to avoid spawning at (0,0)
+            entitySprite.setPosition(combatantData.x, combatantData.y);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(entitySprite);
+            }
+            
+            this.entitySprites.set(entityId, entitySprite);
+        } else if (entitySprite && combatantData.type === COMBATANT_TYPES.MINION && isMinionCombatant(combatantData)) {
+            // Update minion colors based on team
+            this.updateMinionColors(entitySprite, combatantData);
         }
         
         // Create health bar for heroes
@@ -905,6 +917,14 @@ export class EntityManager {
     private updateHeroColors(sprite: Phaser.GameObjects.Sprite, combatant: HeroCombatant): void {
         const colorManager = this.entityFactory.getColorManager();
         colorManager.updateHeroColors(sprite, combatant);
+    }
+
+    /**
+     * Updates minion sprite colors based on team
+     */
+    private updateMinionColors(sprite: Phaser.GameObjects.Sprite, combatant: MinionCombatant): void {
+        const colorManager = this.entityFactory.getColorManager();
+        colorManager.updateMinionColors(sprite, combatant);
     }
 
     /**

@@ -111,6 +111,37 @@ export class EntityFactory {
     }
 
     /**
+     * Creates a sprite for minion entities
+     */
+    createMinionSprite(minionType: string, combatant?: any): Phaser.GameObjects.Sprite {
+        const textureKey = this.getMinionTextureKey(minionType);
+        const sprite = this.scene.add.sprite(0, 0, textureKey);
+        sprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
+        sprite.setOrigin(0.5, 0.5);
+        
+        // Apply colors if combatant data is provided
+        if (combatant) {
+            this.colorManager.applyMinionColors(sprite, combatant);
+        }
+        
+        return sprite;
+    }
+
+    /**
+     * Gets the appropriate texture key based on minion type
+     */
+    private getMinionTextureKey(minionType: string): string {
+        switch (minionType) {
+            case 'warrior':
+                return 'minion-warrior';
+            case 'archer':
+                return 'minion-archer';
+            default:
+                return 'minion-warrior';
+        }
+    }
+
+    /**
      * Gets the color manager for external use
      */
     getColorManager(): ColorManager {

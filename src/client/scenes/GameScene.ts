@@ -65,6 +65,10 @@ export class GameScene extends Phaser.Scene {
         this.load.image('hero-pyromancer', '/assets/heroes/hero_pyromancer.png');
         this.load.image('hero-sniper', '/assets/heroes/hero_sniper.png');
         this.load.image('hero-thorndive', '/assets/heroes/hero_thorndive.png');
+        
+        // Load minion assets
+        this.load.image('minion-warrior', '/assets/minions/minion_warrior.png');
+        this.load.image('minion-archer', '/assets/minions/minion_archer.png');
     }
 
     async create() {
