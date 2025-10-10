@@ -179,6 +179,7 @@ export const GAMEPLAY_CONFIG = {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again
         },
+        AWARENESS_RANGE: 200, // Range within which bots count friends and enemies for retreat decisions
     },
     REWARDS: {
         LEVEL_CHESTS: {

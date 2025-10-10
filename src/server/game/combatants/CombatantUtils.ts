@@ -2,6 +2,7 @@ import { GameState } from '../../schema/GameState';
 import { Combatant } from '../../schema/Combatants';
 import { DamageEvent, KillEvent, DeathEffectEvent, KillStreakEvent } from '../../schema/Events';
 import { ReflectEffect } from '../../schema/Effects';
+import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 
 export type DamageSource = 'auto-attack' | 'ability';
 
@@ -316,10 +317,11 @@ export class CombatantUtils {
      * @param combatant The combatant to evaluate
      * @param allCombatants Array of all combatants in the game
      * @param currentTime Current game time for cooldown calculation
-     * @param nearbyRadius Radius to check for nearby units (default: 200)
      * @returns true if the combatant should play defensively (more enemies than friends nearby)
      */
-    static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number, nearbyRadius: number = 150): boolean {
+    static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number): boolean {
+        const nearbyRadius = GAMEPLAY_CONFIG.BOTS.AWARENESS_RANGE;
+        
         // Count nearby enemies - only count heroes, not minions
         const nearbyEnemies = allCombatants.filter((other: any) => {
             if (other.team === combatant.team || other.health <= 0) {
