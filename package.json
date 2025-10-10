@@ -4,9 +4,12 @@
   "description": "Online browser MOBA game",
   "main": "dist/server/index.js",
   "scripts": {
+    "gen": "node scripts/generate-version.js",
+    "predev": "npm run gen",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch src/server/index.ts",
     "dev:client": "vite",
+    "prebuild": "npm run gen",
     "build": "tsc && vite build",
     "build:server": "tsc",
     "start": "node dist/server/index.js",

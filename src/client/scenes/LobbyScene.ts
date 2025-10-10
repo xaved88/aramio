@@ -24,6 +24,7 @@ export class LobbyScene extends Phaser.Scene {
     private startButton!: Phaser.GameObjects.Text;
     private teamSizeButtons: Phaser.GameObjects.Text[] = [];
     private playerSlots: Phaser.GameObjects.Text[] = [];
+    private versionText!: Phaser.GameObjects.Text;
 
     constructor() {
         super({ key: 'LobbyScene' });
@@ -56,6 +57,7 @@ export class LobbyScene extends Phaser.Scene {
         this.blueTeamContainer = null as any;
         this.redTeamContainer = null as any;
         this.startButton = null as any;
+        this.versionText = null as any;
         
         // Clear arrays
         this.configDropdownItems = [];
@@ -331,6 +333,35 @@ export class LobbyScene extends Phaser.Scene {
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5);
+
+        // Version display centered at bottom
+        let versionDisplay = 'Game Version: dev';
+        try {
+            // Dynamic import works in both dev and production
+            import('../../generated/version').then(({ VERSION_INFO }) => {
+                if (this.versionText && this.versionText.scene) {
+                    const displayText = `Game Version: ${VERSION_INFO.commitHash} - ${VERSION_INFO.commitMessage}`;
+                    this.versionText.setText(displayText);
+                }
+            }).catch(() => {
+                // Fallback already set to 'Game Version: dev'
+            });
+        } catch (e) {
+            // Fallback if version file doesn't exist yet
+        }
+        
+        const padding = 10;
+        this.versionText = this.add.text(
+            centerX,
+            this.cameras.main.height - padding,
+            versionDisplay,
+            {
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                fontStyle: 'italic',
+                color: '#888888'
+            }
+        ).setOrigin(0.5, 1);
     }
 
     private updateUI() {

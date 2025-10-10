@@ -30,7 +30,13 @@ A real-time multiplayer browser-based MOBA game built with Phaser and Colyseus.
    npm install
    ```
 
-3. **Start development servers**
+3. **Generate version file** (required for first-time setup)
+   ```bash
+   npm run gen
+   ```
+   Note: This step is automatically run before `dev` and `build` commands, but needs to be run manually for the first setup to avoid TypeScript errors.
+
+4. **Start development servers**
    ```bash
    npm run dev
    ```
@@ -74,6 +80,7 @@ aramio/
 
 ### Available Scripts
 
+- `npm run gen` - Generate version file from git commit hash (runs automatically before dev/build)
 - `npm run dev` - Start both client and server in development mode
 - `npm run dev:client` - Start only the client (Vite dev server)
 - `npm run dev:server` - Start only the server (Colyseus)
@@ -190,7 +197,12 @@ npx kill-port 2567
 npx kill-port 3000
 ```
 
-**TypeScript errors:**
+**TypeScript errors about missing version file:**
+```bash
+npm run gen
+```
+
+**Other TypeScript errors:**
 ```bash
 npm run build:server
 ```
