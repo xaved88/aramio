@@ -29,7 +29,7 @@ export class EntityManager {
     private entitySprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
     private entityHealthBars: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
-    private heroEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entityEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityIconTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -208,19 +208,27 @@ export class EntityManager {
             this.entityHealthBars.set(entityId, entityHealthBar);
         }
         
-        // Create effect overlay for hero sprites
-        let entityEffectOverlay = this.heroEffectOverlays.get(entityId);
-        if (!entityEffectOverlay && combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
+        // Create effect overlay for sprites (heroes and minions)
+        let entityEffectOverlay = this.entityEffectOverlays.get(entityId);
+        if (!entityEffectOverlay && entitySprite) {
             entityEffectOverlay = this.scene.add.graphics();
             entityEffectOverlay.setPosition(combatantData.x, combatantData.y);
-            entityEffectOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 1); // Slightly above hero sprites
+            
+            // Set depth based on entity type
+            if (combatantData.type === COMBATANT_TYPES.HERO) {
+                entityEffectOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 1); // Slightly above hero sprites
+            } else if (combatantData.type === COMBATANT_TYPES.MINION) {
+                entityEffectOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS + 1); // Slightly above minion sprites
+            } else {
+                entityEffectOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.STRUCTURES + 1); // Slightly above structure sprites
+            }
             
             // Assign to main camera
             if (this.cameraManager) {
                 this.cameraManager.assignToMainCamera(entityEffectOverlay);
             }
             
-            this.heroEffectOverlays.set(entityId, entityEffectOverlay);
+            this.entityEffectOverlays.set(entityId, entityEffectOverlay);
         }
         
         
@@ -849,10 +857,10 @@ export class EntityManager {
         }
         
         // Destroy effect overlay
-        const entityEffectOverlay = this.heroEffectOverlays.get(entityId);
+        const entityEffectOverlay = this.entityEffectOverlays.get(entityId);
         if (entityEffectOverlay) {
             entityEffectOverlay.destroy();
-            this.heroEffectOverlays.delete(entityId);
+            this.entityEffectOverlays.delete(entityId);
         }
         
         const entityText = this.entityTexts.get(entityId);
@@ -1056,7 +1064,7 @@ export class EntityManager {
         this.entityGraphics.forEach(graphics => graphics.destroy());
         this.entitySprites.forEach(sprite => sprite.destroy());
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
-        this.heroEffectOverlays.forEach(overlay => overlay.destroy());
+        this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
         this.entityAbilityIconTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
@@ -1075,7 +1083,7 @@ export class EntityManager {
         this.entityGraphics.clear();
         this.entitySprites.clear();
         this.entityHealthBars.clear();
-        this.heroEffectOverlays.clear();
+        this.entityEffectOverlays.clear();
         this.entityTexts.clear();
         this.entityAbilityIconTexts.clear();
         this.entityRadiusIndicators.clear();
@@ -1126,7 +1134,7 @@ export class EntityManager {
         this.entityGraphics.forEach(graphics => graphics.destroy());
         this.entitySprites.forEach(sprite => sprite.destroy());
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
-        this.heroEffectOverlays.forEach(overlay => overlay.destroy());
+        this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
         this.entityAbilityIconTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
@@ -1147,7 +1155,7 @@ export class EntityManager {
         this.entityGraphics.clear();
         this.entitySprites.clear();
         this.entityHealthBars.clear();
-        this.heroEffectOverlays.clear();
+        this.entityEffectOverlays.clear();
         this.entityTexts.clear();
         this.entityAbilityIconTexts.clear();
         this.entityRadiusIndicators.clear();
