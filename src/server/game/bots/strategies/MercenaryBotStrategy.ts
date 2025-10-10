@@ -37,10 +37,13 @@ export class MercenaryBotStrategy {
         // Track healing state for this bot
         this.updateBotHealingState(bot, state);
 
+        // Find all enemies and combatants first
+        const allEnemies = this.findAllEnemies(bot, state);
+        const allCombatants = Array.from(state.combatants.values());
+
         // Check if bot is being targeted by defensive structures
         if (this.isBeingTargetedByDefensiveStructure(bot, state)) {
             // Retreat to safe position
-            const allCombatants = Array.from(state.combatants.values());
             const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
             commands.push({
                 type: 'move',
@@ -49,14 +52,10 @@ export class MercenaryBotStrategy {
             return commands;
         }
 
-        // Find all enemies and combatants first
-        const allEnemies = this.findAllEnemies(bot, state);
-        const allCombatants = Array.from(state.combatants.values());
-
         // Check if bot needs to heal up (fast regeneration strategy)
         if (this.shouldHeal(bot, state)) {
-            // Retreat to safe position to heal up using fast regeneration
-            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            // Retreat to safe position behind cradle to heal up using fast regeneration
+            const retreatPosition = CombatantUtils.getCradleFallbackPosition(bot.team, this.gameplayConfig);
             commands.push({
                 type: 'move',
                 data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
@@ -99,8 +98,8 @@ export class MercenaryBotStrategy {
                 commands.push(movementCommand);
             }
         } else {
-            // NORMAL MODE: Defensive backline positioning (but avoid combat if healing)
-            const movementCommand = this.generateDefensiveMovement(bot, state, this.isCurrentlyHealing(bot, state));
+            // NORMAL MODE: Defensive backline positioning
+            const movementCommand = this.generateDefensiveMovement(bot, state);
             if (movementCommand) {
                 commands.push(movementCommand);
             }
@@ -134,8 +133,12 @@ export class MercenaryBotStrategy {
         }
 
         // Prioritize using rage when we're in danger or when we can secure kills
-        const lowHealthEnemies = nearbyEnemies.filter(enemy => enemy.health <= 50);
-        const inDanger = bot.health <= 60; // Use rage defensively when low health
+        const lowHealthEnemies = nearbyEnemies.filter(enemy => {
+            const healthPercent = (enemy.health / enemy.maxHealth) * 100;
+            return healthPercent <= 50; // 50% health or below
+        });
+        const botHealthPercent = (bot.health / bot.maxHealth) * 100;
+        const inDanger = botHealthPercent <= 60; // Use rage defensively when at 60% health or below
 
         return lowHealthEnemies.length > 0 || inDanger;
     }
@@ -153,7 +156,8 @@ export class MercenaryBotStrategy {
             let score = 0;
             
             // Higher score for lower health enemies (easier to kill)
-            score += (100 - enemy.health) * 3;
+            const enemyHealthPercent = (enemy.health / enemy.maxHealth) * 100;
+            score += (100 - enemyHealthPercent) * 3;
             
             // Bonus for closer enemies (easier to reach with reduced range)
             if (enemy.distance <= 100) {
@@ -175,20 +179,27 @@ export class MercenaryBotStrategy {
 
     private generateRageModeMovement(bot: any, state: SharedGameState, enemies: any[]): GameCommand | null {
         // During rage mode, be aggressive and chase enemies
-        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 100);
+        // Filter out minions since hunter effect prevents targeting them
+        const heroEnemies = enemies.filter(enemy => enemy.type === 'hero');
+        const nearbyHeroEnemies = heroEnemies.filter(enemy => enemy.distance <= 100);
         
-        if (nearbyEnemies.length > 0) {
-            // Chase the closest enemy
-            const closestEnemy = nearbyEnemies.sort((a, b) => a.distance - b.distance)[0];
+        if (nearbyHeroEnemies.length > 0) {
+            // Prioritize the best target (same logic as selectRageTarget)
+            const bestTarget = this.selectRageTarget(enemies, bot, state);
+            
+            // If best target is nearby, chase it; otherwise chase closest
+            const targetEnemy = (bestTarget && bestTarget.distance <= 100) 
+                ? bestTarget 
+                : nearbyHeroEnemies.sort((a, b) => a.distance - b.distance)[0];
             
             // Move toward the enemy, but be aware of reduced attack range during rage
             const rageAttackRange = bot.getAttackRadius();
             
-            if (closestEnemy.distance > rageAttackRange) {
+            if (targetEnemy.distance > rageAttackRange) {
                 // Move closer to get in attack range
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: closestEnemy.x, targetY: closestEnemy.y }
+                    data: { heroId: bot.id, targetX: targetEnemy.x, targetY: targetEnemy.y }
                 };
             }
             // Within attack range, stay in place and let auto-attack handle it
@@ -212,40 +223,25 @@ export class MercenaryBotStrategy {
         }
     }
 
-    private generateDefensiveMovement(bot: any, state: SharedGameState, isHealing: boolean = false): GameCommand | null {
-        // When healing, avoid combat and stay safe
-        if (isHealing) {
-            const allCombatants = Array.from(state.combatants.values());
-            const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
-            return {
-                type: 'move',
-                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
-            };
-        }
-
+    private generateDefensiveMovement(bot: any, state: SharedGameState): GameCommand | null {
         // When not in rage mode, position aggressively for auto-attack opportunities
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length === 0) {
-            // No enemies, check for nearby turrets first (unless healing)
-            if (!isHealing) {
-                const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
-                if (nearbyEnemyTurret) {
-                    return {
-                        type: 'move',
-                        data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
-                    };
-                } else {
-                    // Move toward enemy base to find targets
-                    const targetPosition = this.getEnemyCradlePosition(bot.team);
-                    return {
-                        type: 'move',
-                        data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
-                    };
-                }
+            // No enemies, check for nearby turrets first
+            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+            if (nearbyEnemyTurret) {
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                };
             } else {
-                // When healing and no enemies, stay in healing position
-                return null;
+                // Move toward enemy base to find targets
+                const targetPosition = this.getEnemyCradlePosition(bot.team);
+                return {
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                };
             }
         }
 
@@ -441,14 +437,16 @@ export class MercenaryBotStrategy {
         const timeSinceLastDamage = currentTime - healingState.lastDamageTime;
         const wasRecentlyDamaged = timeSinceLastDamage < 2000; // 2 seconds
         
-        // Update healing state based on health and damage
-        if (bot.health <= 33) {
+        // Update healing state based on health percentage and damage
+        const healthPercent = (bot.health / bot.maxHealth) * 100;
+        
+        if (healthPercent <= 33) {
             // Start healing if health drops to 33% or below
             healingState.isHealing = true;
-        } else if (bot.health >= 70) {
+        } else if (healthPercent >= 70) {
             // Stop healing if health reaches 70% or above
             healingState.isHealing = false;
-        } else if (wasRecentlyDamaged && healingState.isHealing && bot.health > 33) {
+        } else if (wasRecentlyDamaged && healingState.isHealing && healthPercent > 33) {
             // Stop healing if we were recently damaged (healing interrupted) - but only if above critical health
             healingState.isHealing = false;
         }
@@ -465,9 +463,5 @@ export class MercenaryBotStrategy {
     private shouldHeal(bot: any, state: SharedGameState): boolean {
         const healingState = this.botHealingState.get(bot.id);
         return healingState ? healingState.isHealing : false;
-    }
-
-    private isCurrentlyHealing(bot: any, state: SharedGameState): boolean {
-        return this.shouldHeal(bot, state);
     }
 }

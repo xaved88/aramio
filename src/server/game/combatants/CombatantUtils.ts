@@ -463,6 +463,35 @@ export class CombatantUtils {
     }
 
     /**
+     * Gets the safest fallback position behind the team's cradle
+     * This is used for healing and extreme retreat situations
+     * @param team The team ('blue' or 'red')
+     * @param gameplayConfig Game configuration containing cradle positions
+     * @returns Position behind the team's cradle (away from center of map)
+     */
+    static getCradleFallbackPosition(team: string, gameplayConfig: any): { x: number, y: number } {
+        // Get the friendly cradle position
+        const cradlePos = team === 'blue' 
+            ? gameplayConfig.CRADLE_POSITIONS.BLUE 
+            : gameplayConfig.CRADLE_POSITIONS.RED;
+        
+        // Position behind the cradle (away from center)
+        // For blue team (bottom-left), go further down-left
+        // For red team (top-right), go further up-right
+        if (team === 'blue') {
+            return {
+                x: cradlePos.x - 50,
+                y: cradlePos.y + 50
+            };
+        } else {
+            return {
+                x: cradlePos.x + 50,
+                y: cradlePos.y - 50
+            };
+        }
+    }
+
+    /**
      * Checks if a combatant is near a friendly structure (turrets or cradles)
      * Uses the same logic as defensive retreat positioning - inside attack range with buffer
      * @param combatant The combatant to check
