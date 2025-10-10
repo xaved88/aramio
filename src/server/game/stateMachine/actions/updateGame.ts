@@ -210,6 +210,25 @@ function isCombatantStunned(combatant: any): boolean {
 }
 
 /**
+ * Checks if a hero is currently attacking a friendly hero
+ */
+function isAttackingFriendlyHero(enemyHero: any, attacker: any, allCombatants: any[]): boolean {
+    // Only check if the enemy is a hero and has a target
+    if (enemyHero.type !== 'hero' || !enemyHero.target) {
+        return false;
+    }
+    
+    // Find who they're targeting
+    const theirTarget = allCombatants.find(c => c.id === enemyHero.target);
+    
+    // Check if they're targeting a friendly hero
+    return theirTarget && 
+           theirTarget.type === 'hero' && 
+           theirTarget.team === attacker.team &&
+           CombatantUtils.isCombatantAlive(theirTarget);
+}
+
+/**
  * Updates targeting for a combatant based on available enemies in range
  */
 function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
@@ -262,6 +281,35 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
         attacker.target = undefined;
         attacker.attackReadyAt = 0; // Reset wind-up when target is lost
         return;
+    }
+    
+    // Special targeting for cradles: prioritize heroes attacking friendly heroes
+    if (attacker.type === COMBATANT_TYPES.CRADLE) {
+        // Find enemy heroes in range that are attacking friendly heroes
+        const threateningHeroes = enemiesInRange.filter(enemy => 
+            isAttackingFriendlyHero(enemy, attacker, allCombatants)
+        );
+        
+        // If there are heroes attacking our team, prioritize the nearest one
+        if (threateningHeroes.length > 0) {
+            let nearestThreat = threateningHeroes[0];
+            let nearestDistance = CombatantUtils.getDistance(attacker, nearestThreat);
+            
+            threateningHeroes.forEach(threat => {
+                const distance = CombatantUtils.getDistance(attacker, threat);
+                if (distance < nearestDistance) {
+                    nearestThreat = threat;
+                    nearestDistance = distance;
+                }
+            });
+            
+            // Switch to this target if it's different from current
+            if (attacker.target !== nearestThreat.id) {
+                attacker.target = nearestThreat.id;
+                attacker.attackReadyAt = 0; // Reset wind-up when target changes
+            }
+            return;
+        }
     }
     
     // If we have no target but enemies are in range, set target to nearest enemy
