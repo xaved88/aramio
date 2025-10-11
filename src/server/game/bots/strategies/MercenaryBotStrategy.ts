@@ -151,9 +151,10 @@ export class MercenaryBotStrategy {
         }
 
         // Prioritize using rage when we're in danger or when we can secure kills
+        // Only count heroes for low health check - don't waste rage on minions
         const lowHealthEnemies = nearbyEnemies.filter(enemy => {
             const healthPercent = (enemy.health / enemy.maxHealth) * 100;
-            return healthPercent <= 50; // 50% health or below
+            return enemy.type === 'hero' && healthPercent <= 50; // 50% health or below
         });
         const botHealthPercent = (bot.health / bot.maxHealth) * 100;
         const inDanger = botHealthPercent <= 60; // Use rage defensively when at 60% health or below
