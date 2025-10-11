@@ -3,6 +3,7 @@ import { Combatant } from '../../schema/Combatants';
 import { DamageEvent, KillEvent, DeathEffectEvent, KillStreakEvent } from '../../schema/Events';
 import { ReflectEffect } from '../../schema/Effects';
 import { GAMEPLAY_CONFIG } from '../../../GameConfig';
+import { ZONE_TYPES } from '../../../shared/types/CombatantTypes';
 
 export type DamageSource = 'auto-attack' | 'ability' | 'burn';
 
@@ -522,5 +523,175 @@ export class CombatantUtils {
             const safeFightingRange = Math.max(other.attackRadius - 80, 60); // Smaller safe fighting area
             return distance <= safeFightingRange;
         });
+    }
+
+    /**
+     * Checks if a combatant is currently in an enemy damage zone
+     * @param combatant The combatant to check
+     * @param zones Map of all zones in the game
+     * @param safetyMargin Additional radius to treat the zone as bigger (default 15% bigger)
+     * @returns The enemy zone the combatant is in, or null if not in any enemy zone
+     */
+    static isInEnemyZone(combatant: any, zones: Map<string, any>, safetyMargin: number = 0.15): any | null {
+        if (!zones || zones.size === 0) return null;
+
+        for (const zone of zones.values()) {
+            // Skip friendly zones
+            if (zone.team === combatant.team) continue;
+            
+            // Check if combatant is within zone radius (with safety margin)
+            const dx = combatant.x - zone.x;
+            const dy = combatant.y - zone.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const effectiveRadius = zone.radius * (1 + safetyMargin);
+            
+            if (distance <= effectiveRadius + combatant.size) {
+                return zone;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Gets a safe position away from enemy zones using the quickest escape route
+     * @param combatant The combatant that needs to escape
+     * @param zones Map of all zones in the game
+     * @param allCombatants Optional array of all combatants to avoid structures
+     * @returns A safe position outside of enemy zones
+     */
+    static getSafePositionAwayFromZones(combatant: any, zones: Map<string, any>, allCombatants?: any[]): { x: number, y: number } {
+        if (!zones || zones.size === 0) {
+            return { x: combatant.x, y: combatant.y };
+        }
+
+        // Find all enemy zones
+        const enemyZones = Array.from(zones.values()).filter(zone => zone.team !== combatant.team);
+        
+        if (enemyZones.length === 0) {
+            return { x: combatant.x, y: combatant.y };
+        }
+
+        // Find the nearest zone that the combatant is in or near
+        const nearestZone = enemyZones.reduce((nearest, zone) => {
+            const distToZone = Math.sqrt(
+                Math.pow(combatant.x - zone.x, 2) + Math.pow(combatant.y - zone.y, 2)
+            );
+            const distToNearest = nearest ? Math.sqrt(
+                Math.pow(combatant.x - nearest.x, 2) + Math.pow(combatant.y - nearest.y, 2)
+            ) : Infinity;
+            return distToZone < distToNearest ? zone : nearest;
+        }, null as any);
+
+        if (!nearestZone) {
+            return { x: combatant.x, y: combatant.y };
+        }
+
+        // Calculate the shortest path to escape the zone
+        // This is the perpendicular direction from zone center to combatant position
+        const dx = combatant.x - nearestZone.x;
+        const dy = combatant.y - nearestZone.y;
+        const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distanceFromCenter < 0.1) {
+            // If we're at the exact center, pick an arbitrary safe direction
+            // Try moving towards friendly structures if available
+            if (allCombatants) {
+                const friendlyStructures = allCombatants.filter((c: any) => 
+                    c.team === combatant.team && 
+                    c.health > 0 && 
+                    (c.type === 'cradle' || c.type === 'turret')
+                );
+                
+                if (friendlyStructures.length > 0) {
+                    const nearest = friendlyStructures.reduce((closest: any, structure: any) => {
+                        const dist = Math.sqrt(
+                            Math.pow(combatant.x - structure.x, 2) + Math.pow(combatant.y - structure.y, 2)
+                        );
+                        const closestDist = closest ? Math.sqrt(
+                            Math.pow(combatant.x - closest.x, 2) + Math.pow(combatant.y - closest.y, 2)
+                        ) : Infinity;
+                        return dist < closestDist ? structure : closest;
+                    }, null);
+                    
+                    if (nearest) {
+                        const escapeX = nearest.x - nearestZone.x;
+                        const escapeY = nearest.y - nearestZone.y;
+                        const escapeDist = Math.sqrt(escapeX * escapeX + escapeY * escapeY);
+                        return {
+                            x: nearestZone.x + (escapeX / escapeDist) * (nearestZone.radius + 40),
+                            y: nearestZone.y + (escapeY / escapeDist) * (nearestZone.radius + 40)
+                        };
+                    }
+                }
+            }
+            // Default: move in positive X direction
+            return {
+                x: nearestZone.x + nearestZone.radius + 40,
+                y: nearestZone.y
+            };
+        }
+        
+        // Normalize direction (shortest path out of the circle)
+        const dirX = dx / distanceFromCenter;
+        const dirY = dy / distanceFromCenter;
+        
+        // Calculate escape position: just outside zone radius with safety margin
+        const safetyMargin = 40; // Extra distance to stay clear
+        const escapeDistance = nearestZone.radius + safetyMargin;
+        let escapeX = nearestZone.x + dirX * escapeDistance;
+        let escapeY = nearestZone.y + dirY * escapeDistance;
+
+        // Check if this escape position overlaps with any other zones
+        // If so, try alternative directions
+        const isPositionInZone = (x: number, y: number) => {
+            return enemyZones.some(zone => {
+                const dist = Math.sqrt(Math.pow(x - zone.x, 2) + Math.pow(y - zone.y, 2));
+                return dist <= zone.radius + 10; // Small margin
+            });
+        };
+
+        if (isPositionInZone(escapeX, escapeY)) {
+            // Try perpendicular directions
+            const perpDirections = [
+                { x: -dirY, y: dirX },  // 90 degrees
+                { x: dirY, y: -dirX },  // -90 degrees
+            ];
+
+            for (const perpDir of perpDirections) {
+                const testX = nearestZone.x + perpDir.x * escapeDistance;
+                const testY = nearestZone.y + perpDir.y * escapeDistance;
+                
+                if (!isPositionInZone(testX, testY)) {
+                    escapeX = testX;
+                    escapeY = testY;
+                    break;
+                }
+            }
+        }
+
+        return { x: escapeX, y: escapeY };
+    }
+
+    /**
+     * Checks if there's a low-health enemy nearby that's worth staying in a zone for
+     * @param bot The bot to check
+     * @param state The game state
+     * @returns true if there's a low health enemy in attack range
+     */
+    static hasLowHealthEnemyNearby(bot: any, state: any): boolean {
+        const allEnemies = Array.from(state.combatants.values()).filter((combatant: any) => {
+            return combatant.team !== bot.team && combatant.health > 0;
+        });
+        
+        const enemiesInAttackRange = allEnemies.filter((enemy: any) => {
+            const distance = Math.sqrt(Math.pow(enemy.x - bot.x, 2) + Math.pow(enemy.y - bot.y, 2));
+            return distance <= bot.attackRadius + enemy.size;
+        });
+
+        // Consider it worth staying if enemy is below 30% health and in attack range
+        return enemiesInAttackRange.some((enemy: any) => 
+            (enemy.health / enemy.maxHealth) < 0.3
+        );
     }
 } 

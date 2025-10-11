@@ -56,6 +56,23 @@ export class HookshotBotStrategy {
             return commands;
         }
 
+        // Check if bot is standing in an enemy zone (e.g., pyromancer fire)
+        const enemyZone = CombatantUtils.isInEnemyZone(bot, state.zones);
+        if (enemyZone) {
+            // Check if we have a good reason to stay (e.g., enemy is very low health and close)
+            const lowHealthEnemyNearby = CombatantUtils.hasLowHealthEnemyNearby(bot, state);
+            
+            if (!lowHealthEnemyNearby) {
+                // Get safe position away from zones using quickest escape route
+                const safePosition = CombatantUtils.getSafePositionAwayFromZones(bot, state.zones, allCombatants);
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+                });
+                return commands;
+            }
+        }
+
         // Find all enemies
         const allEnemies = this.findAllEnemies(bot, state);
         

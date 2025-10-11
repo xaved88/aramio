@@ -76,6 +76,24 @@ export class MercenaryBotStrategy {
 
         // Check if we're currently in rage mode
         const isInRageMode = this.isInRageMode(bot, state);
+
+        // Check if bot is standing in an enemy zone (e.g., pyromancer fire)
+        // Mercenaries are more willing to stay in zones if in rage mode
+        const enemyZone = CombatantUtils.isInEnemyZone(bot, state.zones);
+        if (enemyZone && !isInRageMode) {
+            // Check if we have a good reason to stay (e.g., enemy is very low health and close)
+            const lowHealthEnemyNearby = CombatantUtils.hasLowHealthEnemyNearby(bot, state);
+            
+            if (!lowHealthEnemyNearby) {
+                // Get safe position away from zones using quickest escape route
+                const safePosition = CombatantUtils.getSafePositionAwayFromZones(bot, state.zones, allCombatants);
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+                });
+                return commands;
+            }
+        }
         
         if (allEnemies.length > 0) {
             // Check if it's time to use rage
