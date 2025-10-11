@@ -702,6 +702,7 @@ export function grantExperience(player: Hero, amount: number, state: GameState, 
 function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayConfig): void {
     const boostMultiplier = 1 + gameplayConfig.EXPERIENCE.STAT_BOOST_PERCENTAGE;
     const rangeBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.RANGE_BOOST_PERCENTAGE;
+    const abilityPowerBoostMultiplier = 1 + gameplayConfig.EXPERIENCE.ABILITY_POWER_BOOST_PERCENTAGE;
     const experienceNeeded = calculateXPForSpecificLevel(player.level, gameplayConfig);
     
     // Level up
@@ -724,6 +725,7 @@ function levelUpPlayer(player: Hero, state: GameState, gameplayConfig: GameplayC
     player.attackStrength = Math.round(player.attackStrength * boostMultiplier);
     player.attackRadius = Math.round(player.attackRadius * rangeBoostMultiplier); // Use separate range scaling
     player.attackSpeed = player.attackSpeed * boostMultiplier;
+    player.abilityPower = player.abilityPower * abilityPowerBoostMultiplier;
 
     // Respawn time increases by 10% per level, capped at max
     player.respawnDuration = Math.round(player.respawnDuration * (1 + gameplayConfig.EXPERIENCE.RESPAWN_LEVEL_MULTIPLIER));

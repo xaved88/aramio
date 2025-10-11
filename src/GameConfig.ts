@@ -141,6 +141,7 @@ export const GAMEPLAY_CONFIG = {
         LEVEL_UP_QUADRATIC_MULTIPLIER: 5, // Additional XP per level above threshold
         STAT_BOOST_PERCENTAGE: 0.10, // 10% boost per level
         RANGE_BOOST_PERCENTAGE: 0.025, // reduced from 0.10 to prevent excessive late-game range at higher levels
+        ABILITY_POWER_BOOST_PERCENTAGE: 0.05, // 5% boost per level
         RESPAWN_LEVEL_MULTIPLIER: 0.10, // 10% increase per level
         RESPAWN_MAX_TIME_MS: 20000, // Maximum respawn time cap
         MINION_KILLED: 3,

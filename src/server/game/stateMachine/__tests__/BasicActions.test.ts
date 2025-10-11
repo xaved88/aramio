@@ -848,6 +848,7 @@ describe('GameStateMachine', () => {
             // Calculate expected stat increases based on configuration
             const statBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.STAT_BOOST_PERCENTAGE; // 1.15
             const rangeBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.RANGE_BOOST_PERCENTAGE; // 1.10
+            const abilityPowerBoostMultiplier = 1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.ABILITY_POWER_BOOST_PERCENTAGE; // 1.05
             
             // Calculate expected stats after multiple level-ups
             // Level 1->2: multiply by 1.15
@@ -856,6 +857,7 @@ describe('GameStateMachine', () => {
             const levelIncrease = updatedPlayer!.level - initialLevel;
             const expectedStatMultiplier = Math.pow(statBoostMultiplier, levelIncrease);
             const expectedRangeMultiplier = Math.pow(rangeBoostMultiplier, levelIncrease);
+            const expectedAbilityPowerMultiplier = Math.pow(abilityPowerBoostMultiplier, levelIncrease);
             // Verify stats increased correctly
             expect(updatedPlayer!.maxHealth).toBe(Math.round(initialMaxHealth * expectedStatMultiplier));
             expect(updatedPlayer!.attackStrength).toBe(Math.round(initialAttackStrength * expectedStatMultiplier));
@@ -863,8 +865,8 @@ describe('GameStateMachine', () => {
             expect(updatedPlayer!.attackSpeed).toBe(initialAttackSpeed * expectedStatMultiplier);
             // Verify respawn duration has increased from level 1
             expect(updatedPlayer!.respawnDuration).toBeGreaterThan(initialRespawnDuration);
-            // Ability strength no longer increases automatically on level up (now handled by rewards)
-            expect(updatedPlayer!.getAbilityStrength()).toBe(initialAbilityStrength);
+            // Ability strength now increases through ability power scaling
+            expect(updatedPlayer!.getAbilityStrength()).toBe(initialAbilityStrength * expectedAbilityPowerMultiplier);
             
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;
