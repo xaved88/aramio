@@ -624,7 +624,7 @@ function grantExperienceToTeamForTurret(amount: number, enemyTeam: string, state
         if (combatant.type === COMBATANT_TYPES.HERO && combatant.team === opposingTeam) {
             const hero = combatant as Hero;
             // Grant experience to all players on opposing team, even when dead/respawning
-            grantExperience(hero, amount, state, turretX, turretY, undefined, gameplayConfig);
+            grantExperience(hero, amount, state, turretX, turretY, undefined, undefined, undefined, gameplayConfig);
         }
     });
 }
@@ -708,11 +708,21 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         }
         
         const totalExperience = adjustedExperiencePerHero + bonusExperience;
-        grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType, gameplayConfig);
+        
+        // Get target name and bot status for hero kills (only for the killer)
+        let targetName: string | undefined = undefined;
+        let targetIsBot: boolean | undefined = undefined;
+        if (xpType === 'heroKill' && dyingUnit.type === COMBATANT_TYPES.HERO) {
+            const dyingHero = dyingUnit as Hero;
+            targetName = dyingHero.displayName;
+            targetIsBot = dyingHero.controller ? dyingHero.controller.startsWith('bot') : false;
+        }
+        
+        grantExperience(hero, totalExperience, state, dyingUnit.x, dyingUnit.y, xpType, targetName, targetIsBot, gameplayConfig);
     });
 }
 
-export function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string, gameplayConfig?: GameplayConfig): void {
+export function grantExperience(player: Hero, amount: number, state: GameState, xpX?: number, xpY?: number, type?: string, targetName?: string, targetIsBot?: boolean, gameplayConfig?: GameplayConfig): void {
     player.experience += amount;
     player.roundStats.totalExperience += amount;
     
@@ -726,6 +736,12 @@ export function grantExperience(player: Hero, amount: number, state: GameState, 
         xpEvent.timestamp = state.gameTime;
         if (type) {
             xpEvent.type = type;
+        }
+        if (targetName) {
+            xpEvent.targetName = targetName;
+        }
+        if (targetIsBot !== undefined) {
+            xpEvent.targetIsBot = targetIsBot;
         }
         state.xpEvents.push(xpEvent);
     }

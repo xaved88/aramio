@@ -552,15 +552,36 @@ export class EntityManager {
             this.cameraManager.assignToMainCamera(xpText);
         }
         
+        // Create secondary text for hero name if available
+        let heroNameText: Phaser.GameObjects.Text | null = null;
+        if (xpEvent.type === 'heroKill' && xpEvent.targetName) {
+            const fontStyle = xpEvent.targetIsBot ? 'italic' : 'normal';
+            heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 18, xpEvent.targetName, {
+                fontSize: '14px',
+                color: color,
+                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
+                fontStyle: fontStyle
+            }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(heroNameText);
+            }
+        }
+        
         // Animate the text floating up and fading out
+        const animationTargets = heroNameText ? [xpText, heroNameText] : [xpText];
         this.scene.tweens.add({
-            targets: xpText,
-            y: xpText.y - CLIENT_CONFIG.XP_EVENTS.ANIMATION.FLOAT_DISTANCE,
+            targets: animationTargets,
+            y: `-=${CLIENT_CONFIG.XP_EVENTS.ANIMATION.FLOAT_DISTANCE}`,
             alpha: 0,
             duration: CLIENT_CONFIG.XP_EVENTS.ANIMATION.DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
                 xpText.destroy();
+                if (heroNameText) {
+                    heroNameText.destroy();
+                }
             }
         });
     }

@@ -14,6 +14,8 @@ export class XPEvent extends Schema {
     @type('number') y!: number; // Y position where XP was earned
     @type('number') timestamp!: number; // When the XP was earned
     @type('string') type?: string; // Type of XP event (e.g., 'minionKill', 'heroKill')
+    @type('string') targetName?: string; // Display name of the killed unit (for hero kills)
+    @type('boolean') targetIsBot?: boolean; // Whether the killed unit is a bot (for hero kills)
 }
 
 export class LevelUpEvent extends Schema {

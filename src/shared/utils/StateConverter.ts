@@ -67,7 +67,9 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         x: event.x,
         y: event.y,
         timestamp: event.timestamp,
-        type: event.type
+        type: event.type,
+        targetName: event.targetName,
+        targetIsBot: event.targetIsBot
     }));
     
     // Convert level-up events

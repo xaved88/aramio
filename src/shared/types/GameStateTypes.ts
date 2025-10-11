@@ -7,6 +7,8 @@ export interface XPEvent {
     y: number;
     timestamp: number;
     type?: string; // Type of XP event (e.g., 'minionKill', 'heroKill')
+    targetName?: string; // Display name of the killed unit (for hero kills)
+    targetIsBot?: boolean; // Whether the killed unit is a bot (for hero kills)
 }
 
 export interface LevelUpEvent {

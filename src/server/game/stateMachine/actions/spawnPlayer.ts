@@ -173,7 +173,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     if (gameplayConfig.DEBUG.STARTING_LEVEL > 1) {
         const startingXP = calculateXPForLevel(gameplayConfig.DEBUG.STARTING_LEVEL, gameplayConfig);
         // Use the normal XP granting system instead of direct assignment
-        grantExperience(hero, startingXP, state, hero.x, hero.y, 'starting_level', gameplayConfig);
+        grantExperience(hero, startingXP, state, hero.x, hero.y, 'starting_level', undefined, undefined, gameplayConfig);
     }
     
     // Add hero to state

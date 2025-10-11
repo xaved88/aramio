@@ -235,7 +235,7 @@ export class GameEngine {
         const xpNeededForNextLevel = calculateXPForSpecificLevel(currentLevel, this.gameplayConfig);
         
         // Grant exactly the amount of XP needed to level up
-        grantExperience(heroCombatant, xpNeededForNextLevel, this.state, heroCombatant.x, heroCombatant.y, 'debug_level_up', this.gameplayConfig);
+        grantExperience(heroCombatant, xpNeededForNextLevel, this.state, heroCombatant.x, heroCombatant.y, 'debug_level_up', undefined, undefined, this.gameplayConfig);
         
         console.log(`Debug level up: Hero ${heroId} granted ${xpNeededForNextLevel} XP to reach level ${currentLevel + 1}`);
     }
