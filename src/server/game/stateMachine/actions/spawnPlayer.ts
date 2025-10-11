@@ -131,6 +131,7 @@ export function handleSpawnPlayer(state: GameState, action: SpawnPlayerAction, g
     hero.moveSpeed = gameplayConfig.HERO_MOVE_SPEED;
     hero.bulletArmor = (heroConfig as any).BULLET_ARMOR || 0;
     hero.abilityArmor = (heroConfig as any).ABILITY_ARMOR || 0;
+    hero.abilityPower = heroConfig.ABILITY_POWER;
     hero.attackReadyAt = 0;
     hero.controller = playerId;
     hero.experience = 0;

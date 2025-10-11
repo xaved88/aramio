@@ -23,7 +23,7 @@ export class HookshotAbilityDefinition implements AbilityDefinition<HookshotAbil
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
-        ability.strength = config.STRENGTH;
+        ability.strengthRatio = config.STRENGTH_RATIO;
         ability.range = config.RANGE;
         ability.duration = config.STUN_DURATION_MS;
         ability.speed = config.SPEED;

@@ -76,6 +76,7 @@ export class Hero extends Combatant {
     @type('number') experience!: number;
     @type('number') level!: number;
     @type('number') experienceNeeded!: number; // XP needed for next level
+    @type('number') abilityPower!: number; // base ability power for calculating ability damage
     @type(RoundStats) roundStats!: RoundStats;
     @type(Ability) ability!: Ability;
     @type('string') controller!: ControllerId; // client ID for players, bot strategy for bots
@@ -94,13 +95,18 @@ export class Hero extends Combatant {
         return result;
     }
 
+    // Ability power getter
+    getAbilityPower(): number {
+        return this.getModifiedStat('abilityPower', this.abilityPower);
+    }
+
     // Ability stat getters - use the same permanent effects system as base stats
     getAbilityRange(): number {
         return this.getModifiedStat('ability:range', (this.ability as any).range || 0);
     }
 
     getAbilityStrength(): number {
-        return this.getModifiedStat('ability:strength', (this.ability as any).strength || 0);
+        return this.getAbilityPower() * ((this.ability as any).strengthRatio || 0);
     }
 
     getAbilityCooldown(): number {

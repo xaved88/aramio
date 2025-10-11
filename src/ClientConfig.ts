@@ -341,8 +341,8 @@ export const CLIENT_CONFIG = {
                 rarity: "upgrade"
             },
             "ability_stat:strength": {
-                title: "Ability Strength",
-                description: "+20% ability damage",
+                title: "Ability Power",
+                description: "+20% ability power",
                 rarity: "upgrade"
             },
             "ability_stat:duration": {

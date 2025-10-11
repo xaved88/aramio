@@ -66,7 +66,7 @@ describe('SniperAbility', () => {
             expect(projectile.type).toBe('sniper');
             expect(projectile.effects.length).toBe(1);
             expect(projectile.effects[0]?.effectType).toBe('applyDamage');
-            expect(projectile.effects[0]?.damage).toBe(sniperAbility.strength);
+            expect(projectile.effects[0]?.damage).toBe(hero.getAbilityStrength());
         });
     });
 });

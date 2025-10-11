@@ -66,7 +66,7 @@ describe('DefaultAbility', () => {
             expect(projectile.type).toBe('default');
             expect(projectile.effects.length).toBe(1);
             expect(projectile.effects[0]?.effectType).toBe('applyDamage');
-            expect(projectile.effects[0]?.damage).toBe(defaultAbility.strength);
+            expect(projectile.effects[0]?.damage).toBe(hero.getAbilityStrength());
         });
 
 

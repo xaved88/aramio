@@ -526,7 +526,7 @@ describe('handleUpdateGame', () => {
             const abilityFactory = new AbilityFactory(TEST_GAMEPLAY_CONFIG);
             attacker.ability = abilityFactory.create('default');
             attacker.ability.cooldown = 5000;
-            (attacker.ability as DefaultAbility).strength = 50;
+            (attacker.ability as DefaultAbility).strengthRatio = 5.0;
             attacker.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             attacker.lastDamageTime = 0;
             
@@ -555,7 +555,7 @@ describe('handleUpdateGame', () => {
             nearEnemy.abilityArmor = 0;
             nearEnemy.ability = abilityFactory.create('default');
             nearEnemy.ability.cooldown = 5000;
-            (nearEnemy.ability as DefaultAbility).strength = 50;
+            (nearEnemy.ability as DefaultAbility).strengthRatio = 5.0;
             nearEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             nearEnemy.lastDamageTime = 0;
             
@@ -584,7 +584,7 @@ describe('handleUpdateGame', () => {
             farEnemy.abilityArmor = 0;
             farEnemy.ability = abilityFactory.create('default');
             farEnemy.ability.cooldown = 5000;
-            (farEnemy.ability as DefaultAbility).strength = 50;
+            (farEnemy.ability as DefaultAbility).strengthRatio = 5.0;
             farEnemy.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             farEnemy.lastDamageTime = 0;
             
@@ -679,7 +679,7 @@ describe('handleUpdateGame', () => {
             player1.attackReadyAt = 0; // Initialize wind-up field
             player1.ability = abilityFactory.create('default');
             player1.ability.cooldown = 1000;
-            (player1.ability as DefaultAbility).strength = 5;
+            (player1.ability as DefaultAbility).strengthRatio = 0.5;
             player1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             player1.lastDamageTime = 0;
 
@@ -706,7 +706,7 @@ describe('handleUpdateGame', () => {
             player2.attackReadyAt = 0; // Initialize wind-up field
             player2.ability = abilityFactory.create('default');
             player2.ability.cooldown = 1000;
-            (player2.ability as DefaultAbility).strength = 5;
+            (player2.ability as DefaultAbility).strengthRatio = 0.5;
             player2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             player2.lastDamageTime = 0;
 
@@ -1000,7 +1000,7 @@ describe('handleUpdateGame', () => {
             blueHero1.attackReadyAt = 0; // Initialize wind-up field
             blueHero1.ability = abilityFactory.create('default');
             blueHero1.ability.cooldown = 1000;
-            (blueHero1.ability as DefaultAbility).strength = 5;
+            (blueHero1.ability as DefaultAbility).strengthRatio = 0.5;
             blueHero1.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero1.lastDamageTime = 0;
 
@@ -1025,7 +1025,7 @@ describe('handleUpdateGame', () => {
             blueHero2.level = 1;
             blueHero2.ability = abilityFactory.create('default');
             blueHero2.ability.cooldown = 1000;
-            (blueHero2.ability as DefaultAbility).strength = 5;
+            (blueHero2.ability as DefaultAbility).strengthRatio = 0.5;
             blueHero2.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero2.lastDamageTime = 0;
 
@@ -1050,7 +1050,7 @@ describe('handleUpdateGame', () => {
             blueHero3.level = 1;
             blueHero3.ability = abilityFactory.create('default');
             blueHero3.ability.cooldown = 1000;
-            (blueHero3.ability as DefaultAbility).strength = 5;
+            (blueHero3.ability as DefaultAbility).strengthRatio = 0.5;
             blueHero3.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             blueHero3.lastDamageTime = 0;
 
@@ -1092,7 +1092,7 @@ describe('handleUpdateGame', () => {
             redHero.level = 1;
             redHero.ability = abilityFactory.create('default');
             redHero.ability.cooldown = 1000;
-            (redHero.ability as DefaultAbility).strength = 5;
+            (redHero.ability as DefaultAbility).strengthRatio = 0.5;
             redHero.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
             redHero.lastDamageTime = 0;
 
@@ -1266,7 +1266,7 @@ describe('handleUpdateGame', () => {
             // Create default ability
             const ability = new DefaultAbility();
             ability.type = 'default';
-            ability.strength = 10;
+            ability.strengthRatio = 1.0;
             ability.cooldown = 1000;
             ability.lastUsedTime = 0;
             hero.ability = ability;

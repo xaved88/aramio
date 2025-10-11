@@ -806,7 +806,7 @@ describe('GameStateMachine', () => {
             const initialAttackRadius = player!.attackRadius;
             const initialAttackSpeed = player!.attackSpeed;
             const initialRespawnDuration = player!.respawnDuration;
-            const initialAbilityStrength = (player!.ability as DefaultAbility).strength;
+            const initialAbilityStrength = player!.getAbilityStrength();
             
             // Grant enough experience to level up multiple times
             // Level 1->2: needs 15 XP
@@ -864,7 +864,7 @@ describe('GameStateMachine', () => {
             // Verify respawn duration has increased from level 1
             expect(updatedPlayer!.respawnDuration).toBeGreaterThan(initialRespawnDuration);
             // Ability strength no longer increases automatically on level up (now handled by rewards)
-            expect((updatedPlayer!.ability as DefaultAbility).strength).toBe(initialAbilityStrength);
+            expect(updatedPlayer!.getAbilityStrength()).toBe(initialAbilityStrength);
             
             // Calculate expected experience consumption based on actual level-ups
             let totalExperienceNeeded = 0;

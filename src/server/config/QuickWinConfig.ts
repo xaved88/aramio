@@ -22,12 +22,12 @@ QUICK_WIN_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 8000; // Very fast respawn (was 6
 
 // Very powerful abilities with fast cooldowns
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 300; // Very fast cooldown (was 1000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.STRENGTH = 25; // Very high damage (was 7)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.STRENGTH_RATIO = 2.5; // Very high damage ratio (was 1.0, gives 25 damage with 10 AP)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.SPEED = 400; // Very fast projectiles (was 200)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.default.RANGE = 300; // Much larger range (was 100)
 
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.COOLDOWN_MS = 2000; // Very fast cooldown (was 5000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH = 15; // Very high damage (was 3)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH_RATIO = 1.5; // Very high damage ratio (was 1.0, gives 15 damage with 10 AP)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.SPEED = 400; // Very fast projectiles (was 250)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.hookshot.RANGE = 350; // Much larger range (was 125)
 
@@ -37,16 +37,16 @@ QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.ATTACK_BOOST_BASE = 6.0; // High boo
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.mercenary.MOVE_SPEED_BOOST_BASE = 1.5; // Very high speed boost (was 0.7)
 
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 800; // Very fast cooldown (was 2000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH = 35; // Very high damage (was 10)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH_RATIO = 3.5; // Very high damage ratio (was 2.0, gives 35 damage with 10 AP)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.SPEED = 400; // Very fast projectiles (was 200)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.pyromancer.RANGE = 350; // Much larger range (was 150)
 
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.thorndive.COOLDOWN_MS = 4000; // Very fast cooldown (was 11000)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.thorndive.DASH_SPEED = 600; // Very fast dash (was 400)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.thorndive.LANDING_DAMAGE = 35; // Very high damage (was 10)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.thorndive.STRENGTH_RATIO = 3.5; // Very high damage ratio (was 1.5, gives 35 damage with 10 AP)
 
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.COOLDOWN_MS = 400; // Very fast cooldown (was 1000)
-QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.STRENGTH = 30; // Very high damage (was 7)
+QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.STRENGTH_RATIO = 3.0; // Very high damage ratio (was 1.5, gives 30 damage with 10 AP)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.SPEED = 500; // Very fast projectiles (was 200)
 QUICK_WIN_CONFIG.COMBAT.ABILITIES.sniper.RANGE = 500; // Much larger range (was 300)
 

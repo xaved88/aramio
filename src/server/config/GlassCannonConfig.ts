@@ -21,11 +21,11 @@ GLASS_CANNON_CONFIG.COMBAT.HERO.RESPAWN_TIME_MS = 3000; // Faster respawn (was 6
 
 // Glass cannon abilities - faster cooldowns, higher damage
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 600; // Faster cooldown (was 1000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.default.STRENGTH = 15; // Much higher damage (was 7)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.default.STRENGTH_RATIO = 1.5; // Much higher damage ratio (was 1.0, gives 15 damage with 10 AP)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.default.SPEED = 250; // Faster projectiles (was 200)
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.COOLDOWN_MS = 3000; // Faster cooldown (was 5000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH = 8; // Higher damage (was 3)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.STRENGTH_RATIO = 0.8; // Higher damage ratio (was 1.0, gives 8 damage with 10 AP)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.SPEED = 300; // Faster projectiles (was 250)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.hookshot.STUN_DURATION_MS = 500; // Shorter stun (was 700)
 
@@ -37,13 +37,13 @@ GLASS_CANNON_CONFIG.COMBAT.ABILITIES.mercenary.RAGE_WIND_UP = 0.05; // Faster wi
 // Removed armor values - no longer grants bullet or ability armor during rage
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 1200; // Faster cooldown (was 2000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH = 20; // Much higher damage (was 10)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.STRENGTH_RATIO = 2.0; // Same as base (gives 20 damage with 10 AP)
 // STRENGTH_PER_LEVEL removed - strength now improved through rewards
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.pyromancer.SPEED = 250; // Faster projectiles (was 200)
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.COOLDOWN_MS = 7000; // Faster cooldown (was 11000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.DASH_SPEED = 500; // Faster dash (was 400)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.LANDING_DAMAGE = 20; // Higher damage (was 10)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.STRENGTH_RATIO = 2.0; // Higher damage ratio (was 1.5, gives 20 damage with 10 AP)
 // LANDING_DAMAGE_PER_LEVEL removed - strength now improved through rewards
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.TAUNT_DURATION_MS = 800; // Shorter taunt (was 1000)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.REFLECT_DURATION_MS = 2000; // Shorter reflect (was 3000)
@@ -51,7 +51,7 @@ GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.ARMOR_BONUS_BULLET = 25; // Reduc
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.thorndive.ARMOR_BONUS_ABILITY = 25; // Reduced armor (was 50)
 
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.sniper.COOLDOWN_MS = 600; // Faster cooldown (was 1000)
-GLASS_CANNON_CONFIG.COMBAT.ABILITIES.sniper.STRENGTH = 18; // Much higher damage (was 7)
+GLASS_CANNON_CONFIG.COMBAT.ABILITIES.sniper.STRENGTH_RATIO = 1.8; // Much higher damage ratio (was 1.5, gives 18 damage with 10 AP)
 GLASS_CANNON_CONFIG.COMBAT.ABILITIES.sniper.SPEED = 300; // Faster projectiles (was 200)
 
 // Glass cannon structures - lower health, higher damage

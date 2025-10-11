@@ -71,7 +71,7 @@ export interface NoCollisionEffect extends CombatantEffect {
     type: 'nocollision';
 }
 
-export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed' | 'bulletArmor' | 'abilityArmor' | 'ability:range' | 'ability:strength' | 'ability:duration' | 'ability:cooldown' | 'ability:speed' | 'ability:mercenaryRageSpeed' | 'ability:pyromancerRadius';
+export type StatType = 'health' | 'maxHealth' | 'attackRadius' | 'attackStrength' | 'attackSpeed' | 'windUp' | 'moveSpeed' | 'bulletArmor' | 'abilityArmor' | 'abilityPower' | 'ability:range' | 'ability:duration' | 'ability:cooldown' | 'ability:speed' | 'ability:mercenaryRageSpeed' | 'ability:pyromancerRadius';
 export type StatOperator = 'relative' | 'absolute' | 'percent';
 
 export interface StatModEffect extends CombatantEffect {
@@ -143,11 +143,13 @@ export interface Ability {
 }
 
 export interface DefaultAbility extends Ability {
-    strength: number;
+    strength: number; // Calculated from abilityPower * strengthRatio
+    strengthRatio: number;
 }
 
 export interface HookshotAbility extends Ability {
-    strength: number;
+    strength: number; // Calculated from abilityPower * strengthRatio
+    strengthRatio: number;
 }
 
 export interface MercenaryAbility extends Ability {
@@ -156,20 +158,24 @@ export interface MercenaryAbility extends Ability {
 
 export interface PyromancerAbility extends Ability {
     type: typeof ABILITY_TYPES.PYROMANCER;
-    strength: number;
+    strength: number; // Calculated from abilityPower * strengthRatio
+    strengthRatio: number;
     radius: number;
     range: number;
 }
 
 export interface ThorndiveAbility extends Ability {
     type: typeof ABILITY_TYPES.THORNDIVE;
+    strength: number; // Calculated from abilityPower * strengthRatio
+    strengthRatio: number;
     range: number;
     landingRadius: number; // AOE radius for landing damage
 }
 
 export interface SniperAbility extends Ability {
     type: typeof ABILITY_TYPES.SNIPER;
-    strength: number; // damage dealt by ability
+    strength: number; // Calculated from abilityPower * strengthRatio
+    strengthRatio: number;
 }
 
 export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect | PassiveHealingEffect;
@@ -205,6 +211,7 @@ export interface HeroCombatant extends BaseCombatant {
     experience: number;
     level: number;
     experienceNeeded: number; // XP needed for next level
+    abilityPower: number; // base ability power for calculating ability damage
     roundStats: RoundStats;
     ability: Ability;
     controller: ControllerId; // client ID for players, bot strategy for bots

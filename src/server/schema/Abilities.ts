@@ -12,7 +12,7 @@ export class DefaultAbility extends Ability {
     super();
     this.type = ABILITY_TYPES.DEFAULT;
   }
-  @type('number') strength!: number; // damage dealt by ability
+  @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
   @type('number') range!: number; // projectile range
 }
 
@@ -21,7 +21,7 @@ export class HookshotAbility extends Ability {
     super();
     this.type = ABILITY_TYPES.HOOKSHOT;
   }
-  @type('number') strength!: number; // damage dealt by ability
+  @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
   @type('number') range!: number; // projectile range
   @type('number') duration!: number; // stun duration in ms
   @type('number') speed!: number; // projectile speed
@@ -41,7 +41,7 @@ export class PyromancerAbility extends Ability {
         super();
         this.type = ABILITY_TYPES.PYROMANCER;
     }
-    @type('number') strength!: number; // damage dealt by ability
+    @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
     @type('number') radius!: number; // AOE radius
     @type('number') range!: number; // projectile range
     @type('number') fireballRadius!: number; // AOE radius (can be modified by rewards)
@@ -53,7 +53,7 @@ export class ThorndiveAbility extends Ability {
         super();
         this.type = ABILITY_TYPES.THORNDIVE;
     }
-    @type('number') strength!: number; // damage dealt by ability (landing damage)
+    @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
     @type('number') range!: number; // dash range
     @type('number') duration!: number; // reflect duration in ms
     @type('number') tauntDuration!: number; // taunt duration in ms
@@ -65,7 +65,7 @@ export class SniperAbility extends Ability {
         super();
         this.type = ABILITY_TYPES.SNIPER;
     }
-    @type('number') strength!: number; // damage dealt by ability
+    @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
     @type('number') range!: number; // projectile range
     @type('number') speed!: number; // projectile speed
 }

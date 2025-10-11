@@ -255,9 +255,9 @@ export class PermanentEffectsDisplay {
             'moveSpeed': 'stat:move_speed',
             'bulletArmor': 'stat:bullet_armor',
             'abilityArmor': 'stat:ability_armor',
+            'abilityPower': 'ability_stat:strength',
             // Ability stats
             'ability:range': 'ability_stat:range',
-            'ability:strength': 'ability_stat:strength',
             'ability:cooldown': 'ability_stat:cooldown',
             'ability:duration': 'ability_stat:duration',
             'ability:speed': 'ability_stat:speed',

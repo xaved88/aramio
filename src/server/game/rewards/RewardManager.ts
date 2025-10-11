@@ -77,26 +77,8 @@ export class RewardManager {
             return false;
         }
 
-        if (rewardType.type === 'stat') {
-            // Apply all stats in the reward
-            rewardType.stats.forEach((statConfig: any) => {
-                const statEffect = new StatModEffect();
-                statEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
-                statEffect.stat = statConfig.stat;
-                statEffect.operator = statConfig.modifier.type === 'flat' ? 'relative' : 'percent';
-                statEffect.amount = statConfig.modifier.value;
-                statEffect.duration = -1; // Permanent effect
-                statEffect.appliedAt = gameTime;
-                hero.permanentEffects.push(statEffect);
-            });
-            return true;
-        } else if (rewardType.type === 'ability') {
-            // Replace the hero's ability with a new one that has all the proper stats
-            const abilityFactory = new AbilityFactory(gameplayConfig);
-            hero.ability = abilityFactory.create(rewardType.abilityType);
-            return true;
-        } else if (rewardType.type === 'ability_stat') {
-            // Apply all stats in the reward (same as base stats)          
+        if (rewardType.type === 'stat' || rewardType.type === 'ability_stat') {
+            // Apply all stats in the reward (works for stat and ability_stat types)
             rewardType.stats.forEach((statConfig: any) => {
                 const statEffect = new StatModEffect();
                 statEffect.type = COMBATANT_EFFECT_TYPES.STATMOD;
@@ -107,6 +89,11 @@ export class RewardManager {
                 statEffect.appliedAt = gameTime;
                 hero.permanentEffects.push(statEffect);
             });
+            return true;
+        } else if (rewardType.type === 'ability') {
+            // Replace the hero's ability with a new one that has all the proper stats
+            const abilityFactory = new AbilityFactory(gameplayConfig);
+            hero.ability = abilityFactory.create(rewardType.abilityType);
             return true;
         }
 

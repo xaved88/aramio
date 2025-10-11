@@ -23,7 +23,7 @@ export class ThorndiveAbilityDefinition implements AbilityDefinition<ThorndiveAb
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
-        ability.strength = config.LANDING_DAMAGE;
+        ability.strengthRatio = config.STRENGTH_RATIO;
         ability.range = config.RANGE;
         ability.duration = config.REFLECT_DURATION_MS;
         ability.tauntDuration = config.TAUNT_DURATION_MS;

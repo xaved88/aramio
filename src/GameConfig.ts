@@ -46,17 +46,18 @@ export const GAMEPLAY_CONFIG = {
             WIND_UP: 0.25, // wind-up time before attack
             RESPAWN_TIME_MS: 6000, // base respawn time
             SIZE: 15, // visual & collision radius
+            ABILITY_POWER: 10, // base ability power for calculating ability damage
         },
         ABILITIES: {
             'default': {
                 COOLDOWN_MS: 2000, // Increased from 1000ms to 2000ms (2 seconds)
-                STRENGTH: 10, // damage dealt by projectile
+                STRENGTH_RATIO: 1.0, // damage = abilityPower * ratio (was 10 damage with 10 AP)
                 SPEED: 200, // pixels per second
                 RANGE: 100, // base range (infinite duration projectiles)
             },
             'hookshot': {
                 COOLDOWN_MS: 5000,
-                STRENGTH: 10, // damage dealt by projectile
+                STRENGTH_RATIO: 1.0, // damage = abilityPower * ratio (was 10 damage with 10 AP)
                 SPEED: 250, // pixels per second (base speed)
                 RANGE: 125, // base range
                 STUN_DURATION_MS: 700, // 700ms base stun duration
@@ -73,7 +74,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'pyromancer': {
                 COOLDOWN_MS: 2000,
-                STRENGTH: 20,
+                STRENGTH_RATIO: 2.0, // damage = abilityPower * ratio (was 20 damage with 10 AP)
                 RADIUS: 30,
                 RANGE: 110,
                 SPEED: 200
@@ -82,7 +83,7 @@ export const GAMEPLAY_CONFIG = {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
                 DASH_SPEED: 400, // Dash movement speed (pixels per second)
                 RANGE: 100, // Base dash range
-                LANDING_DAMAGE: 15, // Base landing damage
+                STRENGTH_RATIO: 1.5, // damage = abilityPower * ratio (was 15 damage with 10 AP)
                 LANDING_RADIUS: 50, // AOE radius for landing damage (now equal to TAUNT_RADIUS)
                 TAUNT_RADIUS: 50, // Radius for taunt effect
                 TAUNT_DURATION_MS: 1000, // Base taunt duration (1 second)
@@ -93,7 +94,7 @@ export const GAMEPLAY_CONFIG = {
             },
             'sniper': {
                 COOLDOWN_MS: 1000, // Same as default
-                STRENGTH: 15,
+                STRENGTH_RATIO: 1.5, // damage = abilityPower * ratio (was 15 damage with 10 AP)
                 SPEED: 250,
                 RANGE: 300, // Longer range than default
             }
@@ -349,9 +350,9 @@ export const GAMEPLAY_CONFIG = {
                 ]
             },
             "ability_stat:strength": {
-                type: "ability_stat",
+                type: "stat",
                 stats: [
-                    { stat: "ability:strength", modifier: { type: "percent", value: 1.20 } }
+                    { stat: "abilityPower", modifier: { type: "percent", value: 1.20 } }
                 ]
             },
             "ability_stat:duration": {
@@ -388,12 +389,12 @@ export const GAMEPLAY_CONFIG = {
         
         // Ability stat support mapping - defines which ability stats each ability type can receive
         ABILITY_STAT_SUPPORT: {
-            'default': ['ability:range', 'ability:strength', 'ability:cooldown'],
-            'hookshot': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:duration', 'ability:speed'],
+            'default': ['ability:range', 'ability:cooldown', 'abilityPower'],
+            'hookshot': ['ability:range', 'ability:cooldown', 'ability:duration', 'ability:speed', 'abilityPower'],
             'mercenary': ['ability:duration', 'ability:cooldown', 'ability:mercenaryRageSpeed'],
-            'pyromancer': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:speed', 'ability:pyromancerRadius'],
-            'thorndive': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:duration'],
-            'sniper': ['ability:range', 'ability:strength', 'ability:cooldown', 'ability:speed']
+            'pyromancer': ['ability:range', 'ability:cooldown', 'ability:speed', 'ability:pyromancerRadius', 'abilityPower'],
+            'thorndive': ['ability:range', 'ability:cooldown', 'ability:duration', 'abilityPower'],
+            'sniper': ['ability:range', 'ability:cooldown', 'ability:speed', 'abilityPower']
         }
     },
     

@@ -21,7 +21,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
-        ability.strength = config.STRENGTH;
+        ability.strengthRatio = config.STRENGTH_RATIO;
         ability.radius = config.RADIUS;
         ability.range = config.RANGE;
         ability.fireballRadius = config.RADIUS; // Initialize reward-modifiable radius

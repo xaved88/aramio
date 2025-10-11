@@ -223,6 +223,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
     switch (colyseusCombatant.type) {
         case COMBATANT_TYPES.HERO:
             const hero = colyseusCombatant as ColyseusHero;
+            const abilityPower = applyStatModifications('abilityPower', (hero as any).abilityPower || 10, allEffects);
+            const strengthRatio = (hero.ability as any).strengthRatio || 0;
             return {
                 ...baseCombatant,
                 type: COMBATANT_TYPES.HERO,
@@ -232,6 +234,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                 experience: hero.experience,
                 level: hero.level,
                 experienceNeeded: hero.experienceNeeded,
+                abilityPower: abilityPower,
                 roundStats: {
                     totalExperience: hero.roundStats.totalExperience,
                     minionKills: hero.roundStats.minionKills,
@@ -244,7 +247,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     type: hero.ability.type,
                     cooldown: applyStatModifications('ability:cooldown', (hero.ability as any).cooldown, allEffects),
                     lastUsedTime: (hero.ability as any).lastUsedTime,
-                    strength: applyStatModifications('ability:strength', (hero.ability as any).strength || 0, allEffects),
+                    strength: abilityPower * strengthRatio,
+                    strengthRatio: strengthRatio,
                     radius: (hero.ability as any).radius,
                     range: applyStatModifications('ability:range', (hero.ability as any).range || 0, allEffects),
                     duration: applyStatModifications('ability:duration', (hero.ability as any).duration || 0, allEffects),

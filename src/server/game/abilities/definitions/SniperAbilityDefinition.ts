@@ -21,7 +21,7 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
-        ability.strength = config.STRENGTH;
+        ability.strengthRatio = config.STRENGTH_RATIO;
         ability.range = config.RANGE;
         ability.speed = config.SPEED;
         
