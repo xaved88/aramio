@@ -494,6 +494,7 @@ export class LobbyScene extends Phaser.Scene {
             const y = index * 40;
             let slotText = '';
             let textColor: number = CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY;
+            let isSelf = false;
             
             if (slot.playerId) {
                 if (slot.isBot) {
@@ -502,8 +503,9 @@ export class LobbyScene extends Phaser.Scene {
                 } else {
                     slotText = slot.playerDisplayName;
                     if (slot.playerId === this.playerSessionId) {
-                        // Your own name uses the character's purple color
+                        // Your own name uses the character's purple color and is bolded
                         textColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;
+                        isSelf = true;
                     } else {
                         // Other players use team colors
                         textColor = team === 'blue' ? CLIENT_CONFIG.UI.COLORS.BLUE : CLIENT_CONFIG.UI.COLORS.RED;
@@ -521,7 +523,8 @@ export class LobbyScene extends Phaser.Scene {
             const slotDisplay = this.add.text(0, y, slotText, {
                 fontSize: '16px',
                 color: hexToColorString(textColor),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                fontStyle: isSelf ? 'bold' : undefined
             }).setOrigin(0.5);
             
 
@@ -544,7 +547,7 @@ export class LobbyScene extends Phaser.Scene {
 
                     // Left arrow: move to blue team
                     arrowLeft.on('pointerdown', () => {
-                        if (slot.playerId === this.playerSessionId) {
+                        if (isSelf) {
                             // Switch own team
                             this.room.send('switchTeam', { team: 'blue' });
                         } else {
@@ -574,7 +577,7 @@ export class LobbyScene extends Phaser.Scene {
 
                     // Right arrow: move to red team
                     arrowRight.on('pointerdown', () => {
-                        if (slot.playerId === this.playerSessionId) {
+                        if (isSelf) {
                             // Switch own team
                             this.room.send('switchTeam', { team: 'red' });
                         } else {
@@ -590,7 +593,7 @@ export class LobbyScene extends Phaser.Scene {
                 }
 
                 // Add edit button for current player's own slot
-                if (slot.playerId === this.playerSessionId) {
+                if (isSelf) {
                     const editButton = this.add.text(70, y, '✏️', {
                         fontSize: '12px',
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,

@@ -14,6 +14,7 @@ import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { ControlModeToggle } from './ControlModeToggle';
+import { KillFeed } from './KillFeed';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -35,6 +36,7 @@ export class UIManager {
     private cursorRenderer: CursorRenderer;
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
+    private killFeed: KillFeed;
     private controlModeToggle: ControlModeToggle | null = null;
     private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
@@ -88,6 +90,7 @@ export class UIManager {
         this.cursorRenderer = new CursorRenderer(scene);
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
+        this.killFeed = new KillFeed(scene);
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -107,6 +110,7 @@ export class UIManager {
         this.cursorRenderer.setCameraManager(this.cameraManager);
         this.cheatMenu.setHUDCamera(hudCamera);
         this.notificationOverlay.setHUDCamera(hudCamera);
+        this.killFeed.setHUDCamera(hudCamera);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -121,6 +125,7 @@ export class UIManager {
         this.cursorRenderer.setCameraManager(cameraManager);
         this.cheatMenu.setCameraManager(cameraManager);
         this.notificationOverlay.setCameraManager(cameraManager);
+        this.killFeed.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -184,6 +189,9 @@ export class UIManager {
         Object.keys(this.hudElements).forEach(key => {
             this.hudElements[key as keyof typeof this.hudElements] = null;
         });
+        
+        // Clear kill feed on HUD clear (game restart)
+        this.killFeed.clear();
     }
 
     hideVictoryScreen(): void {
@@ -196,6 +204,7 @@ export class UIManager {
         this.statsOverlay.setPlayerSessionId(sessionId);
         this.damageTakenOverlay.setPlayerSessionId(sessionId);
         this.damageDealtOverlay.setPlayerSessionId(sessionId);
+        this.killFeed.setPlayerSessionId(sessionId);
     }
 
     showSuperMinionTriggerNotification(triggeredTeam: string): void {
@@ -345,6 +354,9 @@ export class UIManager {
         
         // Check for kill streak notifications
         this.checkKillStreakNotifications(state);
+        
+        // Update kill feed
+        this.killFeed.processKillEvents(state);
         
         if (Object.values(this.hudElements).some(el => !el)) return;
         
@@ -590,5 +602,6 @@ export class UIManager {
         this.damageDealtOverlay.destroy();
         this.cursorRenderer.destroy();
         this.cheatMenu.destroy();
+        this.killFeed.destroy();
     }
 } 
