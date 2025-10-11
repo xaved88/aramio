@@ -151,6 +151,7 @@ export const GAMEPLAY_CONFIG = {
         TOWER_DESTROYED: 100,
         UNIT_KILL_RADIUS: 175, // radius within which heroes must be to get unit kill XP
         LAST_HIT_BONUS_PERCENTAGE: 0.25, // bonus experience for getting the last hit on a unit
+        DAMAGE_CONTRIBUTION_WINDOW_MS: 2500, // time window (2.5s) for damage dealt to count towards XP sharing
     },
     MINION_SPAWNING: {
         WARRIORS_PER_WAVE: 2,

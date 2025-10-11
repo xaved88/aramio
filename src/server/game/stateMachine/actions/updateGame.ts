@@ -661,6 +661,25 @@ function grantExperienceToTeamForUnitKill(amount: number, enemyTeam: string, sta
         }
     });
     
+    // Find heroes who dealt damage to the target within the damage contribution window
+    const damageContributionWindow = gameplayConfig.EXPERIENCE.DAMAGE_CONTRIBUTION_WINDOW_MS;
+    const recentDamageEvents = state.damageEvents.filter(
+        event => event.targetId === dyingUnit.id && 
+        (state.gameTime - event.timestamp) <= damageContributionWindow
+    );
+    
+    // Add heroes who dealt damage recently but aren't in range
+    recentDamageEvents.forEach(damageEvent => {
+        const damager = state.combatants.get(damageEvent.sourceId);
+        if (damager && damager.type === COMBATANT_TYPES.HERO && damager.team === opposingTeam) {
+            const damagerHero = damager as Hero;
+            // Only add if alive and not already in the list
+            if (damagerHero.state === 'alive' && !heroesInRange.find(hero => hero.id === damagerHero.id)) {
+                heroesInRange.push(damagerHero);
+            }
+        }
+    });
+    
     // If killer hero is not in range, add them to the list
     if (killerHero && !heroesInRange.find(hero => hero.id === killerHero!.id)) {
         heroesInRange.push(killerHero);
