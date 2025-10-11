@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COMBATANT_TYPES, isHeroCombatant, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
@@ -12,6 +13,7 @@ import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
+import { ControlModeToggle } from './ControlModeToggle';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -33,6 +35,8 @@ export class UIManager {
     private cursorRenderer: CursorRenderer;
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
+    private controlModeToggle: ControlModeToggle | null = null;
+    private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null;
     private wasPlayerAlive: boolean = true; // Track previous alive state to detect death transitions
@@ -126,6 +130,37 @@ export class UIManager {
         this.cheatMenu.setRoom(room);
     }
 
+    setInputHandler(inputHandler: any): void {
+        this.inputHandler = inputHandler;
+    }
+
+    private createControlModeToggle(): void {
+        if (this.controlModeToggle) {
+            this.controlModeToggle.destroy();
+        }
+        
+        const padding = 10;
+        this.controlModeToggle = new ControlModeToggle(
+            this.scene,
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH - padding - 15,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - padding - 15,
+            (mode) => {
+                // Update input handler when mode changes
+                if (this.inputHandler) {
+                    this.inputHandler.setControlMode(mode);
+                }
+            }
+        );
+        this.controlModeToggle.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        this.controlModeToggle.setScrollFactor(0, 0);
+        
+        // Add to HUD container if it exists
+        const hudContainer = this.hudRenderer.getHUDContainer();
+        if (hudContainer) {
+            hudContainer.add(this.controlModeToggle.getContainer());
+        }
+    }
+
     createHUD(): void {
         this.clearHUD();
         const newHudElements = this.hudRenderer.createHUDElements();
@@ -133,10 +168,19 @@ export class UIManager {
         
         // Initialize cursor renderer
         this.cursorRenderer.create();
+        
+        // Create control mode toggle after HUD is created
+        this.createControlModeToggle();
     }
 
     clearHUD(): void {
         Object.values(this.hudElements).forEach(el => el?.destroy());
+        
+        // Destroy control mode toggle if it exists
+        if (this.controlModeToggle) {
+            this.controlModeToggle.destroy();
+            this.controlModeToggle = null;
+        }
         Object.keys(this.hudElements).forEach(key => {
             this.hudElements[key as keyof typeof this.hudElements] = null;
         });

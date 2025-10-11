@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
+import { ControlMode, ControlModeStorage } from './utils/ControlModeStorage';
 
 /**
  * SINGLE SOURCE OF TRUTH FOR ALL INPUT HANDLING
@@ -11,10 +12,15 @@ import { CLIENT_CONFIG } from '../ClientConfig';
  * - Simple modification of control schemes
  * - Better testing and debugging of input logic
  * 
- * Control Scheme: Point-to-move + Click-down-to-stop + Click-up-for-ability
- * - Mouse not pressed: Move towards mouse pointer
- * - Mouse pressed: Stop sending move events, show ability targeting
- * - Mouse released: Fire ability at release position
+ * Control Schemes:
+ * 1. Mouse-only: Point-to-move + Click-down-to-stop + Click-up-for-ability
+ *    - Mouse not pressed: Move towards mouse pointer
+ *    - Mouse pressed: Stop sending move events, show ability targeting
+ *    - Mouse released: Fire ability at release position
+ * 
+ * 2. Keyboard + Mouse: WASD for movement + Click for ability
+ *    - WASD: Directional movement (additive vectors)
+ *    - Mouse click: Fire ability at click position
  */
 export class InputHandler {
     private scene: Phaser.Scene;
@@ -27,9 +33,23 @@ export class InputHandler {
     private gameplayConfig: any = null;
     private uiManager: any = null;
 
+    // Control mode
+    private controlMode: ControlMode = 'mouse';
+    
+    // Keyboard movement state
+    private keyStates: {
+        W: boolean;
+        A: boolean;
+        S: boolean;
+        D: boolean;
+    } = { W: false, A: false, S: false, D: false };
+    
+    private readonly KEYBOARD_MOVE_DISTANCE = 100;
+
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
         this.room = room;
+        this.controlMode = ControlModeStorage.getControlMode();
     }
 
     /**
@@ -76,28 +96,31 @@ export class InputHandler {
      * Sets up all keyboard input handlers
      */
     private setupKeyboardHandlers(): void {
-        // S key handler for hero cycling
-        this.scene.input.keyboard?.on('keydown-S', (event: KeyboardEvent) => {
+        // WASD for movement (keyboard mode only)
+        this.setupWASDHandlers();
+
+        // H key handler for hero cycling (was S, moved due to WASD)
+        this.scene.input.keyboard?.on('keydown-H', (event: KeyboardEvent) => {
             if (this.room) {
                 this.room.send('toggleHero');
             }
         });
 
-        // D key handler for debug kill (only if enabled)
-        this.scene.input.keyboard?.on('keydown-D', (event: KeyboardEvent) => {
+        // K key handler for debug kill (was D, moved due to WASD)
+        this.scene.input.keyboard?.on('keydown-K', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
                 this.room.send('debugKill');
             }
         });
 
-        // L key handler for instant respawn (only if enabled)
-        this.scene.input.keyboard?.on('keydown-L', (event: KeyboardEvent) => {
+        // R key handler for instant respawn (was L, moved to more accessible key)
+        this.scene.input.keyboard?.on('keydown-R', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
                 this.room.send('instantRespawn');
             }
         });
 
-        // U key handler for level up (only if enabled)
+        // U key handler for level up (keeping U)
         this.scene.input.keyboard?.on('keydown-U', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
                 this.room.send('debugLevelUp');
@@ -148,12 +171,60 @@ export class InputHandler {
         });
     }
 
+    /**
+     * Sets up WASD key handlers for keyboard movement
+     */
+    private setupWASDHandlers(): void {
+        // W key
+        this.scene.input.keyboard?.on('keydown-W', () => {
+            this.keyStates.W = true;
+        });
+        this.scene.input.keyboard?.on('keyup-W', () => {
+            this.keyStates.W = false;
+        });
+
+        // A key
+        this.scene.input.keyboard?.on('keydown-A', () => {
+            this.keyStates.A = true;
+        });
+        this.scene.input.keyboard?.on('keyup-A', () => {
+            this.keyStates.A = false;
+        });
+
+        // S key
+        this.scene.input.keyboard?.on('keydown-S', () => {
+            this.keyStates.S = true;
+        });
+        this.scene.input.keyboard?.on('keyup-S', () => {
+            this.keyStates.S = false;
+        });
+
+        // D key
+        this.scene.input.keyboard?.on('keydown-D', () => {
+            this.keyStates.D = true;
+        });
+        this.scene.input.keyboard?.on('keyup-D', () => {
+            this.keyStates.D = false;
+        });
+    }
+
 
     /**
      * Called every frame to handle continuous input (movement)
      * This is the ONLY place where movement commands should be sent
      */
     update(): void {
+        if (this.controlMode === 'mouse') {
+            this.updateMouseMovement();
+        } else {
+            this.updateKeyboardMovement();
+        }
+    }
+
+    /**
+     * Handles movement for mouse-only mode
+     */
+    private updateMouseMovement(): void {
         // Only send movement commands when not clicking (for ability targeting)
         if (!this.isClickHeld) {
             const pointer = this.scene.input.activePointer;
@@ -175,6 +246,41 @@ export class InputHandler {
     }
 
     /**
+     * Handles movement for keyboard mode
+     */
+    private updateKeyboardMovement(): void {
+        // Calculate movement vector from WASD keys
+        let moveX = 0;
+        let moveY = 0;
+
+        if (this.keyStates.W) moveY -= this.KEYBOARD_MOVE_DISTANCE;
+        if (this.keyStates.S) moveY += this.KEYBOARD_MOVE_DISTANCE;
+        if (this.keyStates.A) moveX -= this.KEYBOARD_MOVE_DISTANCE;
+        if (this.keyStates.D) moveX += this.KEYBOARD_MOVE_DISTANCE;
+
+        // Get current hero position
+        const gameScene = this.scene as any;
+        if (!gameScene.lastState) return;
+
+        let heroX = 0;
+        let heroY = 0;
+        
+        for (const combatant of gameScene.lastState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                heroX = combatant.x;
+                heroY = combatant.y;
+                break;
+            }
+        }
+
+        // Send move command relative to current position
+        this.room.send('move', {
+            targetX: heroX + moveX,
+            targetY: heroY + moveY
+        });
+    }
+
+    /**
      * Handles pointer down events - starts ability targeting
      */
     private handlePointerDown(pointer: Phaser.Input.Pointer): void {
@@ -192,21 +298,39 @@ export class InputHandler {
      * Handles pointer up events - fires ability
      */
     private handlePointerUp(pointer: Phaser.Input.Pointer): void {
-        if (this.isClickHeld && !this.wasRespawningOnClick) {
-            // Only fire ability if the hero wasn't respawning when click started
-            const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-            this.room.send('useAbility', {
-                x: worldPos.x,
-                y: worldPos.y
-            });
+        if (this.controlMode === 'mouse') {
+            // Mouse mode: ability on mouse up
+            if (this.isClickHeld && !this.wasRespawningOnClick) {
+                // Only fire ability if the hero wasn't respawning when click started
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                this.room.send('useAbility', {
+                    x: worldPos.x,
+                    y: worldPos.y
+                });
+                
+                // Notify scene for UI updates (hide ability range display)
+                this.notifyScenePointerUp(pointer);
+            }
             
-            // Notify scene for UI updates (hide ability range display)
-            this.notifyScenePointerUp(pointer);
+            this.isClickHeld = false;
+            this.clickDownPosition = null;
+            this.wasRespawningOnClick = false; // Reset for next click
+        } else {
+            // Keyboard mode: ability on mouse up (same UI behavior as mouse mode)
+            if (this.isClickHeld && !this.wasRespawningOnClick) {
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                this.room.send('useAbility', {
+                    x: worldPos.x,
+                    y: worldPos.y
+                });
+                
+                // Notify scene for UI updates (hide ability range display)
+                this.notifyScenePointerUp(pointer);
+            }
+            
+            this.isClickHeld = false;
+            this.wasRespawningOnClick = false;
         }
-        
-        this.isClickHeld = false;
-        this.clickDownPosition = null;
-        this.wasRespawningOnClick = false; // Reset for next click
     }
 
     /**
@@ -297,5 +421,24 @@ export class InputHandler {
                 break;
             }
         }
+    }
+
+    /**
+     * Sets the control mode and updates internal state
+     */
+    setControlMode(mode: ControlMode): void {
+        this.controlMode = mode;
+        
+        // Reset keyboard state when switching modes
+        if (mode === 'mouse') {
+            this.keyStates = { W: false, A: false, S: false, D: false };
+        }
+    }
+
+    /**
+     * Gets the current control mode
+     */
+    getControlMode(): ControlMode {
+        return this.controlMode;
     }
 }

@@ -246,6 +246,7 @@ export const CLIENT_CONFIG = {
             ACCENT: 0x34495e, // darker accent color
             SECONDARY: 0x95a5a6, // gray secondary
             BORDER: 0x7f8c8d, // gray border
+            CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
             GAME_CANVAS: 0x2c3e50,

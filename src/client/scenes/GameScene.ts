@@ -73,6 +73,10 @@ export class GameScene extends Phaser.Scene {
         // Load structure assets
         this.load.image('structure-cradle', '/assets/structures/structure_cradle.png');
         this.load.image('structure-turret', '/assets/structures/structure_tower.png');
+        
+        // Load control mode icons
+        this.load.image('control-mouse', '/assets/config/mouse.png');
+        this.load.image('control-keyboard', '/assets/config/keyboard.png');
     }
 
     async create() {
@@ -377,6 +381,9 @@ export class GameScene extends Phaser.Scene {
         
         // Set up InputHandler dependencies now that UI is initialized
         this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager);
+        
+        // Link UIManager to InputHandler for control mode updates
+        this.uiManager.setInputHandler(this.inputHandler);
     }
 
     private processStateChange(colyseusState: GameState) {

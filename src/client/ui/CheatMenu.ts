@@ -128,25 +128,25 @@ export class CheatMenu {
         return [
             {
                 id: 'toggleHero',
-                name: '(S)witch Hero',
+                name: 'Switch (H)ero',
                 description: 'Take control of the next available hero',
-                key: 'S',
+                key: 'H',
                 enabled: true, // Always available
                 action: () => this.room.send('toggleHero')
             },
             {
                 id: 'debugKill',
-                name: 'Instant (D)eath',
+                name: 'Instant (K)ill',
                 description: 'Kill your current hero',
-                key: 'D',
+                key: 'K',
                 enabled: this.gameplayConfig.DEBUG.CHEAT_KILL_PLAYER_ENABLED,
                 action: () => this.room.send('debugKill')
             },
             {
                 id: 'instantRespawn',
-                name: 'Instant (L)ife',
+                name: 'Instant (R)espawn',
                 description: 'Respawn your hero',
-                key: 'L',
+                key: 'R',
                 enabled: this.gameplayConfig.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED,
                 action: () => this.room.send('instantRespawn')
             },
