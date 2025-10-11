@@ -596,6 +596,13 @@ export class GameScene extends Phaser.Scene {
             return;
         }
 
+        // Get the actual visual position of the hero graphics object
+        const heroGraphics = this.entityManager.getEntityGraphics(currentHero.id);
+        if (!heroGraphics) {
+            this.hideAbilityRangeDisplay();
+            return;
+        }
+
         // Calculate cast range based on ability type
         let castRange: number;
         if (currentHero.ability.type === 'mercenary') {
@@ -608,31 +615,33 @@ export class GameScene extends Phaser.Scene {
         // Determine color based on ability cooldown status
         const rangeColor = this.getAbilityRangeDisplayColor(currentHero);
         
-        // Clear and draw the ability range circle centered on the hero
+        // Position the graphics object at the hero's visual position and draw relative to (0, 0)
+        this.abilityRangeDisplay.setPosition(heroGraphics.x, heroGraphics.y);
         this.abilityRangeDisplay.clear();
         this.abilityRangeDisplay.lineStyle(2, rangeColor, 0.6);
-        this.abilityRangeDisplay.strokeCircle(currentHero.x, currentHero.y, castRange);
+        this.abilityRangeDisplay.strokeCircle(0, 0, castRange);
         
         // Get mouse position and calculate target position (sticking to cast range if beyond)
         const mouseWorldPos = this.screenToWorldCoordinates(this.input.activePointer.x, this.input.activePointer.y);
-        const dx = mouseWorldPos.x - currentHero.x;
-        const dy = mouseWorldPos.y - currentHero.y;
+        const dx = mouseWorldPos.x - heroGraphics.x;
+        const dy = mouseWorldPos.y - heroGraphics.y;
         const mouseDistance = Math.sqrt(dx * dx + dy * dy);
         
         let targetX: number, targetY: number;
         if (mouseDistance <= castRange) {
-            // Mouse is within range, use mouse position
-            targetX = mouseWorldPos.x;
-            targetY = mouseWorldPos.y;
+            // Mouse is within range, use mouse position (relative to hero)
+            targetX = dx;
+            targetY = dy;
         } else {
-            // Mouse is beyond range, stick to cast range boundary
+            // Mouse is beyond range, stick to cast range boundary (relative to hero)
             const directionX = dx / mouseDistance;
             const directionY = dy / mouseDistance;
-            targetX = currentHero.x + directionX * castRange;
-            targetY = currentHero.y + directionY * castRange;
+            targetX = directionX * castRange;
+            targetY = directionY * castRange;
         }
         
         // Draw targeting visual for abilities considering target position and ability type
+        // Note: targetX and targetY are now relative to the hero's position (0, 0)
         this.drawTargetingVisual(currentHero, targetX, targetY, rangeColor);
         
         this.abilityRangeDisplay.setVisible(true);
@@ -660,10 +669,10 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
-     * Draws a targeting circle at the specified location
+     * Draws a targeting circle at the specified location (relative to hero)
      */
     private drawTargetingCircle(targetX: number, targetY: number, radius: number, color: number): void {
-        // Draw targeting circle at target location
+        // Draw targeting circle at target location (relative coordinates)
         this.abilityRangeDisplay!.lineStyle(1, color, 0.3);
         this.abilityRangeDisplay!.strokeCircle(targetX, targetY, radius);
         this.abilityRangeDisplay!.fillStyle(color, 0.1);
@@ -671,29 +680,27 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
-     * Draws a targeting arrow showing the direction the ability will fire
+     * Draws a targeting arrow showing the direction the ability will fire (relative to hero)
      */
     private drawTargetingArrow(hero: any, targetX: number, targetY: number, color: number): void {
         
-        // Calculate direction from hero to target
-        const dx = targetX - hero.x;
-        const dy = targetY - hero.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        // targetX and targetY are already relative to hero position (0, 0)
+        const distance = Math.sqrt(targetX * targetX + targetY * targetY);
         
         if (distance === 0) return; // Avoid division by zero
         
         // Normalize direction
-        const directionX = dx / distance;
-        const directionY = dy / distance;
+        const directionX = targetX / distance;
+        const directionY = targetY / distance;
         
         // Calculate arrow positions
         const arrowLength = 25; // Length of the arrow
         const arrowHeadSize = 8; // Size of the arrow head
         const lineWidth = 3;
         
-        // Start arrow slightly away from hero center
-        const arrowStartX = hero.x + directionX * 20;
-        const arrowStartY = hero.y + directionY * 20;
+        // Start arrow slightly away from hero center (which is at 0, 0)
+        const arrowStartX = directionX * 20;
+        const arrowStartY = directionY * 20;
         
         // Calculate arrow end position
         const arrowEndX = arrowStartX + directionX * arrowLength;
