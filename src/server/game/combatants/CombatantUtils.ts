@@ -498,6 +498,46 @@ export class CombatantUtils {
     }
 
     /**
+     * Checks if all friendly turrets are alive
+     * @param team The team to check turrets for
+     * @param allCombatants Array of all combatants in the game
+     * @returns true if all 3 turrets for the team are alive
+     */
+    static areAllFriendlyTurretsAlive(team: string, allCombatants: any[]): boolean {
+        const friendlyTurrets = allCombatants.filter((combatant: any) => 
+            combatant.type === 'turret' && 
+            combatant.team === team &&
+            combatant.health > 0
+        );
+        
+        // Each team has 3 turrets - all must be alive (health > 0)
+        return friendlyTurrets.length === 3;
+    }
+
+    /**
+     * Gets a healing position between the second row turrets
+     * Second row turrets are the turrets off the main diagonal path
+     * @param team The team to get turret position for
+     * @param gameplayConfig Game configuration containing turret positions
+     * @returns Position at the midpoint between the second row turrets
+     */
+    static getSecondRowTurretsFallbackPosition(team: string, gameplayConfig: any): { x: number, y: number } {
+        const turretPositions = team === 'blue' 
+            ? gameplayConfig.TURRET_POSITIONS.BLUE 
+            : gameplayConfig.TURRET_POSITIONS.RED;
+        
+        // Second row turrets are at indices 1 and 2 (the off-path turrets)
+        const turret1 = turretPositions[1];
+        const turret2 = turretPositions[2];
+        
+        // Return midpoint between the two turrets
+        return {
+            x: (turret1.x + turret2.x) / 2,
+            y: (turret1.y + turret2.y) / 2
+        };
+    }
+
+    /**
      * Checks if a combatant is near a friendly structure (turrets or cradles)
      * Uses the same logic as defensive retreat positioning - inside attack range with buffer
      * @param combatant The combatant to check

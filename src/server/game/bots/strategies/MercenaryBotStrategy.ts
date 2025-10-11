@@ -54,8 +54,15 @@ export class MercenaryBotStrategy {
 
         // Check if bot needs to heal up (fast regeneration strategy)
         if (this.shouldHeal(bot, state)) {
-            // Retreat to safe position behind cradle to heal up using fast regeneration
-            const retreatPosition = CombatantUtils.getCradleFallbackPosition(bot.team, this.gameplayConfig);
+            // If all friendly turrets are alive, retreat behind a second row turret
+            // Otherwise, retreat to cradle
+            const allCombatants = Array.from(state.combatants.values());
+            const allTurretsAlive = CombatantUtils.areAllFriendlyTurretsAlive(bot.team, allCombatants);
+            
+            const retreatPosition = allTurretsAlive 
+                ? CombatantUtils.getSecondRowTurretsFallbackPosition(bot.team, this.gameplayConfig)
+                : CombatantUtils.getCradleFallbackPosition(bot.team, this.gameplayConfig);
+                
             commands.push({
                 type: 'move',
                 data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
