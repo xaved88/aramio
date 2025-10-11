@@ -95,9 +95,9 @@ export const GAMEPLAY_CONFIG = {
                 ARMOR_BONUS_ABILITY: 50, // Additional ability armor during effect
             },
             'sniper': {
-                COOLDOWN_MS: 1000, // Same as default
-                STRENGTH_RATIO: 1.5, // damage = abilityPower * ratio (was 15 damage with 10 AP)
-                SPEED: 250,
+                COOLDOWN_MS: 3000, // Longer cooldown for higher risk/reward
+                STRENGTH_RATIO: 1.8, // damage = abilityPower * ratio (increased from 1.5 for higher damage)
+                SPEED: 200, // Slower projectile (reduced from 250)
                 RANGE: 300, // Longer range than default
             }
         },
