@@ -26,6 +26,7 @@ export class Combatant extends Schema {
     @type('number') abilityArmor!: number; // Armor against abilities
     @type([CombatantEffect]) effects = new ArraySchema<CombatantEffect>(); // Array of active effects on this combatant - will contain specific effect types
     @type('number') lastDamageTime!: number; // Timestamp when the combatant last took damage
+    @type('number') direction = 0; // Direction the combatant is facing in degrees (0-360)
 
     // Stat getters with effect modifications
     getHealth(): number {

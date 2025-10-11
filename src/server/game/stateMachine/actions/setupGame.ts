@@ -40,6 +40,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
     blueCradle.moveSpeed = 0; // Cradles don't move
     blueCradle.bulletArmor = 0;
     blueCradle.abilityArmor = 0;
+    blueCradle.direction = 0; // Initialize direction
     state.combatants.set(blueCradle.id, blueCradle);
     
     // Create red cradle (top right)
@@ -61,6 +62,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
     redCradle.moveSpeed = 0; // Cradles don't move
     redCradle.bulletArmor = 0;
     redCradle.abilityArmor = 0;
+    redCradle.direction = 0; // Initialize direction
     state.combatants.set(redCradle.id, redCradle);
     
     // Create blue turrets
@@ -83,6 +85,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
         blueTurret.moveSpeed = 0; // Turrets don't move
         blueTurret.bulletArmor = 0;
         blueTurret.abilityArmor = 0;
+        blueTurret.direction = 0; // Initialize direction
         state.combatants.set(blueTurret.id, blueTurret);
     });
     
@@ -106,6 +109,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
         redTurret.moveSpeed = 0; // Turrets don't move
         redTurret.bulletArmor = 0;
         redTurret.abilityArmor = 0;
+        redTurret.direction = 0; // Initialize direction
         state.combatants.set(redTurret.id, redTurret);
     });
     

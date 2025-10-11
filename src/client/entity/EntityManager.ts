@@ -340,6 +340,11 @@ export class EntityManager {
             combatantData.y
         );
         
+        // Animate rotation for sprites (if they exist)
+        if (entitySprite) {
+            this.animateEntityRotation(entityId, entitySprite, combatantData.direction);
+        }
+        
         // Render the entity
         this.entityRenderer.renderEntity(
             combatantData,
@@ -1137,6 +1142,36 @@ export class EntityManager {
             onComplete: () => {
                 // Cleanup handled by the tween itself
             }
+        });
+    }
+
+    /**
+     * Animates rotation for a sprite entity
+     */
+    private animateEntityRotation(
+        entityId: CombatantId,
+        sprite: Phaser.GameObjects.Sprite,
+        targetDirection: number
+    ): void {
+        // Convert direction from degrees to radians for Phaser
+        const targetRotation = (targetDirection * Math.PI) / 180;
+        
+        // Calculate shortest rotation path
+        const currentRotation = sprite.rotation;
+        let rotationDiff = targetRotation - currentRotation;
+        
+        // Normalize rotation difference to [-PI, PI]
+        while (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+        while (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+        
+        const finalRotation = currentRotation + rotationDiff;
+        
+        // Create smooth tween to new rotation
+        this.scene.tweens.add({
+            targets: sprite,
+            rotation: finalRotation,
+            duration: CLIENT_CONFIG.ENTITY_ROTATION_DURATION_MS,
+            ease: 'Linear'
         });
     }
 

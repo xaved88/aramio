@@ -127,6 +127,7 @@ describe('CameraManager', () => {
                 attackReadyAt: 0,
                 bulletArmor: 0,
                 abilityArmor: 0,
+                direction: 0,
                 abilityPower: 10,
                 effects: [],
                 ability: {
@@ -199,6 +200,7 @@ describe('CameraManager', () => {
                 attackReadyAt: 0,
                 bulletArmor: 0,
                 abilityArmor: 0,
+                direction: 0,
                 abilityPower: 10,
                 effects: [],
                 ability: {
@@ -254,6 +256,7 @@ describe('CameraManager', () => {
                 attackReadyAt: 0,
                 bulletArmor: 0,
                 abilityArmor: 0,
+                direction: 0,
                 abilityPower: 10,
                 effects: [],
                 ability: {
@@ -341,6 +344,7 @@ describe('CameraManager', () => {
                 attackReadyAt: 0,
                 bulletArmor: 0,
                 abilityArmor: 0,
+                direction: 0,
                 abilityPower: 10,
                 effects: [],
                 ability: {

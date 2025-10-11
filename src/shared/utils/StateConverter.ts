@@ -208,6 +208,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
         attackReadyAt: colyseusCombatant.attackReadyAt,
         moveSpeed: applyStatModifications('moveSpeed', colyseusCombatant.moveSpeed, allEffects),
         lastDamageTime: colyseusCombatant.lastDamageTime || 0,
+        direction: colyseusCombatant.direction || 0,
         effects: colyseusCombatant.effects ? colyseusCombatant.effects.map(effect => {
             const baseEffect = {
                 type: effect.type,

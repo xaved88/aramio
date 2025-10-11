@@ -4,6 +4,7 @@ import { COMBATANT_TYPES, MINION_TYPES, MinionType } from '../../../shared/types
 import { CombatantUtils } from './CombatantUtils';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../shared/utils/GameBounds';
 import { GameplayConfig } from '../../config/ConfigProvider';
+import { calculateDirectionFromVector } from '../../../shared/utils/DirectionUtils';
 
 export class MinionManager {
     private gameplayConfig: GameplayConfig;
@@ -100,6 +101,9 @@ export class MinionManager {
         const newX = minion.x + normalizedDx * moveSpeed;
         const newY = minion.y + normalizedDy * moveSpeed;
         
+        // Update direction based on movement vector
+        minion.direction = calculateDirectionFromVector(dx, dy);
+        
         // Clamp to game bounds
         minion.x = Math.max(getMinX(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(this.gameplayConfig.GAME_BOUND_BUFFER), newX));
         minion.y = Math.max(getMinY(this.gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxY(this.gameplayConfig.GAME_BOUND_BUFFER), newY));
@@ -176,6 +180,7 @@ export class MinionManager {
         minion.lastAttackTime = 0;
         minion.bulletArmor = 0;
         minion.abilityArmor = 0;
+        minion.direction = 0; // Initialize direction
         
         // Mark minion as buffed for XP calculation
         minion.isBuffed = isBuffed;

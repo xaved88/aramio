@@ -16,6 +16,7 @@ import { GameplayConfig } from '../config/ConfigProvider';
 import { MinionManager } from './combatants/MinionManager';
 import { calculateXPForSpecificLevel } from '../../shared/utils/XPUtils';
 import { grantExperience } from './stateMachine/actions/updateGame';
+import { calculateDirectionFromVector } from '../../shared/utils/DirectionUtils';
 
 export class GameEngine {
     private state: GameState;
@@ -704,6 +705,9 @@ export class GameEngine {
         // Calculate normalized direction and move
         const normalizedDx = dx / distance;
         const normalizedDy = dy / distance;
+        
+        // Update direction based on movement vector
+        combatant.direction = calculateDirectionFromVector(dx, dy);
         
         // Move the combatant
         combatant.x += normalizedDx * moveDistance;

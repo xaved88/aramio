@@ -4,6 +4,7 @@ import { MoveHeroAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../../../shared/utils/GameBounds';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { calculateDirectionFromVector } from '../../../../shared/utils/DirectionUtils';
 
 export function handleMoveHero(state: GameState, action: MoveHeroAction, gameplayConfig: GameplayConfig): StateMachineResult {
     // Find hero by ID
@@ -36,6 +37,9 @@ export function handleMoveHero(state: GameState, action: MoveHeroAction, gamepla
         const moveSpeed = hero.getMoveSpeed();
         const newX = hero.x + normalizedDx * moveSpeed;
         const newY = hero.y + normalizedDy * moveSpeed;
+        
+        // Update direction based on movement vector
+        hero.direction = calculateDirectionFromVector(dx, dy);
         
         // Clamp to game bounds
         hero.x = Math.max(getMinX(gameplayConfig.GAME_BOUND_BUFFER), Math.min(getMaxX(gameplayConfig.GAME_BOUND_BUFFER), newX));

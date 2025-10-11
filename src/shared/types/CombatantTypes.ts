@@ -217,6 +217,7 @@ export interface BaseCombatant {
     abilityArmor: number; // Armor against abilities
     effects: CombatantEffectUnion[]; // Array of active effects on this combatant
     lastDamageTime: number; // Timestamp when the combatant last took damage
+    direction: number; // Direction the combatant is facing in degrees (0-360)
 }
 
 export interface HeroCombatant extends BaseCombatant {

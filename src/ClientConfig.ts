@@ -1,6 +1,7 @@
 // Client Configuration
 export const CLIENT_CONFIG = {
     ENTITY_MOVEMENT_DURATION_MS: 100, // duration for entity movement animations
+    ENTITY_ROTATION_DURATION_MS: 150, // duration for entity rotation animations
     RENDERER: {
         TYPE: 'svg' as 'shape' | 'svg', // 'shape' for original shape rendering, 'svg' for SVG-based rendering
     },
