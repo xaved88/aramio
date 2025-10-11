@@ -73,8 +73,8 @@ export const GAMEPLAY_CONFIG = {
                 // Removed armor values - no longer grants bullet or ability armor during rage
             },
             'pyromancer': {
-                COOLDOWN_MS: 2000,
-                STRENGTH_RATIO: 2.0, // damage = abilityPower * ratio (was 20 damage with 10 AP)
+                COOLDOWN_MS: 5000,
+                STRENGTH_RATIO: 0.7, // damage from the tick of the ability zone
                 RADIUS: 30,
                 RANGE: 110,
                 SPEED: 200

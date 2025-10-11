@@ -78,6 +78,7 @@ describe('CameraManager', () => {
             killStreakEvents: [],
             blueSuperMinionsTriggered: false,
             redSuperMinionsTriggered: false,
+            zones: new Map(),
         };
     });
 

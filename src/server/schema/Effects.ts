@@ -45,3 +45,10 @@ export class MoveEffect extends CombatantEffect {
     @type('number') moveTargetY!: number; // Target Y for move effect
     @type('number') moveSpeed!: number; // Speed for move effect (pixels per second)
 }
+
+export class BurningEffect extends CombatantEffect {
+    @type('number') tickRate!: number; // milliseconds between ticks
+    @type('number') lastTickTime!: number; // timestamp of last tick
+    @type('number') damagePercentPerTick!: number; // percentage of target's max health to deal per tick (0.01 = 1%)
+    @type('string') sourceId!: string; // ID of the combatant that applied the burning effect
+}

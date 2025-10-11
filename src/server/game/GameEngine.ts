@@ -1,7 +1,8 @@
 import { GameState } from '../schema/GameState';
 import { Combatant } from '../schema/Combatants';
 import { Projectile, ProjectileEffect } from '../schema/Projectiles';
-import { MoveEffect, CombatantEffect } from '../schema/Effects';
+import { Zone, ZoneEffect } from '../schema/Zones';
+import { MoveEffect, CombatantEffect, BurningEffect } from '../schema/Effects';
 import { GameStateMachine } from './stateMachine/GameStateMachine';
 import { GameActionTypes } from './stateMachine/types';
 import { StateMachineResult } from './stateMachine/types';
@@ -69,6 +70,9 @@ export class GameEngine {
         
         // Update projectiles
         this.updateProjectiles(deltaTime);
+        
+        // Update zones
+        this.updateZones(deltaTime);
         
         // Update effects (remove expired ones and process active effects)
         this.updateEffects(deltaTime);
@@ -302,10 +306,18 @@ export class GameEngine {
                     Math.pow(nextY - projectile.targetY, 2)
                 );
                 
-                // If reached destination (close enough OR would overshoot), trigger AOE damage
+                // If reached destination (close enough OR would overshoot)
                 if (targetDistance <= 10 || nextDistance > targetDistance) {
                     projectilesToRemove.push(projectile.id);
-                    this.applyAOEDamage(projectile, projectile.targetX, projectile.targetY);
+                    
+                    // Handle based on projectile type
+                    if (projectile.type === 'fireball') {
+                        // Fireball creates a zone (no AOE event)
+                        this.createZoneFromProjectile(projectile, projectile.targetX, projectile.targetY);
+                    } else {
+                        // Other projectiles use AOE damage
+                        this.applyAOEDamage(projectile, projectile.targetX, projectile.targetY);
+                    }
                     return;
                 }
             } else {
@@ -420,6 +432,47 @@ export class GameEngine {
     }
 
     /**
+     * Creates a zone from a projectile at a specific location
+     */
+    private createZoneFromProjectile(projectile: any, targetX: number, targetY: number): void {
+        // Zone creation is delegated to the ability definition via projectile data
+        // For now, this is a placeholder that the PyromancerAbilityDefinition will handle
+        // by storing zone data in the projectile
+        if (projectile.zoneData) {
+            const zone = new Zone();
+            zone.id = `zone_${this.state.gameTime}_${Math.random()}`;
+            zone.ownerId = projectile.ownerId;
+            zone.x = targetX;
+            zone.y = targetY;
+            zone.radius = projectile.zoneData.radius;
+            zone.team = projectile.team;
+            zone.type = projectile.zoneData.type;
+            zone.duration = projectile.zoneData.duration;
+            zone.createdAt = this.state.gameTime;
+            zone.tickRate = projectile.zoneData.tickRate;
+            zone.lastTickTime = this.state.gameTime;
+            
+            // Copy effects from projectile zone data
+            if (projectile.zoneData.effects) {
+                projectile.zoneData.effects.forEach((effectData: any) => {
+                    const zoneEffect = new ZoneEffect();
+                    zoneEffect.effectType = effectData.effectType;
+                    
+                    if (effectData.effectType === 'applyDamage') {
+                        zoneEffect.damage = effectData.damage;
+                    } else if (effectData.effectType === 'applyEffect') {
+                        zoneEffect.combatantEffect = effectData.combatantEffect;
+                    }
+                    
+                    zone.effects.push(zoneEffect);
+                });
+            }
+            
+            this.state.zones.set(zone.id, zone);
+        }
+    }
+    
+    /**
      * Applies AOE damage at a specific location
      */
     private applyAOEDamage(projectile: any, targetX: number, targetY: number): void {
@@ -457,6 +510,89 @@ export class GameEngine {
     }
     
     /**
+     * Updates zones by ticking effects, expiring them, and applying effects
+     */
+    private updateZones(deltaTime: number): void {
+        const currentTime = this.state.gameTime;
+        const zonesToRemove: string[] = [];
+        
+        this.state.zones.forEach((zone: Zone) => {
+            // Check if zone has expired
+            const timeSinceCreation = currentTime - zone.createdAt;
+            if (timeSinceCreation >= zone.duration) {
+                zonesToRemove.push(zone.id);
+                return;
+            }
+            
+            // Check if it's time to tick
+            const timeSinceLastTick = currentTime - zone.lastTickTime;
+            if (timeSinceLastTick >= zone.tickRate) {
+                zone.lastTickTime = currentTime;
+                this.applyZoneEffects(zone);
+            }
+        });
+        
+        // Remove expired zones
+        zonesToRemove.forEach(zoneId => {
+            this.state.zones.delete(zoneId);
+        });
+    }
+    
+    /**
+     * Applies zone effects to all valid targets within the zone
+     */
+    private applyZoneEffects(zone: Zone): void {
+        if (!zone.effects || zone.effects.length === 0) return;
+        
+        this.state.combatants.forEach((combatant: Combatant) => {
+            // Check if combatant is enemy
+            if (combatant.team === zone.team) return;
+            // Check if combatant is dead
+            if (combatant.getHealth() <= 0) return;
+            // Only affect heroes and minions, not structures
+            if (combatant.type !== 'hero' && combatant.type !== 'minion') return;
+            
+            // Check if combatant is within zone radius
+            const dx = combatant.x - zone.x;
+            const dy = combatant.y - zone.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance <= zone.radius + combatant.size) {
+                // Apply zone effects
+                zone.effects.forEach((effect: ZoneEffect) => {
+                    switch (effect.effectType) {
+                        case 'applyDamage':
+                            if (effect.damage) {
+                                CombatantUtils.damageCombatant(combatant, effect.damage, this.state, zone.ownerId, 'ability');
+                            }
+                            break;
+                        case 'applyEffect':
+                            if (effect.combatantEffect) {
+                                this.applyOrRefreshCombatantEffect(combatant, effect.combatantEffect);
+                            }
+                            break;
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Applies a combatant effect to a target, or refreshes it if it already exists (for non-stacking effects)
+     */
+    private applyOrRefreshCombatantEffect(target: Combatant, effect: CombatantEffect): void {
+        // For burning effects, remove existing burning before applying new one
+        if (effect.type === 'burning') {
+            const existingBurningIndex = target.effects.findIndex((e: CombatantEffect) => e.type === 'burning');
+            if (existingBurningIndex !== -1) {
+                target.effects.splice(existingBurningIndex, 1);
+            }
+        }
+        
+        this.applyCombatantEffect(target, effect);
+    }
+    
+    /**
      * Updates effects by removing expired ones and processing active effects
      */
     private updateEffects(deltaTime: number): void {
@@ -474,6 +610,11 @@ export class GameEngine {
                     if (shouldRemove) {
                         effectsToRemove.push(index);
                     }
+                }
+                
+                // Process burning effects
+                if (effect.type === 'burning') {
+                    this.processBurningEffect(combatant, effect as BurningEffect, currentTime);
                 }
                 
                 // Check for expired effects (only skip truly infinite duration effects)
@@ -496,6 +637,31 @@ export class GameEngine {
                 combatant.effects.splice(index, 1);
             });
         });
+    }
+    
+    /**
+     * Processes a burning effect on a combatant, dealing damage periodically
+     */
+    private processBurningEffect(combatant: Combatant, effect: BurningEffect, currentTime: number): void {
+        const timeSinceLastTick = currentTime - effect.lastTickTime;
+        if (timeSinceLastTick >= effect.tickRate) {
+            effect.lastTickTime = currentTime;
+            
+            // Calculate damage as a percentage of target's max health
+            const damage = combatant.getMaxHealth() * effect.damagePercentPerTick;
+            
+            if (damage > 0) {
+                // Use the centralized damage system which handles:
+                // - Health reduction
+                // - Damage/kill events
+                // - Stat tracking (damage dealt/taken)
+                // - Kill streaks
+                // - Passive healing removal
+                // - Reflect damage
+                // Burning damage bypasses armor via calculateArmorReduction check
+                CombatantUtils.damageCombatant(combatant, damage, this.state, effect.sourceId, 'burn');
+            }
+        }
     }
     
     /**

@@ -4,7 +4,7 @@ import { DamageEvent, KillEvent, DeathEffectEvent, KillStreakEvent } from '../..
 import { ReflectEffect } from '../../schema/Effects';
 import { GAMEPLAY_CONFIG } from '../../../GameConfig';
 
-export type DamageSource = 'auto-attack' | 'ability';
+export type DamageSource = 'auto-attack' | 'ability' | 'burn';
 
 export class CombatantUtils {
     /**
@@ -120,6 +120,11 @@ export class CombatantUtils {
      * @returns Reduced damage after armor calculation
      */
     private static calculateArmorReduction(combatant: Combatant, damage: number, damageSource: DamageSource): number {
+        // Burn damage is true damage and bypasses armor
+        if (damageSource === 'burn') {
+            return damage;
+        }
+        
         const armor = damageSource === 'auto-attack' ? combatant.getBulletArmor() : combatant.getAbilityArmor();
         
         // Formula: damage dealt = damage * (1 - armor / (armor + 100))

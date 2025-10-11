@@ -136,6 +136,26 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         timestamp: event.timestamp
     }));
     
+    // Convert zones
+    const sharedZones = new Map<string, any>();
+    if (colyseusState.zones) {
+        colyseusState.zones.forEach((zone: any, id: string) => {
+            sharedZones.set(id, {
+                id: zone.id,
+                ownerId: zone.ownerId,
+                x: zone.x,
+                y: zone.y,
+                radius: zone.radius,
+                team: zone.team,
+                type: zone.type,
+                duration: zone.duration,
+                createdAt: zone.createdAt,
+                tickRate: zone.tickRate,
+                lastTickTime: zone.lastTickTime
+            });
+        });
+    }
+    
     return {
         gameTime: colyseusState.gameTime,
         gamePhase: colyseusState.gamePhase,
@@ -149,6 +169,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         damageEvents: sharedDamageEvents,
         killEvents: sharedKillEvents,
         projectiles: sharedProjectiles,
+        zones: sharedZones,
         aoeDamageEvents: sharedAOEDamageEvents,
         deathEffectEvents: sharedDeathEffectEvents,
         projectileMissEvents: sharedProjectileMissEvents,

@@ -2,6 +2,7 @@
 export type CombatantId = string;
 export type ControllerId = string;
 export type ProjectileId = string;
+export type ZoneId = string;
 
 export const COMBATANT_TYPES = {
     HERO: 'hero',
@@ -43,6 +44,13 @@ export const PROJECTILE_TYPES = {
 
 export type ProjectileType = typeof PROJECTILE_TYPES[keyof typeof PROJECTILE_TYPES];
 
+// Zone type constants
+export const ZONE_TYPES = {
+    PYROMANCER_FIRE: 'pyromancer_fire'
+} as const;
+
+export type ZoneType = typeof ZONE_TYPES[keyof typeof ZONE_TYPES];
+
 // Effect type constants (renamed from Effect to CombatantEffect for clarity)
 export const COMBATANT_EFFECT_TYPES = {
     STUN: 'stun',
@@ -52,7 +60,8 @@ export const COMBATANT_EFFECT_TYPES = {
     REFLECT: 'reflect',
     HUNTER: 'hunter',
     TAUNT: 'taunt',
-    PASSIVE_HEALING: 'passive_healing'
+    PASSIVE_HEALING: 'passive_healing',
+    BURNING: 'burning'
 } as const;
 
 export type CombatantEffectType = typeof COMBATANT_EFFECT_TYPES[keyof typeof COMBATANT_EFFECT_TYPES];
@@ -105,6 +114,13 @@ export interface MoveEffect extends CombatantEffect {
     moveTargetX: number;
     moveTargetY: number;
     moveSpeed: number; // pixels per second
+}
+
+export interface BurningEffect extends CombatantEffect {
+    type: 'burning';
+    tickRate: number; // milliseconds between ticks
+    lastTickTime: number; // timestamp of last tick
+    damagePerTick: number; // calculated damage per tick
 }
 
 // Projectile effect types
@@ -178,7 +194,7 @@ export interface SniperAbility extends Ability {
     strengthRatio: number;
 }
 
-export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect | PassiveHealingEffect;
+export type CombatantEffectUnion = StunEffect | NoCollisionEffect | StatModEffect | ReflectEffect | HunterEffect | MoveEffect | TauntEffect | PassiveHealingEffect | BurningEffect;
 
 export interface BaseCombatant {
     id: CombatantId;
@@ -250,7 +266,7 @@ export interface DamageEvent {
     amount: number; // final damage after armor reduction
     originalAmount: number; // original damage before armor reduction
     timestamp: number;
-    damageSource: string; // 'auto-attack' or 'ability'
+    damageSource: string; // 'auto-attack', 'ability', or 'burn'
 }
 
 export interface KillEvent {
@@ -276,6 +292,21 @@ export interface Projectile {
     targetX?: number; // For destination-based projectiles
     targetY?: number; // For destination-based projectiles
     aoeRadius?: number; // For AOE damage projectiles
+}
+
+export interface Zone {
+    id: ZoneId;
+    ownerId: CombatantId;
+    x: number;
+    y: number;
+    radius: number;
+    team: string;
+    type: ZoneType;
+    duration: number; // Duration in milliseconds
+    createdAt: number;
+    tickRate: number; // milliseconds between ticks
+    lastTickTime: number;
+    effects: any[]; // Array of effects that trigger on tick
 }
 
 export function isHeroCombatant(combatant: Combatant): combatant is HeroCombatant {

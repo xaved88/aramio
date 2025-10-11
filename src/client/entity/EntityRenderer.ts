@@ -258,6 +258,43 @@ export class EntityRenderer {
             graphics.strokePath();
         }
 
+        // Check for burning effect - add pulsing orange border and flame icon
+        const isBurning = combatant.effects.some(effect => effect.type === 'burning');
+        if (isBurning) {
+            const spriteScale = getSpriteScale(combatant);
+            
+            // Add pulsing orange border for burning effect
+            const pulseIntensity = Math.sin(Date.now() * 0.012) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (fast flickering)
+            const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px
+            
+            // Draw border with orange-red flame color
+            graphics.lineStyle(borderThickness, 0xFF6600, 0.7); // Orange-red border with transparency
+            graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
+            
+            // Add flame icon above the entity
+            graphics.lineStyle(3, 0xFF6600); // Orange-red lines for icon
+            
+            // Draw a flame shape for burning icon
+            const iconSize = 7 * spriteScale; // Scale icon
+            const iconY = -(combatant.size + 16) * spriteScale; // Scale position
+            
+            // Draw flame outline (zigzag upward pattern)
+            graphics.moveTo(0, iconY + iconSize); // Bottom center
+            graphics.lineTo(-iconSize * 0.5, iconY + iconSize * 0.3); // Left middle
+            graphics.lineTo(-iconSize * 0.3, iconY - iconSize * 0.3); // Left upper
+            graphics.lineTo(0, iconY - iconSize); // Top point
+            graphics.lineTo(iconSize * 0.3, iconY - iconSize * 0.3); // Right upper
+            graphics.lineTo(iconSize * 0.5, iconY + iconSize * 0.3); // Right middle
+            graphics.lineTo(0, iconY + iconSize); // Back to bottom
+            
+            graphics.strokePath();
+            
+            // Add inner flame flicker
+            const flickerOffset = Math.sin(Date.now() * 0.02) * 1;
+            graphics.fillStyle(0xFFAA00, 0.5); // Brighter orange with transparency
+            graphics.fillCircle(0, iconY + iconSize * 0.2 + flickerOffset, iconSize * 0.25);
+        }
+
         // Check for super minion - add black cross indicator
         if (isMinionCombatant(combatant) && combatant.isBuffed) {
             const spriteScale = getSpriteScale(combatant);

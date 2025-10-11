@@ -3,6 +3,7 @@ import { AbilityDefinition } from './AbilityDefinition';
 import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { Hero } from '../../../schema/Combatants';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { BurningEffect } from '../../../schema/Effects';
 
 export class PyromancerAbilityDefinition implements AbilityDefinition<PyromancerAbility> {
     private static _instance: PyromancerAbilityDefinition;
@@ -105,14 +106,61 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         projectile.createdAt = state.gameTime;
         projectile.targetX = targetX;
         projectile.targetY = targetY;
-        projectile.aoeRadius = hero.getPyromancerRadius();
         
-        // Add applyDamage effect
-        const damageEffect = new ProjectileEffect();
-        damageEffect.effectType = 'applyDamage';
-        damageEffect.damage = hero.getAbilityStrength();
-        projectile.effects.push(damageEffect);
+        // Calculate damage values
+        const abilityPower = hero.getAbilityPower();
+        const zoneDamage = this.calculateZoneDamage(abilityPower);
+        const burningDamagePercent = this.calculateBurningDamagePercent(abilityPower);
+        
+        // Add zone data to projectile
+        (projectile as any).zoneData = {
+            radius: hero.getPyromancerRadius(),
+            type: 'pyromancer_fire',
+            duration: 2500, // 2.5 seconds
+            tickRate: 250, // 0.25 seconds
+            effects: [
+                {
+                    effectType: 'applyDamage',
+                    damage: zoneDamage
+                },
+                {
+                    effectType: 'applyEffect',
+                    combatantEffect: this.createBurningEffect(burningDamagePercent, state.gameTime, heroId)
+                }
+            ]
+        };
         
         state.projectiles.set(projectile.id, projectile);
+    }
+    
+    /**
+     * Calculates zone damage per tick: AP / 3
+     */
+    private calculateZoneDamage(abilityPower: number): number {
+        return abilityPower / 3;
+    }
+    
+    /**
+     * Calculates burning damage percent per tick based on AP
+     * Formula: (AP * 0.12) / (AP + 150)
+     * Results: 10 AP = 0.75% per tick (3.75% total), 50 AP = 3% per tick (15% total), 100 AP = 4.8% per tick (24% total)
+     */
+    private calculateBurningDamagePercent(abilityPower: number): number {
+        return (abilityPower * 0.12) / (abilityPower + 150);
+    }
+    
+    /**
+     * Creates a burning effect
+     */
+    private createBurningEffect(damagePercentPerTick: number, currentTime: number, sourceId: string): BurningEffect {
+        const burningEffect = new BurningEffect();
+        burningEffect.type = 'burning';
+        burningEffect.duration = 4000; // 4 seconds
+        burningEffect.appliedAt = currentTime;
+        burningEffect.tickRate = 750; // 0.75 seconds
+        burningEffect.lastTickTime = currentTime;
+        burningEffect.damagePercentPerTick = damagePercentPerTick;
+        burningEffect.sourceId = sourceId;
+        return burningEffect;
     }
 }

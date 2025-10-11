@@ -7,7 +7,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 export interface DamageEntry {
     amount: number; // final damage after armor reduction
     originalAmount: number; // original damage before armor reduction
-    damageSource: 'auto-attack' | 'ability';
+    damageSource: 'auto-attack' | 'ability' | 'burn';
     attackerId: string;
     attackerName: string;
     timestamp: number;
@@ -154,6 +154,8 @@ export class DamageTakenOverlay {
                     attackType = `'${damageEntry.abilityName}'`;
                 } else if (damageEntry.damageSource === 'auto-attack') {
                     attackType = 'Auto Attack';
+                } else if (damageEntry.damageSource === 'burn') {
+                    attackType = 'Burn';
                 }
                 
                 // Calculate armor reduction percentage from stored original amount

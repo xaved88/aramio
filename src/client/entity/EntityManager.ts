@@ -36,6 +36,7 @@ export class EntityManager {
     private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
+    private zoneGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
@@ -95,6 +96,9 @@ export class EntityManager {
         // Update projectiles
         this.updateProjectileEntities(state);
         
+        // Update zones
+        this.updateZoneEntities(state);
+        
         // Render targeting lines
         this.renderTargetingLines(state);
         
@@ -121,6 +125,9 @@ export class EntityManager {
         
         // Remove projectiles that no longer exist
         this.cleanupRemovedProjectiles(state);
+        
+        // Remove zones that no longer exist
+        this.cleanupRemovedZones(state);
     }
 
     /**
@@ -422,6 +429,66 @@ export class EntityManager {
         
         // Render the projectile
         this.entityRenderer.renderProjectile(projectileData, projectileGraphics, state);
+    }
+
+    /**
+     * Updates zone entities
+     */
+    private updateZoneEntities(state: SharedGameState): void {
+        if (!state.zones) return;
+        
+        state.zones.forEach((zoneData: any) => {
+            this.updateZoneEntity(zoneData, state);
+        });
+    }
+
+    /**
+     * Updates a single zone entity, creating it if it doesn't exist
+     */
+    private updateZoneEntity(zoneData: any, state: SharedGameState): void {
+        const entityId = zoneData.id;
+        
+        // Get or create zone graphics
+        let zoneGraphics = this.zoneGraphics.get(entityId);
+        
+        if (!zoneGraphics) {
+            zoneGraphics = this.entityFactory.createEntityGraphics();
+            zoneGraphics.setPosition(zoneData.x, zoneData.y);
+            
+            // Set depth below combatants
+            zoneGraphics.setDepth(-1); // Below structures but above background
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(zoneGraphics);
+            }
+            
+            this.zoneGraphics.set(entityId, zoneGraphics);
+        }
+        
+        // Render the zone
+        this.renderZone(zoneData, zoneGraphics, state);
+    }
+
+    /**
+     * Renders a zone (colored circle)
+     */
+    private renderZone(zoneData: any, zoneGraphics: Phaser.GameObjects.Graphics, state: SharedGameState): void {
+        zoneGraphics.clear();
+        
+        // Determine color based on team
+        let zoneColor = 0xff6b35; // Default orange
+        if (zoneData.team === 'blue') {
+            zoneColor = 0x4a90e2; // Blue
+        } else if (zoneData.team === 'red') {
+            zoneColor = 0xe24a4a; // Red
+        }
+        
+        // Draw filled circle with border
+        zoneGraphics.fillStyle(zoneColor, 0.2); // Low opacity fill
+        zoneGraphics.lineStyle(2, zoneColor, 0.6); // Border with medium opacity
+        zoneGraphics.fillCircle(0, 0, zoneData.radius);
+        zoneGraphics.strokeCircle(0, 0, zoneData.radius);
     }
 
     /**
@@ -803,6 +870,30 @@ export class EntityManager {
     }
 
     /**
+     * Removes zones that no longer exist in the game state
+     */
+    private cleanupRemovedZones(state: SharedGameState): void {
+        if (!state.zones) return;
+        
+        this.zoneGraphics.forEach((zoneGraphics, entityId) => {
+            if (!state.zones.has(entityId)) {
+                this.destroyZoneEntity(entityId);
+            }
+        });
+    }
+
+    /**
+     * Destroys a zone entity
+     */
+    private destroyZoneEntity(entityId: string): void {
+        const zoneGraphics = this.zoneGraphics.get(entityId);
+        if (zoneGraphics) {
+            zoneGraphics.destroy();
+            this.zoneGraphics.delete(entityId);
+        }
+    }
+
+    /**
      * Removes combatants that no longer exist in the game state
      */
     private cleanupRemovedCombatants(state: SharedGameState): void {
@@ -1071,6 +1162,7 @@ export class EntityManager {
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
+        this.zoneGraphics.forEach(graphics => graphics.destroy());
         
         if (this.targetingLinesGraphics) {
             this.targetingLinesGraphics.destroy();
@@ -1141,6 +1233,7 @@ export class EntityManager {
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
+        this.zoneGraphics.forEach(graphics => graphics.destroy());
         
         // Clear targeting lines graphics
         if (this.targetingLinesGraphics) {
@@ -1162,6 +1255,7 @@ export class EntityManager {
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
         this.projectileGraphics.clear();
+        this.zoneGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
         this.processedDeathEffectEvents.clear();

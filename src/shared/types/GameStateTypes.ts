@@ -64,6 +64,7 @@ export interface SharedGameState {
     damageEvents: DamageEvent[];
     killEvents: KillEvent[];
     projectiles: Map<ProjectileId, Projectile>;
+    zones: Map<string, any>; // Zones for area effects
     aoeDamageEvents: AOEDamageEvent[];
     deathEffectEvents: DeathEffectEvent[];
     projectileMissEvents: ProjectileMissEvent[];
