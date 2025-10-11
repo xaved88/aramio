@@ -24,6 +24,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         ability.lastUsedTime = 0;
         ability.strengthRatio = config.STRENGTH_RATIO;
         ability.burnStrengthRatio = config.BURN_STRENGTH_RATIO;
+        ability.duration = config.DURATION_MS;
         ability.radius = config.RADIUS;
         ability.range = config.RANGE;
         ability.fireballRadius = config.RADIUS; // Initialize reward-modifiable radius
@@ -117,7 +118,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         (projectile as any).zoneData = {
             radius: hero.getPyromancerRadius(),
             type: 'pyromancer_fire',
-            duration: 2500, // 2.5 seconds
+            duration: hero.getAbilityDuration(),
             tickRate: 250, // 0.25 seconds
             effects: [
                 {

@@ -43,6 +43,7 @@ export class PyromancerAbility extends Ability {
     }
     @type('number') strengthRatio!: number; // damage ratio (multiplied by abilityPower)
     @type('number') burnStrengthRatio!: number; // burning damage multiplier in formula: (AP * ratio) / (AP + 150)
+    @type('number') duration!: number; // zone duration in ms
     @type('number') radius!: number; // AOE radius
     @type('number') range!: number; // projectile range
     @type('number') fireballRadius!: number; // AOE radius (can be modified by rewards)
