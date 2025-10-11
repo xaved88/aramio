@@ -100,6 +100,48 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
         state.killStreakEvents.splice(index, 1);
     });
     
+    // Clear old damage events (older than 5 seconds)
+    const damageEventsToRemove: number[] = [];
+    
+    state.damageEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 5000) { // 5 seconds
+            damageEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove damage events in reverse order
+    damageEventsToRemove.reverse().forEach(index => {
+        state.damageEvents.splice(index, 1);
+    });
+    
+    // Clear old kill events (older than 10 seconds)
+    const killEventsToRemove: number[] = [];
+    
+    state.killEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 10000) { // 10 seconds
+            killEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove kill events in reverse order
+    killEventsToRemove.reverse().forEach(index => {
+        state.killEvents.splice(index, 1);
+    });
+    
+    // Clear old projectile miss events (older than 3 seconds)
+    const projectileMissEventsToRemove: number[] = [];
+    
+    state.projectileMissEvents.forEach((event, index) => {
+        if (currentTime - event.timestamp > 3000) { // 3 seconds
+            projectileMissEventsToRemove.push(index);
+        }
+    });
+    
+    // Remove projectile miss events in reverse order
+    projectileMissEventsToRemove.reverse().forEach(index => {
+        state.projectileMissEvents.splice(index, 1);
+    });
+    
     // Handle passive healing
     handlePassiveHealing(state, gameplayConfig);
     

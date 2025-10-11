@@ -75,6 +75,11 @@ export class KillFeed {
             
             this.processedKillEvents.add(eventKey);
             
+            // Prevent unbounded growth - clear if too large
+            if (this.processedKillEvents.size > 1000) {
+                this.processedKillEvents.clear();
+            }
+            
             // Get killer and victim info
             const killer = state.combatants.get(event.sourceId);
             const victim = state.combatants.get(event.targetId);

@@ -232,6 +232,12 @@ export class DamageTakenOverlay {
                 if (this.processedDamageEvents.has(eventKey)) return;
                 
                 this.processedDamageEvents.add(eventKey);
+                
+                // Prevent unbounded growth - clear if too large
+                if (this.processedDamageEvents.size > 1000) {
+                    this.processedDamageEvents.clear();
+                }
+                
                 this.addDamageEntry(event, state);
             }
         });

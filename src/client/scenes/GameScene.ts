@@ -208,6 +208,11 @@ export class GameScene extends Phaser.Scene {
             
             this.processedAttackEvents.add(eventKey);
             
+            // Prevent unbounded growth - clear if too large
+            if (this.processedAttackEvents.size > 1000) {
+                this.processedAttackEvents.clear();
+            }
+            
             // Trigger targeting line flash
             this.entityManager.triggerTargetingLineFlash(event.sourceId, event.targetId);
         });
@@ -221,6 +226,11 @@ export class GameScene extends Phaser.Scene {
             if (this.processedDamageEvents.has(eventKey)) return;
             
             this.processedDamageEvents.add(eventKey);
+            
+            // Prevent unbounded growth - clear if too large
+            if (this.processedDamageEvents.size > 1000) {
+                this.processedDamageEvents.clear();
+            }
             
             // Track recent attackers if the player was the target
             if (this.playerSessionId) {
@@ -253,6 +263,10 @@ export class GameScene extends Phaser.Scene {
             
             this.processedProjectileMissEvents.add(eventKey);
             
+            // Prevent unbounded growth - clear if too large
+            if (this.processedProjectileMissEvents.size > 1000) {
+                this.processedProjectileMissEvents.clear();
+            }
             
             // Determine the correct color using the same logic as projectile rendering
             let teamColor: 'blue' | 'red' | 'player' = event.team as 'blue' | 'red';
