@@ -96,6 +96,10 @@ export class KillFeed {
                 ? victim.displayName 
                 : victim.type.charAt(0).toUpperCase() + victim.type.slice(1);
             
+            // Check if killer/victim are bots
+            const isKillerBot = killer.type === 'hero' && !!killer.controller && killer.controller.startsWith('bot');
+            const isVictimBot = victim.type === 'hero' && !!victim.controller && victim.controller.startsWith('bot');
+            
             // Add entry to feed
             this.addEntry(
                 killerName,
@@ -105,7 +109,9 @@ export class KillFeed {
                 event.timestamp,
                 involvedPlayer,
                 isPlayerKiller,
-                isPlayerVictim
+                isPlayerVictim,
+                isKillerBot,
+                isVictimBot
             );
         });
     }
@@ -121,7 +127,9 @@ export class KillFeed {
         timestamp: number,
         involvedPlayer: boolean,
         isKillerPlayer: boolean,
-        isVictimPlayer: boolean
+        isVictimPlayer: boolean,
+        isKillerBot: boolean,
+        isVictimBot: boolean
     ): void {
         // Remove oldest entry if we're at max capacity
         if (this.entries.length >= this.MAX_ENTRIES) {
@@ -157,12 +165,13 @@ export class KillFeed {
         const fontSize = involvedPlayer ? '11px' : '10px';
         const fontWeight = involvedPlayer ? 'bold' : 'normal';
         
-        // Killer name
+        // Killer name - use italic for bots
+        const killerFontStyle = isKillerBot ? (involvedPlayer ? 'bold italic' : 'italic') : fontWeight;
         const killerText = this.scene.add.text(5, this.ENTRY_HEIGHT / 2, killerName, {
             fontSize: fontSize,
             fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
             color: killerColor,
-            fontStyle: fontWeight
+            fontStyle: killerFontStyle
         });
         killerText.setOrigin(0, 0.5);
         entryContainer.add(killerText);
@@ -182,7 +191,8 @@ export class KillFeed {
         skullIcon.setOrigin(0, 0.5);
         entryContainer.add(skullIcon);
         
-        // Victim name
+        // Victim name - use italic for bots
+        const victimFontStyle = isVictimBot ? (involvedPlayer ? 'bold italic' : 'italic') : fontWeight;
         const victimText = this.scene.add.text(
             skullIcon.x + skullIcon.width + 4, 
             this.ENTRY_HEIGHT / 2, 
@@ -191,7 +201,7 @@ export class KillFeed {
                 fontSize: fontSize,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
                 color: victimColor,
-                fontStyle: fontWeight
+                fontStyle: victimFontStyle
             }
         );
         victimText.setOrigin(0, 0.5);

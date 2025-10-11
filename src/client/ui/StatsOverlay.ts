@@ -351,7 +351,8 @@ export class StatsOverlay {
         align: 'left' | 'right' = 'left',
         isHighlighted: boolean = false,
         isDead: boolean = false,
-        team?: string
+        team?: string,
+        isBot: boolean = false
     ): Phaser.GameObjects.Text {
         // Determine final color: yellow for highlighted (current player), respawn color for dead, normal otherwise
         let finalColor = color;
@@ -368,7 +369,8 @@ export class StatsOverlay {
         const cell = this.scene.add.text(x, y, text, {
             fontSize: '14px',
             color: finalColor,
-            fontFamily: 'monospace'
+            fontFamily: 'monospace',
+            fontStyle: isBot ? 'italic' : 'normal'
         });
         
         if (align === 'right') {
@@ -395,8 +397,10 @@ export class StatsOverlay {
             const isHighlighted = player && (column.key === 'arrow' || column.key === 'heroId' || column.key === 'abilityType') ? player.isCurrentPlayer : false;
             const isDead = player && !player.isCurrentPlayer ? player.state === 'respawning' : false;
             const team = player?.team;
+            // Only italicize name (heroId) and ability columns for bots
+            const isBot = player?.isBot && (column.key === 'heroId' || column.key === 'abilityType');
             
-            cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted, isDead, team));
+            cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted, isDead, team, isBot));
             currentX += this.COLUMN_WIDTHS[column.width];
         });
 
