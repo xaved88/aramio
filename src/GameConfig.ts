@@ -74,10 +74,11 @@ export const GAMEPLAY_CONFIG = {
             },
             'pyromancer': {
                 COOLDOWN_MS: 5000,
-                STRENGTH_RATIO: 0.7, // damage from the tick of the ability zone
-                RADIUS: 30,
-                RANGE: 110,
-                SPEED: 200
+                STRENGTH_RATIO: 0.25, // damage from the tick of the ability zone
+                BURN_STRENGTH_RATIO: 0.12, // burning damage multiplier in formula: (AP * ratio) / (AP + 150)
+                RADIUS: 25,
+                RANGE: 100,
+                SPEED: 180
             },
             'thorndive': {
                 COOLDOWN_MS: 11000, // High cooldown (11 seconds)
@@ -223,7 +224,7 @@ export const GAMEPLAY_CONFIG = {
             ability_chest: {
                 rewards: [
                     { id: "ability:thorndive", weight: 1 },
-                    { id: "ability:pyromancer", weight: 1 },
+                    { id: "ability:pyromancer", weight: 100 },
                     { id: "ability:hookshot", weight: 1 },
                     { id: "ability:mercenary", weight: 1 },
                     { id: "ability:sniper", weight: 1 },

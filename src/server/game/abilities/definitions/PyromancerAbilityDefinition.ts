@@ -23,6 +23,7 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         ability.cooldown = config.COOLDOWN_MS;
         ability.lastUsedTime = 0;
         ability.strengthRatio = config.STRENGTH_RATIO;
+        ability.burnStrengthRatio = config.BURN_STRENGTH_RATIO;
         ability.radius = config.RADIUS;
         ability.range = config.RANGE;
         ability.fireballRadius = config.RADIUS; // Initialize reward-modifiable radius
@@ -109,8 +110,8 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
         
         // Calculate damage values
         const abilityPower = hero.getAbilityPower();
-        const zoneDamage = this.calculateZoneDamage(abilityPower);
-        const burningDamagePercent = this.calculateBurningDamagePercent(abilityPower);
+        const zoneDamage = this.calculateZoneDamage(abilityPower, ability.strengthRatio);
+        const burningDamagePercent = this.calculateBurningDamagePercent(abilityPower, ability.burnStrengthRatio);
         
         // Add zone data to projectile
         (projectile as any).zoneData = {
@@ -134,19 +135,19 @@ export class PyromancerAbilityDefinition implements AbilityDefinition<Pyromancer
     }
     
     /**
-     * Calculates zone damage per tick: AP / 3
+     * Calculates zone damage per tick: AP * strengthRatio
      */
-    private calculateZoneDamage(abilityPower: number): number {
-        return abilityPower / 3;
+    private calculateZoneDamage(abilityPower: number, strengthRatio: number): number {
+        return abilityPower * strengthRatio;
     }
     
     /**
      * Calculates burning damage percent per tick based on AP
-     * Formula: (AP * 0.12) / (AP + 150)
+     * Formula: (AP * burnStrengthRatio) / (AP + 150)
      * Results: 10 AP = 0.75% per tick (3.75% total), 50 AP = 3% per tick (15% total), 100 AP = 4.8% per tick (24% total)
      */
-    private calculateBurningDamagePercent(abilityPower: number): number {
-        return (abilityPower * 0.12) / (abilityPower + 150);
+    private calculateBurningDamagePercent(abilityPower: number, burnStrengthRatio: number): number {
+        return (abilityPower * burnStrengthRatio) / (abilityPower + 150);
     }
     
     /**

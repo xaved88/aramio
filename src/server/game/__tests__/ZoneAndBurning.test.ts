@@ -358,10 +358,10 @@ describe('Zone and Burning Mechanics', () => {
             zone.tickRate = 250;
             zone.lastTickTime = 1000;
 
-            // Add damage effect (AP / 3)
+            // Add damage effect (AP * strengthRatio)
             const damageEffect = new ZoneEffect();
             damageEffect.effectType = 'applyDamage';
-            damageEffect.damage = 10 / 3; // Assuming AP = 10
+            damageEffect.damage = 10 * 0.333; // Assuming AP = 10, strengthRatio = 0.333
             zone.effects.push(damageEffect);
 
             // Add burning effect
