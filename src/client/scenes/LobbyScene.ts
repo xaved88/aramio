@@ -457,7 +457,9 @@ export class LobbyScene extends Phaser.Scene {
         this.configDropdownItems = [];
 
         if (!this.lobbyState) return;
-        const items = this.lobbyState.availableConfigs || [];
+        const allItems = this.lobbyState.availableConfigs || [];
+        // Filter out the currently selected config
+        const items = allItems.filter(name => name !== this.lobbyState!.selectedConfig);
 
         items.forEach((name, idx) => {
             const y = startY + idx * 24;

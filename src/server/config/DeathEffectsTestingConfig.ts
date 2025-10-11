@@ -25,6 +25,11 @@ DEATH_EFFECTS_TESTING_CONFIG.HERO_SPAWN_POSITIONS.RED = [
 // Move red cradle out of blue turret range
 DEATH_EFFECTS_TESTING_CONFIG.CRADLE_POSITIONS.RED = { x: 500, y: 200 }; // Outside blue turret range
 
+// Remove second and third blue turrets - only keep the main one
+DEATH_EFFECTS_TESTING_CONFIG.TURRET_POSITIONS.BLUE = [
+    { x: 250, y: 450 }  // Only keep the main blue turret
+];
+
 // Move red turret to far corner
 DEATH_EFFECTS_TESTING_CONFIG.TURRET_POSITIONS.RED = [
     { x: 50, y: 50 }   // Far corner away from everything

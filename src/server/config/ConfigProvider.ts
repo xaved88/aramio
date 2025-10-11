@@ -1,11 +1,8 @@
 import { GAMEPLAY_CONFIG } from '../../GameConfig';
-import { GLASS_CANNON_CONFIG } from './GlassCannonConfig';
-import { QUICK_WIN_CONFIG } from './QuickWinConfig';
 import { HIGHER_LEVEL_TESTING_CONFIG } from './HigherLevelTestingConfig';
 import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 import { STATIONARY_CONFIG } from './StationaryConfig';
 import { STATIONARY_NORMAL_RANGE_CONFIG } from './StationaryNormalRangeConfig';
-import { SUPERMINIONS_DISABLED_CONFIG } from './SuperminionsDisabledConfig';
 import { MERCENARY_ONLY_CONFIG } from './MercenaryOnlyConfig';
 import { PRACTICE_CONFIG } from './PracticeConfig';
 
@@ -17,15 +14,12 @@ export class ConfigProvider {
     constructor() {
         // Register available configs
         this.registerConfig('default', GAMEPLAY_CONFIG);
-        this.registerConfig('glass-cannon', GLASS_CANNON_CONFIG);
-        this.registerConfig('quick-win', QUICK_WIN_CONFIG);
-        this.registerConfig('higher-level-testing', HIGHER_LEVEL_TESTING_CONFIG);
-        this.registerConfig('death-effects-testing', DEATH_EFFECTS_TESTING_CONFIG);
-        this.registerConfig('stationary-high-range', STATIONARY_CONFIG);
-        this.registerConfig('stationary-normal-range', STATIONARY_NORMAL_RANGE_CONFIG);
-        this.registerConfig('superminions-disabled', SUPERMINIONS_DISABLED_CONFIG);
-        this.registerConfig('mercenary-only', MERCENARY_ONLY_CONFIG);
         this.registerConfig('practice', PRACTICE_CONFIG);
+        this.registerConfig('test: higher-level', HIGHER_LEVEL_TESTING_CONFIG);
+        this.registerConfig('test: death-effects', DEATH_EFFECTS_TESTING_CONFIG);
+        this.registerConfig('test: no-move', STATIONARY_NORMAL_RANGE_CONFIG);
+        this.registerConfig('test: no-move-high-range', STATIONARY_CONFIG);
+        this.registerConfig('test: mercenary-only', MERCENARY_ONLY_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {
