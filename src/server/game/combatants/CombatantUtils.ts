@@ -59,7 +59,7 @@ export class CombatantUtils {
 
             // Check for reflect effects and apply reflect damage (only if this isn't already reflect damage)
             if (!isReflectDamage) {
-                this.handleReflectDamage(combatant, actualDamage, gameState, sourceId, damageSource);
+                this.handleReflectDamage(combatant, damage, gameState, sourceId, damageSource);
             }
         }
         
@@ -225,12 +225,12 @@ export class CombatantUtils {
     /**
      * Handles reflect damage effects
      * @param combatant The combatant that took damage and might have reflect
-     * @param actualDamage The damage taken (after armor reduction)
+     * @param originalDamage The original incoming damage (before armor reduction)
      * @param gameState The game state for applying reflect damage
      * @param sourceId The ID of the original attacker
      * @param damageSource The type of damage source
      */
-    private static handleReflectDamage(combatant: Combatant, actualDamage: number, gameState: GameState, sourceId: string, damageSource: DamageSource): void {
+    private static handleReflectDamage(combatant: Combatant, originalDamage: number, gameState: GameState, sourceId: string, damageSource: DamageSource): void {
         const sourceCombatant = gameState.combatants.get(sourceId);
         if (!sourceCombatant) return;
 
@@ -251,8 +251,8 @@ export class CombatantUtils {
 
         for (const reflectEffect of reflectEffects) {
             if (reflectEffect.reflectPercentage && reflectEffect.reflectPercentage > 0) {
-                // Calculate reflect damage (percentage of actual damage taken)
-                const reflectDamage = (actualDamage * reflectEffect.reflectPercentage) / 100;
+                // Calculate reflect damage (percentage of original damage before armor)
+                const reflectDamage = (originalDamage * reflectEffect.reflectPercentage) / 100;
                 
                 // Apply reflect damage back to the attacker (same damage type)
                 if (reflectDamage > 0 && sourceId !== combatant.id) {

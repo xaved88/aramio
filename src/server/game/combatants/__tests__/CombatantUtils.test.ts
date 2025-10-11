@@ -230,5 +230,49 @@ describe('CombatantUtils', () => {
             // Attacker should take 50 reflect damage but NOT reflect it back
             expect(attacker.health).toBe(50); // 100 - 50 = 50
         });
+
+        it('should reflect original damage before armor mitigation', () => {
+            // Give hero 100 armor (50% damage reduction)
+            hero.bulletArmor = 100;
+            
+            // Add reflect effect to hero
+            const reflectEffect = {
+                type: 'reflect',
+                reflectPercentage: 100, // 100% reflect
+                duration: 3000,
+                appliedAt: 0
+            } as any;
+            hero.effects.push(reflectEffect);
+
+            // Attacker deals 100 damage to hero
+            CombatantUtils.damageCombatant(hero, 100, gameState, attacker.id, 'auto-attack');
+
+            // Hero should take only 50 damage due to 50% armor reduction
+            expect(hero.health).toBe(50); // 100 - 50 = 50
+
+            // Attacker should take reflect damage based on ORIGINAL damage (100), not reduced damage (50)
+            // So reflect should be 100 * 100% = 100
+            expect(attacker.health).toBe(0); // 100 - 100 = 0
+        });
+
+        it('should only reflect auto-attack damage, not ability damage', () => {
+            // Add reflect effect to hero
+            const reflectEffect = {
+                type: 'reflect',
+                reflectPercentage: 100, // 100% reflect
+                duration: 3000,
+                appliedAt: 0
+            } as any;
+            hero.effects.push(reflectEffect);
+
+            // Attacker deals ability damage to hero
+            CombatantUtils.damageCombatant(hero, 60, gameState, attacker.id, 'ability');
+
+            // Hero should take 60 damage
+            expect(hero.health).toBe(40); // 100 - 60 = 40
+
+            // Attacker should NOT take reflect damage from ability damage
+            expect(attacker.health).toBe(100); // No reflect damage
+        });
     });
 });
