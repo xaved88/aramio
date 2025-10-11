@@ -3,6 +3,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { RewardCardManager } from './RewardCardManager';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { HUDContainer } from './HUDContainer';
+import { hexToColorString } from '../utils/ColorUtils';
 
 /**
  * RespawnOverlay displays a prominent overlay when the player's hero is respawning
@@ -17,6 +18,8 @@ export class RespawnOverlay {
     private timer: Phaser.GameObjects.Text | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
     private deathSummaryHint: Phaser.GameObjects.Text | null = null;
+    private slainByText: Phaser.GameObjects.Text | null = null;
+    private killerNameText: Phaser.GameObjects.Text | null = null;
     private rewardCardManager: RewardCardManager;
     private isVisible: boolean = false;
     private onRewardChosen?: (rewardId: string) => void;
@@ -55,9 +58,66 @@ export class RespawnOverlay {
         this.overlay.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.overlay);
         
+        // Create "Slain by" text (above "Respawning")
+        this.slainByText = this.scene.add.text(
+            0, // Will be positioned dynamically
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Above the main text
+            'Slain by ',
+            {
+                fontSize: '20px',
+                color: '#ffffff',
+                fontStyle: 'normal',
+                stroke: '#000000',
+                strokeThickness: 2,
+                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+            }
+        );
+        this.slainByText.setOrigin(0, 0.5); // Left-aligned
+        this.slainByText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.slainByText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.slainByText);
+        
+        // Create killer name text (colored based on team)
+        this.killerNameText = this.scene.add.text(
+            0, // Will be positioned dynamically
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Same position as "Slain by"
+            '',
+            {
+                fontSize: '20px',
+                color: '#ffffff',
+                fontStyle: 'normal',
+                stroke: '#000000',
+                strokeThickness: 2,
+                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+            }
+        );
+        this.killerNameText.setOrigin(0, 0.5); // Left-aligned
+        this.killerNameText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.killerNameText.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.killerNameText);
+        
+        // Create death summary hint text (below "Slain by")
+        this.deathSummaryHint = this.scene.add.text(
+            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 30, // Below the "Slain by" text
+            'Hold "Shift" for Death Summary',
+            {
+                fontSize: '14px',
+                color: '#999999',
+                fontStyle: 'normal',
+                stroke: '#000000',
+                strokeThickness: 1
+            }
+        );
+        this.deathSummaryHint.setOrigin(0.5);
+        this.deathSummaryHint.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.deathSummaryHint.setScrollFactor(0, 0); // Fixed to screen
+        this.deathSummaryHint.setAlpha(0.7); // Make it more subtle
+        this.hudContainer.add(this.deathSummaryHint);
+        
         this.text = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Moved up more
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 90, // Moved down
             'Respawning',
             {
                 fontSize: '36px',
@@ -75,7 +135,7 @@ export class RespawnOverlay {
         
         this.timer = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 45, // Moved up with text
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 135, // Moved down with text
             '',
             {
                 fontSize: '32px',
@@ -93,7 +153,7 @@ export class RespawnOverlay {
         
         this.rewardsText = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 6 + 140, // Moved down more to be closer to reward cards
+            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 6 + 190, // Moved down and closer to reward cards
             'Choose your rewards',
             {
                 fontSize: '24px',
@@ -109,31 +169,13 @@ export class RespawnOverlay {
         this.rewardsText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.rewardsText);
         
-        // Create death summary hint text
-        this.deathSummaryHint = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 85, // Moved up with text
-            'Hold "Shift" for Death Summary',
-            {
-                fontSize: '18px',
-                color: '#cccccc',
-                fontStyle: 'normal',
-                stroke: '#000000',
-                strokeThickness: 1,
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true }
-            }
-        );
-        this.deathSummaryHint.setOrigin(0.5);
-        this.deathSummaryHint.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
-        this.deathSummaryHint.setScrollFactor(0, 0); // Fixed to screen
-        this.hudContainer.add(this.deathSummaryHint);
-        
         this.hide();
     }
 
     show(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint) {
-            const elements = [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint];
+        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
+            // Core elements that always show (timer visibility is managed by updateTimer)
+            const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
             elements.forEach(el => el.setAlpha(0).setVisible(true));
             
             this.scene.tweens.add({
@@ -143,37 +185,112 @@ export class RespawnOverlay {
                 ease: 'Power2'
             });
             
+            // If timer is visible (managed by updateTimer), animate it too
+            if (this.timer.visible) {
+                this.timer.setAlpha(0);
+                this.scene.tweens.add({
+                    targets: this.timer,
+                    alpha: 1,
+                    duration: 600,
+                    ease: 'Power2'
+                });
+            }
+            
+            // If rewardsText is visible (managed by updateTimer), animate it too
+            if (this.rewardsText.visible) {
+                this.rewardsText.setAlpha(0);
+                this.scene.tweens.add({
+                    targets: this.rewardsText,
+                    alpha: 1,
+                    duration: 600,
+                    ease: 'Power2'
+                });
+            }
+            
             this.isVisible = true;
         }
     }
 
     hide(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint) {
-            [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint].forEach(el => el.setVisible(false));
+        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
+            [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText].forEach(el => el.setVisible(false));
             this.rewardCardManager.setVisible(false);
             this.isVisible = false;
         }
     }
 
     updateTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
-        if (this.timer) {
-            this.timer.setText(`${Math.ceil(remainingTimeMs / 1000)}s`);
+        // Hide timer when at 0 or below
+        const timerReady = remainingTimeMs <= 0;
+        
+        // Update main "Respawning" text
+        if (this.text) {
+            if (timerReady) {
+                this.text.setText('Respawn Ready');
+                this.text.setColor('#2ecc71'); // Green
+            } else {
+                this.text.setText('Respawning');
+                this.text.setColor('#ffffff'); // White
+            }
         }
         
-        if (this.rewardsText) {
-            if (hasUnspentRewards) {
-                this.rewardsText.setVisible(true);
+        // Update timer display - hide when at 0 or below
+        if (this.timer) {
+            if (timerReady) {
+                this.timer.setVisible(false);
             } else {
-                this.rewardsText.setVisible(false);
+                const secondsRemaining = Math.ceil(remainingTimeMs / 1000);
+                this.timer.setVisible(true);
+                this.timer.setText(`${secondsRemaining}s`);
             }
         }
         
         // Show/hide reward cards based on unspent rewards (show immediately when respawning)
         this.rewardCardManager.setVisible(hasUnspentRewards);
+        
+        // Only show "Choose your rewards" text when reward cards are visible
+        if (this.rewardsText) {
+            this.rewardsText.setVisible(hasUnspentRewards);
+        }
     }
 
     updateRewards(hero: HeroCombatant): void {
         this.rewardCardManager.updateRewards(hero);
+    }
+
+    updateSlainBy(killerName: string | null, killerTeam: string | null, isBot: boolean = false): void {
+        if (this.slainByText && this.killerNameText) {
+            if (killerName) {
+                // "Slain by" stays white
+                this.slainByText.setVisible(true);
+                
+                // Set killer name
+                this.killerNameText.setText(killerName);
+                this.killerNameText.setVisible(true);
+                
+                // Set color based on killer's team using CLIENT_CONFIG values
+                if (killerTeam === 'blue') {
+                    this.killerNameText.setColor(hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE));
+                } else if (killerTeam === 'red') {
+                    this.killerNameText.setColor(hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED));
+                } else {
+                    // Unknown killer or no team
+                    this.killerNameText.setColor('#cccccc');
+                }
+                
+                // Italicize if killer was a bot
+                this.killerNameText.setFontStyle(isBot ? 'italic' : 'normal');
+                
+                // Center the combined text
+                const totalWidth = this.slainByText.width + this.killerNameText.width;
+                const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+                this.slainByText.setX(centerX - (totalWidth / 2));
+                this.killerNameText.setX(centerX - (totalWidth / 2) + this.slainByText.width);
+            } else {
+                this.slainByText.setVisible(false);
+                this.killerNameText.setVisible(false);
+            }
+        }
     }
 
     private updateBackground(): void {
@@ -185,9 +302,9 @@ export class RespawnOverlay {
     }
 
     showWithTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
-        this.show();
-        this.updateBackground();
         this.updateTimer(remainingTimeMs, hasUnspentRewards);
+        this.updateBackground();
+        this.show();
     }
 
     isShowing(): boolean {
@@ -200,7 +317,7 @@ export class RespawnOverlay {
             this.hudContainer = null;
         }
         
-        [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint] = [null, null, null, null, null];
+        [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText] = [null, null, null, null, null, null, null];
         this.rewardCardManager.destroy();
         this.isVisible = false;
     }

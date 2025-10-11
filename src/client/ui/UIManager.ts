@@ -47,6 +47,9 @@ export class UIManager {
     private lastBlueSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
     private lastRedSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
     private processedKillStreakEvents: Set<string> = new Set(); // Track processed kill streak events
+    private lastKillerName: string | null = null; // Track who killed the player
+    private lastKillerTeam: string | null = null; // Track killer's team
+    private lastKillerIsBot: boolean = false; // Track if killer was a bot
 
     // HUD elements
     private hudElements: {
@@ -447,6 +450,9 @@ export class UIManager {
                 }
             }
             
+            // Update killer info
+            this.respawnOverlay.updateSlainBy(this.lastKillerName, this.lastKillerTeam, this.lastKillerIsBot);
+            
             this.respawnOverlay.showWithTimer(remainingTime > 0 ? remainingTime : 0, hasUnspentRewards);
         } else {
             this.respawnOverlay.hide();
@@ -538,18 +544,70 @@ export class UIManager {
         
         // Check for death transition (alive -> dead)
         if (this.wasPlayerAlive && isPlayerDead) {
-            // Player just died, capture death summary
+            // Player just died, capture death summary and killer info
             this.captureDeathSummary();
+            this.captureKillerInfo(state);
         }
         
         // Check for respawn transition (dead -> alive)
         if (!this.wasPlayerAlive && !isPlayerDead) {
-            // Player just respawned, clear death summary
+            // Player just respawned, clear death summary and killer info
             this.clearDeathSummary();
+            this.clearKillerInfo();
         }
         
         // Update previous state
         this.wasPlayerAlive = !isPlayerDead;
+    }
+
+    /**
+     * Captures info about who killed the player
+     */
+    private captureKillerInfo(state: SharedGameState): void {
+        const playerHeroId = this.getCurrentPlayerHeroId();
+        if (!playerHeroId) return;
+        
+        // Find the most recent kill event where this player was the target
+        const playerDeathEvent = state.killEvents
+            .filter(event => event.targetId === playerHeroId && event.targetType === 'hero')
+            .sort((a, b) => b.timestamp - a.timestamp)[0];
+        
+        if (playerDeathEvent) {
+            // Find the killer combatant
+            const killer = state.combatants.get(playerDeathEvent.sourceId);
+            if (killer) {
+                // Get display name based on combatant type
+                if (killer.type === 'hero') {
+                    this.lastKillerName = killer.displayName;
+                    // Check if killer is a bot
+                    this.lastKillerIsBot = !!(killer.controller && killer.controller.startsWith('bot'));
+                } else {
+                    // Capitalize non-hero types (e.g., "Minion", "Turret")
+                    this.lastKillerName = killer.type.charAt(0).toUpperCase() + killer.type.slice(1);
+                    this.lastKillerIsBot = false;
+                }
+                this.lastKillerTeam = killer.team;
+            } else {
+                // Killer not found (e.g., killed by cheat) - set to unknown
+                this.lastKillerName = 'Unknown';
+                this.lastKillerTeam = null;
+                this.lastKillerIsBot = false;
+            }
+        } else {
+            // No kill event found - set to unknown
+            this.lastKillerName = 'Unknown';
+            this.lastKillerTeam = null;
+            this.lastKillerIsBot = false;
+        }
+    }
+
+    /**
+     * Clears stored killer info
+     */
+    private clearKillerInfo(): void {
+        this.lastKillerName = null;
+        this.lastKillerTeam = null;
+        this.lastKillerIsBot = false;
     }
 
     /**
