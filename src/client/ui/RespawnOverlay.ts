@@ -16,6 +16,7 @@ export class RespawnOverlay {
     private overlay: Phaser.GameObjects.Graphics | null = null;
     private text: Phaser.GameObjects.Text | null = null;
     private timer: Phaser.GameObjects.Text | null = null;
+    private timerCircle: Phaser.GameObjects.Graphics | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
     private deathSummaryHint: Phaser.GameObjects.Text | null = null;
     private slainByText: Phaser.GameObjects.Text | null = null;
@@ -23,6 +24,7 @@ export class RespawnOverlay {
     private rewardCardManager: RewardCardManager;
     private isVisible: boolean = false;
     private onRewardChosen?: (rewardId: string) => void;
+    private respawnDuration: number = 0; // Track total respawn duration
 
     constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
@@ -142,7 +144,7 @@ export class RespawnOverlay {
             CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 135, // Moved down with text
             '',
             {
-                fontSize: '32px',
+                fontSize: '20px',
                 color: '#ffffff',
                 fontStyle: 'bold',
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -155,6 +157,12 @@ export class RespawnOverlay {
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.timer.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.timer);
+        
+        // Create circular timer progress ring
+        this.timerCircle = this.scene.add.graphics();
+        this.timerCircle.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.timerCircle.setScrollFactor(0, 0); // Fixed to screen
+        this.hudContainer.add(this.timerCircle);
         
         this.rewardsText = this.scene.add.text(
             CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
@@ -179,7 +187,7 @@ export class RespawnOverlay {
     }
 
     show(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
+        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
             // Core elements that always show (timer visibility is managed by updateTimer)
             const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
             elements.forEach(el => el.setAlpha(0).setVisible(true));
@@ -202,6 +210,17 @@ export class RespawnOverlay {
                 });
             }
             
+            // If timer circle is visible, animate it too
+            if (this.timerCircle && this.timerCircle.visible) {
+                this.timerCircle.setAlpha(0);
+                this.scene.tweens.add({
+                    targets: this.timerCircle,
+                    alpha: 1,
+                    duration: 600,
+                    ease: 'Power2'
+                });
+            }
+            
             // If rewardsText is visible (managed by updateTimer), animate it too
             if (this.rewardsText.visible) {
                 this.rewardsText.setAlpha(0);
@@ -218,8 +237,8 @@ export class RespawnOverlay {
     }
 
     hide(): void {
-        if (this.overlay && this.text && this.timer && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
-            [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText].forEach(el => el.setVisible(false));
+        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
+            [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText].forEach(el => el.setVisible(false));
             this.rewardCardManager.setVisible(false);
             this.isVisible = false;
         }
@@ -228,6 +247,16 @@ export class RespawnOverlay {
     updateTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
         // Hide timer when at 0 or below
         const timerReady = remainingTimeMs <= 0;
+        
+        // Track respawn duration on first frame of respawning (when timer is highest)
+        if (!timerReady && remainingTimeMs > this.respawnDuration) {
+            this.respawnDuration = remainingTimeMs;
+        }
+        
+        // Reset duration when respawn is complete
+        if (timerReady) {
+            this.respawnDuration = 0;
+        }
         
         // Update main "Respawning" text
         if (this.text) {
@@ -248,6 +277,26 @@ export class RespawnOverlay {
                 const secondsRemaining = Math.ceil(remainingTimeMs / 1000);
                 this.timer.setVisible(true);
                 this.timer.setText(`${secondsRemaining}s`);
+            }
+        }
+        
+        // Update circular timer progress ring
+        if (this.timerCircle) {
+            this.timerCircle.clear();
+            if (!timerReady && this.respawnDuration > 0) {
+                const respawnProgress = Math.max(0, Math.min(1, (this.respawnDuration - remainingTimeMs) / this.respawnDuration));
+                
+                const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+                const centerY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 135;
+                const radius = 22; // Smaller radius around the timer text
+                
+                this.timerCircle.lineStyle(7, 0xffffff, 0.8); // Thicker white line
+                this.timerCircle.beginPath();
+                this.timerCircle.arc(centerX, centerY, radius, -Math.PI/2, -Math.PI/2 + (2 * Math.PI * respawnProgress));
+                this.timerCircle.strokePath();
+                this.timerCircle.setVisible(true);
+            } else {
+                this.timerCircle.setVisible(false);
             }
         }
         
@@ -323,7 +372,7 @@ export class RespawnOverlay {
             this.hudContainer = null;
         }
         
-        [this.overlay, this.text, this.timer, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText] = [null, null, null, null, null, null, null];
+        [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText] = [null, null, null, null, null, null, null, null];
         this.rewardCardManager.destroy();
         this.isVisible = false;
     }

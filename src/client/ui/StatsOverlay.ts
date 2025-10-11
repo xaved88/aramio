@@ -106,12 +106,12 @@ export class StatsOverlay {
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         },
         TEAM_TOTALS: {
-            fontSize: '16px',
+            fontSize: '18px',
             fontStyle: 'bold',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         },
         NO_PLAYERS: {
-            fontSize: '14px',
+            fontSize: '15px',
             color: '#888888',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }
@@ -204,21 +204,14 @@ export class StatsOverlay {
     }
 
     /**
-     * Creates team header and totals with consistent styling
+     * Creates team header with consistent styling
      */
-    private createTeamInfo(x: number, y: number, teamName: string, teamColor: string, totals: { kills: number, deaths: number, xp: number }): void {
+    private createTeamInfo(x: number, y: number, teamName: string, teamColor: string): void {
         const header = this.scene.add.text(x, y, teamName, { ...this.TEXT_STYLES.HEADER, color: teamColor });
         header.setDepth(this.DEPTHS.UI_CONTENT);
         header.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(header);
         this.hudContainer!.add(header);
-
-        const totalsText = this.scene.add.text(x + 200, y, `XP: ${Math.round(totals.xp)} | K: ${totals.kills} | D: ${totals.deaths}`, 
-            { ...this.TEXT_STYLES.TEAM_TOTALS, color: teamColor });
-        totalsText.setDepth(this.DEPTHS.UI_CONTENT);
-        totalsText.setScrollFactor(0, 0); // Fixed to screen
-        this.overlayElements.push(totalsText);
-        this.hudContainer!.add(totalsText);
     }
 
     /**
@@ -249,18 +242,18 @@ export class StatsOverlay {
         const tableWidth = this.getTotalTableWidth();
         const tableX = centerX - tableWidth / 2 - 30;
 
-        const gameTimeText = this.scene.add.text(centerX, 20, `Game Time: ${this.formatGameTime(state.gameTime)}`, this.TEXT_STYLES.GAME_TIME);
+        const gameTimeText = this.scene.add.text(centerX, 35, `Game Time: ${this.formatGameTime(state.gameTime)}`, this.TEXT_STYLES.GAME_TIME);
         gameTimeText.setOrigin(0.5, 0);
         gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
         gameTimeText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(gameTimeText);
         this.hudContainer.add(gameTimeText);
 
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 70, 'Red Team', '#e74c3c', this.calculateTeamTotals(redTeamStats));
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 370, 'Blue Team', '#3498db', this.calculateTeamTotals(blueTeamStats));
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 90, 'Red Team', '#e74c3c');
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 400, 'Blue Team', '#3498db');
 
-        this.createTeamTable(redTeamStats, tableX, 120, '#e74c3c');
-        this.createTeamTable(blueTeamStats, tableX, 420, '#3498db');
+        this.createTeamTable(redTeamStats, tableX, 140, '#e74c3c');
+        this.createTeamTable(blueTeamStats, tableX, 450, '#3498db');
 
         // Add hints about additional overlays at the bottom
         this.createOverlayHints();
@@ -288,9 +281,12 @@ export class StatsOverlay {
 
         this.overlayElements.push(...this.createTableRow(startX, startY, teamColor));
 
+        // Separator with margins - more on left (arrow width), less on right
         const separator = this.scene.add.graphics();
+        const leftInset = this.COLUMN_WIDTHS.arrow; // Arrow column width on left
+        const rightInset = 0; // Less margin on right
         separator.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
-        separator.lineBetween(startX, startY + this.CELL_HEIGHT + 5, startX + this.getTotalTableWidth(), startY + this.CELL_HEIGHT + 5);
+        separator.lineBetween(startX + leftInset, startY + this.CELL_HEIGHT + 5, startX + this.getTotalTableWidth() - rightInset, startY + this.CELL_HEIGHT + 5);
         separator.setDepth(this.DEPTHS.UI_CONTENT);
         separator.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(separator);
@@ -300,6 +296,43 @@ export class StatsOverlay {
             const rowY = startY + (index + 1) * (this.CELL_HEIGHT + this.CELL_PADDING) + 10;
             this.overlayElements.push(...this.createTableRow(startX, rowY, teamColor, player));
         });
+        
+        // Add totals row with extra spacing
+        const totalsRowY = startY + (stats.length + 1) * (this.CELL_HEIGHT + this.CELL_PADDING) + 18;
+        
+        // Add separator before totals
+        const totalsSepar = this.scene.add.graphics();
+        totalsSepar.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
+        totalsSepar.lineBetween(startX + leftInset, totalsRowY - 8, startX + this.getTotalTableWidth() - rightInset, totalsRowY - 8);
+        totalsSepar.setDepth(this.DEPTHS.UI_CONTENT);
+        totalsSepar.setScrollFactor(0, 0);
+        this.overlayElements.push(totalsSepar);
+        this.hudContainer!.add(totalsSepar);
+        
+        // Calculate totals
+        const totals = this.calculateTeamTotals(stats);
+        const totalsData: PlayerStats = {
+            id: 'totals',
+            displayName: 'Totals',
+            controller: 'totals' as ControllerId,
+            team: stats[0]?.team || 'blue',
+            abilityType: '',
+            level: 0,
+            experience: 0,
+            totalExperience: totals.xp,
+            minionKills: totals.minionKills,
+            heroKills: totals.kills,
+            turretKills: totals.turretKills,
+            deaths: totals.deaths,
+            damageTaken: totals.damageTaken,
+            damageDealt: totals.damageDealt,
+            isBot: false,
+            isCurrentPlayer: false,
+            levelRewards: 0,
+            state: 'alive'
+        };
+        
+        this.overlayElements.push(...this.createTableRow(startX, totalsRowY, teamColor, totalsData, true));
     }
 
     /**
@@ -337,7 +370,7 @@ export class StatsOverlay {
         }
         
         const cell = this.scene.add.text(x, y, text, {
-            fontSize: '14px',
+            fontSize: '15px',
             color: finalColor,
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             fontStyle: isBot ? 'italic' : 'normal'
@@ -357,18 +390,20 @@ export class StatsOverlay {
     /**
      * Creates a table row (header or player data)
      */
-    private createTableRow(startX: number, startY: number, teamColor: string, player?: PlayerStats): Phaser.GameObjects.Text[] {
+    private createTableRow(startX: number, startY: number, teamColor: string, player?: PlayerStats, isTotalsRow: boolean = false): Phaser.GameObjects.Text[] {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
         this.COLUMNS.forEach(column => {
             const x = column.align === 'right' ? currentX + this.COLUMN_WIDTHS[column.width] - 5 : currentX;
-            const text = player ? column.getValue(player) : column.header;
-            const isHighlighted = player && (column.key === 'arrow' || column.key === 'heroId' || column.key === 'abilityType') ? player.isCurrentPlayer : false;
-            const isDead = player && !player.isCurrentPlayer ? player.state === 'respawning' : false;
+            // Hide level column in totals row (it doesn't make sense to sum levels)
+            const text = (isTotalsRow && column.key === 'level') ? '' : (player ? column.getValue(player) : column.header);
+            // Highlight entire current player row
+            const isHighlighted = !isTotalsRow && player ? player.isCurrentPlayer : false;
+            const isDead = player && !player.isCurrentPlayer && !isTotalsRow ? player.state === 'respawning' : false;
             const team = player?.team;
-            // Only italicize name (heroId) and ability columns for bots
-            const isBot = player?.isBot && (column.key === 'heroId' || column.key === 'abilityType');
+            // Only italicize name (heroId) and ability columns for bots (not for totals)
+            const isBot = !isTotalsRow && player?.isBot && (column.key === 'heroId' || column.key === 'abilityType');
             
             cells.push(this.createCell(x, startY, text, teamColor, this.COLUMN_WIDTHS[column.width], column.align, isHighlighted, isDead, team, isBot));
             currentX += this.COLUMN_WIDTHS[column.width];
@@ -421,13 +456,25 @@ export class StatsOverlay {
     }
 
     /**
-     * Calculates team totals for kills, deaths, and XP
+     * Calculates team totals for all stats
      */
-    private calculateTeamTotals(stats: PlayerStats[]): { kills: number, deaths: number, xp: number } {
+    private calculateTeamTotals(stats: PlayerStats[]): { 
+        kills: number, 
+        deaths: number, 
+        xp: number,
+        minionKills: number,
+        turretKills: number,
+        damageDealt: number,
+        damageTaken: number
+    } {
         return {
             kills: stats.reduce((sum, player) => sum + player.heroKills, 0),
             deaths: stats.reduce((sum, player) => sum + player.deaths, 0),
-            xp: stats.reduce((sum, player) => sum + player.totalExperience, 0)
+            xp: stats.reduce((sum, player) => sum + player.totalExperience, 0),
+            minionKills: stats.reduce((sum, player) => sum + player.minionKills, 0),
+            turretKills: stats.reduce((sum, player) => sum + player.turretKills, 0),
+            damageDealt: stats.reduce((sum, player) => sum + player.damageDealt, 0),
+            damageTaken: stats.reduce((sum, player) => sum + player.damageTaken, 0)
         };
     }
 
@@ -492,7 +539,7 @@ export class StatsOverlay {
         if (!this.hudContainer) return;
         
         const buttonX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-        const buttonY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 80;
+        const buttonY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 35;
         
         // Create button text with background (like lobby buttons)
         this.backToLobbyButton = this.scene.add.text(

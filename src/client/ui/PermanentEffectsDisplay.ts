@@ -289,13 +289,13 @@ export class PermanentEffectsDisplay {
         
         // Create temporary text to measure dimensions
         const tempTitle = this.scene.add.text(0, 0, title, {
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffffff',
             fontStyle: 'bold',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         });
         const tempDesc = this.scene.add.text(0, 0, description, {
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#cccccc',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             wordWrap: { width: 200 }
@@ -315,14 +315,14 @@ export class PermanentEffectsDisplay {
         
         // Create actual tooltip text
         const titleText = this.scene.add.text(tooltipX + 10, tooltipY + 10, title, {
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffffff',
             fontStyle: 'bold',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         });
         
         const descText = this.scene.add.text(tooltipX + 10, tooltipY + 30, description, {
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#cccccc',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             wordWrap: { width: totalWidth - 20 }

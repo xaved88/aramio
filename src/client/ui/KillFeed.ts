@@ -28,7 +28,7 @@ export class KillFeed {
     private readonly ENTRY_HEIGHT = 20;
     private readonly ENTRY_SPACING = 3;
     private readonly FEED_X = 10; // Top left corner
-    private readonly FEED_Y = 100; // Below the HUD elements
+    private readonly FEED_Y = 105; // Below the HUD elements
     private readonly FADE_DURATION = 5000; // How long before entries start to fade
     private readonly REMOVE_DELAY = 6000; // How long before entries are removed
 
@@ -167,7 +167,7 @@ export class KillFeed {
             : hexToColorString(victimTeam === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED);
         
         // Create text: "KillerName killed VictimName"
-        const fontSize = involvedPlayer ? '11px' : '10px';
+        const fontSize = involvedPlayer ? '13px' : '12px';
         const fontWeight = involvedPlayer ? 'bold' : 'normal';
         
         // Killer name - use italic for bots

@@ -81,9 +81,10 @@ export class HUDRenderer {
         this.hudContainer!.add(healthBar);
         
         // Create health text
-        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, '100/100', {
-            fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
-            fontFamily: 'Arial Black, Arial, sans-serif',
+        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, 'XXX / YYY', {
+            fontSize: '15px',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold',
             color: hexToColorString(healthConfig.TEXT_COLOR),
             stroke: '#000000',
             strokeThickness: 1,
@@ -92,7 +93,7 @@ export class HUDRenderer {
                 offsetY: 1,
                 color: '#000000',
                 blur: 2,
-                stroke: false,
+                stroke: true,
                 fill: true
             }
         }).setOrigin(0.5);
@@ -121,6 +122,7 @@ export class HUDRenderer {
         // Create level text (centered in the circular XP bar)
         const levelText = this.scene.add.text(circleX, circleY, '1', {
             fontSize: CLIENT_CONFIG.HUD.LEVEL_TEXT.FONT_SIZE,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             color: hexToColorString(CLIENT_CONFIG.HUD.LEVEL_TEXT.COLOR),
             stroke: '#000000',
             strokeThickness: 1,
@@ -312,7 +314,7 @@ export class HUDRenderer {
         // Update health text with thousand separators
         const currentHealth = Math.round(player.health).toLocaleString();
         const maxHealth = Math.round(player.maxHealth).toLocaleString();
-        hudElements.healthText.setText(`${currentHealth}/${maxHealth}`);
+        hudElements.healthText.setText(`${currentHealth} / ${maxHealth}`);
         
         // Update circular experience bar
         const experiencePercent = player.experience / player.experienceNeeded;

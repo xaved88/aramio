@@ -157,18 +157,18 @@ export const CLIENT_CONFIG = {
         LEVEL_INDICATOR: {
             X: 25, // Left side (level indicator first)
             Y: 25, // Top-left corner (circle center will be at Y: 45)
-            RADIUS: 16, // Radius of the circular XP indicator
+            RADIUS: 20, // Radius of the circular XP indicator
             BACKGROUND_COLOR: 0x333333,
             EXPERIENCE_COLOR: 0xf1c40f, // yellow/gold
             TEXT_COLOR: 0xffffff,
             BACKGROUND_ALPHA: 0.8,
-            LINE_WIDTH: 8, // Thickness of the circular indicator
+            LINE_WIDTH: 10, // Thickness of the circular indicator
         },
         HEALTH_BAR: {
-            X: 62, // Closer to level indicator
-            Y: 31, // Health bar center will be at Y: 34 (same as level indicator center)
-            WIDTH: 200,
-            HEIGHT: 20,
+            X: 75, // Adjusted for larger level indicator
+            Y: 33, // Adjusted for larger level indicator
+            WIDTH: 220,
+            HEIGHT: 24,
             BACKGROUND_COLOR: 0x333333,
             HEALTH_COLOR: 0x2ecc71, // green
             TEXT_COLOR: 0xffffff,
@@ -178,27 +178,27 @@ export const CLIENT_CONFIG = {
             X: 5,
             Y: 20,
             WIDTH: 10,
-            HEIGHT: 45, // height of health + exp bars
+            HEIGHT: 53, // height of health + exp bars (adjusted for larger elements)
             BACKGROUND_COLOR: 0x333333,
             COOLDOWN_COLOR: 0x9b59b6, // purple
             READY_COLOR: 0xd2b4de, // lighter purple
             BACKGROUND_ALPHA: 0.8,
         },
         LEVEL_TEXT: {
-            FONT_SIZE: '14px',
+            FONT_SIZE: '18px',
             COLOR: 0xffffff,
         },
         KILL_COUNTERS: {
-            X: 127, // Centered below health bar (adjusted for group width)
-            Y: 67, // Below health bar
+            X: 135, // Adjusted for larger health bar
+            Y: 73, // Below health bar (adjusted for larger elements)
             ICON_SIZE: 12,
             SPACING: 20, // Reduced spacing between icon and number
             TEXT_COLOR: 0xffffff,
             FONT_SIZE: '14px',
         },
         REWARDS_COUNTER: {
-            X: 40, // Centered under level indicator (level indicator center is at X: 36)
-            Y: 77, // Below level indicator circle with more spacing
+            X: 45, // Adjusted for larger level indicator
+            Y: 85, // Below level indicator circle with more spacing (adjusted for larger elements)
             ICON_SIZE: 12,
             SPACING: 8, // Closer spacing between icon and number
             TEXT_COLOR: 0xf1c40f, // yellow/gold

@@ -86,7 +86,7 @@ export class DamageDealtOverlay {
         
         // Create breakdown text at the bottom
         this.breakdownText = this.scene.add.text(10, 275, '', {
-            fontSize: '13px',
+            fontSize: '15px',
             color: '#ffffff',
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             stroke: '#000000',
@@ -103,7 +103,7 @@ export class DamageDealtOverlay {
         // Create placeholder entries (will be updated with real data)
         for (let i = 0; i < 12; i++) {
             const entry = this.scene.add.text(10, 35 + (i * 18), '', {
-                fontSize: '12px',
+                fontSize: '15px',
                 color: '#ffffff',
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             });
@@ -166,7 +166,7 @@ export class DamageDealtOverlay {
                 // Use the stored wasKillingBlow flag instead of checking current state
                 let reductionText = '';
                 if (damageEntry.wasKillingBlow) {
-                    reductionText = ' (killing blow)';
+                    reductionText = ' (kill)';
                 } else if (reductionPercent > 0) {
                     reductionText = ` (${reductionPercent}% reduced)`;
                 }
@@ -185,6 +185,8 @@ export class DamageDealtOverlay {
             const baseTitle = 'Damage Dealt (last 15s)';
             const title = this.isDeathSummaryMode ? `${baseTitle} before death` : baseTitle;
             this.titleText.setText(title);
+            // Use smaller font for death summary (longer text), larger for regular
+            this.titleText.setFontSize(this.isDeathSummaryMode ? 16 : 18);
         }
 
         // Calculate damage breakdown
