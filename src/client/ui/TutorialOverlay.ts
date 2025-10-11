@@ -1,0 +1,388 @@
+import Phaser from 'phaser';
+import { CLIENT_CONFIG } from '../../ClientConfig';
+import { HUDContainer } from './HUDContainer';
+import { hexToColorString } from '../utils/ColorUtils';
+
+/**
+ * TutorialOverlay displays an introductory tutorial for new players
+ */
+export class TutorialOverlay {
+    private scene: Phaser.Scene;
+    private hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
+    private cameraManager: any = null;
+    private hudContainer: HUDContainer | null = null;
+    private overlay: Phaser.GameObjects.Graphics | null = null;
+    private contentContainer: Phaser.GameObjects.Container | null = null;
+    private isVisible: boolean = false;
+    private onDismiss?: () => void;
+
+    constructor(scene: Phaser.Scene, onDismiss?: () => void) {
+        this.scene = scene;
+        this.onDismiss = onDismiss;
+        this.createOverlay();
+    }
+
+    setHUDCamera(hudCamera: Phaser.Cameras.Scene2D.Camera): void {
+        this.hudCamera = hudCamera;
+    }
+
+    setCameraManager(cameraManager: any): void {
+        this.cameraManager = cameraManager;
+        if (this.hudContainer) {
+            this.hudContainer.setCameraManager(cameraManager);
+        }
+    }
+
+    private createOverlay(): void {
+        // Create HUD container
+        this.hudContainer = new HUDContainer(this.scene);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
+        
+        if (this.cameraManager) {
+            this.hudContainer.setCameraManager(this.cameraManager);
+        }
+        
+        // Create dark overlay background
+        this.overlay = this.scene.add.graphics();
+        this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
+        this.overlay.setScrollFactor(0, 0);
+        this.overlay.setVisible(false); // Start hidden
+        this.hudContainer.add(this.overlay);
+        
+        // Create content container
+        this.contentContainer = this.scene.add.container(0, 0);
+        this.contentContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
+        this.contentContainer.setScrollFactor(0, 0);
+        this.contentContainer.setVisible(false); // Start hidden
+        this.hudContainer.add(this.contentContainer);
+        
+        this.buildContent();
+    }
+
+    private buildContent(): void {
+        if (!this.contentContainer) return;
+        
+        const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+        const startY = 40;
+        const contentWidth = 600;
+        const leftX = centerX - contentWidth / 2;
+        
+        // Panel background - sized to contain all content
+        const panelHeight = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - (startY - 20) * 2; // Symmetric padding
+        const panelBg = this.scene.add.graphics();
+        panelBg.fillStyle(0x2c3e50, 0.95);
+        panelBg.fillRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight, 10);
+        panelBg.lineStyle(2, 0x3498db, 1);
+        panelBg.strokeRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight, 10);
+        this.contentContainer.add(panelBg);
+        
+        // Close button (X) in top right corner of panel
+        const closeButtonSize = 30;
+        const closeButtonX = leftX + contentWidth + 20 - closeButtonSize / 2 - 10; // 10px from right edge
+        const closeButtonY = startY - 20 + closeButtonSize / 2 + 10; // 10px from top edge
+        
+        const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
+        this.contentContainer.add(closeBg);
+        
+        const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', {
+            fontSize: '28px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
+        });
+        closeText.setOrigin(0.5);
+        this.contentContainer.add(closeText);
+        
+        // Make close button interactive
+        const closeZone = this.scene.add.zone(closeButtonX - closeButtonSize / 2, closeButtonY - closeButtonSize / 2, closeButtonSize, closeButtonSize);
+        closeZone.setOrigin(0, 0);
+        closeZone.setInteractive();
+        closeZone.setScrollFactor(0, 0);
+        this.contentContainer.add(closeZone);
+        
+        closeZone.on('pointerover', () => {
+            closeBg.setFillStyle(CLIENT_CONFIG.UI.COLORS.ACCENT);
+        });
+        
+        closeZone.on('pointerout', () => {
+            closeBg.setFillStyle(CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        });
+        
+        closeZone.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number, event: Phaser.Types.Input.EventData) => {
+            // Stop event propagation to prevent ability firing
+            event.stopPropagation();
+            
+            this.hide();
+            if (this.onDismiss) {
+                this.onDismiss();
+            }
+        });
+        
+        let currentY = startY;
+        
+        // Title
+        const title = this.scene.add.text(centerX, currentY, 'Welcome to Aramio!', {
+            fontSize: '32px',
+            color: '#3498db',
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        title.setOrigin(0.5, 0);
+        this.contentContainer.add(title);
+        currentY += 50;
+        
+        // Welcome text
+        const welcomeText = this.scene.add.text(centerX, currentY, 
+            'Casual MOBA action! Level up, unlock abilities,\nand destroy the enemy Cradle to claim victory!', 
+            {
+                fontSize: '16px',
+                color: '#ffffff',
+                align: 'center',
+                wordWrap: { width: contentWidth - 40 },
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            }
+        );
+        welcomeText.setOrigin(0.5, 0);
+        this.contentContainer.add(welcomeText);
+        currentY += 70;
+        
+        // Controls section
+        const controlsTitle = this.scene.add.text(leftX, currentY, 'How to Play:', {
+            fontSize: '20px',
+            color: '#f1c40f',
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        this.contentContainer.add(controlsTitle);
+        currentY += 30;
+        
+        const controlsStartY = currentY;
+        
+        const controlsList = [
+            'Your hero follows your mouse cursor',
+            'An enemy within your attack radius will be auto-attacked',
+            'Click to aim your special hero Ability, release to fire',
+            'Gather xp from defeating enemies',
+            'Choose level-up rewards while respawning',
+            '',
+            '\'T\': Toggle this tutorial',
+        ];
+        
+        const controlsText = this.scene.add.text(leftX + 20, currentY, controlsList.join('\n'), {
+            fontSize: '14px',
+            color: '#ffffff',
+            lineSpacing: 5,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        this.contentContainer.add(controlsText);
+        
+        // Hero visualization with attack radius (right side of controls)
+        const heroVisualizationX = leftX + 480;
+        const heroVisualizationY = controlsStartY + 35;
+        
+        // Draw attack radius circle (using same style as in-game, but larger for label space)
+        const radiusGraphics = this.scene.add.graphics();
+        radiusGraphics.lineStyle(
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA
+        );
+        radiusGraphics.strokeCircle(heroVisualizationX, heroVisualizationY, 55); // Slightly larger than default 50 for label space
+        this.contentContainer.add(radiusGraphics);
+        
+        // Draw hero image
+        const heroVisual = this.scene.add.image(heroVisualizationX, heroVisualizationY, 'hero-base');
+        heroVisual.setDisplaySize(40, 40);
+        this.contentContainer.add(heroVisual);
+        
+        // Add "Your Hero" label beneath the hero
+        const heroLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 27, 'Your Hero', {
+            fontSize: '12px',
+            color: '#888888',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        heroLabel.setOrigin(0.5);
+        this.contentContainer.add(heroLabel);
+        
+        // Add label for attack radius
+        const radiusLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 65, 'Auto-Attack Radius', {
+            fontSize: '12px',
+            color: '#888888',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        radiusLabel.setOrigin(0.5);
+        this.contentContainer.add(radiusLabel);
+        
+        currentY += 170;
+        
+        // Heroes section
+        const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Abilities:', {
+            fontSize: '20px',
+            color: '#f1c40f',
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        this.contentContainer.add(heroesTitle);
+        currentY += 60;
+        
+        // Display hero types with images and descriptions
+        const heroData = [
+            { type: 'default', name: 'Default', desc: 'Basic projectile attack' },
+            { type: 'hookshot', name: 'Hookshot', desc: 'Grappling hook stun' },
+            { type: 'mercenary', name: 'Mercenary', desc: 'Rage mode berserker' },
+            { type: 'pyromancer', name: 'Pyromancer', desc: 'AOE fire damage' },
+            { type: 'sniper', name: 'Sniper', desc: 'Precise ranged attack' },
+            { type: 'thorndive', name: 'Thorndive', desc: 'Dash, taunt, reflect damage' }
+        ];
+        
+        const heroIconSize = 40;
+        const heroSpacing = 95;
+        const heroStartX = leftX + 30;
+        
+        for (let i = 0; i < heroData.length; i++) {
+            const hero = heroData[i];
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = heroStartX + col * (heroSpacing * 2);
+            const y = currentY + row * 50;
+            
+            // Hero image
+            const heroKey = hero.type === 'default' ? 'hero-base' : `hero-${hero.type}`;
+            const heroImage = this.scene.add.image(x, y, heroKey);
+            heroImage.setDisplaySize(heroIconSize, heroIconSize);
+            // No tint - show original sprite colors (team colors are applied via shaders in-game)
+            this.contentContainer.add(heroImage);
+            
+            // Hero name (bold and larger)
+            const heroName = this.scene.add.text(x + heroIconSize / 2 + 10, y - 15, 
+                hero.name, 
+                {
+                    fontSize: '15px',
+                    color: '#ffffff',
+                    fontStyle: 'bold',
+                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+                }
+            );
+            this.contentContainer.add(heroName);
+            
+            // Hero description (smaller and normal weight)
+            const heroDesc = this.scene.add.text(x + heroIconSize / 2 + 10, y + 2, 
+                hero.desc, 
+                {
+                    fontSize: '12px',
+                    color: '#cccccc',
+                    wordWrap: { width: 120 },
+                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+                }
+            );
+            this.contentContainer.add(heroDesc);
+        }
+        currentY += 100;
+        
+        // Advanced Controls section
+        const advancedControlsTitle = this.scene.add.text(leftX, currentY, 'Advanced Controls:', {
+            fontSize: '20px',
+            color: '#f1c40f',
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        this.contentContainer.add(advancedControlsTitle);
+        currentY += 30;
+        
+        const advancedControlsList = [
+            'Toggle Control Mode in bottom right',
+            'Keyboard Mode: \'WASD\' to move',
+            '',
+            '\'Tab\': Hold to open Stats',
+            '\'Shift\': Hold to open Damage Summary',
+            '\'Ctrl\': Hold to open Cheat Menu (sneaky)',
+        ];
+        
+        const advancedControlsText = this.scene.add.text(leftX + 20, currentY, advancedControlsList.join('\n'), {
+            fontSize: '14px',
+            color: '#ffffff',
+            lineSpacing: 5,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+        });
+        this.contentContainer.add(advancedControlsText);
+    }
+
+    show(): void {
+        if (this.overlay && this.contentContainer) {
+            // Kill any existing tweens to prevent animation conflicts
+            this.scene.tweens.killTweensOf([this.overlay, this.contentContainer]);
+            
+            this.updateBackground();
+            
+            this.overlay.setAlpha(0).setVisible(true);
+            this.contentContainer.setAlpha(0).setVisible(true);
+            
+            this.scene.tweens.add({
+                targets: [this.overlay, this.contentContainer],
+                alpha: 1,
+                duration: 300,
+                ease: 'Power2'
+            });
+            
+            this.isVisible = true;
+        }
+    }
+
+    hide(): void {
+        if (this.overlay && this.contentContainer) {
+            // Kill any existing tweens to prevent animation conflicts
+            this.scene.tweens.killTweensOf([this.overlay, this.contentContainer]);
+            
+            this.scene.tweens.add({
+                targets: [this.overlay, this.contentContainer],
+                alpha: 0,
+                duration: 300,
+                ease: 'Power2',
+                onComplete: () => {
+                    if (this.overlay && this.contentContainer) {
+                        this.overlay.setVisible(false);
+                        this.contentContainer.setVisible(false);
+                    }
+                }
+            });
+            
+            this.isVisible = false;
+        }
+    }
+
+    private updateBackground(): void {
+        if (this.overlay) {
+            this.overlay.clear();
+            this.overlay.fillStyle(0x000000, 0.7);
+            this.overlay.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+        }
+    }
+
+    isShowing(): boolean {
+        return this.isVisible;
+    }
+
+    toggle(): void {
+        if (this.isVisible) {
+            this.hide();
+            if (this.onDismiss) {
+                this.onDismiss();
+            }
+        } else {
+            this.show();
+        }
+    }
+
+    destroy(): void {
+        if (this.hudContainer) {
+            this.hudContainer.destroy();
+            this.hudContainer = null;
+        }
+        
+        this.overlay = null;
+        this.contentContainer = null;
+        this.isVisible = false;
+    }
+}
+

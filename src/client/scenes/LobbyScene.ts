@@ -7,6 +7,8 @@ import { ConnectionManager } from '../ConnectionManager';
 import { PlayerNameStorage } from '../utils/PlayerNameStorage';
 import { ControlModeToggle } from '../ui/ControlModeToggle';
 import { ControlModeStorage } from '../utils/ControlModeStorage';
+import { TutorialOverlay } from '../ui/TutorialOverlay';
+import { CursorRenderer } from '../ui/CursorRenderer';
 
 export class LobbyScene extends Phaser.Scene {
     private client!: Client;
@@ -28,7 +30,9 @@ export class LobbyScene extends Phaser.Scene {
     private playerSlots: Phaser.GameObjects.Text[] = [];
     private versionText!: Phaser.GameObjects.Text;
     private controlModeToggle!: ControlModeToggle;
-    private controlsDescriptionText!: Phaser.GameObjects.Text;
+    private tutorialOverlay!: TutorialOverlay;
+    private tutorialButton!: Phaser.GameObjects.Container;
+    private cursorRenderer!: CursorRenderer;
 
     constructor() {
         super({ key: 'LobbyScene' });
@@ -62,12 +66,23 @@ export class LobbyScene extends Phaser.Scene {
         this.redTeamContainer = null as any;
         this.startButton = null as any;
         this.versionText = null as any;
-        this.controlsDescriptionText = null as any;
         
         // Destroy control mode toggle if it exists
         if (this.controlModeToggle) {
             this.controlModeToggle.destroy();
             this.controlModeToggle = null as any;
+        }
+        
+        // Destroy tutorial overlay if it exists
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.destroy();
+            this.tutorialOverlay = null as any;
+        }
+        
+        // Destroy tutorial button if it exists
+        if (this.tutorialButton) {
+            this.tutorialButton.destroy();
+            this.tutorialButton = null as any;
         }
         
         // Clear arrays
@@ -94,13 +109,21 @@ export class LobbyScene extends Phaser.Scene {
         // Load control mode icons
         this.load.image('control-mouse', '/assets/config/mouse.png');
         this.load.image('control-keyboard', '/assets/config/keyboard.png');
+        
+        // Load hero assets for tutorial overlay
+        this.load.image('hero-base', '/assets/heroes/hero_base.png');
+        this.load.image('hero-hookshot', '/assets/heroes/hero_hookshot.png');
+        this.load.image('hero-mercenary', '/assets/heroes/hero_mercenary.png');
+        this.load.image('hero-pyromancer', '/assets/heroes/hero_pyromancer.png');
+        this.load.image('hero-sniper', '/assets/heroes/hero_sniper.png');
+        this.load.image('hero-thorndive', '/assets/heroes/hero_thorndive.png');
     }
 
     async create() {
         console.log('Creating lobby scene...');
         
-        // Reset cursor visibility (in case coming from game scene)
-        this.input.setDefaultCursor('default');
+        // Hide the default cursor (use custom cursor like in game)
+        this.input.setDefaultCursor('none');
         
         // Reset all state for fresh scene
         this.resetSceneState();
@@ -165,6 +188,20 @@ export class LobbyScene extends Phaser.Scene {
             if (currentPlayerSlot) {
                 event.preventDefault(); // Prevent the 'E' from being typed
                 this.showNameEditDialog(currentPlayerSlot.playerDisplayName, true);
+            }
+        });
+
+        // ESC key handler for closing tutorial
+        this.input.keyboard?.on('keydown-ESC', (event: KeyboardEvent) => {
+            if (this.tutorialOverlay && this.tutorialOverlay.isShowing()) {
+                this.tutorialOverlay.hide();
+            }
+        });
+
+        // T key handler for tutorial toggle
+        this.input.keyboard?.on('keydown-T', (event: KeyboardEvent) => {
+            if (this.tutorialOverlay) {
+                this.tutorialOverlay.toggle();
             }
         });
     }
@@ -306,8 +343,8 @@ export class LobbyScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // Start button
-        this.startButton = this.add.text(centerX, 540, 'Start Game', {
+        // Start button (near bottom of screen)
+        this.startButton = this.add.text(centerX, 620, 'Start Game', {
             fontSize: '24px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -335,22 +372,11 @@ export class LobbyScene extends Phaser.Scene {
             }
         });
 
-        // Game controls info
-        this.add.text(centerX, 620, 'Game Controls:', {
-            fontSize: '18px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        this.controlsDescriptionText = this.add.text(centerX, 650, '', {
-            fontSize: '14px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }).setOrigin(0.5);
+        // How to Play section (above start button)
+        const howToPlayY = 560;
         
-        // Set initial controls description based on current mode
-        this.updateControlsDescription();
+        // Tutorial button with text (entire element is clickable)
+        this.createTutorialButton(centerX, howToPlayY);
 
         // Version display centered at bottom
         let versionDisplay = 'Game Version: dev';
@@ -387,25 +413,81 @@ export class LobbyScene extends Phaser.Scene {
             this.cameras.main.width - padding - 15,
             this.cameras.main.height - padding - 15,
             (mode) => {
-                // Update controls description when mode changes
-                this.updateControlsDescription();
+                // Control mode change callback
             }
         );
         this.controlModeToggle.setScrollFactor(0, 0);
+        
+        // Initialize tutorial overlay
+        this.tutorialOverlay = new TutorialOverlay(this);
+        
+        // Initialize cursor renderer
+        this.cursorRenderer = new CursorRenderer(this);
+        this.cursorRenderer.create();
     }
     
-    private updateControlsDescription(): void {
-        // Get mode from toggle if it exists, otherwise from storage
-        const mode = this.controlModeToggle 
-            ? this.controlModeToggle.getCurrentMode() 
-            : ControlModeStorage.getControlMode();
-            
-        if (mode === 'mouse') {
-            this.controlsDescriptionText.setText('Move with mouse • Click to use ability');
-        } else {
-            this.controlsDescriptionText.setText('WASD to move • Click to use ability');
+    update() {
+        // Update cursor to show crosshair
+        if (this.cursorRenderer) {
+            this.cursorRenderer.update(null, 0, false);
         }
     }
+    
+    private createTutorialButton(x: number, y: number): void {
+        const buttonSize = 30;
+        
+        // Create container for the entire clickable element
+        this.tutorialButton = this.add.container(x, y);
+        
+        // Background rectangle for the entire button
+        const bgRect = this.add.rectangle(0, 0, 160, 45, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        
+        // Background circle for the ? icon
+        const bg = this.add.circle(-60, 0, buttonSize / 2, CLIENT_CONFIG.UI.COLORS.CONTROL_TOGGLE);
+        bg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
+        
+        // Question mark text
+        const questionMark = this.add.text(-60, 0, '?', {
+            fontSize: '20px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
+        });
+        questionMark.setOrigin(0.5, 0.5);
+        
+        // "How to Play" text
+        const howToPlayText = this.add.text(-35, 0, 'How to Play', {
+            fontSize: '18px',
+            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
+        });
+        howToPlayText.setOrigin(0, 0.5);
+        
+        // Add elements to container
+        this.tutorialButton.add([bgRect, bg, questionMark, howToPlayText]);
+        
+        // Make entire area clickable
+        const clickableWidth = 160;
+        const clickableHeight = 45;
+        this.tutorialButton.setSize(clickableWidth, clickableHeight);
+        this.tutorialButton.setInteractive();
+        
+        // Hover effects
+        this.tutorialButton.on('pointerover', () => {
+            bgRect.setFillStyle(CLIENT_CONFIG.UI.COLORS.ACCENT);
+        });
+        
+        this.tutorialButton.on('pointerout', () => {
+            bgRect.setFillStyle(CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        });
+        
+        // Click handler
+        this.tutorialButton.on('pointerdown', () => {
+            this.tutorialOverlay.show();
+        });
+    }
+    
 
     private updateUI() {
         if (!this.lobbyState) return;

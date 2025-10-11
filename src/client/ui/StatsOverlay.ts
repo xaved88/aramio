@@ -266,41 +266,7 @@ export class StatsOverlay {
      * Creates hints about additional overlays at the bottom of the stats screen
      */
     private createOverlayHints(): void {
-        // Damage overlay hint
-        this.damageHintText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 50,
-            'Hold "Shift" to view recent damage',
-            {
-                fontSize: '14px',
-                color: '#888888',
-                fontStyle: 'italic'
-            }
-        );
-        
-        this.damageHintText.setOrigin(0.5, 0.5);
-        this.damageHintText.setDepth(this.DEPTHS.UI_CONTENT);
-        this.damageHintText.setScrollFactor(0, 0); // Fixed to screen
-        this.overlayElements.push(this.damageHintText);
-        this.hudContainer!.add(this.damageHintText);
-
-        // Cheat menu hint
-        this.cheatHintText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 30,
-            'Hold "Ctrl" for cheat menu',
-            {
-                fontSize: '14px',
-                color: '#888888',
-                fontStyle: 'italic'
-            }
-        );
-        
-        this.cheatHintText.setOrigin(0.5, 0.5);
-        this.cheatHintText.setDepth(this.DEPTHS.UI_CONTENT);
-        this.cheatHintText.setScrollFactor(0, 0); // Fixed to screen
-        this.overlayElements.push(this.cheatHintText);
-        this.hudContainer!.add(this.cheatHintText);
+        // No hints - controls are shown in tutorial
     }
 
     /**

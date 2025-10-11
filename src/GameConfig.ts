@@ -408,4 +408,9 @@ export const GAMEPLAY_CONFIG = {
         CHEAT_INSTANT_RESPAWN_ENABLED: true, // Enable 'l' key to instantly respawn player for testing
         CHEAT_LEVEL_UP_ENABLED: true, // Enable 'u' key to level up player for testing
     },
+
+    // Tutorial Configuration
+    TUTORIAL: {
+        ENABLED: false, // Whether to show tutorial at game start
+    },
 } as const;

@@ -314,7 +314,7 @@ export const CLIENT_CONFIG = {
             },
             "ability:thorndive": {
                 title: "Thorndive",
-                description: "Tank with dash and taunt",
+                description: "Dash, taunt, reflect damage",
                 rarity: "ability"
             },
             "ability:pyromancer": {

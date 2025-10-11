@@ -15,6 +15,7 @@ import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { ControlModeToggle } from './ControlModeToggle';
 import { KillFeed } from './KillFeed';
+import { TutorialOverlay } from './TutorialOverlay';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -37,6 +38,7 @@ export class UIManager {
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
+    private tutorialOverlay: TutorialOverlay;
     private controlModeToggle: ControlModeToggle | null = null;
     private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
@@ -94,6 +96,10 @@ export class UIManager {
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
         this.killFeed = new KillFeed(scene);
+        this.tutorialOverlay = new TutorialOverlay(scene, () => {
+            // On dismiss callback - allow movement again
+            // Movement is handled via isTutorialVisible method
+        });
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -114,6 +120,7 @@ export class UIManager {
         this.cheatMenu.setHUDCamera(hudCamera);
         this.notificationOverlay.setHUDCamera(hudCamera);
         this.killFeed.setHUDCamera(hudCamera);
+        this.tutorialOverlay.setHUDCamera(hudCamera);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -129,6 +136,7 @@ export class UIManager {
         this.cheatMenu.setCameraManager(cameraManager);
         this.notificationOverlay.setCameraManager(cameraManager);
         this.killFeed.setCameraManager(cameraManager);
+        this.tutorialOverlay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -650,6 +658,46 @@ export class UIManager {
         return this.lastState?.gamePhase === 'finished';
     }
 
+    // Tutorial overlay methods
+    showTutorial(): void {
+        this.tutorialOverlay.show();
+        // When tutorial opens, stop the player's current movement
+        this.stopPlayerMovement();
+    }
+
+    hideTutorial(): void {
+        this.tutorialOverlay.hide();
+    }
+
+    toggleTutorial(): void {
+        if (!this.tutorialOverlay.isShowing()) {
+            // Opening tutorial - stop movement
+            this.stopPlayerMovement();
+        }
+        this.tutorialOverlay.toggle();
+    }
+
+    isTutorialVisible(): boolean {
+        return this.tutorialOverlay.isShowing();
+    }
+    
+    private stopPlayerMovement(): void {
+        // Send stop command by moving to current position
+        if (!this.lastState || !this.playerSessionId) return;
+        
+        const currentHero = this.getCurrentPlayerHero(this.lastState);
+        if (currentHero && currentHero.state === 'alive') {
+            // Get the room from stats overlay (which has access to it)
+            const room = (this.statsOverlay as any).room;
+            if (room) {
+                room.send('move', {
+                    targetX: currentHero.x,
+                    targetY: currentHero.y
+                });
+            }
+        }
+    }
+
     destroy(): void {
         Object.values(this.hudElements).forEach(el => el?.destroy());
         this.respawnOverlay.destroy();
@@ -661,5 +709,6 @@ export class UIManager {
         this.cursorRenderer.destroy();
         this.cheatMenu.destroy();
         this.killFeed.destroy();
+        this.tutorialOverlay.destroy();
     }
 } 

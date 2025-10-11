@@ -398,6 +398,11 @@ export class GameScene extends Phaser.Scene {
         
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);
+        
+        // Show tutorial if enabled in config
+        if (this.gameplayConfig?.TUTORIAL?.ENABLED) {
+            this.uiManager.showTutorial();
+        }
     }
 
     private processStateChange(colyseusState: GameState) {

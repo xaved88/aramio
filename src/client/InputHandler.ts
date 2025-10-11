@@ -169,6 +169,20 @@ export class InputHandler {
                 this.uiManager.hideCheatMenu();
             }
         });
+
+        // T key handler for tutorial toggle
+        this.scene.input.keyboard?.on('keydown-T', (event: KeyboardEvent) => {
+            if (this.uiManager) {
+                this.uiManager.toggleTutorial();
+            }
+        });
+
+        // ESC key handler for closing tutorial
+        this.scene.input.keyboard?.on('keydown-ESC', (event: KeyboardEvent) => {
+            if (this.uiManager && this.uiManager.isTutorialVisible()) {
+                this.uiManager.hideTutorial();
+            }
+        });
     }
 
     /**
@@ -214,6 +228,11 @@ export class InputHandler {
      * This is the ONLY place where movement commands should be sent
      */
     update(): void {
+        // Don't send movement commands if tutorial is visible
+        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+            return;
+        }
+
         if (this.controlMode === 'mouse') {
             this.updateMouseMovement();
         } else {
@@ -284,6 +303,11 @@ export class InputHandler {
      * Handles pointer down events - starts ability targeting
      */
     private handlePointerDown(pointer: Phaser.Input.Pointer): void {
+        // Don't handle input if tutorial is visible
+        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+            return;
+        }
+
         this.isClickHeld = true;
         // Check if hero is currently respawning when click starts
         this.wasRespawningOnClick = this.isPlayerRespawning();
@@ -298,6 +322,11 @@ export class InputHandler {
      * Handles pointer up events - fires ability
      */
     private handlePointerUp(pointer: Phaser.Input.Pointer): void {
+        // Don't handle input if tutorial is visible
+        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+            return;
+        }
+
         if (this.controlMode === 'mouse') {
             // Mouse mode: ability on mouse up
             if (this.isClickHeld && !this.wasRespawningOnClick) {
