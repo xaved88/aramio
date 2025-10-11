@@ -351,7 +351,7 @@ export const GAMEPLAY_CONFIG = {
                 ]
             },
             "ability_stat:strength": {
-                type: "stat",
+                type: "ability_stat",
                 stats: [
                     { stat: "abilityPower", modifier: { type: "percent", value: 1.20 } }
                 ]
