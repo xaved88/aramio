@@ -6,7 +6,6 @@ import { hexToColorString } from '../utils/ColorUtils';
 import { ConnectionManager } from '../ConnectionManager';
 import { PlayerNameStorage } from '../utils/PlayerNameStorage';
 import { ControlModeToggle } from '../ui/ControlModeToggle';
-import { ControlModeStorage } from '../utils/ControlModeStorage';
 import { TutorialOverlay } from '../ui/TutorialOverlay';
 import { CursorRenderer } from '../ui/CursorRenderer';
 
@@ -20,14 +19,12 @@ export class LobbyScene extends Phaser.Scene {
     private hasLoadedSavedName: boolean = false;
     
     // UI Elements
-    private configLabel!: Phaser.GameObjects.Text;
     private configValue!: Phaser.GameObjects.Text;
     private configDropdownItems: Phaser.GameObjects.Text[] = [];
     private blueTeamContainer!: Phaser.GameObjects.Container;
     private redTeamContainer!: Phaser.GameObjects.Container;
     private startButton!: Phaser.GameObjects.Text;
     private teamSizeButtons: Phaser.GameObjects.Text[] = [];
-    private playerSlots: Phaser.GameObjects.Text[] = [];
     private versionText!: Phaser.GameObjects.Text;
     private controlModeToggle!: ControlModeToggle;
     private tutorialOverlay!: TutorialOverlay;
@@ -60,7 +57,6 @@ export class LobbyScene extends Phaser.Scene {
         this.hasLoadedSavedName = false;
         
         // Reset UI elements
-        this.configLabel = null as any;
         this.configValue = null as any;
         this.blueTeamContainer = null as any;
         this.redTeamContainer = null as any;
@@ -88,19 +84,8 @@ export class LobbyScene extends Phaser.Scene {
         // Clear arrays
         this.configDropdownItems = [];
         this.teamSizeButtons = [];
-        this.playerSlots = [];
     }
 
-    /**
-     * Called when scene is shut down - Phaser handles most cleanup automatically
-     */
-    shutdown() {
-        // Phaser automatically destroys all game objects when the scene shuts down
-        // We just need to clean up any custom resources
-        if (this.connectionManager) {
-            // Connection manager cleanup if needed
-        }
-    }
 
     preload() {
         // Load pyromancer icon for the title
@@ -110,13 +95,17 @@ export class LobbyScene extends Phaser.Scene {
         this.load.image('control-mouse', '/assets/config/mouse.png');
         this.load.image('control-keyboard', '/assets/config/keyboard.png');
         
-        // Load hero assets for tutorial overlay
+        // Load assets for tutorial overlay
         this.load.image('hero-base', '/assets/heroes/hero_base.png');
         this.load.image('hero-hookshot', '/assets/heroes/hero_hookshot.png');
         this.load.image('hero-mercenary', '/assets/heroes/hero_mercenary.png');
         this.load.image('hero-pyromancer', '/assets/heroes/hero_pyromancer.png');
         this.load.image('hero-sniper', '/assets/heroes/hero_sniper.png');
         this.load.image('hero-thorndive', '/assets/heroes/hero_thorndive.png');
+        this.load.image('minion-warrior', '/assets/minions/minion_warrior.png');
+        this.load.image('minion-archer', '/assets/minions/minion_archer.png');
+        this.load.image('structure-cradle', '/assets/structures/structure_cradle.png');
+        this.load.image('structure-turret', '/assets/structures/structure_tower.png');
     }
 
     async create() {
@@ -295,7 +284,7 @@ export class LobbyScene extends Phaser.Scene {
         }
 
         // Config selector
-        this.configLabel = this.add.text(centerX, 220, 'Config:', {
+        this.add.text(centerX, 220, 'Config:', {
             fontSize: '20px',
             color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -411,10 +400,7 @@ export class LobbyScene extends Phaser.Scene {
         this.controlModeToggle = new ControlModeToggle(
             this,
             this.cameras.main.width - padding - 15,
-            this.cameras.main.height - padding - 15,
-            (mode) => {
-                // Control mode change callback
-            }
+            this.cameras.main.height - padding - 15
         );
         this.controlModeToggle.setScrollFactor(0, 0);
         
@@ -492,8 +478,6 @@ export class LobbyScene extends Phaser.Scene {
     private updateUI() {
         if (!this.lobbyState) return;
 
-        // Team size is now shown by the selected button border
-
         // Update config selector
         if (this.configValue) {
             this.configValue.setText(this.lobbyState.selectedConfig || 'default');
@@ -568,7 +552,6 @@ export class LobbyScene extends Phaser.Scene {
 
     private updateTeamDisplay(team: 'blue' | 'red', slots: PlayerSlot[]) {
         const container = team === 'blue' ? this.blueTeamContainer : this.redTeamContainer;
-        const teamColor = team === 'blue' ? CLIENT_CONFIG.UI.COLORS.BLUE : CLIENT_CONFIG.UI.COLORS.RED;
         
         // Clear existing slots
         container.removeAll(true);
@@ -579,6 +562,7 @@ export class LobbyScene extends Phaser.Scene {
             let slotText = '';
             let textColor: number = CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY;
             let isSelf = false;
+            let fontStyle: string | undefined = undefined;
             
             if (slot.playerId) {
                 if (slot.isBot) {
@@ -590,6 +574,7 @@ export class LobbyScene extends Phaser.Scene {
                         // Your own name uses the character's purple color and is bolded
                         textColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;
                         isSelf = true;
+                        fontStyle = 'bold';
                     } else {
                         // Other players use team colors
                         textColor = team === 'blue' ? CLIENT_CONFIG.UI.COLORS.BLUE : CLIENT_CONFIG.UI.COLORS.RED;
@@ -602,13 +587,14 @@ export class LobbyScene extends Phaser.Scene {
             } else {
                 slotText = 'Empty';
                 textColor = CLIENT_CONFIG.UI.COLORS.DISABLED;
+                fontStyle = 'italic';
             }
 
             const slotDisplay = this.add.text(0, y, slotText, {
-                fontSize: '16px',
+                fontSize: '18px',
                 color: hexToColorString(textColor),
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                fontStyle: isSelf ? 'bold' : undefined
+                fontStyle: fontStyle
             }).setOrigin(0.5);
             
 

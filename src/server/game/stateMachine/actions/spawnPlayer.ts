@@ -16,7 +16,7 @@ const BOT_NAMES = [
     'Shadow', 'Raven', 'Phoenix', 'Orion',
     'Mystic', 'Rogue', 'Sage', 'Guardian', 'Champion', 'Warrior', 'Hunter',
     'Nimble Boom', 'Swift Action', 'Fierce Looks', 'Bill the Clever', 'Jim the Wise', 'Jane the Strong', 'Ann the Cleaver',
-    'Destroyer', 'Crusher', 'Slayer', 'Berserker', 'Ravager', 'Conqueror', 'Annihilator', 'Devastator',
+    'Destroyer', 'Crusher', 'Berserker', 'Ravager', 'Conqueror', 'Annihilator', 'Devastator',
     'Thunder', 'Lightning', 'I cast Fireball', 'Ice Cube', 'Wind', 'Earth', 'Water',
     'Ghost', 'Phantom', 'Specter', 'Wraith', 'Demon', 'Angel', 'Titan', 'Giant'
 ];

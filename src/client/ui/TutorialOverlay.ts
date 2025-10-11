@@ -160,11 +160,11 @@ export class TutorialOverlay {
         const controlsStartY = currentY;
         
         const controlsList = [
-            'Your hero follows your mouse cursor',
-            'An enemy within your attack radius will be auto-attacked',
-            'Click to aim your special hero Ability, release to fire',
-            'Gather xp from defeating enemies',
-            'Choose level-up rewards while respawning',
+            '- Your hero follows your mouse cursor',
+            '- An enemy within your attack radius will be auto-attacked',
+            '- Click to aim your special Ability, release to fire',
+            '- Gather xp from defeating enemies',
+            '- Choose level-up rewards while respawning',
             '',
             '\'T\': Toggle this tutorial',
         ];
@@ -177,9 +177,9 @@ export class TutorialOverlay {
         });
         this.contentContainer.add(controlsText);
         
-        // Hero visualization with attack radius (right side of controls)
+        // Hero visualization with attack radius (right side of controls) - moved up
         const heroVisualizationX = leftX + 480;
-        const heroVisualizationY = controlsStartY + 35;
+        const heroVisualizationY = controlsStartY + 20;
         
         // Draw attack radius circle (using same style as in-game, but larger for label space)
         const radiusGraphics = this.scene.add.graphics();
@@ -205,14 +205,89 @@ export class TutorialOverlay {
         heroLabel.setOrigin(0.5);
         this.contentContainer.add(heroLabel);
         
-        // Add label for attack radius
-        const radiusLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 65, 'Auto-Attack Radius', {
+        // Add label for attack radius (to the right of the circle)
+        const radiusLabel = this.scene.add.text(heroVisualizationX + 62, heroVisualizationY, 'Auto-Attack\nRadius', {
+            fontSize: '11px',
+            color: '#888888',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            align: 'left',
+            lineSpacing: 2
+        });
+        radiusLabel.setOrigin(0, 0.5);
+        this.contentContainer.add(radiusLabel);
+        
+        // Game entities visualization (below hero visualization) - horizontal layout
+        const entitiesY = heroVisualizationY + 80;
+        const entitiesStartX = heroVisualizationX - 80;
+        
+        // Minions section (left side)
+        const minionData = [
+            { key: 'minion-warrior', name: 'Warrior', size: 24 },
+            { key: 'minion-archer', name: 'Archer', size: 24 }
+        ];
+        
+        const minionsTitle = this.scene.add.text(entitiesStartX - 14, entitiesY, 'Minions:', {
             fontSize: '12px',
             color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
         });
-        radiusLabel.setOrigin(0.5);
-        this.contentContainer.add(radiusLabel);
+        minionsTitle.setOrigin(0, 0.5);
+        this.contentContainer.add(minionsTitle);
+        
+        let minionY = entitiesY + 28;
+        for (const entity of minionData) {
+            // Entity image
+            const entityImage = this.scene.add.image(entitiesStartX, minionY, entity.key);
+            entityImage.setDisplaySize(entity.size, entity.size);
+            this.contentContainer.add(entityImage);
+            
+            // Entity label
+            const entityLabel = this.scene.add.text(entitiesStartX + entity.size / 2 + 10, minionY, entity.name, {
+                fontSize: '13px',
+                color: '#cccccc',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            });
+            entityLabel.setOrigin(0, 0.5);
+            this.contentContainer.add(entityLabel);
+            
+            minionY += 35;
+        }
+        
+        // Structures section (right side)
+        const structuresStartX = entitiesStartX + 120;
+        const structureData = [
+            { key: 'structure-turret', name: 'Turret', size: 26 },
+            { key: 'structure-cradle', name: 'Cradle', size: 28 }
+        ];
+        
+        const structuresTitle = this.scene.add.text(structuresStartX - 14, entitiesY, 'Structures:', {
+            fontSize: '12px',
+            color: '#888888',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            fontStyle: 'bold'
+        });
+        structuresTitle.setOrigin(0, 0.5);
+        this.contentContainer.add(structuresTitle);
+        
+        let structureY = entitiesY + 28;
+        for (const entity of structureData) {
+            // Entity image
+            const entityImage = this.scene.add.image(structuresStartX, structureY, entity.key);
+            entityImage.setDisplaySize(entity.size, entity.size);
+            this.contentContainer.add(entityImage);
+            
+            // Entity label
+            const entityLabel = this.scene.add.text(structuresStartX + entity.size / 2 + 10, structureY, entity.name, {
+                fontSize: '13px',
+                color: '#cccccc',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            });
+            entityLabel.setOrigin(0, 0.5);
+            this.contentContainer.add(entityLabel);
+            
+            structureY += 35;
+        }
         
         currentY += 170;
         
@@ -226,14 +301,15 @@ export class TutorialOverlay {
         this.contentContainer.add(heroesTitle);
         currentY += 60;
         
-        // Display hero types with images and descriptions
+        // Display hero types with images and descriptions - use CLIENT_CONFIG to avoid duplication
+        // Strip "Ability: " prefix from titles for cleaner display
         const heroData = [
-            { type: 'default', name: 'Default', desc: 'Basic projectile attack' },
-            { type: 'hookshot', name: 'Hookshot', desc: 'Grappling hook stun' },
-            { type: 'mercenary', name: 'Mercenary', desc: 'Rage mode berserker' },
-            { type: 'pyromancer', name: 'Pyromancer', desc: 'AOE fire damage' },
-            { type: 'sniper', name: 'Sniper', desc: 'Precise ranged attack' },
-            { type: 'thorndive', name: 'Thorndive', desc: 'Dash, taunt, reflect damage' }
+            { type: 'default', name: 'Starter', desc: 'Basic projectile attack' },
+            { type: 'hookshot', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].description },
+            { type: 'mercenary', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].description },
+            { type: 'pyromancer', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].description },
+            { type: 'sniper', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].description },
+            { type: 'thorndive', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].description }
         ];
         
         const heroIconSize = 40;
@@ -291,12 +367,12 @@ export class TutorialOverlay {
         currentY += 30;
         
         const advancedControlsList = [
-            'Toggle Control Mode in bottom right',
-            'Keyboard Mode: \'WASD\' to move',
+            '- \'Tab\': Hold to open Stats',
+            '- \'Shift\': Hold to open Damage Summary',
+            '- \'Ctrl\': Hold to open Cheat Menu (sneaky)',
             '',
-            '\'Tab\': Hold to open Stats',
-            '\'Shift\': Hold to open Damage Summary',
-            '\'Ctrl\': Hold to open Cheat Menu (sneaky)',
+            'Toggle Control Mode in bottom right',
+            '- Keyboard Mode: \'WASD\' to move',
         ];
         
         const advancedControlsText = this.scene.add.text(leftX + 20, currentY, advancedControlsList.join('\n'), {
@@ -306,6 +382,14 @@ export class TutorialOverlay {
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         });
         this.contentContainer.add(advancedControlsText);
+        
+        // Pyromancer icon visualization (right side of advanced controls)
+        const pyroIconX = leftX + 480;
+        const pyroIconY = currentY + 50;
+        
+        const pyroIcon = this.scene.add.image(pyroIconX, pyroIconY, 'pyromancer-icon');
+        pyroIcon.setDisplaySize(100, 100);
+        this.contentContainer.add(pyroIcon);
     }
 
     show(): void {

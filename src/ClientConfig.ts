@@ -277,63 +277,63 @@ export const CLIENT_CONFIG = {
     REWARDS: {
         DISPLAY: {
             "stat:health": {
-                title: "Health Boost",
+                title: "Max Health",
                 description: "+15% max health",
                 rarity: "common"
             },
             "stat:bullet_armor": {
-                title: "Bullet Armor", 
-                description: "+30 bullet armor",
+                title: "Auto-Attack Armor", 
+                description: "+30 armor against auto-attacks",
                 rarity: "common"
             },
             "stat:ability_armor": {
                 title: "Ability Armor", 
-                description: "+30 ability armor",
+                description: "+30 armor against abilities",
                 rarity: "common"
             },
             "stat:damage": {
-                title: "Damage Boost",
-                description: "+15% attack strength", 
+                title: "Damage",
+                description: "+15% auto-attack damage", 
                 rarity: "common"
             },
             "stat:attack_speed": {
                 title: "Attack Speed",
-                description: "+15% attacks per second",
+                description: "+15% auto-attacks per second",
                 rarity: "common"
             },
             "stat:attack_range": {
                 title: "Attack Range",
-                description: "+10 attack range",
+                description: "+10 auto-attack range",
                 rarity: "common"
             },
             "stat:move_speed": {
-                title: "Movement Speed",
+                title: "Speed",
                 description: "+5% movement speed",
                 rarity: "common"
             },
             "ability:thorndive": {
-                title: "Thorndive",
+                title: "Ability: Thorndive",
                 description: "Dash, taunt, reflect damage",
                 rarity: "ability"
             },
             "ability:pyromancer": {
-                title: "Pyromancer",
+                title: "Ability: Pyromancer",
                 description: "AOE fire damage",
                 rarity: "ability"
             },
             "ability:hookshot": {
-                title: "Hookshot",
-                description: "Grappling hook stun",
+                title: "Ability: Hookshot",
+                description: "Grappling hook with stun",
                 rarity: "ability"
             },
             "ability:mercenary": {
-                title: "Mercenary",
-                description: "Rage mode berserker",
+                title: "Ability: Mercenary",
+                description: "Rage-mode assassin",
                 rarity: "ability"
             },
             "ability:sniper": {
-                title: "Sniper",
-                description: "Precise ranged attack",
+                title: "Ability: Sniper",
+                description: "Precise ranged projectile",
                 rarity: "ability"
             },
             "ability_stat:range": {
@@ -368,7 +368,7 @@ export const CLIENT_CONFIG = {
             },
             "ability_stat:speed": {
                 title: "Projectile Speed",
-                description: "+25% projectile speed",
+                description: "+25% ability projectile speed",
                 rarity: "upgrade"
             }
         }
