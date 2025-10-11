@@ -27,7 +27,6 @@ export class InputHandler {
     private room: any;
     private isClickHeld: boolean = false;
     private clickDownPosition: { x: number; y: number } | null = null;
-    private wasRespawningOnClick: boolean = false;
     
     // Dependencies for keyboard input handling
     private gameplayConfig: any = null;
@@ -309,8 +308,6 @@ export class InputHandler {
         }
 
         this.isClickHeld = true;
-        // Check if hero is currently respawning when click starts
-        this.wasRespawningOnClick = this.isPlayerRespawning();
         const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
         this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
         
@@ -329,8 +326,7 @@ export class InputHandler {
 
         if (this.controlMode === 'mouse') {
             // Mouse mode: ability on mouse up
-            if (this.isClickHeld && !this.wasRespawningOnClick) {
-                // Only fire ability if the hero wasn't respawning when click started
+            if (this.isClickHeld) {
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                 this.room.send('useAbility', {
                     x: worldPos.x,
@@ -343,10 +339,9 @@ export class InputHandler {
             
             this.isClickHeld = false;
             this.clickDownPosition = null;
-            this.wasRespawningOnClick = false; // Reset for next click
         } else {
             // Keyboard mode: ability on mouse up (same UI behavior as mouse mode)
-            if (this.isClickHeld && !this.wasRespawningOnClick) {
+            if (this.isClickHeld) {
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
                 this.room.send('useAbility', {
                     x: worldPos.x,
@@ -358,7 +353,6 @@ export class InputHandler {
             }
             
             this.isClickHeld = false;
-            this.wasRespawningOnClick = false;
         }
     }
 
@@ -380,22 +374,6 @@ export class InputHandler {
         if (gameScene.onPointerUp) {
             gameScene.onPointerUp(pointer);
         }
-    }
-
-    /**
-     * Checks if the player's hero is currently respawning
-     */
-    private isPlayerRespawning(): boolean {
-        const gameScene = this.scene as any;
-        if (gameScene.lastState) {
-            // Find the player's hero in the game state
-            for (const combatant of gameScene.lastState.combatants.values()) {
-                if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
-                    return combatant.state === 'respawning';
-                }
-            }
-        }
-        return false;
     }
 
     /**

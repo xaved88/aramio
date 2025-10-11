@@ -79,7 +79,7 @@ export class DamageTakenOverlay {
         this.titleText = this.scene.add.text(10, 10, '', {
             fontSize: '16px',
             color: '#ff6b6b',
-            fontFamily: 'Arial, sans-serif'
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         });
         this.hudContainer.add(this.titleText);
 
@@ -90,7 +90,7 @@ export class DamageTakenOverlay {
         this.breakdownText = this.scene.add.text(10, 275, '', {
             fontSize: '13px',
             color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             stroke: '#000000',
             strokeThickness: 1
         });
@@ -107,7 +107,7 @@ export class DamageTakenOverlay {
             const entry = this.scene.add.text(10, 35 + (i * 18), '', {
                 fontSize: '12px',
                 color: '#ffffff',
-                fontFamily: 'Arial, sans-serif'
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             });
             this.hudContainer!.add(entry);
             this.damageEntries.push(entry);

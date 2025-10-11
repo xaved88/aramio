@@ -812,7 +812,7 @@ export class GameScene extends Phaser.Scene {
             const topLabel = this.gameObjectFactory.createText(x, 5, x.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5, 0);
             this.gridLabels.push(topLabel);
             
@@ -820,7 +820,7 @@ export class GameScene extends Phaser.Scene {
             const bottomLabel = this.gameObjectFactory.createText(x, CLIENT_CONFIG.MAP_HEIGHT - 5, x.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5, 1);
             this.gridLabels.push(bottomLabel);
         }
@@ -831,7 +831,7 @@ export class GameScene extends Phaser.Scene {
             const leftLabel = this.gameObjectFactory.createText(5, y, y.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0, 0.5);
             this.gridLabels.push(leftLabel);
             
@@ -839,7 +839,7 @@ export class GameScene extends Phaser.Scene {
             const rightLabel = this.gameObjectFactory.createText(CLIENT_CONFIG.MAP_WIDTH - 5, y, y.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(1, 0.5);
             this.gridLabels.push(rightLabel);
         }
@@ -888,7 +888,7 @@ export class GameScene extends Phaser.Scene {
             const topLabel = this.gameObjectFactory.createText(x, 5, x.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xff0000),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0.5, 0);
             this.screenGridLabels.push(topLabel);
             
@@ -896,7 +896,7 @@ export class GameScene extends Phaser.Scene {
             const bottomLabel = this.gameObjectFactory.createText(x, CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 5, x.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xff0000),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0.5, 1);
             this.screenGridLabels.push(bottomLabel);
         }
@@ -907,7 +907,7 @@ export class GameScene extends Phaser.Scene {
             const leftLabel = this.gameObjectFactory.createText(5, y, y.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xff0000),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0, 0.5);
             this.screenGridLabels.push(leftLabel);
             
@@ -915,7 +915,7 @@ export class GameScene extends Phaser.Scene {
             const rightLabel = this.gameObjectFactory.createText(CLIENT_CONFIG.GAME_CANVAS_WIDTH - 5, y, y.toString(), {
                 fontSize: '10px',
                 color: hexToColorString(0xff0000),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(1, 0.5);
             this.screenGridLabels.push(rightLabel);
         }
@@ -944,7 +944,7 @@ export class GameScene extends Phaser.Scene {
             const text = this.gameObjectFactory.createText(position.x, position.y, `${index + 1}`, {
                 fontSize: '12px',
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5);
         });
         
@@ -962,7 +962,7 @@ export class GameScene extends Phaser.Scene {
             const text = this.gameObjectFactory.createText(position.x, position.y, `${index + 1}`, {
                 fontSize: '12px',
                 color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5);
         });
     }

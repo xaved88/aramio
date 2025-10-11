@@ -25,7 +25,7 @@ export class LoadingScreen {
             {
                 fontSize: '24px',
                 color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             }
         ).setOrigin(0.5);
     }

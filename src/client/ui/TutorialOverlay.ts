@@ -122,7 +122,7 @@ export class TutorialOverlay {
         let currentY = startY;
         
         // Title
-        const title = this.scene.add.text(centerX, currentY, 'Welcome to Aramio!', {
+        const title = this.scene.add.text(centerX, currentY, 'Welcome to ARAM.IO!', {
             fontSize: '32px',
             color: '#3498db',
             fontStyle: 'bold',

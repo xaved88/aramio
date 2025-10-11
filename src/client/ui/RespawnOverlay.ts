@@ -67,6 +67,7 @@ export class RespawnOverlay {
                 fontSize: '20px',
                 color: '#ffffff',
                 fontStyle: 'normal',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
@@ -86,6 +87,7 @@ export class RespawnOverlay {
                 fontSize: '20px',
                 color: '#ffffff',
                 fontStyle: 'normal',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
@@ -105,6 +107,7 @@ export class RespawnOverlay {
                 fontSize: '14px',
                 color: '#999999',
                 fontStyle: 'normal',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 1
             }
@@ -123,6 +126,7 @@ export class RespawnOverlay {
                 fontSize: '36px',
                 color: '#ffffff',
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 4,
                 shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 4, fill: true }
@@ -141,6 +145,7 @@ export class RespawnOverlay {
                 fontSize: '32px',
                 color: '#ffffff',
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 3,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
@@ -159,6 +164,7 @@ export class RespawnOverlay {
                 fontSize: '24px',
                 color: '#f1c40f',
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }

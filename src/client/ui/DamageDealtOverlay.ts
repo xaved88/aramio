@@ -77,7 +77,7 @@ export class DamageDealtOverlay {
         this.titleText = this.scene.add.text(10, 10, '', {
             fontSize: '16px',
             color: '#6bff6b', // Green color to distinguish from damage taken (red)
-            fontFamily: 'Arial, sans-serif'
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         });
         this.hudContainer.add(this.titleText);
 
@@ -88,7 +88,7 @@ export class DamageDealtOverlay {
         this.breakdownText = this.scene.add.text(10, 275, '', {
             fontSize: '13px',
             color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             stroke: '#000000',
             strokeThickness: 1
         });
@@ -105,7 +105,7 @@ export class DamageDealtOverlay {
             const entry = this.scene.add.text(10, 35 + (i * 18), '', {
                 fontSize: '12px',
                 color: '#ffffff',
-                fontFamily: 'Arial, sans-serif'
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
             });
             this.hudContainer!.add(entry);
             this.damageEntries.push(entry);

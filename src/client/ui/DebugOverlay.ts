@@ -33,7 +33,7 @@ export class DebugOverlay {
         this.coordinatesDebugPanel = this.gameObjectFactory.createText(10, CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2, '', {
             fontSize: '16px',
             color: hexToColorString(0xffffff),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0, 0);
         this.coordinatesDebugPanel.setVisible(CLIENT_CONFIG.DEBUG.WORLD_COORDINATE_GRID_ENABLED || CLIENT_CONFIG.DEBUG.SCREEN_COORDINATE_GRID_ENABLED);
         
@@ -92,7 +92,7 @@ export class DebugOverlay {
                 const label = this.gameObjectFactory.createText(x + 5, y - 15, `${x},${y}`, {
                     fontSize: '12px',
                     color: hexToColorString(0x666666),
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
                 }, CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0, 0);
                 
                 this.gridLabels.push(label);
@@ -129,7 +129,7 @@ export class DebugOverlay {
                 const label = this.gameObjectFactory.createText(x + 5, y - 15, `${x},${y}`, {
                     fontSize: '12px',
                     color: hexToColorString(0x999999),
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
                 }, CLIENT_CONFIG.RENDER_DEPTH.GAME_UI).setOrigin(0, 0);
                 
                 this.screenGridLabels.push(label);

@@ -544,7 +544,7 @@ export class EntityManager {
         const xpText = this.scene.add.text(xpEvent.x, xpEvent.y, text, {
             fontSize: fontSize,
             color: color,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Assign to main camera
@@ -559,7 +559,7 @@ export class EntityManager {
             heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 18, xpEvent.targetName, {
                 fontSize: '14px',
                 color: color,
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 fontStyle: fontStyle
             }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY);
             
@@ -691,7 +691,7 @@ export class EntityManager {
         const levelUpText = this.scene.add.text(levelUpEvent.x, levelUpEvent.y, `Level Up!`, {
             fontSize: CLIENT_CONFIG.LEVEL_UP_EVENTS.FONT_SIZE,
             color: CLIENT_CONFIG.LEVEL_UP_EVENTS.COLOR,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Assign to main camera

@@ -96,20 +96,24 @@ export class StatsOverlay {
         HEADER: {
             fontSize: '24px',
             color: '#ffffff',
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         },
         GAME_TIME: {
             fontSize: '20px',
             color: '#ffffff',
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         },
         TEAM_TOTALS: {
             fontSize: '16px',
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         },
         NO_PLAYERS: {
             fontSize: '14px',
-            color: '#888888'
+            color: '#888888',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }
     } as const;
 
@@ -335,7 +339,7 @@ export class StatsOverlay {
         const cell = this.scene.add.text(x, y, text, {
             fontSize: '14px',
             color: finalColor,
-            fontFamily: 'monospace',
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             fontStyle: isBot ? 'italic' : 'normal'
         });
         
@@ -464,6 +468,7 @@ export class StatsOverlay {
                 fontSize: '48px',
                 color: textColor,
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 3,
                 shadow: {
@@ -498,6 +503,7 @@ export class StatsOverlay {
                 fontSize: '24px',
                 color: '#FFFFFF',
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
                 padding: { x: 20, y: 10 }
             }

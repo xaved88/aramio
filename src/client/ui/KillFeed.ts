@@ -174,7 +174,7 @@ export class KillFeed {
         const killerFontStyle = isKillerBot ? (involvedPlayer ? 'bold italic' : 'italic') : fontWeight;
         const killerText = this.scene.add.text(5, this.ENTRY_HEIGHT / 2, killerName, {
             fontSize: fontSize,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             color: killerColor,
             fontStyle: killerFontStyle
         });
@@ -188,7 +188,7 @@ export class KillFeed {
             '☠', 
             {
                 fontSize: fontSize,
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 color: '#FFFFFF',
                 fontStyle: fontWeight
             }
@@ -204,7 +204,7 @@ export class KillFeed {
             victimName, 
             {
                 fontSize: fontSize,
-                fontFamily: CLIENT_CONFIG.UI.FONTS.DEFAULT_FAMILY,
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 color: victimColor,
                 fontStyle: victimFontStyle
             }

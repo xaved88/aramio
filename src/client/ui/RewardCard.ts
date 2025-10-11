@@ -256,6 +256,7 @@ export class RewardCard {
                 fontSize: '16px',
                 color: '#333333',
                 fontStyle: 'bold',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 align: 'center'
             }
         );
@@ -270,6 +271,7 @@ export class RewardCard {
             {
                 fontSize: '16px',
                 color: '#666666',
+                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 align: 'center',
                 wordWrap: { width: config.width - 30 }
             }
@@ -313,7 +315,10 @@ export class RewardCard {
                 this.hudContainer!.getContainer().setScale(1.0);
             });
             
-            this.hudContainer!.getContainer().on('pointerdown', () => {
+            this.hudContainer!.getContainer().on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number, event: Phaser.Types.Input.EventData) => {
+                // Stop event propagation to prevent ability firing
+                event.stopPropagation();
+                
                 if (this.onClick) {
                     this.onClick(this.rewardId);
                 }

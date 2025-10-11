@@ -225,7 +225,6 @@ export const CLIENT_CONFIG = {
             LARGE: '14px',
             ERROR: '16px',
             VICTORY: '48px',
-            DEFAULT_FAMILY: 'Arial',
             PRIMARY: 'Arial',
         },
         COLORS: {
