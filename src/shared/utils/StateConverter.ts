@@ -264,6 +264,7 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                     minionKills: hero.roundStats.minionKills,
                     heroKills: hero.roundStats.heroKills,
                     turretKills: hero.roundStats.turretKills,
+                    deaths: hero.roundStats.deaths,
                     damageTaken: hero.roundStats.damageTaken,
                     damageDealt: hero.roundStats.damageDealt
                 },

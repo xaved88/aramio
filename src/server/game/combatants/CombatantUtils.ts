@@ -82,6 +82,12 @@ export class CombatantUtils {
             deathEffectEvent.timestamp = gameState.gameTime;
             gameState.deathEffectEvents.push(deathEffectEvent);
             
+            // Update death stats for victim if it's a hero
+            if (combatant.type === 'hero') {
+                const victimHero = combatant as any;
+                victimHero.roundStats.deaths++;
+            }
+            
             // Update kill stats for source combatant
             if (sourceCombatant && sourceCombatant.type === 'hero') {
                 const hero = sourceCombatant as any;

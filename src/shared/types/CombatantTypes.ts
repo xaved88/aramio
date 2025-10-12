@@ -148,6 +148,7 @@ export interface RoundStats {
     minionKills: number; // number of minions killed
     heroKills: number; // number of heroes killed
     turretKills: number; // number of turrets destroyed
+    deaths: number; // number of times this hero has died
     damageTaken: number; // total damage taken
     damageDealt: number; // total damage dealt
 }

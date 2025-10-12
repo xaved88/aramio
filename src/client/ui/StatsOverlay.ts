@@ -426,10 +426,6 @@ export class StatsOverlay {
         const stats: PlayerStats[] = [];
         state.combatants.forEach((combatant) => {
             if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
-                const deaths = state.killEvents.filter(killEvent => 
-                    killEvent.targetId === combatant.id && killEvent.targetType === 'hero'
-                ).length;
-                
                 stats.push({
                     id: combatant.id,
                     displayName: combatant.displayName,
@@ -442,7 +438,7 @@ export class StatsOverlay {
                     minionKills: combatant.roundStats.minionKills,
                     heroKills: combatant.roundStats.heroKills,
                     turretKills: combatant.roundStats.turretKills,
-                    deaths: deaths,
+                    deaths: combatant.roundStats.deaths,
                     damageTaken: combatant.roundStats.damageTaken,
                     damageDealt: combatant.roundStats.damageDealt,
                     isBot: combatant.controller.startsWith('bot'),

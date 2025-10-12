@@ -87,6 +87,7 @@ export class RoundStats extends Schema {
     @type('number') minionKills = 0; // number of minions killed
     @type('number') heroKills = 0; // number of heroes killed
     @type('number') turretKills = 0; // number of turrets destroyed
+    @type('number') deaths = 0; // number of times this hero has died
     @type('number') damageTaken = 0; // total damage taken
     @type('number') damageDealt = 0; // total damage dealt
     @type('number') currentKillStreak = 0; // current kills without dying

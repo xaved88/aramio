@@ -86,6 +86,7 @@ describe('PermanentEffectsDisplay', () => {
                 minionKills: 0,
                 heroKills: 0,
                 turretKills: 0,
+                deaths: 0,
                 damageTaken: 0,
                 damageDealt: 0,
             },
