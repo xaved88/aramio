@@ -165,14 +165,14 @@ export const GAMEPLAY_CONFIG = {
         BLUE: [
             { x: 100, y: 675 }, // Spawn 1: 75 units below blue cradle (clamped to max Y)
             { x: 62, y: 675 },  // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 62, y: 637 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 45, y: 637 },  // Spawn 3: right angle point of triangle with 2 and 4
             { x: 25, y: 637 },   // Spawn 4: between 3 and 5, same y as 3 and 5
             { x: 25, y: 600 }    // Spawn 5: 75 units left of blue cradle
         ],
         RED: [
             { x: 600, y: 25 },   // Spawn 1: 75 units above red cradle (clamped to min Y)
             { x: 637, y: 25 },   // Spawn 2: between 1 and 3, same y as 1 and 3
-            { x: 637, y: 62 },  // Spawn 3: right angle point of triangle with 2 and 4
+            { x: 655, y: 62 },  // Spawn 3: right angle point of triangle with 2 and 4
             { x: 675, y: 62 },  // Spawn 4: between 3 and 5, same y as 3 and 5
             { x: 675, y: 100 }   // Spawn 5: 75 units right of red cradle
         ],
