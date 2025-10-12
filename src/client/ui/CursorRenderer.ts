@@ -9,6 +9,8 @@ export class CursorRenderer {
     private scene: Phaser.Scene;
     private cursorGraphics: Phaser.GameObjects.Graphics | null = null;
     private cameraManager: any = null;
+    private wasOnCooldown: boolean = false;
+    private flashIntensity: number = 0; // 0 = no flash, 1 = full flash
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -48,16 +50,15 @@ export class CursorRenderer {
         const mouseX = pointer.x;
         const mouseY = pointer.y;
 
-        // Always draw the crosshair cursor
-        this.drawCrosshair(mouseX, mouseY);
-
         // Don't show cooldown indicator in post-game mode
         const gameScene = this.scene as any;
         if (gameScene.lastState?.gamePhase === 'finished') {
+            this.drawCrosshair(mouseX, mouseY, false); // Normal visibility in post-game
             return;
         }
 
         if (!hero || hero.state !== 'alive') {
+            this.drawCrosshair(mouseX, mouseY, false); // Normal visibility when dead/no hero
             return; // Don't show cooldown if no hero or hero is dead/respawning
         }
 
@@ -76,6 +77,21 @@ export class CursorRenderer {
             isAbilityReady = timeSinceLastUse >= ability.cooldown;
             cooldownProgress = Math.min(timeSinceLastUse / ability.cooldown, 1);
         }
+
+        // Detect cooldown -> ready transition and trigger flash
+        if (this.wasOnCooldown && isAbilityReady) {
+            this.flashIntensity = 1.0;
+        }
+        this.wasOnCooldown = !isAbilityReady;
+        
+        // Decay flash intensity
+        if (this.flashIntensity > 0) {
+            this.flashIntensity -= 0.05; // Fade out over ~20 frames at 60fps
+            if (this.flashIntensity < 0) this.flashIntensity = 0;
+        }
+
+        // Draw crosshair with reduced visibility if on cooldown
+        this.drawCrosshair(mouseX, mouseY, !isAbilityReady);
 
         if (!isAbilityReady) {
             // Show cooldown progress ring only when ability is on cooldown
@@ -99,15 +115,17 @@ export class CursorRenderer {
     /**
      * Draws a crosshair cursor at the specified position
      */
-    private drawCrosshair(x: number, y: number): void {
+    private drawCrosshair(x: number, y: number, isOnCooldown: boolean = false): void {
         if (!this.cursorGraphics) return;
         
-        const crosshairSize = 8;
+        const crosshairSize = 8 + (this.flashIntensity * 4); // Expand when flashing
         const lineThickness = 2;
         const outlineThickness = 3;
         const color = 0xffffff; // White crosshair
         const outlineColor = 0x000000; // Black outline
-        const alpha = 0.9;
+        // Dim during cooldown, bright with flash effect when ready
+        const baseAlpha = isOnCooldown ? 0.4 : 0.9;
+        const alpha = baseAlpha + (this.flashIntensity * 0.1); // Slightly brighter when flashing
 
         // Draw black outline first (thicker)
         this.cursorGraphics.lineStyle(outlineThickness, outlineColor, alpha);
