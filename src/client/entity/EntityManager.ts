@@ -30,7 +30,6 @@ export class EntityManager {
     private entityHealthBars: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
-    private entityAbilityIconTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -141,7 +140,6 @@ export class EntityManager {
         let entitySprite = this.entitySprites.get(entityId);
         let entityHealthBar = this.entityHealthBars.get(entityId);
         let entityText = this.entityTexts.get(entityId);
-        let entityAbilityIconText = this.entityAbilityIconTexts.get(entityId);
         let radiusIndicator = this.entityRadiusIndicators.get(entityId);
         
         // Create sprite for heroes
@@ -261,20 +259,6 @@ export class EntityManager {
             this.entityTexts.set(entityId, entityText);
         }
         
-        // Create ability icon text for heroes
-        if (combatantData.type === COMBATANT_TYPES.HERO && !entityAbilityIconText) {
-            entityAbilityIconText = this.entityFactory.createEntityText();
-            // Set initial position immediately to avoid spawning at (0,0)
-            entityAbilityIconText.setPosition(combatantData.x, combatantData.y);
-            entityAbilityIconText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES);
-            
-            // Assign to main camera
-            if (this.cameraManager) {
-                this.cameraManager.assignToMainCamera(entityAbilityIconText);
-            }
-            
-            this.entityAbilityIconTexts.set(entityId, entityAbilityIconText);
-        }
         
         if (!radiusIndicator) {
             radiusIndicator = this.entityFactory.createRadiusIndicator();
@@ -328,7 +312,6 @@ export class EntityManager {
         if (entitySprite) targets.push(entitySprite);
         if (entityHealthBar) targets.push(entityHealthBar);
         targets.push(entityText, radiusIndicator);
-        if (entityAbilityIconText) targets.push(entityAbilityIconText);
         if (respawnRing) targets.push(respawnRing);
         if (abilityReadyIndicator) targets.push(abilityReadyIndicator);
         if (entityEffectOverlay) targets.push(entityEffectOverlay);
@@ -353,7 +336,6 @@ export class EntityManager {
             radiusIndicator,
             respawnRing,
             abilityReadyIndicator,
-            entityAbilityIconText,
             entityHealthBar,
             entityEffectOverlay,
             state,
@@ -986,11 +968,6 @@ export class EntityManager {
             this.entityTexts.delete(entityId);
         }
         
-        const entityAbilityIconText = this.entityAbilityIconTexts.get(entityId);
-        if (entityAbilityIconText) {
-            entityAbilityIconText.destroy();
-            this.entityAbilityIconTexts.delete(entityId);
-        }
         
         const radiusIndicator = this.entityRadiusIndicators.get(entityId);
         if (radiusIndicator) {
@@ -1213,7 +1190,6 @@ export class EntityManager {
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
         this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
-        this.entityAbilityIconTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
@@ -1233,7 +1209,6 @@ export class EntityManager {
         this.entityHealthBars.clear();
         this.entityEffectOverlays.clear();
         this.entityTexts.clear();
-        this.entityAbilityIconTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();
@@ -1284,7 +1259,6 @@ export class EntityManager {
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
         this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
-        this.entityAbilityIconTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
@@ -1306,7 +1280,6 @@ export class EntityManager {
         this.entityHealthBars.clear();
         this.entityEffectOverlays.clear();
         this.entityTexts.clear();
-        this.entityAbilityIconTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
         this.entityAbilityReadyIndicators.clear();

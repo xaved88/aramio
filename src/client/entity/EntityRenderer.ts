@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, HeroCombatant, MINION_TYPES, isMinionCombatant, CombatantId, ControllerId } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
-import { AbilityIconManager } from '../abilities/AbilityIconManager';
 import { RendererFactory } from './RendererFactory';
 import { CombatantRenderer } from './CombatantRenderer';
 import { getSpriteScale } from '../utils/SpriteScaleUtils';
@@ -55,7 +54,6 @@ export class EntityRenderer {
         radiusIndicator: Phaser.GameObjects.Graphics,
         respawnRing: Phaser.GameObjects.Graphics | undefined,
         abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
-        abilityIconText: Phaser.GameObjects.Text | undefined,
         healthBar: Phaser.GameObjects.Graphics | undefined,
         effectOverlay?: Phaser.GameObjects.Graphics,
         state?: SharedGameState,
@@ -99,10 +97,6 @@ export class EntityRenderer {
         // Update text display (level for heroes, nothing for others)
         this.updateTextDisplay(combatant, text);
         
-        // Update ability icon display for heroes
-        if (abilityIconText && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
-            this.updateAbilityIconDisplay(combatant, abilityIconText);
-        }
         
         // Handle turret visibility
         if (combatant.type === COMBATANT_TYPES.TURRET) {
@@ -646,8 +640,7 @@ export class EntityRenderer {
                 : (combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a); // Team colors for others
             
             text.setStyle({ 
-                fontSize: '16px', 
-                fontStyle: 'bold',
+                fontSize: '12px', 
                 fontWeight: '900',
                 color: `#${textColor.toString(16).padStart(6, '0')}`,
                 stroke: '#000000',
@@ -669,41 +662,6 @@ export class EntityRenderer {
         }
     }
 
-    /**
-     * Updates the ability icon display for heroes
-     */
-    private updateAbilityIconDisplay(combatant: HeroCombatant, abilityIconText: Phaser.GameObjects.Text): void {
-        const abilityIcon = AbilityIconManager.getAbilityIcon(combatant.ability.type);
-        abilityIconText.setText(abilityIcon);
-
-        // Check if this hero is controlled by the current player
-        const isControlledByPlayer = this.playerSessionId && combatant.controller === this.playerSessionId;
-        
-        // Set color based on control
-        const textColor = isControlledByPlayer 
-            ? CLIENT_CONFIG.SELF_COLORS.TEXT
-            : (combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a); // Team colors for others
-        
-        abilityIconText.setStyle({ 
-            fontSize: '16px', 
-            fontStyle: 'bold',
-            fontWeight: '900',
-            color: `#${textColor.toString(16).padStart(6, '0')}`,
-            stroke: '#000000',
-            strokeThickness: 1,
-            shadow: {
-                offsetX: 1,
-                offsetY: 1,
-                color: '#000000',
-                blur: 2,
-                fill: true
-            },
-            align: 'center'
-        });
-
-        // Position the ability icon above the level text by adjusting the origin
-        abilityIconText.setOrigin(0.5, 0.9); // Position higher than the level text
-    }
 
     /**
      * Converts a number to Roman numeral
