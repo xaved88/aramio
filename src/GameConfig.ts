@@ -37,7 +37,7 @@ export const GAMEPLAY_CONFIG = {
     },
 
     COMBAT: {
-        COLLISION_THRESHOLD_MULTIPLIER: 0.9, // 90% threshold for collision detection
+        COLLISION_THRESHOLD_MULTIPLIER: 1.1, // 100% threshold for collision detection
         HERO: {
             HEALTH: 75,
             ATTACK_RADIUS: 50,

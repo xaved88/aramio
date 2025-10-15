@@ -193,7 +193,7 @@ export class TutorialOverlay {
         
         // Draw hero image
         const heroVisual = this.scene.add.image(heroVisualizationX, heroVisualizationY, 'hero-base');
-        heroVisual.setDisplaySize(40, 40);
+        heroVisual.setScale(40 / heroVisual.width); // Scale proportionally based on width
         this.contentContainer.add(heroVisual);
         
         // Add "Your Hero" label beneath the hero
@@ -239,7 +239,7 @@ export class TutorialOverlay {
         for (const entity of minionData) {
             // Entity image
             const entityImage = this.scene.add.image(entitiesStartX, minionY, entity.key);
-            entityImage.setDisplaySize(entity.size, entity.size);
+            entityImage.setScale(entity.size / entityImage.width); // Scale proportionally
             this.contentContainer.add(entityImage);
             
             // Entity label
@@ -274,6 +274,7 @@ export class TutorialOverlay {
         for (const entity of structureData) {
             // Entity image
             const entityImage = this.scene.add.image(structuresStartX, structureY, entity.key);
+            // Both structures get squashed to square
             entityImage.setDisplaySize(entity.size, entity.size);
             this.contentContainer.add(entityImage);
             
@@ -326,7 +327,7 @@ export class TutorialOverlay {
             // Hero image
             const heroKey = hero.type === 'default' ? 'hero-base' : `hero-${hero.type}`;
             const heroImage = this.scene.add.image(x, y, heroKey);
-            heroImage.setDisplaySize(heroIconSize, heroIconSize);
+            heroImage.setScale(heroIconSize / heroImage.width); // Scale proportionally
             // No tint - show original sprite colors (team colors are applied via shaders in-game)
             this.contentContainer.add(heroImage);
             
@@ -388,7 +389,7 @@ export class TutorialOverlay {
         const pyroIconY = currentY + 50;
         
         const pyroIcon = this.scene.add.image(pyroIconX, pyroIconY, 'pyromancer-icon');
-        pyroIcon.setDisplaySize(100, 100);
+        pyroIcon.setScale(100 / pyroIcon.width); // Scale proportionally
         this.contentContainer.add(pyroIcon);
     }
 
