@@ -5,6 +5,7 @@ import { hexToColorString } from '../utils/ColorUtils';
 import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
+import { Button } from './Button';
 
 interface CheatOption {
     id: string;
@@ -27,7 +28,7 @@ export class CheatMenu {
     private isVisible: boolean = false;
     private room: any = null;
     private gameplayConfig: GameplayConfig | null = null;
-    private cheatButtons: Phaser.GameObjects.Text[] = [];
+    private cheatButtons: Button[] = [];
 
     // Depth configuration for consistent layering
     private readonly DEPTHS = {
@@ -144,7 +145,7 @@ export class CheatMenu {
         
         // Create semi-transparent background (matching stats overlay)
         const background = this.scene.add.graphics();
-        background.fillStyle(0x000000, 0.7);
+        background.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
         background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         background.setDepth(this.DEPTHS.BACKGROUND);
         background.setScrollFactor(0, 0); // Fixed to screen
@@ -181,16 +182,19 @@ export class CheatMenu {
      */
     private createCheatButton(cheat: CheatOption, x: number, y: number): void {
         if (!this.hudContainer) return;
-
-        const buttonStyle = TextStyleHelper.getButtonStyle(cheat.enabled);
         
         // Create main button
-        const button = this.scene.add.text(
+        const button = new Button(this.scene, {
             x,
             y,
-            cheat.name,
-            buttonStyle
-        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
+            text: cheat.name,
+            type: 'standard',
+            enabled: cheat.enabled,
+            onClick: cheat.action
+        });
+        
+        button.setDepth(this.DEPTHS.UI_CONTENT);
+        button.setScrollFactor(0, 0);
         
         this.hudContainer.add(button);
         this.overlayElements.push(button);
@@ -221,30 +225,6 @@ export class CheatMenu {
         this.hudContainer.add(keybindText);
         this.overlayElements.push(keybindText);
 
-        // Add interactivity only if enabled
-        if (cheat.enabled) {
-            button.setInteractive();
-            
-            // Add click handler
-            button.on('pointerdown', () => {
-                cheat.action();
-                // Menu will close when Caps Lock is released, no need to hide here
-            });
-            
-            // Add hover effects
-            button.on('pointerover', () => {
-                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON_HOVER) });
-            });
-            
-            button.on('pointerout', () => {
-                button.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON) });
-            });
-        } else {
-            // Disabled state - no interactivity
-            button.setAlpha(0.5);
-            description.setAlpha(0.5);
-            keybindText.setAlpha(0.5);
-        }
     }
 
     /**

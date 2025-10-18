@@ -124,7 +124,7 @@ export class GameScene extends Phaser.Scene {
                 getCanvasWidth() / 2, 
                 getCanvasHeight() / 2, 
                 'Failed to connect to server', 
-                TextStyleHelper.getStyleWithColor('HUD_TEXT', CLIENT_CONFIG.UI.COLORS.ERROR), 
+                TextStyleHelper.getStyle('ERROR'), 
                 CLIENT_CONFIG.RENDER_DEPTH.GAME_UI
             ).setOrigin(0.5);
         }

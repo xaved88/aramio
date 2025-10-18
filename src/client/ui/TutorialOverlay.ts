@@ -90,7 +90,7 @@ export class TutorialOverlay {
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
-            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', CLIENT_CONFIG.UI.COLORS.TEXT));
+            TextStyleHelper.getStyle('TITLE_MEDIUM'));
         closeText.setOrigin(0.5);
         this.contentContainer.add(closeText);
         

@@ -31,7 +31,7 @@ export class EntityFactory {
     createEntityText(): Phaser.GameObjects.Text {
         const text = this.scene.add.text(0, 0, '', {
             fontSize: CLIENT_CONFIG.UI.FONTS.MEDIUM,
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_SECONDARY)
+            color: hexToColorString(0x000000)
         }).setOrigin(0.5);
         return text;
     }

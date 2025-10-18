@@ -10,6 +10,7 @@ import { PlayerNameStorage } from '../utils/PlayerNameStorage';
 import { ControlModeToggle } from '../ui/ControlModeToggle';
 import { TutorialOverlay } from '../ui/TutorialOverlay';
 import { CursorRenderer } from '../ui/CursorRenderer';
+import { Button } from '../ui/Button';
 
 export class LobbyScene extends Phaser.Scene {
     private client!: Client;
@@ -25,7 +26,7 @@ export class LobbyScene extends Phaser.Scene {
     private configDropdownItems: Phaser.GameObjects.Text[] = [];
     private blueTeamContainer!: Phaser.GameObjects.Container;
     private redTeamContainer!: Phaser.GameObjects.Container;
-    private startButton!: Phaser.GameObjects.Text;
+    private startButton!: Button;
     private teamSizeButtons: Phaser.GameObjects.Text[] = [];
     private versionText!: Phaser.GameObjects.Text;
     private controlModeToggle!: ControlModeToggle;
@@ -255,12 +256,12 @@ export class LobbyScene extends Phaser.Scene {
         pyromancerIcon.setOrigin(0.5);
 
         const titleText = this.add.text(centerX + 25, centerY - 300, 'ARAM.IO Lobby', 
-            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', CLIENT_CONFIG.UI.COLORS.PRIMARY)
+            TextStyleHelper.getTitleStyle('medium')
         ).setOrigin(0.5);
 
         // Team size selector
         this.add.text(centerX, centerY - 230, 'Team Size:', 
-            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT)
+            TextStyleHelper.getStyle('HEADER')
         ).setOrigin(0.5);
 
         // Team size buttons
@@ -284,7 +285,7 @@ export class LobbyScene extends Phaser.Scene {
 
         // Config selector
         this.add.text(centerX, centerY - 130, 'Config:', 
-            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT)
+            TextStyleHelper.getStyle('HEADER')
         ).setOrigin(0.5);
 
         this.configValue = this.add.text(centerX, centerY - 100, 'default', 
@@ -315,37 +316,28 @@ export class LobbyScene extends Phaser.Scene {
         this.redTeamContainer = this.add.container(centerX + 200, teamY);
 
         this.add.text(centerX - 200, teamY - 40, 'Blue Team', 
-            TextStyleHelper.getStyleWithColor('TITLE_SMALL', CLIENT_CONFIG.UI.COLORS.BLUE)
+            TextStyleHelper.getStyleWithColor('TITLE_SMALL', TextStyleHelper.getTeamColor('blue'))
         ).setOrigin(0.5);
 
         this.add.text(centerX + 200, teamY - 40, 'Red Team', 
-            TextStyleHelper.getStyleWithColor('TITLE_SMALL', CLIENT_CONFIG.UI.COLORS.RED)
+            TextStyleHelper.getStyleWithColor('TITLE_SMALL', TextStyleHelper.getTeamColor('red'))
         ).setOrigin(0.5);
 
         // Start button (below How to Play button)
-        this.startButton = this.add.text(centerX, centerY + 250, 'Start Game', 
-            TextStyleHelper.getButtonStyle(true, CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
-        ).setOrigin(0.5).setInteractive();
-
-        // Add hover effects for start button - will be updated in updateUI based on state
-        this.startButton.on('pointerover', () => {
-            if (this.lobbyState?.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON_HOVER) });
+        this.startButton = new Button(this, {
+            x: centerX,
+            y: centerY + 250,
+            text: 'Start Game',
+            type: 'proceed',
+            enabled: false, // Will be updated in updateUI
+            onClick: () => {
+                if (this.lobbyState?.canStart) {
+                    this.room.send('startGame');
+                }
             }
         });
-        this.startButton.on('pointerout', () => {
-            if (this.lobbyState?.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
-            } else {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
-            }
-        });
-
-        this.startButton.on('pointerdown', () => {
-            if (this.lobbyState?.canStart) {
-                this.room.send('startGame');
-            }
-        });
+        
+        this.add.existing(this.startButton);
 
         // How to Play section (above start button)
         const howToPlayY = centerY + 200;
@@ -374,12 +366,11 @@ export class LobbyScene extends Phaser.Scene {
             centerX,
             getCanvasHeight() - padding,
             versionDisplay,
-            {
-                fontSize: '12px',
+            TextStyleHelper.getStyleWithCustom('BODY_TINY', {
                 fontFamily: 'monospace',
                 fontStyle: 'italic',
                 color: '#888888'
-            }
+            })
         ).setOrigin(0.5, 1);
 
         // Control mode toggle in bottom right
@@ -420,13 +411,13 @@ export class LobbyScene extends Phaser.Scene {
         
         // Question mark text
         const questionMark = this.add.text(-60, 0, '?', 
-            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY)
+            TextStyleHelper.getStyle('HEADER')
         );
         questionMark.setOrigin(0.5, 0.5);
         
         // "How to Play" text
         const howToPlayText = this.add.text(-35, 0, 'How to Play', 
-            TextStyleHelper.getStyleWithColor('BODY_LARGE', CLIENT_CONFIG.UI.COLORS.TEXT)
+            TextStyleHelper.getStyle('BODY_LARGE')
         );
         howToPlayText.setOrigin(0, 0.5);
         
@@ -469,16 +460,16 @@ export class LobbyScene extends Phaser.Scene {
             if (size === this.lobbyState!.teamSize) {
                 button.setStyle({ 
                     backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    stroke: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
+                    stroke: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED),
                     strokeThickness: 2,
-                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
+                    color: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED)
                 });
             } else {
                 button.setStyle({ 
                     backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
                     stroke: '',
                     strokeThickness: 0,
-                    color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT)
+                    color: '#ffffff'
                 });
             }
         });
@@ -489,11 +480,7 @@ export class LobbyScene extends Phaser.Scene {
 
         // Update start button
         if (this.startButton && this.startButton.scene) {
-            if (this.lobbyState.canStart) {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
-            } else {
-                this.startButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.DISABLED) });
-            }
+            this.startButton.setEnabled(this.lobbyState.canStart);
         }
     }
 
@@ -509,13 +496,13 @@ export class LobbyScene extends Phaser.Scene {
 
         items.forEach((name, idx) => {
             const y = startY + idx * 24;
-            const item = this.add.text(centerX, y, name, {
-                fontSize: '14px',
-                color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                padding: { x: 8, y: 3 }
-            }).setOrigin(0.5).setInteractive();
+            const item = this.add.text(centerX, y, name, 
+                TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                    color: '#ffffff',
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    padding: { x: 8, y: 3 }
+                })
+            ).setOrigin(0.5).setInteractive();
 
             // Add hover effects
             this.addHoverEffect(item, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
@@ -540,7 +527,7 @@ export class LobbyScene extends Phaser.Scene {
         slots.forEach((slot, index) => {
             const y = index * 40;
             let slotText = '';
-            let textColor: number = CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY;
+            let textColor: number = 0xffffff; // white
             let isSelf = false;
             let fontStyle: string | undefined = undefined;
             
@@ -557,7 +544,7 @@ export class LobbyScene extends Phaser.Scene {
                         fontStyle = 'bold';
                     } else {
                         // Other players use team colors
-                        textColor = team === 'blue' ? CLIENT_CONFIG.UI.COLORS.BLUE : CLIENT_CONFIG.UI.COLORS.RED;
+                        textColor = TextStyleHelper.getTeamColor(team as 'blue' | 'red');
                     }
                 }
                 
@@ -570,12 +557,12 @@ export class LobbyScene extends Phaser.Scene {
                 fontStyle = 'italic';
             }
 
-            const slotDisplay = this.add.text(0, y, slotText, {
-                fontSize: '18px',
-                color: hexToColorString(textColor),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                fontStyle: fontStyle
-            }).setOrigin(0.5);
+            const slotDisplay = this.add.text(0, y, slotText, 
+                TextStyleHelper.getStyleWithCustom('BODY_LARGE', {
+                    color: hexToColorString(textColor),
+                    fontStyle: fontStyle
+                })
+            ).setOrigin(0.5);
             
 
             // Add team switching arrows for players (not bots)
@@ -586,7 +573,7 @@ export class LobbyScene extends Phaser.Scene {
                 if (team !== 'blue') {
                     const arrowLeft = this.add.text(-100, y, '←', {
                         fontSize: '24px',
-                        color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
+                         color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE_TEAM),
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
                         padding: { x: 4, y: 2 }
@@ -616,7 +603,7 @@ export class LobbyScene extends Phaser.Scene {
                 if (team !== 'red') {
                     const arrowRight = this.add.text(100, y, '→', {
                         fontSize: '24px',
-                        color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
+                         color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED_TEAM),
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
                         padding: { x: 4, y: 2 }
@@ -672,26 +659,20 @@ export class LobbyScene extends Phaser.Scene {
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
 
-        this.add.text(centerX, centerY, 'Failed to connect to lobby', {
-            fontSize: '24px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.ERROR),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }).setOrigin(0.5);
+        this.add.text(centerX, centerY, 'Failed to connect to lobby', 
+            TextStyleHelper.getStyle('ERROR')
+        ).setOrigin(0.5);
 
-        const retryButton = this.add.text(centerX, centerY + 50, 'Retry', {
-            fontSize: '18px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
-            padding: { x: 15, y: 8 }
-        }).setOrigin(0.5).setInteractive();
-
-        // Add hover effects
-        this.addHoverEffect(retryButton, CLIENT_CONFIG.UI.COLORS.PRIMARY);
-
-        retryButton.on('pointerdown', () => {
-            this.scene.restart();
+        const retryButton = new Button(this, {
+            x: centerX,
+            y: centerY + 50,
+            text: 'Retry',
+            type: 'standard',
+            onClick: () => this.scene.restart()
         });
+        
+        // Add button to scene
+        this.add.existing(retryButton);
     }
 
     /**
@@ -778,18 +759,16 @@ export class LobbyScene extends Phaser.Scene {
         const centerY = this.cameras.main.height / 2;
 
         // Create semi-transparent overlay
-        const overlay = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5);
+        const overlay = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
 
         // Create dialog background
         const dialogBg = this.add.rectangle(centerX, centerY, 400, 200, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
         dialogBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
 
         // Title
-        const title = this.add.text(centerX, centerY - 60, 'Change Display Name', {
-            fontSize: '20px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }).setOrigin(0.5);
+        const title = this.add.text(centerX, centerY - 60, 'Change Display Name', 
+            TextStyleHelper.getStyle('HEADER')
+        ).setOrigin(0.5);
 
         // Create HTML input field over the canvas
         const canvasElement = this.game.canvas;
@@ -825,36 +804,34 @@ export class LobbyScene extends Phaser.Scene {
         }
 
         // Buttons
-        const cancelButton = this.add.text(centerX - 80, centerY + 60, 'Cancel', {
-            fontSize: '16px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY),
-            padding: { x: 12, y: 8 }
-        }).setOrigin(0.5).setInteractive();
-
-        const saveButton = this.add.text(centerX + 80, centerY + 60, 'Save', {
-            fontSize: '16px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
-            padding: { x: 12, y: 8 }
-        }).setOrigin(0.5).setInteractive();
-
-        // Button hover effects
-        cancelButton.on('pointerover', () => {
-            cancelButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
-        });
-        cancelButton.on('pointerout', () => {
-            cancelButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.SECONDARY) });
+        const cancelButton = new Button(this, {
+            x: centerX - 80,
+            y: centerY + 60,
+            text: 'Cancel',
+            type: 'standard',
+            onClick: () => cleanup()
         });
 
-        saveButton.on('pointerover', () => {
-            saveButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACCENT) });
+        const saveButton = new Button(this, {
+            x: centerX + 80,
+            y: centerY + 60,
+            text: 'Save',
+            type: 'proceed',
+            onClick: () => {
+                const newName = inputElement.value.trim();
+                if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
+                    // Save to localStorage for persistence
+                    PlayerNameStorage.savePlayerName(newName);
+                    // Send to server
+                    this.room.send('setPlayerDisplayName', { displayName: newName });
+                    cleanup();
+                }
+            }
         });
-        saveButton.on('pointerout', () => {
-            saveButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY) });
-        });
+
+        // Add buttons to scene
+        this.add.existing(cancelButton);
+        this.add.existing(saveButton);
 
         // Store dialog elements for cleanup
         const dialogElements = [overlay, dialogBg, title, cancelButton, saveButton];
@@ -866,21 +843,6 @@ export class LobbyScene extends Phaser.Scene {
             dialogElements.forEach(element => element.destroy());
         };
 
-        // Event handlers
-        cancelButton.on('pointerdown', () => {
-            cleanup();
-        });
-
-        saveButton.on('pointerdown', () => {
-            const newName = inputElement.value.trim();
-            if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
-                // Save to localStorage for persistence
-                PlayerNameStorage.savePlayerName(newName);
-                // Send to server
-                this.room.send('setPlayerDisplayName', { displayName: newName });
-                cleanup();
-            }
-        });
 
         // Handle Enter key in input field
         inputElement.addEventListener('keydown', (event) => {

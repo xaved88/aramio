@@ -6,6 +6,7 @@ import { hexToColorString } from '../utils/ColorUtils';
 import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { HUDContainer } from './HUDContainer';
+import { Button } from './Button';
 
 interface PlayerStats {
     id: string;
@@ -49,7 +50,7 @@ export class StatsOverlay {
     private isVisible: boolean = false;
     private playerSessionId: ControllerId | null = null;
     private victoryDefeatText: Phaser.GameObjects.Text | null = null;
-    private backToLobbyButton: Phaser.GameObjects.Text | null = null;
+    private backToLobbyButton: Button | null = null;
     private damageHintText: Phaser.GameObjects.Text | null = null;
     private cheatHintText: Phaser.GameObjects.Text | null = null;
     private isPostGameMode: boolean = false;
@@ -183,7 +184,7 @@ export class StatsOverlay {
     /**
      * Creates team header with consistent styling
      */
-    private createTeamInfo(x: number, y: number, teamName: string, teamColor: string): void {
+    private createTeamInfo(x: number, y: number, teamName: string, teamColor: number): void {
         const header = this.scene.add.text(x, y, teamName, TextStyleHelper.getStyleWithColor('TITLE_SMALL', teamColor));
         header.setDepth(this.DEPTHS.UI_CONTENT);
         header.setScrollFactor(0, 0); // Fixed to screen
@@ -204,7 +205,7 @@ export class StatsOverlay {
         }
         
         const background = this.scene.add.graphics();
-        background.fillStyle(0x000000, 0.7);
+        background.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
         background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         background.setDepth(this.DEPTHS.BACKGROUND);
         background.setScrollFactor(0, 0); // Fixed to screen
@@ -226,11 +227,11 @@ export class StatsOverlay {
         this.overlayElements.push(gameTimeText);
         this.hudContainer.add(gameTimeText);
 
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 90, 'Red Team', '#e74c3c');
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 400, 'Blue Team', '#3498db');
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 90, 'Red Team', TextStyleHelper.getTeamColor('red'));
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 400, 'Blue Team', TextStyleHelper.getTeamColor('blue'));
 
-        this.createTeamTable(redTeamStats, tableX, 140, '#e74c3c');
-        this.createTeamTable(blueTeamStats, tableX, 450, '#3498db');
+        this.createTeamTable(redTeamStats, tableX, 140, TextStyleHelper.getTeamColor('red'));
+        this.createTeamTable(blueTeamStats, tableX, 450, TextStyleHelper.getTeamColor('blue'));
 
         // Add hints about additional overlays at the bottom
         this.createOverlayHints();
@@ -246,9 +247,9 @@ export class StatsOverlay {
     /**
      * Creates a proper table for team stats
      */
-    private createTeamTable(stats: PlayerStats[], startX: number, startY: number, teamColor: string): void {
+    private createTeamTable(stats: PlayerStats[], startX: number, startY: number, teamColor: number): void {
         if (stats.length === 0) {
-            const noPlayersText = this.scene.add.text(startX, startY, 'No players', TextStyleHelper.getStyleWithColor('BODY_SMALL', '#888888'));
+            const noPlayersText = this.scene.add.text(startX, startY, 'No players', TextStyleHelper.getStyleWithColor('BODY_SMALL', CLIENT_CONFIG.UI.COLORS.DISABLED));
             noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
             noPlayersText.setScrollFactor(0, 0); // Fixed to screen
             this.overlayElements.push(noPlayersText);
@@ -262,7 +263,7 @@ export class StatsOverlay {
         const separator = this.scene.add.graphics();
         const leftInset = this.COLUMN_WIDTHS.arrow; // Arrow column width on left
         const rightInset = 0; // Less margin on right
-        separator.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
+        separator.lineStyle(1, teamColor, 0.5);
         separator.lineBetween(startX + leftInset, startY + this.CELL_HEIGHT + 5, startX + this.getTotalTableWidth() - rightInset, startY + this.CELL_HEIGHT + 5);
         separator.setDepth(this.DEPTHS.UI_CONTENT);
         separator.setScrollFactor(0, 0); // Fixed to screen
@@ -279,7 +280,7 @@ export class StatsOverlay {
         
         // Add separator before totals
         const totalsSepar = this.scene.add.graphics();
-        totalsSepar.lineStyle(1, parseInt(teamColor.replace('#', '0x')), 0.5);
+        totalsSepar.lineStyle(1, teamColor, 0.5);
         totalsSepar.lineBetween(startX + leftInset, totalsRowY - 8, startX + this.getTotalTableWidth() - rightInset, totalsRowY - 8);
         totalsSepar.setDepth(this.DEPTHS.UI_CONTENT);
         totalsSepar.setScrollFactor(0, 0);
@@ -326,7 +327,7 @@ export class StatsOverlay {
         x: number, 
         y: number, 
         text: string, 
-        color: string, 
+        color: number, 
         width: number, 
         align: 'left' | 'right' = 'left',
         isHighlighted: boolean = false,
@@ -337,17 +338,16 @@ export class StatsOverlay {
         // Determine final color: yellow for highlighted (current player), respawn color for dead, normal otherwise
         let finalColor = color;
         if (isHighlighted) {
-            finalColor = '#ffff00';
+            finalColor = 0xffff00; // yellow
         } else if (isDead && team) {
             // Use the same respawn colors as the game renderer
-            const respawnColor = team === 'blue' 
+            finalColor = team === 'blue' 
                 ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING 
                 : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING;
-            finalColor = this.hexNumberToString(respawnColor);
         }
         
         const cell = this.scene.add.text(x, y, text, TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-            color: finalColor,
+            color: typeof finalColor === 'number' ? hexToColorString(finalColor) : finalColor,
             fontStyle: isBot ? 'italic' : 'normal'
         }));
         
@@ -365,7 +365,7 @@ export class StatsOverlay {
     /**
      * Creates a table row (header or player data)
      */
-    private createTableRow(startX: number, startY: number, teamColor: string, player?: PlayerStats, isTotalsRow: boolean = false): Phaser.GameObjects.Text[] {
+    private createTableRow(startX: number, startY: number, teamColor: number, player?: PlayerStats, isTotalsRow: boolean = false): Phaser.GameObjects.Text[] {
         const cells: Phaser.GameObjects.Text[] = [];
         let currentX = startX;
 
@@ -475,7 +475,7 @@ export class StatsOverlay {
         
         const isVictory = winningTeam === playerTeam;
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
-        const textColor = isVictory ? '#4CAF50' : '#F44336';
+        const textColor = isVictory ? CLIENT_CONFIG.VICTORY_COLORS.VICTORY : CLIENT_CONFIG.VICTORY_COLORS.DEFEAT;
         
         // Position in upper right corner with same padding as health bar (20px)
         this.victoryDefeatText = this.scene.add.text(
@@ -508,34 +508,20 @@ export class StatsOverlay {
         const buttonX = getCanvasWidth() / 2;
         const buttonY = getCanvasHeight() - 35;
         
-        // Create button text with background (like lobby buttons)
-        this.backToLobbyButton = this.scene.add.text(
-            buttonX,
-            buttonY,
-            'Back to Lobby',
-            TextStyleHelper.getButtonStyle(true, CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
-        ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive();
+        // Create button using Button component
+        this.backToLobbyButton = new Button(this.scene, {
+            x: buttonX,
+            y: buttonY,
+            text: 'Back to Lobby',
+            type: 'proceed',
+            onClick: () => this.handleBackToLobby()
+        });
+        
+        this.backToLobbyButton.setDepth(this.DEPTHS.UI_CONTENT);
+        this.backToLobbyButton.setScrollFactor(0, 0);
         
         this.hudContainer.add(this.backToLobbyButton);
         this.overlayElements.push(this.backToLobbyButton);
-        
-        // Add click handler
-        this.backToLobbyButton.on('pointerdown', () => {
-            this.handleBackToLobby();
-        });
-        
-        // Add hover effects (like lobby buttons)
-        this.backToLobbyButton.on('pointerover', () => {
-            if (this.backToLobbyButton) {
-                this.backToLobbyButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON_HOVER) });
-            }
-        });
-        
-        this.backToLobbyButton.on('pointerout', () => {
-            if (this.backToLobbyButton) {
-                this.backToLobbyButton.setStyle({ backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON) });
-            }
-        });
     }
 
     /**

@@ -47,25 +47,6 @@ export class TextStyleHelper {
     }
 
     /**
-     * Creates a button style with custom background color
-     */
-    static getButtonStyle(
-        enabled: boolean = true,
-        backgroundColor?: string | number
-    ): Phaser.Types.GameObjects.Text.TextStyle {
-        const baseStyle = enabled ? 'BUTTON_PRIMARY' : 'BUTTON_DISABLED';
-        const style = this.getStyle(baseStyle);
-        
-        if (backgroundColor !== undefined) {
-            style.backgroundColor = typeof backgroundColor === 'number' 
-                ? hexToColorString(backgroundColor) 
-                : backgroundColor;
-        }
-        
-        return style;
-    }
-
-    /**
      * Creates a title style with custom color
      */
     static getTitleStyle(
@@ -98,5 +79,15 @@ export class TextStyleHelper {
         
         return style;
     }
+
+    /**
+     * Gets team color for a given team name
+     */
+    static getTeamColor(team: 'blue' | 'red'): number {
+        return team === 'blue' 
+            ? CLIENT_CONFIG.UI.COLORS.BLUE_TEAM
+            : CLIENT_CONFIG.UI.COLORS.RED_TEAM;
+    }
+
 
 }

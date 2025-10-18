@@ -57,7 +57,7 @@ describe('VictoryScreen', () => {
             'VICTORY!',
             expect.objectContaining({
                 fontSize: '72px',
-                color: '#FFFFFF',
+                color: '#4CAF50',
                 fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4,
@@ -81,7 +81,7 @@ describe('VictoryScreen', () => {
             'DEFEAT!',
             expect.objectContaining({
                 fontSize: '72px',
-                color: '#FF6B6B',
+                color: '#F44336',
                 fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4,

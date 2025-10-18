@@ -64,14 +64,14 @@ export class VictoryScreen {
         this.background = this.scene.add.graphics();
         this.background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
         this.background.setScrollFactor(0); // Make background camera-independent
-        this.background.fillStyle(0x000000, 0.7);
+        this.background.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
         this.background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         this.background.setAlpha(0);
         this.hudContainer.add(this.background);
         
         // Create victory/defeat text with better styling
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
-        const textColor = isVictory ? '#FFFFFF' : '#FF6B6B';
+        const textColor = isVictory ? CLIENT_CONFIG.VICTORY_COLORS.VICTORY : CLIENT_CONFIG.VICTORY_COLORS.DEFEAT;
         
         this.victoryText = this.scene.add.text(
             getCanvasWidth() / 2,

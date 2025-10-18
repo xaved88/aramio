@@ -65,6 +65,10 @@ export const CLIENT_CONFIG = {
         GAME_UI: 1000,          // Stats overlay, game interface
         MODALS: 2000            // Victory screen, modals
     } as const,
+    VICTORY_COLORS: {
+        VICTORY: '#4CAF50', // green for victory
+        DEFEAT: '#F44336',  // red for defeat
+    },
     VICTORY_SCREEN: {
         FADE_IN_DURATION_MS: 1000, // 1 second fade in
         FADE_OUT_DURATION_MS: 1000, // 1 second fade out
@@ -285,22 +289,17 @@ export const CLIENT_CONFIG = {
                 color: '#ffffff'
             },
             
-            // UI elements
-            BUTTON_PRIMARY: {
+            BUTTON_TEXT: {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff',
-                backgroundColor: '#3498db',
-                padding: { x: 15, y: 8 }
+                color: '#ffffff'
             },
-            BUTTON_DISABLED: {
+            BUTTON_TEXT_DISABLED: {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#888888',
-                backgroundColor: '#4A4A4A',
-                padding: { x: 15, y: 8 }
+                color: '#888888'
             },
             // Specialized text
             HUD_TEXT: {
@@ -310,33 +309,38 @@ export const CLIENT_CONFIG = {
                 color: '#ffffff',
                 stroke: '#000000',
                 strokeThickness: 1
+            },
+            ERROR: {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ff0000'
             }
         },
+        BUTTON_COLORS: {
+            STANDARD: 0x3498db, // blue for standard buttons
+            STANDARD_HOVER: 0x5dade2, // blue hover for standard buttons
+            PROCEED: 0x4CAF50, // green for proceed/action buttons
+            PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
+            DISABLED: 0x4A4A4A, // gray for disabled buttons
+        },
         COLORS: {
-            TEXT_PRIMARY: 0xffffff,
-            TEXT_SECONDARY: 0x000000,
-            ERROR: 0xff0000,
-            VICTORY: 0x2ecc71, // green
-            DEFEAT: 0xe74c3c, // red
-            PRIMARY: 0x3498db, // blue
-            TEXT: 0xffffff, // white
             BACKGROUND: 0x2c3e50, // dark blue-gray
-            PROCEED_BUTTON: 0x4CAF50, // green for proceed/action buttons
-            PROCEED_BUTTON_HOVER: 0x388E3C, // green hover for proceed/action buttons
-            ACTION_BUTTON: 0x3498db, // blue for general action buttons
-            ACTION_BUTTON_HOVER: 0x5dade2, // blue hover for general action buttons
             DISABLED: 0x7f8c8d, // gray
-            BLUE: 0x3498db, // blue
-            RED: 0xe74c3c, // red
+            BLUE_TEAM: 0x3498db, // blue for blue team
+            RED_TEAM: 0xe74c3c, // red for red team
             ACCENT: 0x34495e, // darker accent color
-            SECONDARY: 0x95a5a6, // gray secondary
             BORDER: 0x7f8c8d, // gray border
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
             VIEWPORT: 0x1a252f, // Darker blue-gray for viewport background
-            GAME_MAP: 0x2c3e50, // Original color for game map area
-            LOBBY: 0x2c3e50, // Original blue background for lobby
+            GAME_MAP: 0x2c3e50,
+            LOBBY: 0x2c3e50,
+        },
+        OVERLAY: {
+            BACKGROUND: 0x000000, // black overlay background
+            ALPHA: 0.7, // overlay transparency
         },
     },
     XP_EVENTS: {
