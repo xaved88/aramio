@@ -185,6 +185,7 @@ export const GAMEPLAY_CONFIG = {
             MAX: 2.2, // The max % of cooldown to wait before firing again
         },
         AWARENESS_RANGE: 200, // Range within which bots count friends and enemies for retreat decisions
+        BOT_BEHAVIOR: 'original', // Bot behavior type: 'original' or 'improved'
     },
     REWARDS: {
         LEVEL_CHESTS: {

@@ -5,6 +5,7 @@ import { STATIONARY_CONFIG } from './StationaryConfig';
 import { STATIONARY_NORMAL_RANGE_CONFIG } from './StationaryNormalRangeConfig';
 import { MERCENARY_ONLY_CONFIG } from './MercenaryOnlyConfig';
 import { PRACTICE_CONFIG } from './PracticeConfig';
+import { IMPROVED_BOTS_CONFIG } from './ImprovedBotsConfig';
 
 export type GameplayConfig = any; // Type alias for now, will be made strict later
 
@@ -15,11 +16,16 @@ export class ConfigProvider {
         // Register available configs
         this.registerConfig('default', GAMEPLAY_CONFIG);
         this.registerConfig('practice', PRACTICE_CONFIG);
+        this.registerConfig('improved-bots', IMPROVED_BOTS_CONFIG);
         this.registerConfig('test: higher-level', HIGHER_LEVEL_TESTING_CONFIG);
         this.registerConfig('test: death-effects', DEATH_EFFECTS_TESTING_CONFIG);
         this.registerConfig('test: no-move', STATIONARY_NORMAL_RANGE_CONFIG);
         this.registerConfig('test: no-move-high-range', STATIONARY_CONFIG);
         this.registerConfig('test: mercenary-only', MERCENARY_ONLY_CONFIG);
+        this.registerConfig('higher-level-testing', HIGHER_LEVEL_TESTING_CONFIG);
+        this.registerConfig('death-effects-testing', DEATH_EFFECTS_TESTING_CONFIG);
+        this.registerConfig('stationary-high-range', STATIONARY_CONFIG);
+        this.registerConfig('stationary-normal-range', STATIONARY_NORMAL_RANGE_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {
