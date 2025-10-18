@@ -22,10 +22,6 @@ export class ConfigProvider {
         this.registerConfig('test: no-move', STATIONARY_NORMAL_RANGE_CONFIG);
         this.registerConfig('test: no-move-high-range', STATIONARY_CONFIG);
         this.registerConfig('test: mercenary-only', MERCENARY_ONLY_CONFIG);
-        this.registerConfig('higher-level-testing', HIGHER_LEVEL_TESTING_CONFIG);
-        this.registerConfig('death-effects-testing', DEATH_EFFECTS_TESTING_CONFIG);
-        this.registerConfig('stationary-high-range', STATIONARY_CONFIG);
-        this.registerConfig('stationary-normal-range', STATIONARY_NORMAL_RANGE_CONFIG);
     }
 
     registerConfig(name: string, config: GameplayConfig): void {

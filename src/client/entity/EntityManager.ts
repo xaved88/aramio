@@ -529,25 +529,29 @@ export class EntityManager {
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
-        // Assign to main camera
+        // Assign to main camera and apply inverse zoom to counteract camera zoom
         if (this.cameraManager) {
             this.cameraManager.assignToMainCamera(xpText);
+            const currentZoom = this.cameraManager.camera.zoom;
+            xpText.setScale(1 / currentZoom);
         }
         
         // Create secondary text for hero name if available
         let heroNameText: Phaser.GameObjects.Text | null = null;
         if (xpEvent.type === 'heroKill' && xpEvent.targetName) {
             const fontStyle = xpEvent.targetIsBot ? 'italic' : 'normal';
-            heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 18, xpEvent.targetName, {
-                fontSize: '14px',
+            heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 12, xpEvent.targetName, {
+                fontSize: '17px',
                 color: color,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 fontStyle: fontStyle
             }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY);
             
-            // Assign to main camera
+            // Assign to main camera and apply inverse zoom to counteract camera zoom
             if (this.cameraManager) {
                 this.cameraManager.assignToMainCamera(heroNameText);
+                const currentZoom = this.cameraManager.camera.zoom;
+                heroNameText.setScale(1 / currentZoom);
             }
         }
         
@@ -676,9 +680,11 @@ export class EntityManager {
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
-        // Assign to main camera
+        // Assign to main camera and apply inverse zoom to counteract camera zoom
         if (this.cameraManager) {
             this.cameraManager.assignToMainCamera(levelUpText);
+            const currentZoom = this.cameraManager.camera.zoom;
+            levelUpText.setScale(1 / currentZoom);
         }
         
         // Animate the text floating up and fading out

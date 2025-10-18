@@ -354,8 +354,8 @@ export const CLIENT_CONFIG = {
             LAST_HIT: '#ffff00', // Yellow for last hits (minion and hero kills)
         },
         FONTS: {
-            DEFAULT_SIZE: '16px',
-            HERO_KILL_SIZE: '18px', // Larger font for hero kills
+            DEFAULT_SIZE: '21px',
+            HERO_KILL_SIZE: '23px', // Larger font for hero kills
         },
         ANIMATION: {
             FLOAT_DISTANCE: 30, // How far the text floats up
@@ -364,7 +364,7 @@ export const CLIENT_CONFIG = {
     },
     LEVEL_UP_EVENTS: {
         COLOR: '#ffd700', // Gold color for level up
-        FONT_SIZE: '20px',
+        FONT_SIZE: '26px',
         ANIMATION: {
             FLOAT_DISTANCE: 50, // How far the text floats up
             DURATION_MS: 3000,
