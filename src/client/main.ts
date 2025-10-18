@@ -2,13 +2,16 @@ import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
 import { GameScene } from './scenes/GameScene';
 import { LobbyScene } from './scenes/LobbyScene';
+import { getCanvasSize } from './utils/CanvasSize';
+
+const { width, height } = getCanvasSize();
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: CLIENT_CONFIG.GAME_CANVAS_WIDTH,
-    height: CLIENT_CONFIG.GAME_CANVAS_HEIGHT,
+    width,
+    height,
     parent: 'game-container',
-    backgroundColor: CLIENT_CONFIG.UI.BACKGROUND.GAME_CANVAS,
+    backgroundColor: CLIENT_CONFIG.UI.BACKGROUND.VIEWPORT,
     scene: [LobbyScene, GameScene],
     physics: {
         default: 'arcade',

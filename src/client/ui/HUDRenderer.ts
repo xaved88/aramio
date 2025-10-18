@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 
 /**
@@ -81,22 +82,19 @@ export class HUDRenderer {
         this.hudContainer!.add(healthBar);
         
         // Create health text
-        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, 'XXX / YYY', {
-            fontSize: '15px',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold',
-            color: hexToColorString(healthConfig.TEXT_COLOR),
-            stroke: '#000000',
-            strokeThickness: 1,
-            shadow: {
-                offsetX: 1,
-                offsetY: 1,
-                color: '#000000',
-                blur: 2,
-                stroke: true,
-                fill: true
-            }
-        }).setOrigin(0.5);
+        const healthText = this.scene.add.text(healthConfig.X + healthConfig.WIDTH / 2, healthConfig.Y + healthConfig.HEIGHT / 2, 'XXX / YYY', 
+            TextStyleHelper.getStyleWithCustom('HUD_TEXT', {
+                color: hexToColorString(healthConfig.TEXT_COLOR),
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
+            })
+        ).setOrigin(0.5);
         healthText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         healthText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer!.add(healthText);

@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { IconManager } from '../utils/IconManager';
 
 export class PermanentEffectsDisplay {
@@ -119,7 +121,7 @@ export class PermanentEffectsDisplay {
             const col = index % iconsPerRow;
             
             // Calculate right-aligned position (start from right, go left)
-            const baseX = config.START_X - col * (config.ICON_SIZE + config.SPACING) - config.ICON_SIZE / 2;
+            const baseX = getCanvasWidth() - 20 - col * (config.ICON_SIZE + config.SPACING) - config.ICON_SIZE / 2;
             const baseY = config.Y + row * (config.ICON_SIZE + config.SPACING) + config.ICON_SIZE / 2;
             
             // Create stacked icons with slight offsets to show stacking (going down)
@@ -288,18 +290,12 @@ export class PermanentEffectsDisplay {
         const description = this.formatEffectDescription(rewardDisplay.description, operator, amount);
         
         // Create temporary text to measure dimensions
-        const tempTitle = this.scene.add.text(0, 0, title, {
-            fontSize: '16px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
-        const tempDesc = this.scene.add.text(0, 0, description, {
-            fontSize: '14px',
-            color: '#cccccc',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            wordWrap: { width: 200 }
-        });
+        const tempTitle = this.scene.add.text(0, 0, title, 
+            TextStyleHelper.getStyle('BODY_MEDIUM'));
+        const tempDesc = this.scene.add.text(0, 0, description, 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                wordWrap: { width: 200 }
+            }));
         
         const titleWidth = tempTitle.width;
         const descWidth = Math.max(tempDesc.width, 150);
@@ -314,19 +310,13 @@ export class PermanentEffectsDisplay {
         tooltipBg.strokeRoundedRect(tooltipX, tooltipY, totalWidth, totalHeight, 4);
         
         // Create actual tooltip text
-        const titleText = this.scene.add.text(tooltipX + 10, tooltipY + 10, title, {
-            fontSize: '16px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const titleText = this.scene.add.text(tooltipX + 10, tooltipY + 10, title, 
+            TextStyleHelper.getStyle('BODY_MEDIUM'));
         
-        const descText = this.scene.add.text(tooltipX + 10, tooltipY + 30, description, {
-            fontSize: '14px',
-            color: '#cccccc',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            wordWrap: { width: totalWidth - 20 }
-        });
+        const descText = this.scene.add.text(tooltipX + 10, tooltipY + 30, description, 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                wordWrap: { width: totalWidth - 20 }
+            }));
         
         // Clean up temporary text
         tempTitle.destroy();

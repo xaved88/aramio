@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { HUDContainer } from './HUDContainer';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 
 export enum NotificationType {
     SUPERMINION_SPAWN = 'superminion_spawn',
@@ -102,12 +104,10 @@ export class NotificationOverlay {
         this.hudContainer.add(this.background);
         
         // Create title text
-        this.titleText = this.scene.add.text(0, 0, '', {
-            fontSize: '24px',
-            fontFamily: 'Arial',
-            color: '#FFFFFF',
-            align: 'center'
-        });
+        this.titleText = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('TITLE_SMALL', {
+                align: 'center'
+            }));
         this.titleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
         this.titleText.setScrollFactor(0);
         this.titleText.setOrigin(0.5, 0.5);
@@ -115,12 +115,10 @@ export class NotificationOverlay {
         this.hudContainer.add(this.titleText);
         
         // Create subtitle text
-        this.subtitleText = this.scene.add.text(0, 0, '', {
-            fontSize: '14px',
-            fontFamily: 'Arial',
-            color: '#FFFFFF',
-            align: 'center'
-        });
+        this.subtitleText = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                align: 'center'
+            }));
         this.subtitleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
         this.subtitleText.setScrollFactor(0);
         this.subtitleText.setOrigin(0.5, 0.5);
@@ -165,8 +163,8 @@ export class NotificationOverlay {
         // Create background with team color
         const overlayWidth = 400;
         const overlayHeight = 80;
-        const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-        const centerY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 4; // Top quarter of screen
+        const centerX = getCanvasWidth() / 2;
+        const centerY = getCanvasHeight() / 4; // Top quarter of screen
         
         this.background?.clear();
         this.background?.fillStyle(teamColor, 0.9);

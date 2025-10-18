@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { Client } from 'colyseus.js';
 import { LobbyState, PlayerSlot } from '../../shared/types/LobbyTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ConnectionManager } from '../ConnectionManager';
 import { PlayerNameStorage } from '../utils/PlayerNameStorage';
@@ -113,6 +115,9 @@ export class LobbyScene extends Phaser.Scene {
         
         // Hide the default cursor (use custom cursor like in game)
         this.input.setDefaultCursor('none');
+        
+        // Create lobby background
+        this.createLobbyBackground();
         
         // Reset all state for fresh scene
         this.resetSceneState();
@@ -241,37 +246,31 @@ export class LobbyScene extends Phaser.Scene {
     }
 
     private createUI() {
-        const centerX = this.cameras.main.width / 2;
-        const centerY = this.cameras.main.height / 2;
+        const centerX = getCanvasWidth() / 2;
+        const centerY = getCanvasHeight() / 2;
 
         // Add pyromancer icon and title
-        const pyromancerIcon = this.add.image(centerX - 115, 50, 'pyromancer-icon');
+        const pyromancerIcon = this.add.image(centerX - 115, centerY - 300, 'pyromancer-icon');
         pyromancerIcon.setScale(0.6);
         pyromancerIcon.setOrigin(0.5);
 
-        const titleText = this.add.text(centerX + 25, 50, 'ARAM.IO Lobby', {
-            fontSize: '32px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.PRIMARY),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }).setOrigin(0.5);
+        const titleText = this.add.text(centerX + 25, centerY - 300, 'ARAM.IO Lobby', 
+            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', CLIENT_CONFIG.UI.COLORS.PRIMARY)
+        ).setOrigin(0.5);
 
         // Team size selector
-        this.add.text(centerX, 120, 'Team Size:', {
-            fontSize: '20px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this.add.text(centerX, centerY - 230, 'Team Size:', 
+            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT)
+        ).setOrigin(0.5);
 
         // Team size buttons
         for (let i = 1; i <= 5; i++) {
-            const button = this.add.text(centerX - 80 + (i - 1) * 40, 150, i.toString(), {
-                fontSize: '20px',
-                color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                padding: { x: 8, y: 4 }
-            }).setOrigin(0.5).setInteractive();
+            const button = this.add.text(centerX - 80 + (i - 1) * 40, centerY - 200, i.toString(), 
+                TextStyleHelper.getStyleWithCustom('HEADER', {
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    padding: { x: 8, y: 4 }
+                })
+            ).setOrigin(0.5).setInteractive();
 
             // Add hover effects
             this.addHoverEffect(button, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
@@ -284,20 +283,16 @@ export class LobbyScene extends Phaser.Scene {
         }
 
         // Config selector
-        this.add.text(centerX, 220, 'Config:', {
-            fontSize: '20px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this.add.text(centerX, centerY - 130, 'Config:', 
+            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT)
+        ).setOrigin(0.5);
 
-        this.configValue = this.add.text(centerX, 250, 'default', {
-            fontSize: '18px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-            padding: { x: 10, y: 5 }
-        }).setOrigin(0.5).setInteractive();
+        this.configValue = this.add.text(centerX, centerY - 100, 'default', 
+            TextStyleHelper.getStyleWithCustom('BODY_LARGE', {
+                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                padding: { x: 10, y: 5 }
+            })
+        ).setOrigin(0.5).setInteractive();
 
         // Add hover effects
         this.addHoverEffect(this.configValue, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
@@ -310,36 +305,27 @@ export class LobbyScene extends Phaser.Scene {
                 this.configDropdownItems = [];
             } else {
                 // Open dropdown
-                this.toggleConfigDropdown(centerX, 280);
+                this.toggleConfigDropdown(centerX, centerY - 70);
             }
         });
 
         // Team containers
-        this.blueTeamContainer = this.add.container(centerX - 200, 320);
-        this.redTeamContainer = this.add.container(centerX + 200, 320);
+        const teamY = centerY; // Position teams at the center
+        this.blueTeamContainer = this.add.container(centerX - 200, teamY);
+        this.redTeamContainer = this.add.container(centerX + 200, teamY);
 
-        this.add.text(centerX - 200, 280, 'Blue Team', {
-            fontSize: '22px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this.add.text(centerX - 200, teamY - 40, 'Blue Team', 
+            TextStyleHelper.getStyleWithColor('TITLE_SMALL', CLIENT_CONFIG.UI.COLORS.BLUE)
+        ).setOrigin(0.5);
 
-        this.add.text(centerX + 200, 280, 'Red Team', {
-            fontSize: '22px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this.add.text(centerX + 200, teamY - 40, 'Red Team', 
+            TextStyleHelper.getStyleWithColor('TITLE_SMALL', CLIENT_CONFIG.UI.COLORS.RED)
+        ).setOrigin(0.5);
 
-        // Start button (near bottom of screen)
-        this.startButton = this.add.text(centerX, 620, 'Start Game', {
-            fontSize: '24px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
-            padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setInteractive();
+        // Start button (below How to Play button)
+        this.startButton = this.add.text(centerX, centerY + 250, 'Start Game', 
+            TextStyleHelper.getButtonStyle(true, CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
+        ).setOrigin(0.5).setInteractive();
 
         // Add hover effects for start button - will be updated in updateUI based on state
         this.startButton.on('pointerover', () => {
@@ -362,7 +348,7 @@ export class LobbyScene extends Phaser.Scene {
         });
 
         // How to Play section (above start button)
-        const howToPlayY = 560;
+        const howToPlayY = centerY + 200;
         
         // Tutorial button with text (entire element is clickable)
         this.createTutorialButton(centerX, howToPlayY);
@@ -386,7 +372,7 @@ export class LobbyScene extends Phaser.Scene {
         const padding = 10;
         this.versionText = this.add.text(
             centerX,
-            this.cameras.main.height - padding,
+            getCanvasHeight() - padding,
             versionDisplay,
             {
                 fontSize: '12px',
@@ -433,21 +419,15 @@ export class LobbyScene extends Phaser.Scene {
         bg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         
         // Question mark text
-        const questionMark = this.add.text(-60, 0, '?', {
-            fontSize: '20px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        });
+        const questionMark = this.add.text(-60, 0, '?', 
+            TextStyleHelper.getStyleWithColor('HEADER', CLIENT_CONFIG.UI.COLORS.TEXT_PRIMARY)
+        );
         questionMark.setOrigin(0.5, 0.5);
         
         // "How to Play" text
-        const howToPlayText = this.add.text(-35, 0, 'How to Play', {
-            fontSize: '18px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        });
+        const howToPlayText = this.add.text(-35, 0, 'How to Play', 
+            TextStyleHelper.getStyleWithColor('BODY_LARGE', CLIENT_CONFIG.UI.COLORS.TEXT)
+        );
         howToPlayText.setOrigin(0, 0.5);
         
         // Add elements to container
@@ -933,5 +913,21 @@ export class LobbyScene extends Phaser.Scene {
                 cleanup();
             }
         });
+    }
+
+    /**
+     * Creates a background for the lobby scene
+     * This overrides the viewport background to use the original blue color
+     */
+    private createLobbyBackground(): void {
+        // Create a graphics object for the lobby background
+        const lobbyBackground = this.add.graphics();
+        
+        // Set it to the lowest depth so it appears behind everything else
+        lobbyBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.SCENE_BACKGROUND);
+        
+        // Fill the entire canvas with the lobby background color
+        lobbyBackground.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
+        lobbyBackground.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
     }
 }

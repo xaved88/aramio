@@ -3,6 +3,8 @@ import { COMBATANT_TYPES, isHeroCombatant, HeroCombatant, ControllerId } from '.
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { HUDContainer } from './HUDContainer';
 
 interface PlayerStats {
@@ -91,31 +93,6 @@ export class StatsOverlay {
         UI_CONTENT: CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 1
     } as const;
 
-    // Text styles for consistent appearance
-    private readonly TEXT_STYLES = {
-        HEADER: {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        },
-        GAME_TIME: {
-            fontSize: '20px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        },
-        TEAM_TOTALS: {
-            fontSize: '18px',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        },
-        NO_PLAYERS: {
-            fontSize: '15px',
-            color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        }
-    } as const;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -207,7 +184,7 @@ export class StatsOverlay {
      * Creates team header with consistent styling
      */
     private createTeamInfo(x: number, y: number, teamName: string, teamColor: string): void {
-        const header = this.scene.add.text(x, y, teamName, { ...this.TEXT_STYLES.HEADER, color: teamColor });
+        const header = this.scene.add.text(x, y, teamName, TextStyleHelper.getStyleWithColor('TITLE_SMALL', teamColor));
         header.setDepth(this.DEPTHS.UI_CONTENT);
         header.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(header);
@@ -228,7 +205,7 @@ export class StatsOverlay {
         
         const background = this.scene.add.graphics();
         background.fillStyle(0x000000, 0.7);
-        background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+        background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         background.setDepth(this.DEPTHS.BACKGROUND);
         background.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(background);
@@ -238,11 +215,11 @@ export class StatsOverlay {
         const blueTeamStats = playerStats.filter(p => p.team === 'blue');
         const redTeamStats = playerStats.filter(p => p.team === 'red');
 
-        const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+        const centerX = getCanvasWidth() / 2;
         const tableWidth = this.getTotalTableWidth();
         const tableX = centerX - tableWidth / 2 - 30;
 
-        const gameTimeText = this.scene.add.text(centerX, 35, `Game Time: ${this.formatGameTime(state.gameTime)}`, this.TEXT_STYLES.GAME_TIME);
+        const gameTimeText = this.scene.add.text(centerX, 35, `Game Time: ${this.formatGameTime(state.gameTime)}`, TextStyleHelper.getStyle('HEADER'));
         gameTimeText.setOrigin(0.5, 0);
         gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
         gameTimeText.setScrollFactor(0, 0); // Fixed to screen
@@ -271,7 +248,7 @@ export class StatsOverlay {
      */
     private createTeamTable(stats: PlayerStats[], startX: number, startY: number, teamColor: string): void {
         if (stats.length === 0) {
-            const noPlayersText = this.scene.add.text(startX, startY, 'No players', this.TEXT_STYLES.NO_PLAYERS);
+            const noPlayersText = this.scene.add.text(startX, startY, 'No players', TextStyleHelper.getStyleWithColor('BODY_SMALL', '#888888'));
             noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
             noPlayersText.setScrollFactor(0, 0); // Fixed to screen
             this.overlayElements.push(noPlayersText);
@@ -369,12 +346,10 @@ export class StatsOverlay {
             finalColor = this.hexNumberToString(respawnColor);
         }
         
-        const cell = this.scene.add.text(x, y, text, {
-            fontSize: '15px',
+        const cell = this.scene.add.text(x, y, text, TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
             color: finalColor,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             fontStyle: isBot ? 'italic' : 'normal'
-        });
+        }));
         
         if (align === 'right') {
             cell.setOrigin(1, 0);
@@ -504,15 +479,11 @@ export class StatsOverlay {
         
         // Position in upper right corner with same padding as health bar (20px)
         this.victoryDefeatText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH - 20,
+            getCanvasWidth() - 20,
             20,
             text,
-            {
-                fontSize: '48px',
+            TextStyleHelper.getStyleWithCustom('TITLE_LARGE', {
                 color: textColor,
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                stroke: '#000000',
                 strokeThickness: 3,
                 shadow: {
                     offsetX: 2,
@@ -521,7 +492,7 @@ export class StatsOverlay {
                     blur: 4,
                     fill: true
                 }
-            }
+            })
         ).setOrigin(1, 0).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0); // Right-aligned origin
         
         this.hudContainer.add(this.victoryDefeatText);
@@ -534,22 +505,15 @@ export class StatsOverlay {
     private addBackToLobbyButton(): void {
         if (!this.hudContainer) return;
         
-        const buttonX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-        const buttonY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 35;
+        const buttonX = getCanvasWidth() / 2;
+        const buttonY = getCanvasHeight() - 35;
         
         // Create button text with background (like lobby buttons)
         this.backToLobbyButton = this.scene.add.text(
             buttonX,
             buttonY,
             'Back to Lobby',
-            {
-                fontSize: '24px',
-                color: '#FFFFFF',
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON),
-                padding: { x: 20, y: 10 }
-            }
+            TextStyleHelper.getButtonStyle(true, CLIENT_CONFIG.UI.COLORS.PROCEED_BUTTON)
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0).setInteractive();
         
         this.hudContainer.add(this.backToLobbyButton);

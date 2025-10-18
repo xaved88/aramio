@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { hexToColorString } from '../utils/ColorUtils';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 
 /**
  * Simple loading screen component that shows "Loading..." text
@@ -19,14 +21,10 @@ export class LoadingScreen {
         }
 
         this.loadingText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2,
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2,
             'Loading...',
-            {
-                fontSize: '24px',
-                color: hexToColorString(0xffffff),
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-            }
+            TextStyleHelper.getTitleStyle('small')
         ).setOrigin(0.5);
     }
 

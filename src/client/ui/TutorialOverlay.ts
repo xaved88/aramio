@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { hexToColorString } from '../utils/ColorUtils';
 
@@ -62,18 +64,20 @@ export class TutorialOverlay {
     private buildContent(): void {
         if (!this.contentContainer) return;
         
-        const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-        const startY = 40;
+        const centerX = getCanvasWidth() / 2;
+        const centerY = getCanvasHeight() / 2;
         const contentWidth = 600;
+        const contentHeight = Math.min(700, getCanvasHeight() - 60); // Max 700px height, with 30px margin
         const leftX = centerX - contentWidth / 2;
+        const startY = centerY - contentHeight / 2;
         
-        // Panel background - sized to contain all content
-        const panelHeight = CLIENT_CONFIG.GAME_CANVAS_HEIGHT - (startY - 20) * 2; // Symmetric padding
+        // Panel background - centered
+        const panelHeight = contentHeight;
         const panelBg = this.scene.add.graphics();
         panelBg.fillStyle(0x2c3e50, 0.95);
-        panelBg.fillRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight, 10);
+        panelBg.fillRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
         panelBg.lineStyle(2, 0x3498db, 1);
-        panelBg.strokeRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight, 10);
+        panelBg.strokeRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
         this.contentContainer.add(panelBg);
         
         // Close button (X) in top right corner of panel
@@ -85,12 +89,8 @@ export class TutorialOverlay {
         closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
-        const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', {
-            fontSize: '28px',
-            color: hexToColorString(CLIENT_CONFIG.UI.COLORS.TEXT),
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        });
+        const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
+            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', CLIENT_CONFIG.UI.COLORS.TEXT));
         closeText.setOrigin(0.5);
         this.contentContainer.add(closeText);
         
@@ -122,12 +122,8 @@ export class TutorialOverlay {
         let currentY = startY;
         
         // Title
-        const title = this.scene.add.text(centerX, currentY, 'Welcome to ARAM.IO!', {
-            fontSize: '32px',
-            color: '#3498db',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const title = this.scene.add.text(centerX, currentY, 'Welcome to ARAM.IO!', 
+            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', '#3498db'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
@@ -135,25 +131,18 @@ export class TutorialOverlay {
         // Welcome text
         const welcomeText = this.scene.add.text(centerX, currentY, 
             'Casual MOBA action! Level up, unlock abilities,\nand destroy the enemy Cradle to claim victory!', 
-            {
-                fontSize: '16px',
-                color: '#ffffff',
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
-                wordWrap: { width: contentWidth - 40 },
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-            }
+                wordWrap: { width: contentWidth - 40 }
+            })
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
         currentY += 70;
         
         // Controls section
-        const controlsTitle = this.scene.add.text(leftX, currentY, 'How to Play:', {
-            fontSize: '20px',
-            color: '#f1c40f',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const controlsTitle = this.scene.add.text(leftX, currentY, 'How to Play:', 
+            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
         this.contentContainer.add(controlsTitle);
         currentY += 30;
         
@@ -169,12 +158,10 @@ export class TutorialOverlay {
             '\'T\': Toggle this tutorial',
         ];
         
-        const controlsText = this.scene.add.text(leftX + 20, currentY, controlsList.join('\n'), {
-            fontSize: '14px',
-            color: '#ffffff',
-            lineSpacing: 5,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const controlsText = this.scene.add.text(leftX + 20, currentY, controlsList.join('\n'), 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                lineSpacing: 5
+            }));
         this.contentContainer.add(controlsText);
         
         // Hero visualization with attack radius (right side of controls) - moved up
@@ -197,22 +184,18 @@ export class TutorialOverlay {
         this.contentContainer.add(heroVisual);
         
         // Add "Your Hero" label beneath the hero
-        const heroLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 27, 'Your Hero', {
-            fontSize: '12px',
-            color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const heroLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 27, 'Your Hero', 
+            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
         heroLabel.setOrigin(0.5);
         this.contentContainer.add(heroLabel);
         
         // Add label for attack radius (to the right of the circle)
-        const radiusLabel = this.scene.add.text(heroVisualizationX + 62, heroVisualizationY, 'Auto-Attack\nRadius', {
-            fontSize: '11px',
-            color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            align: 'left',
-            lineSpacing: 2
-        });
+        const radiusLabel = this.scene.add.text(heroVisualizationX + 62, heroVisualizationY, 'Auto-Attack\nRadius', 
+            TextStyleHelper.getStyleWithCustom('BODY_TINY', {
+                color: '#888888',
+                align: 'left',
+                lineSpacing: 2
+            }));
         radiusLabel.setOrigin(0, 0.5);
         this.contentContainer.add(radiusLabel);
         
@@ -226,12 +209,8 @@ export class TutorialOverlay {
             { key: 'minion-archer', name: 'Archer', size: 24 }
         ];
         
-        const minionsTitle = this.scene.add.text(entitiesStartX - 14, entitiesY, 'Minions:', {
-            fontSize: '12px',
-            color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        });
+        const minionsTitle = this.scene.add.text(entitiesStartX - 14, entitiesY, 'Minions:', 
+            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
         minionsTitle.setOrigin(0, 0.5);
         this.contentContainer.add(minionsTitle);
         
@@ -243,11 +222,8 @@ export class TutorialOverlay {
             this.contentContainer.add(entityImage);
             
             // Entity label
-            const entityLabel = this.scene.add.text(entitiesStartX + entity.size / 2 + 10, minionY, entity.name, {
-                fontSize: '13px',
-                color: '#cccccc',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-            });
+            const entityLabel = this.scene.add.text(entitiesStartX + entity.size / 2 + 10, minionY, entity.name, 
+                TextStyleHelper.getStyleWithColor('BODY_SMALL', '#cccccc'));
             entityLabel.setOrigin(0, 0.5);
             this.contentContainer.add(entityLabel);
             
@@ -261,12 +237,8 @@ export class TutorialOverlay {
             { key: 'structure-cradle', name: 'Cradle', size: 28 }
         ];
         
-        const structuresTitle = this.scene.add.text(structuresStartX - 14, entitiesY, 'Structures:', {
-            fontSize: '12px',
-            color: '#888888',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            fontStyle: 'bold'
-        });
+        const structuresTitle = this.scene.add.text(structuresStartX - 14, entitiesY, 'Structures:', 
+            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
         structuresTitle.setOrigin(0, 0.5);
         this.contentContainer.add(structuresTitle);
         
@@ -279,11 +251,8 @@ export class TutorialOverlay {
             this.contentContainer.add(entityImage);
             
             // Entity label
-            const entityLabel = this.scene.add.text(structuresStartX + entity.size / 2 + 10, structureY, entity.name, {
-                fontSize: '13px',
-                color: '#cccccc',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-            });
+            const entityLabel = this.scene.add.text(structuresStartX + entity.size / 2 + 10, structureY, entity.name, 
+                TextStyleHelper.getStyleWithColor('BODY_SMALL', '#cccccc'));
             entityLabel.setOrigin(0, 0.5);
             this.contentContainer.add(entityLabel);
             
@@ -293,12 +262,8 @@ export class TutorialOverlay {
         currentY += 170;
         
         // Heroes section
-        const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Abilities:', {
-            fontSize: '20px',
-            color: '#f1c40f',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Abilities:', 
+            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
         this.contentContainer.add(heroesTitle);
         currentY += 60;
         
@@ -334,36 +299,24 @@ export class TutorialOverlay {
             // Hero name (bold and larger)
             const heroName = this.scene.add.text(x + heroIconSize / 2 + 10, y - 15, 
                 hero.name, 
-                {
-                    fontSize: '15px',
-                    color: '#ffffff',
-                    fontStyle: 'bold',
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-                }
+                TextStyleHelper.getStyle('BODY_SMALL')
             );
             this.contentContainer.add(heroName);
             
             // Hero description (smaller and normal weight)
             const heroDesc = this.scene.add.text(x + heroIconSize / 2 + 10, y + 2, 
                 hero.desc, 
-                {
-                    fontSize: '12px',
-                    color: '#cccccc',
-                    wordWrap: { width: 120 },
-                    fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-                }
+                TextStyleHelper.getStyleWithCustom('BODY_TINY', {
+                    wordWrap: { width: 120 }
+                })
             );
             this.contentContainer.add(heroDesc);
         }
         currentY += 100;
         
         // Advanced Controls section
-        const advancedControlsTitle = this.scene.add.text(leftX, currentY, 'Advanced Controls:', {
-            fontSize: '20px',
-            color: '#f1c40f',
-            fontStyle: 'bold',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const advancedControlsTitle = this.scene.add.text(leftX, currentY, 'Advanced Controls:', 
+            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
         this.contentContainer.add(advancedControlsTitle);
         currentY += 30;
         
@@ -376,12 +329,10 @@ export class TutorialOverlay {
             '- Keyboard Mode: \'WASD\' to move',
         ];
         
-        const advancedControlsText = this.scene.add.text(leftX + 20, currentY, advancedControlsList.join('\n'), {
-            fontSize: '14px',
-            color: '#ffffff',
-            lineSpacing: 5,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        const advancedControlsText = this.scene.add.text(leftX + 20, currentY, advancedControlsList.join('\n'), 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                lineSpacing: 5
+            }));
         this.contentContainer.add(advancedControlsText);
         
         // Pyromancer icon visualization (right side of advanced controls)
@@ -440,7 +391,7 @@ export class TutorialOverlay {
         if (this.overlay) {
             this.overlay.clear();
             this.overlay.fillStyle(0x000000, 0.7);
-            this.overlay.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+            this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         }
     }
 

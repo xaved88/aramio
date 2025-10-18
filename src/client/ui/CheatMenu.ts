@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { hexToColorString } from '../utils/ColorUtils';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
@@ -33,39 +35,6 @@ export class CheatMenu {
         UI_CONTENT: CLIENT_CONFIG.RENDER_DEPTH.MODALS + 1
     } as const;
 
-    // Text styles for consistent appearance
-    private readonly TEXT_STYLES = {
-        TITLE: {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            stroke: '#000000',
-            strokeThickness: 2
-        },
-        BUTTON: {
-            fontSize: '18px',
-            color: '#FFFFFF',
-            fontStyle: 'bold',
-            backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.ACTION_BUTTON),
-            padding: { x: 15, y: 8 }
-        },
-        BUTTON_DISABLED: {
-            fontSize: '18px',
-            color: '#888888',
-            fontStyle: 'bold',
-            backgroundColor: '#4A4A4A',
-            padding: { x: 15, y: 8 }
-        },
-        DESCRIPTION: {
-            fontSize: '14px',
-            color: '#CCCCCC'
-        },
-        KEYBIND: {
-            fontSize: '12px',
-            color: '#FFFF00',
-            fontStyle: 'bold'
-        }
-    } as const;
 
     constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig) {
         this.scene = scene;
@@ -176,21 +145,21 @@ export class CheatMenu {
         // Create semi-transparent background (matching stats overlay)
         const background = this.scene.add.graphics();
         background.fillStyle(0x000000, 0.7);
-        background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+        background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         background.setDepth(this.DEPTHS.BACKGROUND);
         background.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(background);
         this.hudContainer.add(background);
 
-        const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-        const centerY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2;
+        const centerX = getCanvasWidth() / 2;
+        const centerY = getCanvasHeight() / 2;
 
         // Create title
         const title = this.scene.add.text(
             centerX,
             80,
             'Cheat Menu',
-            this.TEXT_STYLES.TITLE
+            TextStyleHelper.getTitleStyle('medium')
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
         this.overlayElements.push(title);
         this.hudContainer.add(title);
@@ -213,7 +182,7 @@ export class CheatMenu {
     private createCheatButton(cheat: CheatOption, x: number, y: number): void {
         if (!this.hudContainer) return;
 
-        const buttonStyle = cheat.enabled ? this.TEXT_STYLES.BUTTON : this.TEXT_STYLES.BUTTON_DISABLED;
+        const buttonStyle = TextStyleHelper.getButtonStyle(cheat.enabled);
         
         // Create main button
         const button = this.scene.add.text(
@@ -232,7 +201,7 @@ export class CheatMenu {
             x,
             y + 35,
             cheat.description,
-            this.TEXT_STYLES.DESCRIPTION
+            TextStyleHelper.getStyleWithColor('BODY_SMALL', '#cccccc')
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
         
         this.hudContainer.add(description);
@@ -243,7 +212,10 @@ export class CheatMenu {
             x + 120,
             y,
             `(${cheat.key})`,
-            this.TEXT_STYLES.KEYBIND
+            TextStyleHelper.getStyleWithCustom('BODY_TINY', {
+                color: '#ffff00',
+                fontStyle: 'bold'
+            })
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
         
         this.hudContainer.add(keybindText);

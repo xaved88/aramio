@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { RewardCard } from './RewardCard';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 
@@ -40,8 +42,8 @@ export class RewardCardManager {
         const cardSpacing = 30;
         const numCards = Math.min(3, hero.rewardsForChoice.length);
         const totalWidth = (cardWidth * numCards) + (cardSpacing * (numCards - 1));
-        const startX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2 - totalWidth / 2;
-        const cardY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 + 90; // Moved down further
+        const startX = getCanvasWidth() / 2 - totalWidth / 2;
+        const cardY = getCanvasHeight() / 2 + 90; // Moved down further
 
         // Display chest name if available
         if (hero.levelRewards && hero.levelRewards.length > 0) {
@@ -50,17 +52,15 @@ export class RewardCardManager {
             
             // Create chest name text at bottom of screen
             this.chestNameText = this.scene.add.text(
-                CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-                CLIENT_CONFIG.GAME_CANVAS_HEIGHT - 20,
+                getCanvasWidth() / 2,
+                getCanvasHeight() - 20,
                 chestName,
-                {
-                    fontSize: '14px',
+                TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
                     color: '#888888',
-                    fontStyle: 'normal',
                     align: 'center',
                     stroke: '#000000',
                     strokeThickness: 1
-                }
+                })
             );
             this.chestNameText.setOrigin(0.5);
             this.chestNameText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -80,7 +80,7 @@ export class RewardCardManager {
             
             const card = new RewardCard(this.scene, {
                 x: cardX,
-                y: CLIENT_CONFIG.GAME_CANVAS_HEIGHT + 300, // Start off-screen at bottom
+                y: getCanvasHeight() + 300, // Start off-screen at bottom
                 width: cardWidth,
                 height: cardHeight,
                 rewardId: rewardId,

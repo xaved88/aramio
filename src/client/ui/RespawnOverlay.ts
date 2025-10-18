@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { RewardCardManager } from './RewardCardManager';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { HUDContainer } from './HUDContainer';
@@ -63,17 +65,13 @@ export class RespawnOverlay {
         // Create "Slain by" text (above "Respawning")
         this.slainByText = this.scene.add.text(
             0, // Will be positioned dynamically
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Above the main text
+            getCanvasHeight() / 7, // Above the main text
             'Slain by ',
-            {
-                fontSize: '20px',
-                color: '#ffffff',
-                fontStyle: 'normal',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
-            }
+            })
         );
         this.slainByText.setOrigin(0, 0.5); // Left-aligned
         this.slainByText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -83,17 +81,13 @@ export class RespawnOverlay {
         // Create killer name text (colored based on team)
         this.killerNameText = this.scene.add.text(
             0, // Will be positioned dynamically
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7, // Same position as "Slain by"
+            getCanvasHeight() / 7, // Same position as "Slain by"
             '',
-            {
-                fontSize: '20px',
-                color: '#ffffff',
-                fontStyle: 'normal',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
-            }
+            })
         );
         this.killerNameText.setOrigin(0, 0.5); // Left-aligned
         this.killerNameText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -102,17 +96,14 @@ export class RespawnOverlay {
         
         // Create death summary hint text (below "Slain by")
         this.deathSummaryHint = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 30, // Below the "Slain by" text
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 7 + 30, // Below the "Slain by" text
             'Hold "Shift" for Death Summary',
-            {
-                fontSize: '14px',
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
                 color: '#999999',
-                fontStyle: 'normal',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 1
-            }
+            })
         );
         this.deathSummaryHint.setOrigin(0.5);
         this.deathSummaryHint.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -121,18 +112,14 @@ export class RespawnOverlay {
         this.hudContainer.add(this.deathSummaryHint);
         
         this.text = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 90, // Moved down
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 7 + 90, // Moved down
             'Respawning',
-            {
-                fontSize: '36px',
-                color: '#ffffff',
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            TextStyleHelper.getStyleWithCustom('TITLE_MEDIUM', {
                 stroke: '#000000',
                 strokeThickness: 4,
                 shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 4, fill: true }
-            }
+            })
         );
         this.text.setOrigin(0.5);
         this.text.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -140,18 +127,14 @@ export class RespawnOverlay {
         this.hudContainer.add(this.text);
         
         this.timer = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 135, // Moved down with text
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 7 + 135, // Moved down with text
             '',
-            {
-                fontSize: '20px',
-                color: '#ffffff',
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
                 strokeThickness: 3,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
-            }
+            })
         );
         this.timer.setOrigin(0.5); // Center-aligned
         this.timer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -165,18 +148,15 @@ export class RespawnOverlay {
         this.hudContainer.add(this.timerCircle);
         
         this.rewardsText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 6 + 190, // Moved down and closer to reward cards
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2 - 60, // Positioned higher above the reward cards
             'Choose your rewards',
-            {
-                fontSize: '24px',
+            TextStyleHelper.getStyleWithCustom('TITLE_SMALL', {
                 color: '#f1c40f',
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 stroke: '#000000',
                 strokeThickness: 2,
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
-            }
+            })
         );
         this.rewardsText.setOrigin(0.5);
         this.rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
@@ -286,8 +266,8 @@ export class RespawnOverlay {
             if (!timerReady && this.respawnDuration > 0) {
                 const respawnProgress = Math.max(0, Math.min(1, (this.respawnDuration - remainingTimeMs) / this.respawnDuration));
                 
-                const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
-                const centerY = CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 7 + 135;
+                const centerX = getCanvasWidth() / 2;
+                const centerY = getCanvasHeight() / 7 + 135;
                 const radius = 22; // Smaller radius around the timer text
                 
                 this.timerCircle.lineStyle(7, 0xffffff, 0.8); // Thicker white line
@@ -338,7 +318,7 @@ export class RespawnOverlay {
                 
                 // Center the combined text
                 const totalWidth = this.slainByText.width + this.killerNameText.width;
-                const centerX = CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2;
+                const centerX = getCanvasWidth() / 2;
                 this.slainByText.setX(centerX - (totalWidth / 2));
                 this.killerNameText.setX(centerX - (totalWidth / 2) + this.slainByText.width);
             } else {
@@ -352,7 +332,7 @@ export class RespawnOverlay {
         if (this.overlay) {
             this.overlay.clear();
             this.overlay.fillStyle(0x000000, 0.3);
-            this.overlay.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+            this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         }
     }
 

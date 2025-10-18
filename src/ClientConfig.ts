@@ -14,7 +14,14 @@ export const CLIENT_CONFIG = {
         'thorndive': 1.25,
     } as Record<string, number>,
     CAMERA: {
-        ZOOM: 1.3, // 30% zoom (1.0 = no zoom, 1.3 = 30% zoom)
+        DYNAMIC_ZOOM: {
+            MIN_ZOOM: 1.0, // Zoom at smallest canvas size
+            MAX_ZOOM: 2.5, // Zoom at largest canvas size
+        },
+        CANVAS_SIZE: {
+            MIN_SIZE: 350, // Minimum canvas size in pixels
+            MAX_SIZE: 1400, // Maximum canvas size in pixels
+        },
         LOOK_AHEAD_THRESHOLD: 0.3, // 50% threshold - when mouse is at edge, hero appears at 25% from edge instead of 50% (center)
         SHAKE: {
             ENABLED: false,
@@ -28,10 +35,9 @@ export const CLIENT_CONFIG = {
             DURATION_MS: 200, // how long the flash lasts
         },
     },
-    // Canvas/Viewport size (what the player sees)
-    GAME_CANVAS_WIDTH: 700,
-    GAME_CANVAS_HEIGHT: 700,
-    // Map size (actual game world size)
+    // Canvas/Viewport size is now calculated dynamically in main.ts
+    // Use getCanvasWidth() and getCanvasHeight() from utils/CanvasSize.ts instead
+    // Map size (actual game world size) - game units
     MAP_WIDTH: 700,
     MAP_HEIGHT: 700,
     CRADLE_SIZE: 25, // 25x25 square
@@ -44,6 +50,7 @@ export const CLIENT_CONFIG = {
     },
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
+        SCENE_BACKGROUND: -10,    // Scene backgrounds (behind everything)
         BACKGROUND: -5,         // Radius indicators, respawn rings
         STRUCTURES: 0,          // Turrets, cradles
         TARGETING_LINES: 1,     // Targeting lines between combatants
@@ -227,6 +234,84 @@ export const CLIENT_CONFIG = {
             VICTORY: '48px',
             PRIMARY: 'Arial',
         },
+        TEXT_STYLES: {
+            // Headers and titles
+            TITLE_LARGE: {
+                fontSize: '72px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 4
+            },
+            TITLE_MEDIUM: {
+                fontSize: '32px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff'
+            },
+            TITLE_SMALL: {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff'
+            },
+            HEADER: {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff'
+            },
+            
+            // Body text
+            BODY_LARGE: {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            },
+            BODY_MEDIUM: {
+                fontSize: '16px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            },
+            BODY_SMALL: {
+                fontSize: '14px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            },
+            BODY_TINY: {
+                fontSize: '12px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            },
+            
+            // UI elements
+            BUTTON_PRIMARY: {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff',
+                backgroundColor: '#3498db',
+                padding: { x: 15, y: 8 }
+            },
+            BUTTON_DISABLED: {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#888888',
+                backgroundColor: '#4A4A4A',
+                padding: { x: 15, y: 8 }
+            },
+            // Specialized text
+            HUD_TEXT: {
+                fontSize: '15px',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 1
+            }
+        },
         COLORS: {
             TEXT_PRIMARY: 0xffffff,
             TEXT_SECONDARY: 0x000000,
@@ -249,7 +334,9 @@ export const CLIENT_CONFIG = {
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
-            GAME_CANVAS: 0x2c3e50,
+            VIEWPORT: 0x1a252f, // Darker blue-gray for viewport background
+            GAME_MAP: 0x2c3e50, // Original color for game map area
+            LOBBY: 0x2c3e50, // Original blue background for lobby
         },
     },
     XP_EVENTS: {

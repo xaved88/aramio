@@ -1,5 +1,6 @@
 import { VictoryScreen } from '../VictoryScreen';
 import { CLIENT_CONFIG } from '../../../ClientConfig';
+import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 
 // Mock Phaser
 const mockScene = {
@@ -51,8 +52,8 @@ describe('VictoryScreen', () => {
         victoryScreen.showVictory('blue', 'blue');
         
         expect(mockScene.add.text).toHaveBeenCalledWith(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2,
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2,
             'VICTORY!',
             expect.objectContaining({
                 fontSize: '72px',
@@ -75,8 +76,8 @@ describe('VictoryScreen', () => {
         victoryScreen.showVictory('blue', 'red');
         
         expect(mockScene.add.text).toHaveBeenCalledWith(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2,
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2,
             'DEFEAT!',
             expect.objectContaining({
                 fontSize: '72px',

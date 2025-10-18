@@ -2,9 +2,10 @@ import { CameraManager } from '../CameraManager';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { ControllerId } from '../../shared/types/CombatantTypes';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 
 // Mock Phaser.Scene
-const mockScene = {
+const createMockScene = () => ({
     cameras: {
         main: {
             setZoom: jest.fn(),
@@ -30,11 +31,13 @@ const mockScene = {
     },
     input: {
         activePointer: {
-            x: 350, // Default to center
-            y: 350,
+            x: getCanvasWidth() * 0.5, // Default to center
+            y: getCanvasHeight() * 0.5,
         },
     },
-} as any;
+} as any);
+
+let mockScene = createMockScene();
 
 // Mock EntityManager
 const mockEntityManager = {
@@ -53,8 +56,9 @@ describe('CameraManager', () => {
     let mockState: SharedGameState;
 
     beforeEach(() => {
-        // Reset all mocks
+        // Reset all mocks and recreate scene with current canvas size
         jest.clearAllMocks();
+        mockScene = createMockScene();
         
         cameraManager = new CameraManager(mockScene);
         cameraManager.setEntityManager(mockEntityManager);
@@ -92,12 +96,14 @@ describe('CameraManager', () => {
             mockEntityManager.getEntityGraphics.mockReturnValue({ x: 0, y: 0 });
             
             // Add a player hero to the state
+            const canvasWidth = getCanvasWidth();
+            const canvasHeight = getCanvasHeight();
             mockState.combatants.set('hero1', {
                 id: 'hero1',
                 type: 'hero',
                 controller: 'test-session' as ControllerId,
-                x: 350,
-                y: 350,
+                x: canvasWidth * 0.5,
+                y: canvasHeight * 0.5,
                 health: 100,
                 maxHealth: 100,
                 team: 'blue',
@@ -166,12 +172,14 @@ describe('CameraManager', () => {
             mockEntityManager.getEntityGraphics.mockReturnValue({ x: 0, y: 0 });
             
             // Add first hero
+            const canvasWidth1 = getCanvasWidth();
+            const canvasHeight1 = getCanvasHeight();
             mockState.combatants.set('hero1', {
                 id: 'hero1',
                 type: 'hero',
                 controller: 'test-session' as ControllerId,
-                x: 350,
-                y: 350,
+                x: canvasWidth1 * 0.5,
+                y: canvasHeight1 * 0.5,
                 health: 100,
                 maxHealth: 100,
                 team: 'blue',
@@ -223,12 +231,14 @@ describe('CameraManager', () => {
 
             // Add second hero and remove first
             mockState.combatants.delete('hero1');
+            const canvasWidth2 = getCanvasWidth();
+            const canvasHeight2 = getCanvasHeight();
             mockState.combatants.set('hero2', {
                 id: 'hero2',
                 type: 'hero',
                 controller: 'test-session' as ControllerId,
-                x: 400,
-                y: 400,
+                x: canvasWidth2 * 0.6,
+                y: canvasHeight2 * 0.6,
                 health: 100,
                 maxHealth: 100,
                 team: 'blue',
@@ -284,8 +294,8 @@ describe('CameraManager', () => {
     describe('camera bounds and viewport', () => {
         it('should return correct viewport size', () => {
             const viewport = cameraManager.getViewportSize();
-            expect(viewport.width).toBe(CLIENT_CONFIG.GAME_CANVAS_WIDTH);
-            expect(viewport.height).toBe(CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+            expect(viewport.width).toBe(getCanvasWidth());
+            expect(viewport.height).toBe(getCanvasHeight());
         });
 
         it('should return correct map size', () => {
@@ -312,12 +322,14 @@ describe('CameraManager', () => {
         beforeEach(() => {
             cameraManager.setPlayerSessionId('test-session' as ControllerId);
             // Set up a hero to follow
+            const canvasWidth = getCanvasWidth();
+            const canvasHeight = getCanvasHeight();
             mockState.combatants.set('hero1', {
                 id: 'hero1',
                 type: 'hero',
                 controller: 'test-session' as ControllerId,
-                x: 350,
-                y: 350,
+                x: canvasWidth * 0.5,
+                y: canvasHeight * 0.5,
                 health: 100,
                 maxHealth: 100,
                 team: 'blue',
@@ -375,9 +387,11 @@ describe('CameraManager', () => {
         });
 
         it('should calculate zero offset when mouse is at center', () => {
-            // Mouse at center (350, 350) with viewport 700x700
-            mockScene.input.activePointer.x = 350;
-            mockScene.input.activePointer.y = 350;
+            // Mouse at center
+            const canvasWidthCenter = getCanvasWidth();
+            const canvasHeightCenter = getCanvasHeight();
+            mockScene.input.activePointer.x = canvasWidthCenter * 0.5;
+            mockScene.input.activePointer.y = canvasHeightCenter * 0.5;
             
             cameraManager.updateCamera(mockState);
             
@@ -387,8 +401,10 @@ describe('CameraManager', () => {
 
         it('should calculate positive offset when mouse is to the right', () => {
             // Mouse to the right of center
-            mockScene.input.activePointer.x = 525; // 75% to the right
-            mockScene.input.activePointer.y = 350; // center vertically
+            const canvasWidthRight = getCanvasWidth();
+            const canvasHeightRight = getCanvasHeight();
+            mockScene.input.activePointer.x = canvasWidthRight * 0.75; // 75% to the right
+            mockScene.input.activePointer.y = canvasHeightRight * 0.5; // center vertically
             
             cameraManager.updateCamera(mockState);
             
@@ -401,8 +417,10 @@ describe('CameraManager', () => {
 
         it('should calculate negative offset when mouse is to the left', () => {
             // Mouse to the left of center
-            mockScene.input.activePointer.x = 175; // 75% to the left
-            mockScene.input.activePointer.y = 350; // center vertically
+            const canvasWidthLeft = getCanvasWidth();
+            const canvasHeightLeft = getCanvasHeight();
+            mockScene.input.activePointer.x = canvasWidthLeft * 0.25; // 75% to the left
+            mockScene.input.activePointer.y = canvasHeightLeft * 0.5; // center vertically
             
             cameraManager.updateCamera(mockState);
             
@@ -415,8 +433,10 @@ describe('CameraManager', () => {
 
         it('should calculate offset when mouse is at edge', () => {
             // Mouse at right edge
-            mockScene.input.activePointer.x = 700; // Right edge
-            mockScene.input.activePointer.y = 350; // center vertically
+            const canvasWidthEdge = getCanvasWidth();
+            const canvasHeightEdge = getCanvasHeight();
+            mockScene.input.activePointer.x = canvasWidthEdge - 10; // Near right edge
+            mockScene.input.activePointer.y = canvasHeightEdge * 0.5; // center vertically
             
             cameraManager.updateCamera(mockState);
             
@@ -430,8 +450,10 @@ describe('CameraManager', () => {
 
         it('should update mouse position during updateCamera', () => {
             // Change mouse position
-            mockScene.input.activePointer.x = 400;
-            mockScene.input.activePointer.y = 300;
+            const canvasWidthUpdate = getCanvasWidth();
+            const canvasHeightUpdate = getCanvasHeight();
+            mockScene.input.activePointer.x = canvasWidthUpdate * 0.6;
+            mockScene.input.activePointer.y = canvasHeightUpdate * 0.4;
             
             cameraManager.updateCamera(mockState);
             

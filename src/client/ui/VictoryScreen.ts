@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 
 export class VictoryScreen {
     private scene: Phaser.Scene;
@@ -63,7 +65,7 @@ export class VictoryScreen {
         this.background.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
         this.background.setScrollFactor(0); // Make background camera-independent
         this.background.fillStyle(0x000000, 0.7);
-        this.background.fillRect(0, 0, CLIENT_CONFIG.GAME_CANVAS_WIDTH, CLIENT_CONFIG.GAME_CANVAS_HEIGHT);
+        this.background.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         this.background.setAlpha(0);
         this.hudContainer.add(this.background);
         
@@ -72,14 +74,11 @@ export class VictoryScreen {
         const textColor = isVictory ? '#FFFFFF' : '#FF6B6B';
         
         this.victoryText = this.scene.add.text(
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH / 2,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2,
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2,
             text,
-            {
-                fontSize: '72px',
+            TextStyleHelper.getStyleWithCustom('TITLE_LARGE', {
                 color: textColor,
-                fontStyle: 'bold',
-                stroke: '#000000',
                 strokeThickness: 4,
                 shadow: {
                     offsetX: 2,
@@ -88,7 +87,7 @@ export class VictoryScreen {
                     blur: 4,
                     fill: true
                 }
-            }
+            })
         ).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS).setScrollFactor(0).setAlpha(0); // Make text camera-independent
         
         this.hudContainer.add(this.victoryText);

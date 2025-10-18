@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { IconManager } from '../utils/IconManager';
 
@@ -252,13 +253,11 @@ export class RewardCard {
             0, 
             config.height / 2 - 80, 
             config.title || `Reward ${config.rewardId}`,
-            {
-                fontSize: '16px',
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 color: '#333333',
-                fontStyle: 'bold',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                align: 'center'
-            }
+                align: 'center',
+                fontStyle: 'bold'
+            })
         );
         this.titleText.setOrigin(0.5);
         this.hudContainer.add(this.titleText);
@@ -268,13 +267,11 @@ export class RewardCard {
             0, 
             config.height / 2 - 45, 
             config.description || 'Click to claim this reward',
-            {
-                fontSize: '16px',
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 color: '#666666',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 align: 'center',
                 wordWrap: { width: config.width - 30 }
-            }
+            })
         );
         this.descriptionText.setOrigin(0.5);
         this.hudContainer.add(this.descriptionText);

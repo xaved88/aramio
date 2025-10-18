@@ -3,6 +3,8 @@ import { HUDContainer } from './HUDContainer';
 import { DamageEvent } from '../../shared/types/CombatantTypes';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { TextStyleHelper } from '../utils/TextStyleHelper';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 
 export interface DamageEntry {
     amount: number; // final damage after armor reduction
@@ -67,7 +69,7 @@ export class DamageTakenOverlay {
         }
 
         // Position on the left side of the screen, vertically centered
-        this.hudContainer.setPosition(20, CLIENT_CONFIG.GAME_CANVAS_HEIGHT / 2 - 150);
+        this.hudContainer.setPosition(20, getCanvasHeight() / 2 - 150);
 
         // Create semi-transparent background
         this.background = this.scene.add.graphics();
@@ -76,24 +78,19 @@ export class DamageTakenOverlay {
         this.hudContainer.add(this.background);
 
         // Create title (will be updated dynamically)
-        this.titleText = this.scene.add.text(10, 10, '', {
-            fontSize: '16px',
-            color: '#ff6b6b',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-        });
+        this.titleText = this.scene.add.text(10, 10, '', 
+            TextStyleHelper.getStyleWithColor('BODY_MEDIUM', '#ff6b6b'));
         this.hudContainer.add(this.titleText);
 
         // Create damage entries container
         this.createDamageEntries();
         
         // Create breakdown text at the bottom
-        this.breakdownText = this.scene.add.text(10, 275, '', {
-            fontSize: '15px',
-            color: '#ffffff',
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-            stroke: '#000000',
-            strokeThickness: 1
-        });
+        this.breakdownText = this.scene.add.text(10, 275, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                stroke: '#000000',
+                strokeThickness: 1
+            }));
         this.hudContainer.add(this.breakdownText);
     }
 
@@ -104,11 +101,8 @@ export class DamageTakenOverlay {
 
         // Create placeholder entries (will be updated with real data)
         for (let i = 0; i < 12; i++) {
-            const entry = this.scene.add.text(10, 35 + (i * 18), '', {
-                fontSize: '15px',
-                color: '#ffffff',
-                fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
-            });
+            const entry = this.scene.add.text(10, 35 + (i * 18), '', 
+                TextStyleHelper.getStyle('BODY_SMALL'));
             this.hudContainer!.add(entry);
             this.damageEntries.push(entry);
         }

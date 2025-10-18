@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
+import { getCanvasWidth, getCanvasHeight, getDynamicZoom } from './utils/CanvasSize';
 import { ControllerId } from '../shared/types/CombatantTypes';
 import { SharedGameState } from '../shared/types/GameStateTypes';
 
@@ -25,8 +26,8 @@ export class CameraManager {
         this.camera = scene.cameras.main;
         
         // Viewport size (what the player sees)
-        this.viewportWidth = CLIENT_CONFIG.GAME_CANVAS_WIDTH;
-        this.viewportHeight = CLIENT_CONFIG.GAME_CANVAS_HEIGHT;
+        this.viewportWidth = getCanvasWidth();
+        this.viewportHeight = getCanvasHeight();
         
         // Map size (actual game world size)
         this.mapWidth = CLIENT_CONFIG.MAP_WIDTH;
@@ -39,10 +40,9 @@ export class CameraManager {
 
     private setupCamera(): void {
         // Configure main camera for game world
-        this.camera.setZoom(CLIENT_CONFIG.CAMERA.ZOOM);
+        this.camera.setZoom(getDynamicZoom());
         this.camera.setBounds(0, 0, this.mapWidth, this.mapHeight);
         this.camera.setViewport(0, 0, this.viewportWidth, this.viewportHeight);
-        this.camera.centerOn(this.mapWidth / 2, this.mapHeight / 2);
         
         // Configure HUD camera for UI elements only
         this.hudCamera.setZoom(1.0);

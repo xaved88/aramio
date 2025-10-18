@@ -3,6 +3,7 @@ import { COMBATANT_TYPES, isHeroCombatant, ControllerId } from '../../shared/typ
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { CLIENT_CONFIG } from '../../ClientConfig';
+import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { HUDRenderer } from './HUDRenderer';
 import { VictoryScreen } from './VictoryScreen';
 import { StatsOverlay } from './StatsOverlay';
@@ -158,8 +159,8 @@ export class UIManager {
         const padding = 10;
         this.controlModeToggle = new ControlModeToggle(
             this.scene,
-            CLIENT_CONFIG.GAME_CANVAS_WIDTH - padding - 15,
-            CLIENT_CONFIG.GAME_CANVAS_HEIGHT - padding - 15,
+            getCanvasWidth() - padding - 15,
+            getCanvasHeight() - padding - 15,
             (mode) => {
                 // Update input handler when mode changes
                 if (this.inputHandler) {
