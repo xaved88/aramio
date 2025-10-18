@@ -114,6 +114,10 @@ export class Button extends Phaser.GameObjects.Text {
      * Sets up hover effects for the button
      */
     private setupHoverEffects(): void {
+        // Remove existing hover listeners to prevent duplicates
+        this.off('pointerover');
+        this.off('pointerout');
+        
         const normalColor = this.getNormalColor();
         const hoverColor = this.getHoverColor();
 
@@ -130,6 +134,9 @@ export class Button extends Phaser.GameObjects.Text {
      * Sets up the click handler for the button
      */
     private setupClickHandler(): void {
+        // Remove existing click listener to prevent duplicates
+        this.off('pointerdown');
+        
         if (this.onClick) {
             this.on('pointerdown', () => {
                 if (this.enabled) {
