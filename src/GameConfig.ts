@@ -397,7 +397,7 @@ export const GAMEPLAY_CONFIG = {
             'default': ['ability:range', 'ability:cooldown', 'abilityPower'],
             'hookshot': ['ability:range', 'ability:cooldown', 'ability:duration', 'ability:speed', 'abilityPower'],
             'mercenary': ['ability:duration', 'ability:cooldown', 'ability:mercenaryRageSpeed'],
-            'pyromancer': ['ability:range', 'ability:cooldown', 'ability:duration', 'ability:speed', 'ability:pyromancerRadius', 'abilityPower'],
+            'pyromancer': ['ability:range', 'ability:cooldown', 'ability:duration', 'ability:pyromancerRadius', 'abilityPower'],
             'thorndive': ['ability:range', 'ability:cooldown', 'ability:duration', 'abilityPower'],
             'sniper': ['ability:range', 'ability:cooldown', 'ability:speed', 'abilityPower']
         }
