@@ -185,17 +185,13 @@ export class TutorialOverlay {
         
         // Add "Your Hero" label beneath the hero
         const heroLabel = this.scene.add.text(heroVisualizationX, heroVisualizationY + 27, 'Your Hero', 
-            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
+            TextStyleHelper.getSubtleHintStyle());
         heroLabel.setOrigin(0.5);
         this.contentContainer.add(heroLabel);
         
         // Add label for attack radius (to the right of the circle)
         const radiusLabel = this.scene.add.text(heroVisualizationX + 62, heroVisualizationY, 'Auto-Attack\nRadius', 
-            TextStyleHelper.getStyleWithCustom('BODY_TINY', {
-                color: '#888888',
-                align: 'left',
-                lineSpacing: 2
-            }));
+            TextStyleHelper.getSubtleHintStyle());
         radiusLabel.setOrigin(0, 0.5);
         this.contentContainer.add(radiusLabel);
         
@@ -210,7 +206,7 @@ export class TutorialOverlay {
         ];
         
         const minionsTitle = this.scene.add.text(entitiesStartX - 14, entitiesY, 'Minions:', 
-            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
+            TextStyleHelper.getSubtleHintStyle());
         minionsTitle.setOrigin(0, 0.5);
         this.contentContainer.add(minionsTitle);
         
@@ -238,7 +234,7 @@ export class TutorialOverlay {
         ];
         
         const structuresTitle = this.scene.add.text(structuresStartX - 14, entitiesY, 'Structures:', 
-            TextStyleHelper.getStyleWithColor('BODY_TINY', '#888888'));
+            TextStyleHelper.getSubtleHintStyle());
         structuresTitle.setOrigin(0, 0.5);
         this.contentContainer.add(structuresTitle);
         

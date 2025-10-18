@@ -3,6 +3,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
+import { hexToColorString } from '../utils/ColorUtils';
 
 export class VictoryScreen {
     private scene: Phaser.Scene;
@@ -71,7 +72,7 @@ export class VictoryScreen {
         
         // Create victory/defeat text with better styling
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
-        const textColor = isVictory ? CLIENT_CONFIG.VICTORY_COLORS.VICTORY : CLIENT_CONFIG.VICTORY_COLORS.DEFEAT;
+        const textColor = isVictory ? hexToColorString(CLIENT_CONFIG.VICTORY_COLORS.VICTORY) : hexToColorString(CLIENT_CONFIG.VICTORY_COLORS.DEFEAT);
         
         this.victoryText = this.scene.add.text(
             getCanvasWidth() / 2,

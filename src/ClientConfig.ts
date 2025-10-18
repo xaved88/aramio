@@ -66,8 +66,8 @@ export const CLIENT_CONFIG = {
         MODALS: 2000            // Victory screen, modals
     } as const,
     VICTORY_COLORS: {
-        VICTORY: '#4CAF50', // green for victory
-        DEFEAT: '#F44336',  // red for defeat
+        VICTORY: 0x4CAF50, // green for victory
+        DEFEAT: 0xF44336,  // red for defeat
     },
     VICTORY_SCREEN: {
         FADE_IN_DURATION_MS: 1000, // 1 second fade in
@@ -288,6 +288,11 @@ export const CLIENT_CONFIG = {
                 fontFamily: 'Arial',
                 color: '#ffffff'
             },
+            SUBTLE_HINT: {
+                fontSize: '14px',
+                fontFamily: 'Arial',
+                color: '#888888'
+            },
             
             BUTTON_TEXT: {
                 fontSize: '18px',
@@ -323,12 +328,12 @@ export const CLIENT_CONFIG = {
             PROCEED: 0x4CAF50, // green for proceed/action buttons
             PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
             DISABLED: 0x4A4A4A, // gray for disabled buttons
+            SUBTLE: 0x2c3e50, // dark blue-gray background for subtle buttons
+            SUBTLE_HOVER: 0x34495e, // darker accent color for subtle button hover
         },
         COLORS: {
             BACKGROUND: 0x2c3e50, // dark blue-gray
             DISABLED: 0x7f8c8d, // gray
-            BLUE_TEAM: 0x3498db, // blue for blue team
-            RED_TEAM: 0xe74c3c, // red for red team
             ACCENT: 0x34495e, // darker accent color
             BORDER: 0x7f8c8d, // gray border
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle

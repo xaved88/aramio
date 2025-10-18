@@ -99,11 +99,7 @@ export class RespawnOverlay {
             getCanvasWidth() / 2,
             getCanvasHeight() / 7 + 30, // Below the "Slain by" text
             'Hold "Shift" for Death Summary',
-            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                color: '#999999',
-                stroke: '#000000',
-                strokeThickness: 1
-            })
+            TextStyleHelper.getSubtleHintStyle()
         );
         this.deathSummaryHint.setOrigin(0.5);
         this.deathSummaryHint.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);

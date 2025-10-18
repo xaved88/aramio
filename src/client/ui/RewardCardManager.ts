@@ -55,12 +55,7 @@ export class RewardCardManager {
                 getCanvasWidth() / 2,
                 getCanvasHeight() - 20,
                 chestName,
-                TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                    color: '#888888',
-                    align: 'center',
-                    stroke: '#000000',
-                    strokeThickness: 1
-                })
+                TextStyleHelper.getSubtleHintStyle()
             );
             this.chestNameText.setOrigin(0.5);
             this.chestNameText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);

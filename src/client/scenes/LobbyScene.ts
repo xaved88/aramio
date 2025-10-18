@@ -23,11 +23,11 @@ export class LobbyScene extends Phaser.Scene {
     
     // UI Elements
     private configValue!: Phaser.GameObjects.Text;
-    private configDropdownItems: Phaser.GameObjects.Text[] = [];
+    private configDropdownItems: Button[] = [];
     private blueTeamContainer!: Phaser.GameObjects.Container;
     private redTeamContainer!: Phaser.GameObjects.Container;
     private startButton!: Button;
-    private teamSizeButtons: Phaser.GameObjects.Text[] = [];
+    private teamSizeButtons: Button[] = [];
     private versionText!: Phaser.GameObjects.Text;
     private controlModeToggle!: ControlModeToggle;
     private tutorialOverlay!: TutorialOverlay;
@@ -266,20 +266,17 @@ export class LobbyScene extends Phaser.Scene {
 
         // Team size buttons
         for (let i = 1; i <= 5; i++) {
-            const button = this.add.text(centerX - 80 + (i - 1) * 40, centerY - 200, i.toString(), 
-                TextStyleHelper.getStyleWithCustom('HEADER', {
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    padding: { x: 8, y: 4 }
-                })
-            ).setOrigin(0.5).setInteractive();
-
-            // Add hover effects
-            this.addHoverEffect(button, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
-
-            button.on('pointerdown', () => {
-                this.room.send('setTeamSize', { size: i });
+            const button = new Button(this, {
+                x: centerX - 80 + (i - 1) * 40,
+                y: centerY - 200,
+                text: i.toString(),
+                type: 'subtle',
+                onClick: () => {
+                    this.room.send('setTeamSize', { size: i });
+                }
             });
 
+            this.add.existing(button);
             this.teamSizeButtons.push(button);
         }
 
@@ -366,11 +363,7 @@ export class LobbyScene extends Phaser.Scene {
             centerX,
             getCanvasHeight() - padding,
             versionDisplay,
-            TextStyleHelper.getStyleWithCustom('BODY_TINY', {
-                fontFamily: 'monospace',
-                fontStyle: 'italic',
-                color: '#888888'
-            })
+            TextStyleHelper.getSubtleHintStyle()
         ).setOrigin(0.5, 1);
 
         // Control mode toggle in bottom right
@@ -458,15 +451,17 @@ export class LobbyScene extends Phaser.Scene {
         this.teamSizeButtons.forEach((button, index) => {
             const size = index + 1;
             if (size === this.lobbyState!.teamSize) {
+                // Selected state: green stroke and text
                 button.setStyle({ 
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE),
                     stroke: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED),
                     strokeThickness: 2,
                     color: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED)
                 });
             } else {
+                // Unselected state: white text, no stroke
                 button.setStyle({ 
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
+                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE),
                     stroke: '',
                     strokeThickness: 0,
                     color: '#ffffff'
@@ -496,23 +491,19 @@ export class LobbyScene extends Phaser.Scene {
 
         items.forEach((name, idx) => {
             const y = startY + idx * 24;
-            const item = this.add.text(centerX, y, name, 
-                TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                    color: '#ffffff',
-                    backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                    padding: { x: 8, y: 3 }
-                })
-            ).setOrigin(0.5).setInteractive();
-
-            // Add hover effects
-            this.addHoverEffect(item, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
-
-            item.on('pointerdown', () => {
-                this.room.send('setConfig', { name });
-                this.configDropdownItems.forEach(i => i.destroy());
-                this.configDropdownItems = [];
+            const item = new Button(this, {
+                x: centerX,
+                y: y,
+                text: name,
+                type: 'dropdown',
+                onClick: () => {
+                    this.room.send('setConfig', { name });
+                    this.configDropdownItems.forEach(i => i.destroy());
+                    this.configDropdownItems = [];
+                }
             });
 
+            this.add.existing(item);
             this.configDropdownItems.push(item);
         });
     }
@@ -573,7 +564,7 @@ export class LobbyScene extends Phaser.Scene {
                 if (team !== 'blue') {
                     const arrowLeft = this.add.text(-100, y, '←', {
                         fontSize: '24px',
-                         color: hexToColorString(CLIENT_CONFIG.UI.COLORS.BLUE_TEAM),
+                         color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
                         padding: { x: 4, y: 2 }
@@ -603,7 +594,7 @@ export class LobbyScene extends Phaser.Scene {
                 if (team !== 'red') {
                     const arrowRight = this.add.text(100, y, '→', {
                         fontSize: '24px',
-                         color: hexToColorString(CLIENT_CONFIG.UI.COLORS.RED_TEAM),
+                         color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
                         padding: { x: 4, y: 2 }
@@ -631,20 +622,17 @@ export class LobbyScene extends Phaser.Scene {
 
                 // Add edit button for current player's own slot
                 if (isSelf) {
-                    const editButton = this.add.text(70, y, '✏️', {
-                        fontSize: '12px',
-                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                        padding: { x: 3, y: 2 }
-                    }).setOrigin(0.5).setInteractive();
-
-                    // Add hover effects
-                    this.addHoverEffect(editButton, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
-
-                    editButton.on('pointerdown', () => {
-                        this.showNameEditDialog(slot.playerDisplayName);
+                    const editButton = new Button(this, {
+                        x: 70,
+                        y: y,
+                        text: '✏️',
+                        type: 'icon',
+                        onClick: () => {
+                            this.showNameEditDialog(slot.playerDisplayName);
+                        }
                     });
 
+                    this.add.existing(editButton);
                     elementsToAdd.push(editButton);
                 }
 

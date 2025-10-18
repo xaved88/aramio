@@ -475,7 +475,7 @@ export class StatsOverlay {
         
         const isVictory = winningTeam === playerTeam;
         const text = isVictory ? 'VICTORY!' : 'DEFEAT!';
-        const textColor = isVictory ? CLIENT_CONFIG.VICTORY_COLORS.VICTORY : CLIENT_CONFIG.VICTORY_COLORS.DEFEAT;
+        const textColor = isVictory ? hexToColorString(CLIENT_CONFIG.VICTORY_COLORS.VICTORY) : hexToColorString(CLIENT_CONFIG.VICTORY_COLORS.DEFEAT);
         
         // Position in upper right corner with same padding as health bar (20px)
         this.victoryDefeatText = this.scene.add.text(

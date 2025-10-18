@@ -3,7 +3,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { hexToColorString } from '../utils/ColorUtils';
 import { TextStyleHelper } from '../utils/TextStyleHelper';
 
-export type ButtonType = 'standard' | 'proceed' | 'disabled';
+export type ButtonType = 'standard' | 'proceed' | 'disabled' | 'subtle' | 'dropdown' | 'icon';
 
 export interface ButtonConfig {
     x: number;
@@ -14,6 +14,53 @@ export interface ButtonConfig {
     enabled?: boolean;
     origin?: { x: number; y: number };
 }
+
+interface ButtonTypeConfig {
+    textStyle: string;
+    padding: { x: number; y: number };
+    buttonColor: number;
+    hoverColor: number;
+}
+
+// Button type configurations - centralized and easy to maintain
+const BUTTON_TYPE_CONFIGS: Record<ButtonType, ButtonTypeConfig> = {
+    standard: {
+        textStyle: 'BUTTON_TEXT',
+        padding: { x: 15, y: 8 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD_HOVER
+    },
+    proceed: {
+        textStyle: 'BUTTON_TEXT',
+        padding: { x: 15, y: 8 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED_HOVER
+    },
+    disabled: {
+        textStyle: 'BUTTON_TEXT_DISABLED',
+        padding: { x: 15, y: 8 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED
+    },
+    subtle: {
+        textStyle: 'BUTTON_TEXT',
+        padding: { x: 15, y: 8 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER
+    },
+    dropdown: {
+        textStyle: 'BODY_SMALL',
+        padding: { x: 8, y: 3 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER
+    },
+    icon: {
+        textStyle: 'BODY_TINY',
+        padding: { x: 5, y: 4 },
+        buttonColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE,
+        hoverColor: CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER
+    }
+};
 
 /**
  * Unified Button component that handles all button styling, hover effects, and interactions
@@ -48,26 +95,15 @@ export class Button extends Phaser.GameObjects.Text {
      * Gets the appropriate button style based on type and enabled state
      */
     private static getButtonStyle(type: ButtonType, enabled: boolean): Phaser.Types.GameObjects.Text.TextStyle {
-        // Get base text style from TextStyleHelper
-        const baseTextStyle = enabled ? TextStyleHelper.getStyle('BUTTON_TEXT') : TextStyleHelper.getStyle('BUTTON_TEXT_DISABLED');
+        const config = BUTTON_TYPE_CONFIGS[type];
+        const textStyle = enabled ? config.textStyle : 'BUTTON_TEXT_DISABLED';
+        const baseTextStyle = TextStyleHelper.getStyle(textStyle as any);
         
-        // Add button-specific properties
-        const buttonStyle = {
+        return {
             ...baseTextStyle,
-            padding: { x: 15, y: 8 }
+            padding: config.padding,
+            backgroundColor: hexToColorString(config.buttonColor)
         };
-
-        // Set background color based on button type and enabled state
-        if (!enabled || type === 'disabled') {
-            buttonStyle.backgroundColor = hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED);
-        } else if (type === 'proceed') {
-            buttonStyle.backgroundColor = hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
-        } else {
-            // standard type
-            buttonStyle.backgroundColor = hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD);
-        }
-
-        return buttonStyle;
     }
 
     /**
@@ -77,17 +113,7 @@ export class Button extends Phaser.GameObjects.Text {
         if (!this.enabled) {
             return CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED;
         }
-
-        switch (this.buttonType) {
-            case 'standard':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD_HOVER;
-            case 'proceed':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED_HOVER;
-            case 'disabled':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED;
-            default:
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD_HOVER;
-        }
+        return BUTTON_TYPE_CONFIGS[this.buttonType].hoverColor;
     }
 
     /**
@@ -97,17 +123,7 @@ export class Button extends Phaser.GameObjects.Text {
         if (!this.enabled) {
             return CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED;
         }
-
-        switch (this.buttonType) {
-            case 'standard':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD;
-            case 'proceed':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED;
-            case 'disabled':
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.DISABLED;
-            default:
-                return CLIENT_CONFIG.UI.BUTTON_COLORS.STANDARD;
-        }
+        return BUTTON_TYPE_CONFIGS[this.buttonType].buttonColor;
     }
 
     /**

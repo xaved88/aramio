@@ -85,9 +85,15 @@ export class TextStyleHelper {
      */
     static getTeamColor(team: 'blue' | 'red'): number {
         return team === 'blue' 
-            ? CLIENT_CONFIG.UI.COLORS.BLUE_TEAM
-            : CLIENT_CONFIG.UI.COLORS.RED_TEAM;
+            ? CLIENT_CONFIG.TEAM_COLORS.BLUE
+            : CLIENT_CONFIG.TEAM_COLORS.RED;
     }
 
+    /**
+     * Gets the subtle hint text style for secondary information
+     */
+    static getSubtleHintStyle(): Phaser.Types.GameObjects.Text.TextStyle {
+        return this.getStyle('SUBTLE_HINT');
+    }
 
 }
