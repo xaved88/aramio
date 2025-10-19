@@ -32,7 +32,7 @@ export class PathRenderer {
         const redCradle = this.gameplayConfig.CRADLE_POSITIONS.RED;
         
         // Calculate path dimensions
-        const pathWidth = 80;
+        const pathWidth = 160; // 80 * 2
         const dx = redCradle.x - blueCradle.x;
         const dy = redCradle.y - blueCradle.y;
         const pathLength = Math.sqrt(dx * dx + dy * dy);
@@ -60,8 +60,8 @@ export class PathRenderer {
         length: number,
         angle: number
     ): void {
-        const stoneSize = 8;
-        const stoneSpacing = 12;
+        const stoneSize = 16; // 8 * 2
+        const stoneSpacing = 24; // 12 * 2
         const rows = Math.ceil(width / stoneSpacing);
         const cols = Math.ceil(length / stoneSpacing);
         
@@ -69,7 +69,7 @@ export class PathRenderer {
         const baseColor = 0x6B6B6B;
         
         // Add gap between path and circles
-        const gapDistance = 45;
+        const gapDistance = 90; // 45 * 2
         
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
@@ -114,9 +114,9 @@ export class PathRenderer {
         redCradle: { x: number, y: number },
         width: number
     ): void {
-        const stoneSize = 8;
-        const stoneSpacing = 12;
-        const circleRadius = 60;
+        const stoneSize = 16; // 8 * 2
+        const stoneSpacing = 24; // 12 * 2
+        const circleRadius = 120; // 60 * 2
         const baseColor = 0x6B6B6B;
         
         // Draw circle around blue cradle

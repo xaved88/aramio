@@ -71,7 +71,7 @@ export class MercenaryBotStrategy {
         }
         
         // Check if we're outnumbered and should play defensively
-        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime)) {
+        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime, this.gameplayConfig)) {
             // Retreat to nearest friendly structure for defensive positioning
             const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
             commands.push({
@@ -429,7 +429,7 @@ export class MercenaryBotStrategy {
 
     private findNearbyEnemyTurret(bot: any, state: SharedGameState): any | null {
         const allCombatants = Array.from(state.combatants.values());
-        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
+        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, this.gameplayConfig.AI_BEHAVIOR.TURRET_DETECTION_RANGE);
     }
 
     private getDirectionFromTo(from: any, to: any): { x: number, y: number } {

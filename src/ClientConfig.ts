@@ -7,16 +7,16 @@ export const CLIENT_CONFIG = {
     },
     HERO_SPRITE_SCALES: {
         'default': 1.0,
-        'hookshot': 1.1,
-        'mercenary': 1.1,
-        'pyromancer': 1.1,
-        'sniper': 1.1,
+        'hookshot': 1.0,
+        'mercenary': 1.0,
+        'pyromancer': 1.0,
+        'sniper': 1.0,
         'thorndive': 1.25,
     } as Record<string, number>,
     CAMERA: {
         DYNAMIC_ZOOM: {
-            MIN_ZOOM: 1.0, // Zoom at smallest canvas size
-            MAX_ZOOM: 2.5, // Zoom at largest canvas size
+            MIN_ZOOM: 0.5, // 1.0 * 0.5
+            MAX_ZOOM: 1.25, // 2.5 * 0.5
         },
         CANVAS_SIZE: {
             MIN_SIZE: 350, // Minimum canvas size in pixels
@@ -38,11 +38,11 @@ export const CLIENT_CONFIG = {
     // Canvas/Viewport size is now calculated dynamically in main.ts
     // Use getCanvasWidth() and getCanvasHeight() from utils/CanvasSize.ts instead
     // Map size (actual game world size) - game units
-    MAP_WIDTH: 700,
-    MAP_HEIGHT: 700,
-    CRADLE_SIZE: 25, // 25x25 square
-    TURRET_SIZE: { width: 25, height: 40 }, // tall rectangle
-    MINION_SIZE: 12, // size for minion shapes
+    MAP_WIDTH: 1400,
+    MAP_HEIGHT: 1400,
+    CRADLE_SIZE: 50, // 25x25 square
+    TURRET_SIZE: { width: 50, height: 80 }, // tall rectangle
+    MINION_SIZE: 24, // size for minion shapes
     DEBUG: {
         SPAWN_LOCATION_INDICATORS_ENABLED: false, // Whether to show spawn position indicators
         WORLD_COORDINATE_GRID_ENABLED: false, // Whether to show world coordinate grid overlay
@@ -74,7 +74,7 @@ export const CLIENT_CONFIG = {
         FADE_OUT_DURATION_MS: 1000, // 1 second fade out
     },
     PROJECTILE: {
-        RADIUS: 6,
+        RADIUS: 12,
         BLUE_COLOR: 0x2980b9, // darker blue team color
         RED_COLOR: 0xc0392b,  // darker red team color
         BORDER_COLOR: 0x000000, // black border color
@@ -97,11 +97,17 @@ export const CLIENT_CONFIG = {
         RED: 0xf5b7b1, // lighter red (same as respawning)
         BASE_ALPHA: 0.2, // base alpha for other combatants
         PLAYER_BASE_ALPHA: 0.5, // higher alpha when player's hero is involved
-        LINE_THICKNESS: 2,
-        FLASH_LINE_THICKNESS: 3, // thicker line when flashing
-        OFFSET_PIXELS: 5, // offset for line endpoints to prevent overlap
+        LINE_THICKNESS: 4,
+        FLASH_LINE_THICKNESS: 6,
+        OFFSET_PIXELS: 10, // offset for line endpoints to prevent overlap
         FLASH_DURATION_MS: 100, // flash duration when attack fires
         FLASH_ALPHA: 0.9, // alpha during flash
+    },
+    TARGETING_ARROW: {
+        LENGTH: 50, // Length of the arrow
+        HEAD_SIZE: 16, // Size of the arrow head
+        LINE_WIDTH: 5, // Thickness of the arrow line
+        START_OFFSET: 40, // Distance from hero center to start arrow
     },
     ANIMATIONS: {
         ATTACK_TARGET_FLASH_DURATION_MS: 500, // target flash duration (increased from 500)
@@ -110,15 +116,15 @@ export const CLIENT_CONFIG = {
     },
     HIT_MARKERS: {
         DURATION_MS: 400, // how long hit markers stay visible
-        SIZE: 8, // size of the hit marker crosshair
-        THICKNESS: 2, // thickness of hit marker lines
+        SIZE: 16, // size of the hit marker crosshair
+        THICKNESS: 4, // thickness of hit marker lines
         COLORS: {
             AUTO_ATTACK: 0xffffff, // white for auto-attacks
             ABILITY: 0x9b59b6, // purple for abilities
         },
         OUTLINE: {
             COLOR: 0xffffff, // white outline
-            THICKNESS: 3, // outline thickness
+            THICKNESS: 6, // outline thickness
         },
         SCALE_ANIMATION: {
             START_SCALE: 0.5, // start smaller
@@ -129,27 +135,27 @@ export const CLIENT_CONFIG = {
     PROJECTILE_MISS_EFFECT: {
         DURATION_MS: 400, // how long the effect lasts
         PARTICLE_COUNT: 6, // number of particles in the puff
-        PARTICLE_SIZE: 3, // size of each particle
-        SPREAD_RADIUS: 8, // how far particles spread from center
+        PARTICLE_SIZE: 6, // size of each particle
+        SPREAD_RADIUS: 16, // how far particles spread from center
         FADE_OUT_DURATION_MS: 300, // how long particles take to fade out
     },
     MUZZLE_FLASH: {
         DURATION_MS: 120, // how long the flash lasts
-        SIZE: 8, // size of the flash effect
+        SIZE: 16, // size of the flash effect
         PARTICLE_COUNT: 6, // number of spark particles
-        PARTICLE_SIZE: 1.5, // size of each spark
-        SPREAD_RADIUS: 10, // how far sparks spread
+        PARTICLE_SIZE: 3, // size of each spark
+        SPREAD_RADIUS: 20, // how far sparks spread
         COLOR: 0xffffff, // white sparks for all abilities
         FADE_OUT_DURATION_MS: 80, // how long sparks take to fade out
     },
     RESPAWN_RING: {
-        RADIUS: 25, // slightly larger than player radius
-        THICKNESS: 3,
+        RADIUS: 50, // slightly larger than player radius
+        THICKNESS: 6,
         ALPHA: 0.8,
     },
     ABILITY_READY_INDICATOR: {
-        RADIUS: 17, // slightly larger than player radius
-        THICKNESS: 2,
+        RADIUS: 34, // slightly larger than player radius
+        THICKNESS: 4,
         ALPHA: 0.8,
         COLOR: 0xd2b4de, // lighter purple to match ability bar
     },
@@ -160,7 +166,7 @@ export const CLIENT_CONFIG = {
         ALPHA: 0.9,
     },
     RADIUS_INDICATOR: {
-        LINE_THICKNESS: 1,
+        LINE_THICKNESS: 2,
         LINE_COLOR: 0x000000, // black
         LINE_ALPHA: 0.3,
     },
@@ -358,7 +364,7 @@ export const CLIENT_CONFIG = {
             HERO_KILL_SIZE: '23px', // Larger font for hero kills
         },
         ANIMATION: {
-            FLOAT_DISTANCE: 30, // How far the text floats up
+            FLOAT_DISTANCE: 60, // How far the text floats up
             DURATION_MS: 2000,
         },
     },
@@ -366,7 +372,7 @@ export const CLIENT_CONFIG = {
         COLOR: '#ffd700', // Gold color for level up
         FONT_SIZE: '26px',
         ANIMATION: {
-            FLOAT_DISTANCE: 50, // How far the text floats up
+            FLOAT_DISTANCE: 100, // How far the text floats up
             DURATION_MS: 3000,
         },
     },

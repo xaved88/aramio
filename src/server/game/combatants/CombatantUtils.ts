@@ -276,7 +276,7 @@ export class CombatantUtils {
      * @param detectionRange Range within which to detect turrets
      * @returns The turret with lowest health within range, or null if none found
      */
-    static findNearbyEnemyTurret(source: any, allCombatants: any[], detectionRange: number = 150): any | null {
+    static findNearbyEnemyTurret(source: any, allCombatants: any[], detectionRange: number): any | null {
         const enemyTeam = source.team === 'blue' ? 'red' : 'blue';
         
         const enemyTurrets = allCombatants.filter(combatant => 
@@ -315,8 +315,9 @@ export class CombatantUtils {
             : gameplayConfig.CRADLE_POSITIONS.BLUE;
         
         // Add some randomization to avoid all units targeting the exact same spot
-        const offsetX = (Math.random() - 0.5) * 60; // ±30 pixels
-        const offsetY = (Math.random() - 0.5) * 60; // ±30 pixels
+        const randomOffsetRange = gameplayConfig.AI_BEHAVIOR.RANDOM_OFFSETS;
+        const offsetX = (Math.random() - 0.5) * randomOffsetRange;
+        const offsetY = (Math.random() - 0.5) * randomOffsetRange;
         
         return {
             x: basePosition.x + offsetX,
@@ -329,10 +330,11 @@ export class CombatantUtils {
      * @param combatant The combatant to evaluate
      * @param allCombatants Array of all combatants in the game
      * @param currentTime Current game time for cooldown calculation
+     * @param gameplayConfig The gameplay configuration object
      * @returns true if the combatant should play defensively (more enemies than friends nearby)
      */
-    static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number): boolean {
-        const nearbyRadius = GAMEPLAY_CONFIG.BOTS.AWARENESS_RANGE;
+    static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number, gameplayConfig: any): boolean {
+        const nearbyRadius = gameplayConfig.BOTS.AWARENESS_RANGE;
         
         // Count nearby enemies - only count heroes, not minions
         const nearbyEnemies = allCombatants.filter((other: any) => {
@@ -380,7 +382,7 @@ export class CombatantUtils {
         
         // If we're in a safe defensive position (near a friendly structure), allow fighting
         // Apply this logic for any disadvantage to encourage safe fighting
-        if (nearbyEnemies.length > nearbyFriends.length && this.isNearFriendlyStructure(combatant, allCombatants)) {
+        if (nearbyEnemies.length > nearbyFriends.length && this.isNearFriendlyStructure(combatant, allCombatants, gameplayConfig)) {
             // We're outnumbered but near safety - don't retreat, allow fighting
             return false;
         }
@@ -443,7 +445,7 @@ export class CombatantUtils {
 
         // Return position inside the friendly structure's attack range for protection
         // Use the same logic as isNearFriendlyStructure for consistency
-        const defensiveRange = Math.max(closestStructure.attackRadius - 80, 80);
+        const defensiveRange = Math.max(closestStructure.attackRadius - gameplayConfig.AI_BEHAVIOR.DEFENSIVE_RANGE_BUFFER, gameplayConfig.AI_BEHAVIOR.DEFENSIVE_RANGE_BUFFER);
         const dx = combatant.x - closestStructure.x;
         const dy = combatant.y - closestStructure.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -462,7 +464,7 @@ export class CombatantUtils {
         const normalizedDy = -dy / distance; // Negative to move toward structure
         
         // Add randomness to prevent all bots from clustering at the same spot
-        const randomOffset = (Math.random() - 0.5) * 60; // ±30 pixels random offset
+        const randomOffset = (Math.random() - 0.5) * gameplayConfig.AI_BEHAVIOR.RANDOM_OFFSETS;
         const randomAngle = Math.random() * 2 * Math.PI; // Random angle for offset
         
         const offsetX = Math.cos(randomAngle) * randomOffset;
@@ -490,15 +492,16 @@ export class CombatantUtils {
         // Position behind the cradle (away from center)
         // For blue team (bottom-left), go further down-left
         // For red team (top-right), go further up-right
+        const retreatDistance = gameplayConfig.AI_BEHAVIOR.CRADLE_RETREAT_DISTANCE;
         if (team === 'blue') {
             return {
-                x: cradlePos.x - 50,
-                y: cradlePos.y + 50
+                x: cradlePos.x - retreatDistance,
+                y: cradlePos.y + retreatDistance
             };
         } else {
             return {
-                x: cradlePos.x + 50,
-                y: cradlePos.y - 50
+                x: cradlePos.x + retreatDistance,
+                y: cradlePos.y - retreatDistance
             };
         }
     }
@@ -548,9 +551,10 @@ export class CombatantUtils {
      * Uses the same logic as defensive retreat positioning - inside attack range with buffer
      * @param combatant The combatant to check
      * @param allCombatants Array of all combatants in the game
+     * @param gameplayConfig The gameplay configuration object
      * @returns true if the combatant is near a friendly structure in a defensive position
      */
-    private static isNearFriendlyStructure(combatant: any, allCombatants: any[]): boolean {
+    private static isNearFriendlyStructure(combatant: any, allCombatants: any[], gameplayConfig: any): boolean {
         return allCombatants.some((other: any) => {
             if (other.team !== combatant.team || other.health <= 0) {
                 return false;
@@ -566,7 +570,7 @@ export class CombatantUtils {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             // Expanded safe area for fighting - within attack range plus some buffer
-            const safeFightingRange = Math.max(other.attackRadius - 80, 60); // Smaller safe fighting area
+            const safeFightingRange = Math.max(other.attackRadius - gameplayConfig.AI_BEHAVIOR.SAFE_FIGHTING_BUFFER, gameplayConfig.AI_BEHAVIOR.SAFE_FIGHTING_MIN);
             return distance <= safeFightingRange;
         });
     }

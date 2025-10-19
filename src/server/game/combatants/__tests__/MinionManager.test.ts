@@ -14,9 +14,73 @@ describe('MinionManager', () => {
     let bluePlayer: Combatant;
     let minionManager: MinionManager;
 
+    // Test-specific config with original values before 2x scaling
+    const testConfig = {
+        ...TEST_GAMEPLAY_CONFIG,
+        // Override only the values this test needs for compatibility
+        HERO_MOVE_SPEED: 3.5,
+        MINION_MOVE_SPEED: 2.5,
+        HERO_STOP_DISTANCE: 5,
+        GAME_BOUND_BUFFER: 20,
+        MAP_WIDTH: 700,
+        MAP_HEIGHT: 700,
+        CRADLE_POSITIONS: {
+            BLUE: { x: 100, y: 600 },
+            RED: { x: 600, y: 100 },
+        },
+        COMBAT: {
+            ...TEST_GAMEPLAY_CONFIG.COMBAT,
+            HERO: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.HERO,
+                SIZE: 15,
+                ATTACK_RADIUS: 50,
+            },
+            CRADLE: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.CRADLE,
+                SIZE: 25,
+                ATTACK_RADIUS: 115,
+            },
+            TURRET: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.TURRET,
+                SIZE: 25,
+                ATTACK_RADIUS: 75,
+            },
+            MINION: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.MINION,
+                WARRIOR: {
+                    ...TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR,
+                    SIZE: 12,
+                    ATTACK_RADIUS: 20,
+                },
+                ARCHER: {
+                    ...TEST_GAMEPLAY_CONFIG.COMBAT.MINION.ARCHER,
+                    SIZE: 12,
+                    ATTACK_RADIUS: 60,
+                },
+            },
+        },
+        MINION_SPAWNING: {
+            ...TEST_GAMEPLAY_CONFIG.MINION_SPAWNING,
+            SPAWN_RADIUS: 50,
+        },
+        BOTS: {
+            ...TEST_GAMEPLAY_CONFIG.BOTS,
+            AWARENESS_RANGE: 200,
+        },
+        AI_BEHAVIOR: {
+            ...TEST_GAMEPLAY_CONFIG.AI_BEHAVIOR,
+            TURRET_DETECTION_RANGE: 150,
+            RANDOM_OFFSETS: 60,
+            DEFENSIVE_RANGE_BUFFER: 80,
+            CRADLE_RETREAT_DISTANCE: 50,
+            SAFE_FIGHTING_BUFFER: 80,
+            SAFE_FIGHTING_MIN: 60,
+        },
+    };
+
     beforeEach(() => {
         gameState = new GameState();
-        minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
+        minionManager = new MinionManager(testConfig);
         
         // Create blue minion
         blueMinion = new Minion();
@@ -31,9 +95,9 @@ describe('MinionManager', () => {
         blueMinion.attackStrength = 15;
         blueMinion.attackSpeed = 0.8;
         blueMinion.lastAttackTime = 0;
-        blueMinion.moveSpeed = TEST_GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
+        blueMinion.moveSpeed = testConfig.MINION_MOVE_SPEED;
         blueMinion.minionType = 'warrior';
-        blueMinion.size = TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
+        blueMinion.size = testConfig.COMBAT.MINION.WARRIOR.SIZE;
         
         // Create red minion
         redMinion = new Minion();
@@ -48,17 +112,17 @@ describe('MinionManager', () => {
         redMinion.attackStrength = 15;
         redMinion.attackSpeed = 0.8;
         redMinion.lastAttackTime = 0;
-        redMinion.moveSpeed = TEST_GAMEPLAY_CONFIG.MINION_MOVE_SPEED;
+        redMinion.moveSpeed = testConfig.MINION_MOVE_SPEED;
         redMinion.minionType = 'warrior';
-        redMinion.size = TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.SIZE;
+        redMinion.size = testConfig.COMBAT.MINION.WARRIOR.SIZE;
         
         // Create blue cradle
         blueCradle = new Combatant();
         blueCradle.id = 'blue-cradle';
         blueCradle.type = COMBATANT_TYPES.CRADLE;
         blueCradle.team = 'blue';
-        blueCradle.x = TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x;
-        blueCradle.y = TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y;
+        blueCradle.x = testConfig.CRADLE_POSITIONS.BLUE.x;
+        blueCradle.y = testConfig.CRADLE_POSITIONS.BLUE.y;
         blueCradle.health = 1000;
         blueCradle.maxHealth = 1000;
         blueCradle.attackRadius = 30;
@@ -66,15 +130,15 @@ describe('MinionManager', () => {
         blueCradle.attackSpeed = 0.3;
         blueCradle.lastAttackTime = 0;
         blueCradle.moveSpeed = 0;
-        blueCradle.size = TEST_GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
+        blueCradle.size = testConfig.COMBAT.CRADLE.SIZE;
         
         // Create red cradle
         redCradle = new Combatant();
         redCradle.id = 'red-cradle';
         redCradle.type = COMBATANT_TYPES.CRADLE;
         redCradle.team = 'red';
-        redCradle.x = TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x;
-        redCradle.y = TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y;
+        redCradle.x = testConfig.CRADLE_POSITIONS.RED.x;
+        redCradle.y = testConfig.CRADLE_POSITIONS.RED.y;
         redCradle.health = 1000;
         redCradle.maxHealth = 1000;
         redCradle.attackRadius = 30;
@@ -82,7 +146,7 @@ describe('MinionManager', () => {
         redCradle.attackSpeed = 0.3;
         redCradle.lastAttackTime = 0;
         redCradle.moveSpeed = 0;
-        redCradle.size = TEST_GAMEPLAY_CONFIG.COMBAT.CRADLE.SIZE;
+        redCradle.size = testConfig.COMBAT.CRADLE.SIZE;
         
         // Create blue player
         bluePlayer = new Combatant();
@@ -97,8 +161,8 @@ describe('MinionManager', () => {
         bluePlayer.attackStrength = 100;
         bluePlayer.attackSpeed = 1;
         bluePlayer.lastAttackTime = 0;
-        bluePlayer.moveSpeed = TEST_GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
-        bluePlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+        bluePlayer.moveSpeed = testConfig.HERO_MOVE_SPEED;
+        bluePlayer.size = testConfig.COMBAT.HERO.SIZE;
         
         // Add all combatants to game state
         gameState.combatants.set(blueMinion.id, blueMinion);
@@ -134,8 +198,8 @@ describe('MinionManager', () => {
             redPlayer.attackStrength = 100;
             redPlayer.attackSpeed = 1;
             redPlayer.lastAttackTime = 0;
-            redPlayer.moveSpeed = TEST_GAMEPLAY_CONFIG.HERO_MOVE_SPEED;
-            redPlayer.size = TEST_GAMEPLAY_CONFIG.COMBAT.HERO.SIZE;
+            redPlayer.moveSpeed = testConfig.HERO_MOVE_SPEED;
+            redPlayer.size = testConfig.COMBAT.HERO.SIZE;
             
             gameState.combatants.set(redPlayer.id, redPlayer);
             
@@ -184,21 +248,21 @@ describe('MinionManager', () => {
 
         it('should respect game bounds when moving', () => {
             // Place blue minion at edge of bounds
-            blueMinion.x = getMinX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER);
-            blueMinion.y = getMinY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER);
+            blueMinion.x = getMinX(testConfig.GAME_BOUND_BUFFER);
+            blueMinion.y = getMinY(testConfig.GAME_BOUND_BUFFER);
             
             minionManager.moveMinions(gameState);
             
-            expect(blueMinion.x).toBeGreaterThanOrEqual(getMinX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
-            expect(blueMinion.y).toBeGreaterThanOrEqual(getMinY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
-            expect(blueMinion.x).toBeLessThanOrEqual(getMaxX(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
-            expect(blueMinion.y).toBeLessThanOrEqual(getMaxY(TEST_GAMEPLAY_CONFIG.GAME_BOUND_BUFFER));
+            expect(blueMinion.x).toBeGreaterThanOrEqual(getMinX(testConfig.GAME_BOUND_BUFFER));
+            expect(blueMinion.y).toBeGreaterThanOrEqual(getMinY(testConfig.GAME_BOUND_BUFFER));
+            expect(blueMinion.x).toBeLessThanOrEqual(getMaxX(testConfig.GAME_BOUND_BUFFER));
+            expect(blueMinion.y).toBeLessThanOrEqual(getMaxY(testConfig.GAME_BOUND_BUFFER));
         });
 
         it('should not move when close to target', () => {
             // Place blue minion very close to red cradle
-            blueMinion.x = redCradle.x + TEST_GAMEPLAY_CONFIG.HERO_STOP_DISTANCE - 1;
-            blueMinion.y = redCradle.y + TEST_GAMEPLAY_CONFIG.HERO_STOP_DISTANCE - 1;
+            blueMinion.x = redCradle.x + testConfig.HERO_STOP_DISTANCE - 1;
+            blueMinion.y = redCradle.y + testConfig.HERO_STOP_DISTANCE - 1;
             
             const originalX = blueMinion.x;
             const originalY = blueMinion.y;
@@ -217,7 +281,7 @@ describe('MinionManager', () => {
             minionManager.spawnMinionWave(gameState);
             
             // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
-            const expectedNewMinions = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
+            const expectedNewMinions = testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
         });
 
@@ -238,19 +302,19 @@ describe('MinionManager', () => {
             // Check blue minions are near blue cradle
             blueMinions.forEach(minion => {
                 const distance = Math.sqrt(
-                    Math.pow(minion.x - TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.x, 2) +
-                    Math.pow(minion.y - TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.BLUE.y, 2)
+                    Math.pow(minion.x - testConfig.CRADLE_POSITIONS.BLUE.x, 2) +
+                    Math.pow(minion.y - testConfig.CRADLE_POSITIONS.BLUE.y, 2)
                 );
-                expect(distance).toBeLessThanOrEqual(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.SPAWN_RADIUS);
+                expect(distance).toBeLessThanOrEqual(testConfig.MINION_SPAWNING.SPAWN_RADIUS);
             });
             
             // Check red minions are near red cradle
             redMinions.forEach(minion => {
                 const distance = Math.sqrt(
-                    Math.pow(minion.x - TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.x, 2) +
-                    Math.pow(minion.y - TEST_GAMEPLAY_CONFIG.CRADLE_POSITIONS.RED.y, 2)
+                    Math.pow(minion.x - testConfig.CRADLE_POSITIONS.RED.x, 2) +
+                    Math.pow(minion.y - testConfig.CRADLE_POSITIONS.RED.y, 2)
                 );
-                expect(distance).toBeLessThanOrEqual(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.SPAWN_RADIUS);
+                expect(distance).toBeLessThanOrEqual(testConfig.MINION_SPAWNING.SPAWN_RADIUS);
             });
         });
 
@@ -273,9 +337,9 @@ describe('MinionManager', () => {
             const redWarriors = redMinions.filter(m => m.minionType === MINION_TYPES.WARRIOR);
             const redArchers = redMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
             
-            expect(blueWarriors.length).toBe(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
+            expect(blueWarriors.length).toBe(testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE);
             expect(blueArchers.length).toBe(0); // No archers spawned initially
-            expect(redWarriors.length).toBe(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE);
+            expect(redWarriors.length).toBe(testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE);
             expect(redArchers.length).toBe(0); // No archers spawned initially
         });
 
@@ -292,16 +356,16 @@ describe('MinionManager', () => {
             
             const warrior = blueMinions.find(m => m.minionType === MINION_TYPES.WARRIOR);
             
-            expect(warrior?.health).toBe(TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.HEALTH);
-            expect(warrior?.attackRadius).toBe(TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_RADIUS);
-            expect(warrior?.attackStrength).toBe(TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH);
-            expect(warrior?.attackSpeed).toBe(TEST_GAMEPLAY_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_SPEED);
+            expect(warrior?.health).toBe(testConfig.COMBAT.MINION.WARRIOR.HEALTH);
+            expect(warrior?.attackRadius).toBe(testConfig.COMBAT.MINION.WARRIOR.ATTACK_RADIUS);
+            expect(warrior?.attackStrength).toBe(testConfig.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH);
+            expect(warrior?.attackSpeed).toBe(testConfig.COMBAT.MINION.WARRIOR.ATTACK_SPEED);
         });
     });
 
     describe('checkAndSpawnWave', () => {
         it('should not spawn waves before first wave delay', () => {
-            gameState.gameTime = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS - 100;
+            gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS - 100;
             const initialMinionCount = gameState.combatants.size;
             
             minionManager.checkAndSpawnWave(gameState);
@@ -311,31 +375,31 @@ describe('MinionManager', () => {
         });
 
         it('should spawn first wave warriors after delay', () => {
-            gameState.gameTime = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
             const initialMinionCount = gameState.combatants.size;
             
             minionManager.checkAndSpawnWave(gameState);
             
             // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
-            const expectedNewMinions = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
+            const expectedNewMinions = testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(gameState.currentWave).toBe(1);
         });
 
         it('should spawn multiple waves over time', () => {
-            gameState.gameTime = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS * 2 + 100;
+            gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + testConfig.MINION_SPAWNING.WAVE_INTERVAL_MS * 2 + 100;
             const initialMinionCount = gameState.combatants.size;
             
             minionManager.checkAndSpawnWave(gameState);
             
             // Should spawn only warriors initially (2 warriors per team * 3 waves = 12 total new minions)
-            const expectedNewMinions = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE * 2 * 3;
+            const expectedNewMinions = testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE * 2 * 3;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             expect(gameState.currentWave).toBe(3);
         });
 
         it('should not spawn duplicate waves', () => {
-            gameState.gameTime = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
             gameState.currentWave = 1; // Already spawned first wave
             
             const initialMinionCount = gameState.combatants.size;
@@ -348,17 +412,17 @@ describe('MinionManager', () => {
 
         it('should spawn archers after delay', () => {
             // Spawn a wave first
-            gameState.gameTime = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
+            gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
             minionManager.checkAndSpawnWave(gameState);
             
             const initialMinionCount = gameState.combatants.size;
             
             // Advance time to trigger archer spawning
-            gameState.gameTime += TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS + 100;
+            gameState.gameTime += testConfig.MINION_SPAWNING.ARCHER_SPAWN_DELAY_MS + 100;
             minionManager.checkAndSpawnWave(gameState);
             
             // Should spawn archers for the wave (3 archers per team = 6 total new minions)
-            const expectedNewMinions = TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE * 2;
+            const expectedNewMinions = testConfig.MINION_SPAWNING.ARCHERS_PER_WAVE * 2;
             expect(gameState.combatants.size).toBe(initialMinionCount + expectedNewMinions);
             
             // Verify archers were spawned
@@ -372,8 +436,8 @@ describe('MinionManager', () => {
             const blueArchers = blueMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
             const redArchers = redMinions.filter(m => m.minionType === MINION_TYPES.ARCHER);
             
-            expect(blueArchers.length).toBe(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
-            expect(redArchers.length).toBe(TEST_GAMEPLAY_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(blueArchers.length).toBe(testConfig.MINION_SPAWNING.ARCHERS_PER_WAVE);
+            expect(redArchers.length).toBe(testConfig.MINION_SPAWNING.ARCHERS_PER_WAVE);
         });
     });
 }); 

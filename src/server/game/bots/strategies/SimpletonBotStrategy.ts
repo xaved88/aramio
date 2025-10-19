@@ -31,7 +31,7 @@ export class SimpletonBotStrategy {
 
         // Check if we're outnumbered and should play defensively
         const allCombatants = Array.from(state.combatants.values());
-        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime)) {
+        if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime, this.gameplayConfig)) {
             // Retreat to nearest friendly structure for defensive positioning
             const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
             commands.push({
@@ -272,7 +272,7 @@ export class SimpletonBotStrategy {
         });
 
         // Return position near the closest friendly structure, but outside its attack range
-        const retreatDistance = closestStructure.attackRadius + 50; // 50 pixels buffer
+        const retreatDistance = closestStructure.attackRadius + this.gameplayConfig.AI_BEHAVIOR.CRADLE_RETREAT_DISTANCE;
         const dx = bot.x - closestStructure.x;
         const dy = bot.y - closestStructure.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -301,7 +301,7 @@ export class SimpletonBotStrategy {
 
     private findNearbyEnemyTurret(bot: any, state: SharedGameState): any | null {
         const allCombatants = Array.from(state.combatants.values());
-        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, 150);
+        return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, this.gameplayConfig.AI_BEHAVIOR.TURRET_DETECTION_RANGE);
     }
 
 } 

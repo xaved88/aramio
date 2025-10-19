@@ -540,7 +540,7 @@ export class EntityManager {
         let heroNameText: Phaser.GameObjects.Text | null = null;
         if (xpEvent.type === 'heroKill' && xpEvent.targetName) {
             const fontStyle = xpEvent.targetIsBot ? 'italic' : 'normal';
-            heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 12, xpEvent.targetName, {
+            heroNameText = this.scene.add.text(xpEvent.x, xpEvent.y + 18, xpEvent.targetName, {
                 fontSize: '17px',
                 color: color,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -748,30 +748,30 @@ export class EntityManager {
         
         switch (deathEffectEvent.targetType) {
             case 'minion':
-                explosionRadius = 5; // Smaller starting size
+                explosionRadius = 10; // 5 * 2
                 numRings = 1; // Minimal rings
                 ringDuration = 400; // Shorter duration
                 numParticles = 6; // More particles
-                particleSize = 2; // Particles
-                particleDistance = 15; // Shorter distance
+                particleSize = 4; // 2 * 2
+                particleDistance = 30; // 15 * 2
                 break;
             case 'turret':
             case 'cradle':
-                explosionRadius = 20; // Smaller starting size
+                explosionRadius = 40; // 20 * 2
                 numRings = 2; // Fewer rings
                 ringDuration = 400; // Shorter duration
                 numParticles = 20; // Many more particles
-                particleSize = 3; // Larger particles
-                particleDistance = 40; // Shorter distance
+                particleSize = 6; // 3 * 2
+                particleDistance = 80; // 40 * 2
                 break;
             case 'hero':
             default:
-                explosionRadius = 7; // Smaller starting size
+                explosionRadius = 14; // 7 * 2
                 numRings = 2; // Fewer rings
                 ringDuration = 400; // Shorter duration
                 numParticles = 12; // More particles
-                particleSize = 2; // Particles
-                particleDistance = 25; // Shorter distance
+                particleSize = 4; // 2 * 2
+                particleDistance = 50; // 25 * 2
                 break;
         }
         

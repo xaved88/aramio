@@ -723,13 +723,13 @@ export class GameScene extends Phaser.Scene {
         const directionY = targetY / distance;
         
         // Calculate arrow positions
-        const arrowLength = 25; // Length of the arrow
-        const arrowHeadSize = 8; // Size of the arrow head
-        const lineWidth = 3;
+        const arrowLength = CLIENT_CONFIG.TARGETING_ARROW.LENGTH;
+        const arrowHeadSize = CLIENT_CONFIG.TARGETING_ARROW.HEAD_SIZE;
+        const lineWidth = CLIENT_CONFIG.TARGETING_ARROW.LINE_WIDTH;
         
         // Start arrow slightly away from hero center (which is at 0, 0)
-        const arrowStartX = directionX * 20;
-        const arrowStartY = directionY * 20;
+        const arrowStartX = directionX * CLIENT_CONFIG.TARGETING_ARROW.START_OFFSET;
+        const arrowStartY = directionY * CLIENT_CONFIG.TARGETING_ARROW.START_OFFSET;
         
         // Calculate arrow end position
         const arrowEndX = arrowStartX + directionX * arrowLength;

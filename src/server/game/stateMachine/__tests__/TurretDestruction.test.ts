@@ -9,20 +9,57 @@ describe('TurretDestruction', () => {
     let initialState: GameState;
     let gameStateMachine: GameStateMachine;
 
+    // Test-specific config with original values before 2x scaling
+    const testConfig = {
+        ...TEST_GAMEPLAY_CONFIG,
+        // Override only the values this test needs for compatibility
+        EXPERIENCE: {
+            ...TEST_GAMEPLAY_CONFIG.EXPERIENCE,
+            UNIT_KILL_RADIUS: 175, // Original value before 2x scaling
+            MINION_KILLED: 1.5,    // Original value before 2x scaling
+            HERO_KILL_MULTIPLIER: 2, // Original value before 2x scaling
+            TOWER_DESTROYED: 50,   // Original value before 2x scaling
+        },
+        MAP_WIDTH: 700,
+        MAP_HEIGHT: 700,
+        CRADLE_POSITIONS: {
+            BLUE: { x: 100, y: 600 },
+            RED: { x: 600, y: 100 },
+        },
+        COMBAT: {
+            ...TEST_GAMEPLAY_CONFIG.COMBAT,
+            HERO: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.HERO,
+                SIZE: 15,
+                ATTACK_RADIUS: 50,
+            },
+            CRADLE: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.CRADLE,
+                SIZE: 25,
+                ATTACK_RADIUS: 115,
+            },
+            TURRET: {
+                ...TEST_GAMEPLAY_CONFIG.COMBAT.TURRET,
+                SIZE: 25,
+                ATTACK_RADIUS: 75,
+            },
+        },
+    };
+
     beforeEach(() => {
         initialState = new GameState();
         initialState.gameTime = 0;
         initialState.gamePhase = 'playing';
         
-        const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
-        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
+        const minionManager = new MinionManager(testConfig);
+        gameStateMachine = new GameStateMachine(testConfig, minionManager);
     });
 
     describe('Player destroys turret', () => {
         it('should destroy turret and grant experience when player is in range', () => {
             // Set turret destruction XP to 60 for this test
-            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            const originalTowerDestroyedXP = testConfig.EXPERIENCE.TOWER_DESTROYED;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = 60;
             
             // Setup game with a player
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
@@ -79,15 +116,15 @@ describe('TurretDestruction', () => {
             });
             
             // Hero should have gained experience and leveled up
-            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(testConfig.EXPERIENCE.TOWER_DESTROYED);
             expect(updatedHero?.level).toBe(3);
             
             // Hero stats should be boosted
-            expect(updatedHero?.maxHealth).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HERO.HEALTH);
-            expect(updatedHero?.attackStrength).toBeGreaterThan(TEST_GAMEPLAY_CONFIG.COMBAT.HERO.ATTACK_STRENGTH);
+            expect(updatedHero?.maxHealth).toBeGreaterThan(testConfig.COMBAT.HERO.HEALTH);
+            expect(updatedHero?.attackStrength).toBeGreaterThan(testConfig.COMBAT.HERO.ATTACK_STRENGTH);
             
             // Restore original turret destruction XP
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should not destroy turret when player is out of range', () => {
@@ -149,8 +186,8 @@ describe('TurretDestruction', () => {
 
         it('should grant experience to all players on the same team', () => {
             // Set turret destruction XP to 60 for this test
-            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            const originalTowerDestroyedXP = testConfig.EXPERIENCE.TOWER_DESTROYED;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = 60;
             
             // Setup game with two players on blue team
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
@@ -227,21 +264,21 @@ describe('TurretDestruction', () => {
             
             // Both blue team heroes should have gained experience and leveled up
             // They get 60 experience each, which gets them to level 3
-            expect(updatedHero1?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(testConfig.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(testConfig.EXPERIENCE.TOWER_DESTROYED);
             
             // Check that both heroes leveled up
             expect(updatedHero1?.level).toBe(3);
             expect(updatedHero2?.level).toBe(3);
             
             // Restore original turret destruction XP
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should not grant experience to players on opposing team', () => {
             // Set turret destruction XP to 60 for this test
-            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            const originalTowerDestroyedXP = testConfig.EXPERIENCE.TOWER_DESTROYED;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = 60;
             
             // Setup game with a player on blue team
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
@@ -295,16 +332,16 @@ describe('TurretDestruction', () => {
             
             // Hero should be level 3 with remaining experience
             expect(updatedHero?.level).toBe(3);
-            expect(updatedHero?.roundStats.totalExperience).toBe(TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero?.roundStats.totalExperience).toBe(testConfig.EXPERIENCE.TOWER_DESTROYED);
             
             // Restore original turret destruction XP
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should handle multiple level ups correctly', () => {
             // Set turret destruction XP to 60 for this test
-            const originalTowerDestroyedXP = TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED;
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = 60;
+            const originalTowerDestroyedXP = testConfig.EXPERIENCE.TOWER_DESTROYED;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = 60;
             
             // Setup game with a player
             const setupResult = gameStateMachine.processAction(initialState, { type: 'SETUP_GAME' });
@@ -361,7 +398,7 @@ describe('TurretDestruction', () => {
             expect(updatedPlayer?.roundStats.totalExperience).toBe(73);
             
             // Restore original turret destruction XP
-            (TEST_GAMEPLAY_CONFIG as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
+            (testConfig as any).EXPERIENCE.TOWER_DESTROYED = originalTowerDestroyedXP;
         });
 
         it('should only grant minion XP to heroes within range', () => {
@@ -434,7 +471,7 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only hero1 should get XP (within range), hero2 should not (out of range)
-                            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + testConfig.EXPERIENCE.MINION_KILLED);
             expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2); // Should not get XP
             }
         });
@@ -521,7 +558,7 @@ describe('TurretDestruction', () => {
             });
             
             // Calculate expected XP: level 3 * 4 = 12 XP
-            const expectedXP = 3 * TEST_GAMEPLAY_CONFIG.EXPERIENCE.HERO_KILL_MULTIPLIER;
+            const expectedXP = 3 * testConfig.EXPERIENCE.HERO_KILL_MULTIPLIER;
             
             // Only blueHero1 should get XP (within range), blueHero2 should not (out of range)
             expect(updatedBlueHero1?.roundStats.totalExperience).toBe(initialExp1 + expectedXP);
@@ -589,8 +626,8 @@ describe('TurretDestruction', () => {
             
             // Both players should have gained turret XP (even the dead one)
             // Account for leveling: 20 XP granted, 10 needed for level 1, so 10 remaining
-            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
-            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero1?.roundStats.totalExperience).toBe(initialExp1 + testConfig.EXPERIENCE.TOWER_DESTROYED);
+            expect(updatedHero2?.roundStats.totalExperience).toBe(initialExp2 + testConfig.EXPERIENCE.TOWER_DESTROYED);
             
             // Now kill a minion - only alive player should get XP
             const minions = Array.from(result1.newState.combatants.values())
@@ -623,7 +660,7 @@ describe('TurretDestruction', () => {
                 });
                 
                 // Only alive player should get minion XP
-                            expect(finalHero1?.roundStats.totalExperience).toBe(expBeforeMinion1 + TEST_GAMEPLAY_CONFIG.EXPERIENCE.MINION_KILLED);
+                            expect(finalHero1?.roundStats.totalExperience).toBe(expBeforeMinion1 + testConfig.EXPERIENCE.MINION_KILLED);
             expect(finalHero2?.roundStats.totalExperience).toBe(expBeforeMinion2); // Dead player should not get minion XP
             }
         });

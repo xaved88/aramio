@@ -44,7 +44,7 @@ export class MinionManager {
         }
         
         // Check if there's a nearby enemy turret to prioritize
-        const nearbyEnemyTurret = this.findNearbyEnemyTurret(minion, allCombatants);
+        const nearbyEnemyTurret = CombatantUtils.findNearbyEnemyTurret(minion, allCombatants, this.gameplayConfig.AI_BEHAVIOR.TURRET_DETECTION_RANGE);
         if (nearbyEnemyTurret) {
             this.moveTowardsTarget(minion, nearbyEnemyTurret.x, nearbyEnemyTurret.y);
             return;
@@ -75,10 +75,6 @@ export class MinionManager {
             combatant.team === enemyTeam &&
             CombatantUtils.isCombatantAlive(combatant)
         ) || null;
-    }
-    
-    private findNearbyEnemyTurret(minion: Minion, allCombatants: any[]): any | null {
-        return CombatantUtils.findNearbyEnemyTurret(minion, allCombatants, 150);
     }
     
     private moveTowardsTarget(minion: Minion, targetX: number, targetY: number): void {

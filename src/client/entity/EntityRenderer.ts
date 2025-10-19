@@ -126,18 +126,18 @@ export class EntityRenderer {
         if (isStunned) {
             // Add pulsing yellowish grey border for stun effect
             const pulseIntensity = Math.sin(Date.now() * 0.01) * 0.5 + 0.5; // Pulsing between 0.5 and 1.0
-            const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px
+            const borderThickness = 4 + (pulseIntensity * 3); // Pulsing between 4px and 10px
             graphics.lineStyle(borderThickness, 0xCCCC66); // Slightly brighter yellowish border
             graphics.strokeCircle(0, 0, combatant.size + 2); // Slightly larger than entity
             
             // Add stun icon above the hero
             graphics.setAlpha(1); // Semi-opaque but visible
-            graphics.lineStyle(3, 0xCCCC66); // Slightly brighter yellowish lines for icon
+            graphics.lineStyle(6, 0xCCCC66); // Slightly brighter yellowish lines for icon
 
             
             // Draw a simple lightning bolt shape for stun icon
-            const iconSize = 8;
-            const iconY = -combatant.size - 15; // Position above the hero
+            const iconSize = 16;
+            const iconY = -combatant.size - 30; // Position above the hero
             graphics.moveTo(0, iconY - iconSize);
             graphics.lineTo(-iconSize/2, iconY);
             graphics.lineTo(0, iconY);
@@ -149,7 +149,7 @@ export class EntityRenderer {
         // Check for reflect effect - add pulsing spiky border effect
         const hasReflect = combatant.effects.some(effect => effect.type === 'reflect');
         if (hasReflect) {            
-            graphics.lineStyle(3, 0xFFD700); // Orange-red for danger, thicker line
+            graphics.lineStyle(6, 0xFFD700); // Orange-red for danger, thicker line
             
             // Draw spiky border right on the entity's edge
             const numSpikes = 12;
@@ -173,11 +173,11 @@ export class EntityRenderer {
         const isTaunted = combatant.effects.some(effect => effect.type === 'taunt');
         if (isTaunted) {
             // Add taunt icon above the entity
-            graphics.lineStyle(1, 0xFFFF00); // Yellow lines for icon with reduced thickness
+            graphics.lineStyle(2, 0xFFFF00); // Yellow lines for icon with reduced thickness
             
             // Draw a simple target/eye shape for taunt icon
-            const iconSize = 8; // Slightly smaller icon
-            const iconY = -combatant.size - 15; // Position above the entity
+            const iconSize = 16; // Slightly smaller icon
+            const iconY = -combatant.size - 30; // Position above the entity
             
             // Draw outer circle
             graphics.strokeCircle(0, iconY, iconSize);
@@ -199,18 +199,18 @@ export class EntityRenderer {
             
             // Add pulsing green border for passive healing effect (matching stun style)
             const pulseIntensity = Math.sin(Date.now() * 0.006) * 0.3 + 0.7; // Pulsing between 0.4 and 1.0 (slower, ~1 per second)
-            const borderThickness = 2 + (pulseIntensity * 3); // Pulsing between 2px and 5px (matching stun)
+            const borderThickness = 4 + (pulseIntensity * 3);
             
             // Draw border matching stun style
             graphics.lineStyle(borderThickness, 0x228B22, 0.4); // Darker green border with transparency
             graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
             
             // Add healing icon above the entity (matching stun icon style)
-            graphics.lineStyle(3, 0x228B22); // Darker green lines for icon
+            graphics.lineStyle(6, 0x228B22); // Darker green lines for icon
             
             // Draw a simple cross/plus shape for healing icon
-            const iconSize = 6 * spriteScale; // Scale icon
-            const iconY = -(combatant.size + 15) * spriteScale; // Scale position
+            const iconSize = 12 * spriteScale; // Scale icon
+            const iconY = -(combatant.size + 30) * spriteScale; // Scale position
             
             // Draw horizontal line
             graphics.moveTo(-iconSize, iconY);
@@ -230,18 +230,18 @@ export class EntityRenderer {
             
             // Add pulsing red border for rage mode effect (matching stun style)
             const pulseIntensity = Math.sin(Date.now() * 0.008) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (faster than stun)
-            const borderThickness = 3 + (pulseIntensity * 4); // Pulsing between 3px and 7px (thicker than stun)
+            const borderThickness = 6 + (pulseIntensity * 4); // Pulsing between 6px and 14px
             
             // Draw border matching stun style but with red color
             graphics.lineStyle(borderThickness, 0xFF4444, 0.6); // Bright red border with more opacity
             graphics.strokeCircle(0, 0, (combatant.size + 3) * spriteScale); // Scale with sprite
             
             // Add rage icon above the entity (matching stun icon style)
-            graphics.lineStyle(4, 0xFF4444); // Bright red lines for icon, thicker than other icons
+            graphics.lineStyle(8, 0xFF4444); // Bright red lines for icon, thicker than other icons
             
             // Draw a simple flame/anger symbol for rage icon
-            const iconSize = 8 * spriteScale; // Scale icon
-            const iconY = -(combatant.size + 18) * spriteScale; // Scale position
+            const iconSize = 16 * spriteScale; // Scale icon
+            const iconY = -(combatant.size + 36) * spriteScale; // Scale position
             
             // Draw flame-like shape (zigzag pattern)
             graphics.moveTo(-iconSize, iconY + iconSize/2);
@@ -260,18 +260,18 @@ export class EntityRenderer {
             
             // Add pulsing orange border for burning effect
             const pulseIntensity = Math.sin(Date.now() * 0.012) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (fast flickering)
-            const borderThickness = 1.5 + (pulseIntensity * 1.5); // Pulsing between 1.5px and 3px (reduced)
+            const borderThickness = 3 + (pulseIntensity * 1.5); // Pulsing between 3px and 6px
             
             // Draw border with orange-red flame color
             graphics.lineStyle(borderThickness, 0xFF6600, 0.5); // Orange-red border with more transparency
             graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
             
             // Add flame icon above the entity
-            graphics.lineStyle(1.5, 0xFF6600); // Orange-red lines for icon (thinner)
+            graphics.lineStyle(3, 0xFF6600); // Orange-red lines for icon (thinner)
             
             // Draw a flame shape for burning icon
-            const iconSize = 4 * spriteScale; // Scale icon (smaller)
-            const iconY = -(combatant.size + 16) * spriteScale; // Scale position
+            const iconSize = 8 * spriteScale; // Scale icon (smaller)
+            const iconY = -(combatant.size + 32) * spriteScale; // Scale position
             
             // Draw flame outline (zigzag upward pattern)
             graphics.beginPath();
@@ -481,8 +481,8 @@ export class EntityRenderer {
         // Health bar dimensions
         const heroSize = combatant.size;
         const barWidth = heroSize * 1.5; // Slightly wider than the hero
-        const barHeight = 4; // Thin bar
-        const barY = heroSize + 8; // Position below the hero
+        const barHeight = 8; // Thin bar
+        const barY = heroSize + 16; // Position below the hero
         
         // Draw background bar (total health) - use darker contrasting color
         const backgroundColor = combatant.team === 'blue' ? 0x1a4a6b : respawnColor; // Dark blue for blue team, respawn color for red
@@ -640,7 +640,7 @@ export class EntityRenderer {
                 : (combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a); // Team colors for others
             
             text.setStyle({ 
-                fontSize: '12px', 
+                fontSize: '24px', 
                 fontWeight: '900',
                 color: `#${textColor.toString(16).padStart(6, '0')}`,
                 stroke: '#000000',
