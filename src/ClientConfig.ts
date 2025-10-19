@@ -226,8 +226,8 @@ export const CLIENT_CONFIG = {
             X: 630, // Top right area - moved left to give more space
             Y: 20,
             START_X: 680, // Starting X position for the rightmost icon (can be moved farther right)
-            ICON_SIZE: 24,
-            SPACING: 10,
+            ICON_SIZE: 30,
+            SPACING: 12,
             MAX_ICONS_PER_ROW: 11, // Changed from 4 to 12
             BACKGROUND_COLOR: 0x666666,
             BACKGROUND_ALPHA: 0.7,
