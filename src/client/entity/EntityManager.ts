@@ -43,6 +43,7 @@ export class EntityManager {
     private processedLevelUpEvents: Set<string> = new Set();
     private processedAOEDamageEvents: Set<string> = new Set();
     private lastProcessedTime: number = 0;
+    private activeExplosionGraphics: Set<Phaser.GameObjects.Graphics> = new Set(); // Track explosion, AOE effect, and other visual effect graphics for cleanup
     
     // Track recent attackers (heroes that attacked the player in the last 1 second)
     private recentAttackers: Map<CombatantId, number> = new Map();
@@ -70,7 +71,7 @@ export class EntityManager {
     }
 
     /**
-     * Forces cleanup of all XP and level-up texts
+     * Forces cleanup of all XP and level-up texts, explosions, muzzle flashes, and other visual effects
      * Call this when the browser tab becomes active again
      */
     forceCleanupTexts(): void {
@@ -82,6 +83,31 @@ export class EntityManager {
         // Note: We don't reset lastProcessedTime here because we need to get the current
         // game time from the next update cycle. The timestamp comparison will handle
         // skipping old events properly.
+        
+        // Clean up any lingering explosion graphics when window regains focus
+        this.cleanupActiveExplosions();
+        
+        // Clean up any lingering muzzle flash graphics when window regains focus
+        if (this.animationManager) {
+            this.animationManager.cleanupActiveMuzzleFlashes();
+        }
+        
+        // Clean up any lingering red flash graphics when window regains focus
+        if (this.cameraManager && this.cameraManager.cleanupActiveRedFlashes) {
+            this.cameraManager.cleanupActiveRedFlashes();
+        }
+    }
+    
+    /**
+     * Cleans up all active explosion and AOE effect graphics (rings, particles, and AOE circles)
+     */
+    private cleanupActiveExplosions(): void {
+        this.activeExplosionGraphics.forEach(graphics => {
+            if (graphics && graphics.scene) {
+                graphics.destroy();
+            }
+        });
+        this.activeExplosionGraphics.clear();
     }
 
     /**
@@ -655,6 +681,9 @@ export class EntityManager {
         aoeGraphics.setPosition(aoeEvent.x, aoeEvent.y);
         aoeGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS); // High depth to appear above everything
         
+        // Track for cleanup
+        this.activeExplosionGraphics.add(aoeGraphics);
+        
         // Assign to main camera
         if (this.cameraManager) {
             this.cameraManager.assignToMainCamera(aoeGraphics);
@@ -811,6 +840,9 @@ export class EntityManager {
             ringGraphics.setPosition(deathEffectEvent.x, deathEffectEvent.y);
             ringGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
             
+            // Track for cleanup
+            this.activeExplosionGraphics.add(ringGraphics);
+            
             if (this.cameraManager) {
                 this.cameraManager.assignToMainCamera(ringGraphics);
             }
@@ -843,6 +875,9 @@ export class EntityManager {
             const particleGraphics = this.scene.add.graphics();
             particleGraphics.setPosition(deathEffectEvent.x, deathEffectEvent.y);
             particleGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
+            
+            // Track for cleanup
+            this.activeExplosionGraphics.add(particleGraphics);
             
             if (this.cameraManager) {
                 this.cameraManager.assignToMainCamera(particleGraphics);

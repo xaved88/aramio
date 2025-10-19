@@ -16,6 +16,7 @@ export class CameraManager {
     private isFollowing: boolean = false;
     private entityManager: any = null;
     private lastFollowedHeroId: string | null = null;
+    private activeRedFlashGraphics: Set<Phaser.GameObjects.Rectangle> = new Set(); // Track red flash graphics for cleanup
     
     // Mouse position tracking for lookahead
     private mouseX: number = 0;
@@ -212,6 +213,9 @@ export class CameraManager {
             CLIENT_CONFIG.CAMERA.RED_FLASH.ALPHA
         );
         
+        // Track for cleanup
+        this.activeRedFlashGraphics.add(flashOverlay);
+        
         // Set high depth to appear above everything
         flashOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
         
@@ -228,6 +232,18 @@ export class CameraManager {
                 flashOverlay.destroy();
             }
         });
+    }
+    
+    /**
+     * Cleans up all active red flash graphics
+     */
+    cleanupActiveRedFlashes(): void {
+        this.activeRedFlashGraphics.forEach(graphics => {
+            if (graphics && graphics.scene) {
+                graphics.destroy();
+            }
+        });
+        this.activeRedFlashGraphics.clear();
     }
 
 }

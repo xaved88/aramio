@@ -8,6 +8,7 @@ export class AnimationManager {
     private scene: Phaser.Scene;
     private entityTweens: Map<string, Phaser.Tweens.Tween> = new Map();
     private hitMarkerGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private activeMuzzleFlashGraphics: Set<Phaser.GameObjects.Graphics> = new Set(); // Track muzzle flash graphics for cleanup
     private cameraManager: any = null;
 
     constructor(scene: Phaser.Scene) {
@@ -261,6 +262,9 @@ export class AnimationManager {
         flash.fillCircle(0, 0, config.SIZE);
         flash.setDepth(CLIENT_CONFIG.RENDER_DEPTH.EFFECTS);
         
+        // Track for cleanup
+        this.activeMuzzleFlashGraphics.add(flash);
+        
         // Ensure it only appears on main camera
         if (this.cameraManager) {
             this.cameraManager.assignToMainCamera(flash);
@@ -282,6 +286,9 @@ export class AnimationManager {
         // Create spark particles
         for (let i = 0; i < config.PARTICLE_COUNT; i++) {
             const particle = this.scene.add.graphics();
+            
+            // Track for cleanup
+            this.activeMuzzleFlashGraphics.add(particle);
             
             // Random position around the flash center
             const angle = (Math.PI * 2 * i) / config.PARTICLE_COUNT + Math.random() * 0.5;
@@ -325,5 +332,20 @@ export class AnimationManager {
         this.hitMarkerGraphics.forEach((marker, markerId) => {
             this.cleanupHitMarker(markerId);
         });
+        
+        // Clean up all muzzle flash graphics
+        this.cleanupActiveMuzzleFlashes();
+    }
+    
+    /**
+     * Cleans up all active muzzle flash graphics (flash and particles)
+     */
+    cleanupActiveMuzzleFlashes(): void {
+        this.activeMuzzleFlashGraphics.forEach(graphics => {
+            if (graphics && graphics.scene) {
+                graphics.destroy();
+            }
+        });
+        this.activeMuzzleFlashGraphics.clear();
     }
 } 
