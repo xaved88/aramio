@@ -36,7 +36,7 @@ export class ControlModeToggle {
         this.modeIcon.setDisplaySize(this.ICON_SIZE, this.ICON_SIZE);
 
         this.background.clear();
-        this.background.fillStyle(CLIENT_CONFIG.UI.COLORS.BACKGROUND, 0.8);
+        this.background.fillStyle(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE, 0.8);
         this.background.lineStyle(2, CLIENT_CONFIG.UI.COLORS.CONTROL_TOGGLE, 1);
         
         const padding = 6;

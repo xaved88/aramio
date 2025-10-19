@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameplayConfig } from '../server/config/ConfigProvider';
+import { CLIENT_CONFIG } from '../ClientConfig';
 
 export class PathRenderer {
     private scene: Phaser.Scene;
@@ -66,7 +67,7 @@ export class PathRenderer {
         const cols = Math.ceil(length / stoneSpacing);
         
         // Base path color (more muted gray)
-        const baseColor = 0x6B6B6B;
+        const baseColor = CLIENT_CONFIG.PATH_COLORS.STONE_BASE;
         
         // Add gap between path and circles
         const gapDistance = 90; // 45 * 2
@@ -117,7 +118,7 @@ export class PathRenderer {
         const stoneSize = 16; // 8 * 2
         const stoneSpacing = 24; // 12 * 2
         const circleRadius = 120; // 60 * 2
-        const baseColor = 0x6B6B6B;
+        const baseColor = CLIENT_CONFIG.PATH_COLORS.STONE_BASE;
         
         // Draw circle around blue cradle
         this.drawCircleStones(graphics, blueCradle.x, blueCradle.y, circleRadius, stoneSize, stoneSpacing, baseColor);
@@ -183,7 +184,7 @@ export class PathRenderer {
         baseColor: number
     ): void {
         // Stone shadow
-        graphics.fillStyle(0x5A5A5A, 0.1);
+        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1);
         graphics.fillRect(x - size/2 + 1, y - size/2 + 1, size, size);
         
         // Stone base
@@ -191,11 +192,11 @@ export class PathRenderer {
         graphics.fillRect(x - size/2, y - size/2, size, size);
         
         // Stone highlight
-        graphics.fillStyle(0x7A7A7A, 0.08);
+        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_HIGHLIGHT, 0.08);
         graphics.fillRect(x - size/2, y - size/2, size, size/3);
         
         // Stone border
-        graphics.lineStyle(1, 0x5A5A5A, 0.1);
+        graphics.lineStyle(1, CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1);
         graphics.strokeRect(x - size/2, y - size/2, size, size);
     }
     
@@ -211,7 +212,7 @@ export class PathRenderer {
         alpha: number
     ): void {
         // Stone shadow
-        graphics.fillStyle(0x5A5A5A, 0.1 * alpha);
+        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1 * alpha);
         graphics.fillRect(x - size/2 + 1, y - size/2 + 1, size, size);
         
         // Stone base
@@ -219,11 +220,11 @@ export class PathRenderer {
         graphics.fillRect(x - size/2, y - size/2, size, size);
         
         // Stone highlight
-        graphics.fillStyle(0x7A7A7A, 0.08 * alpha);
+        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_HIGHLIGHT, 0.08 * alpha);
         graphics.fillRect(x - size/2, y - size/2, size, size/3);
         
         // Stone border
-        graphics.lineStyle(1, 0x5A5A5A, 0.1 * alpha);
+        graphics.lineStyle(1, CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1 * alpha);
         graphics.strokeRect(x - size/2, y - size/2, size, size);
     }
     
@@ -246,7 +247,7 @@ export class PathRenderer {
             
             // Create gradient mask effect by drawing semi-transparent overlays
             const alpha = 0.01 + (progress * 0.03);
-            graphics.lineStyle(currentWidth, 0x2c3e50, alpha);
+            graphics.lineStyle(currentWidth, CLIENT_CONFIG.PATH_COLORS.GRADIENT_OVERLAY, alpha);
             graphics.beginPath();
             graphics.moveTo(start.x, start.y);
             graphics.lineTo(end.x, end.y);

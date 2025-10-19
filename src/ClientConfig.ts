@@ -229,7 +229,7 @@ export const CLIENT_CONFIG = {
             ICON_SIZE: 30,
             SPACING: 12,
             MAX_ICONS_PER_ROW: 11, // Changed from 4 to 12
-            BACKGROUND_COLOR: 0x666666,
+            BACKGROUND_COLOR: 0x7a8a9a, // Lighter blue-gray to match game theme
             BACKGROUND_ALPHA: 0.7,
             BACKGROUND_PADDING: 4,
         },
@@ -334,20 +334,18 @@ export const CLIENT_CONFIG = {
             PROCEED: 0x4CAF50, // green for proceed/action buttons
             PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
             DISABLED: 0x4A4A4A, // gray for disabled buttons
-            SUBTLE: 0x2c3e50, // dark blue-gray background for subtle buttons
-            SUBTLE_HOVER: 0x34495e, // darker accent color for subtle button hover
+            SUBTLE: 0x34495e, // Lighter blue-gray background for subtle buttons
+            SUBTLE_HOVER: 0x4a5f7a, // Lighter hover color for subtle buttons
         },
         COLORS: {
-            BACKGROUND: 0x2c3e50, // dark blue-gray
             DISABLED: 0x7f8c8d, // gray
-            ACCENT: 0x34495e, // darker accent color
             BORDER: 0x7f8c8d, // gray border
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
-            VIEWPORT: 0x1a252f, // Darker blue-gray for viewport background
-            GAME_MAP: 0x2c3e50,
-            LOBBY: 0x2c3e50,
+            VIEWPORT: 0x2c3e50, // Lighter blue-gray for viewport background
+            GAME_MAP: 0x34495e, // Slightly lighter than before
+            LOBBY: 0x34495e, // Slightly lighter than before
         },
         OVERLAY: {
             BACKGROUND: 0x000000, // black overlay background
@@ -375,6 +373,12 @@ export const CLIENT_CONFIG = {
             FLOAT_DISTANCE: 100, // How far the text floats up
             DURATION_MS: 3000,
         },
+    },
+    PATH_COLORS: {
+        STONE_BASE: 0x6B6B6B, // Base stone color for cobblestone path
+        STONE_SHADOW: 0x5A5A5A, // Shadow color for stone depth
+        STONE_HIGHLIGHT: 0x7A7A7A, // Highlight color for stone top
+        GRADIENT_OVERLAY: 0x2c3e50, // Color for path gradient fade effect
     },
     REWARDS: {
         DISPLAY: {

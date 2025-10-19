@@ -22,7 +22,7 @@ export class LobbyScene extends Phaser.Scene {
     private hasLoadedSavedName: boolean = false;
     
     // UI Elements
-    private configValue!: Phaser.GameObjects.Text;
+    private configValue!: Button;
     private configDropdownItems: Button[] = [];
     private blueTeamContainer!: Phaser.GameObjects.Container;
     private redTeamContainer!: Phaser.GameObjects.Container;
@@ -38,7 +38,7 @@ export class LobbyScene extends Phaser.Scene {
         super({ key: 'LobbyScene' });
     }
 
-    private addHoverEffect(button: Phaser.GameObjects.Text, normalColor: number, hoverColor: number = CLIENT_CONFIG.UI.COLORS.ACCENT) {
+    private addHoverEffect(button: Phaser.GameObjects.Text, normalColor: number, hoverColor: number = CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER) {
         button.on('pointerover', () => {
             button.setStyle({ backgroundColor: hexToColorString(hoverColor) });
         });
@@ -285,17 +285,12 @@ export class LobbyScene extends Phaser.Scene {
             TextStyleHelper.getStyle('HEADER')
         ).setOrigin(0.5);
 
-        this.configValue = this.add.text(centerX, centerY - 100, 'default', 
-            TextStyleHelper.getStyleWithCustom('BODY_LARGE', {
-                backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                padding: { x: 10, y: 5 }
-            })
-        ).setOrigin(0.5).setInteractive();
-
-        // Add hover effects
-        this.addHoverEffect(this.configValue, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
-
-        this.configValue.on('pointerdown', () => {
+        this.configValue = new Button(this, {
+            x: centerX,
+            y: centerY - 100,
+            text: 'default',
+            type: 'subtle',
+            onClick: () => {
             // Toggle dropdown - close if already open, open if closed
             if (this.configDropdownItems.length > 0) {
                 // Close dropdown
@@ -305,7 +300,10 @@ export class LobbyScene extends Phaser.Scene {
                 // Open dropdown
                 this.toggleConfigDropdown(centerX, centerY - 70);
             }
+            }
         });
+        
+        this.add.existing(this.configValue);
 
         // Team containers
         const teamY = centerY; // Position teams at the center
@@ -396,7 +394,7 @@ export class LobbyScene extends Phaser.Scene {
         this.tutorialButton = this.add.container(x, y);
         
         // Background rectangle for the entire button
-        const bgRect = this.add.rectangle(0, 0, 160, 45, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        const bgRect = this.add.rectangle(0, 0, 160, 45, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         
         // Background circle for the ? icon
         const bg = this.add.circle(-60, 0, buttonSize / 2, CLIENT_CONFIG.UI.COLORS.CONTROL_TOGGLE);
@@ -425,11 +423,11 @@ export class LobbyScene extends Phaser.Scene {
         
         // Hover effects
         this.tutorialButton.on('pointerover', () => {
-            bgRect.setFillStyle(CLIENT_CONFIG.UI.COLORS.ACCENT);
+            bgRect.setFillStyle(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER);
         });
         
         this.tutorialButton.on('pointerout', () => {
-            bgRect.setFillStyle(CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+            bgRect.setFillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         });
         
         // Click handler
@@ -562,16 +560,16 @@ export class LobbyScene extends Phaser.Scene {
                 
                 // Only show left arrow (to blue team) if player is not already on blue team
                 if (team !== 'blue') {
-                    const arrowLeft = this.add.text(-100, y, '←', {
-                        fontSize: '24px',
-                         color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
-                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                        padding: { x: 4, y: 2 }
-                    }).setOrigin(0.5).setInteractive();
+                     const arrowLeft = this.add.text(-100, y, '←', {
+                         fontSize: '24px',
+                          color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
+                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BACKGROUND.LOBBY),
+                         padding: { x: 4, y: 2 }
+                     }).setOrigin(0.5).setInteractive();
 
-                    // Add hover effects
-                    this.addHoverEffect(arrowLeft, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+                     // Add hover effects
+                     this.addHoverEffect(arrowLeft, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
 
                     // Left arrow: move to blue team
                     arrowLeft.on('pointerdown', () => {
@@ -592,16 +590,16 @@ export class LobbyScene extends Phaser.Scene {
 
                 // Only show right arrow (to red team) if player is not already on red team
                 if (team !== 'red') {
-                    const arrowRight = this.add.text(100, y, '→', {
-                        fontSize: '24px',
-                         color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
-                        fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                        backgroundColor: hexToColorString(CLIENT_CONFIG.UI.COLORS.BACKGROUND),
-                        padding: { x: 4, y: 2 }
-                    }).setOrigin(0.5).setInteractive();
+                     const arrowRight = this.add.text(100, y, '→', {
+                         fontSize: '24px',
+                          color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
+                         fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+                         backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BACKGROUND.LOBBY),
+                         padding: { x: 4, y: 2 }
+                     }).setOrigin(0.5).setInteractive();
 
-                    // Add hover effects
-                    this.addHoverEffect(arrowRight, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+                     // Add hover effects
+                     this.addHoverEffect(arrowRight, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
 
                     // Right arrow: move to red team
                     arrowRight.on('pointerdown', () => {
@@ -750,7 +748,7 @@ export class LobbyScene extends Phaser.Scene {
         const overlay = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
 
         // Create dialog background
-        const dialogBg = this.add.rectangle(centerX, centerY, 400, 200, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        const dialogBg = this.add.rectangle(centerX, centerY, 400, 200, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         dialogBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
 
         // Title

@@ -74,7 +74,7 @@ export class TutorialOverlay {
         // Panel background - centered
         const panelHeight = contentHeight;
         const panelBg = this.scene.add.graphics();
-        panelBg.fillStyle(0x2c3e50, 0.95);
+        panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         panelBg.fillRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
         panelBg.lineStyle(2, 0x3498db, 1);
         panelBg.strokeRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
@@ -85,7 +85,7 @@ export class TutorialOverlay {
         const closeButtonX = leftX + contentWidth + 20 - closeButtonSize / 2 - 10; // 10px from right edge
         const closeButtonY = startY - 20 + closeButtonSize / 2 + 10; // 10px from top edge
         
-        const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+        const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
         closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
@@ -102,11 +102,11 @@ export class TutorialOverlay {
         this.contentContainer.add(closeZone);
         
         closeZone.on('pointerover', () => {
-            closeBg.setFillStyle(CLIENT_CONFIG.UI.COLORS.ACCENT);
+            closeBg.setFillStyle(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE_HOVER);
         });
         
         closeZone.on('pointerout', () => {
-            closeBg.setFillStyle(CLIENT_CONFIG.UI.COLORS.BACKGROUND);
+            closeBg.setFillStyle(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
         });
         
         closeZone.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number, event: Phaser.Types.Input.EventData) => {
@@ -386,7 +386,7 @@ export class TutorialOverlay {
     private updateBackground(): void {
         if (this.overlay) {
             this.overlay.clear();
-            this.overlay.fillStyle(0x000000, 0.7);
+            this.overlay.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
             this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         }
     }

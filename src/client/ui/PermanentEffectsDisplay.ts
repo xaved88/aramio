@@ -137,7 +137,7 @@ export class PermanentEffectsDisplay {
                 
                 // Determine styling based on stat type
                 const isAbilityStat = statName.startsWith('ability:') || statName === 'abilityPower';
-                const backgroundColor = isAbilityStat ? 0x4a5568 : 0x4a5568; // Light gray background for both
+                const backgroundColor = config.BACKGROUND_COLOR; // Use config background color
                 const borderColor = isAbilityStat ? 0x3182ce : 0x38a169; // Darker blue for ability stats, darker green for base stats
                 const borderWidth = 1
                 
