@@ -256,7 +256,8 @@ export class RewardCard {
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 color: '#333333',
                 align: 'center',
-                fontStyle: 'bold'
+                fontStyle: 'bold',
+                shadow: undefined
             })
         );
         this.titleText.setOrigin(0.5);
@@ -270,7 +271,8 @@ export class RewardCard {
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 color: '#666666',
                 align: 'center',
-                wordWrap: { width: config.width - 30 }
+                wordWrap: { width: config.width - 30 },
+                shadow: undefined
             })
         );
         this.descriptionText.setOrigin(0.5);

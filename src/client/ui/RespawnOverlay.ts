@@ -69,8 +69,7 @@ export class RespawnOverlay {
             'Slain by ',
             TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
-                strokeThickness: 2,
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+                strokeThickness: 2
             })
         );
         this.slainByText.setOrigin(0, 0.5); // Left-aligned
@@ -85,8 +84,7 @@ export class RespawnOverlay {
             '',
             TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
-                strokeThickness: 2,
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+                strokeThickness: 2
             })
         );
         this.killerNameText.setOrigin(0, 0.5); // Left-aligned
@@ -113,8 +111,7 @@ export class RespawnOverlay {
             'Respawning',
             TextStyleHelper.getStyleWithCustom('TITLE_MEDIUM', {
                 stroke: '#000000',
-                strokeThickness: 4,
-                shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 4, fill: true }
+                strokeThickness: 4
             })
         );
         this.text.setOrigin(0.5);
@@ -128,8 +125,7 @@ export class RespawnOverlay {
             '',
             TextStyleHelper.getStyleWithCustom('HEADER', {
                 stroke: '#000000',
-                strokeThickness: 3,
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+                strokeThickness: 3
             })
         );
         this.timer.setOrigin(0.5); // Center-aligned
@@ -150,8 +146,7 @@ export class RespawnOverlay {
             TextStyleHelper.getStyleWithCustom('TITLE_SMALL', {
                 color: '#f1c40f',
                 stroke: '#000000',
-                strokeThickness: 2,
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true }
+                strokeThickness: 2
             })
         );
         this.rewardsText.setOrigin(0.5);

@@ -267,59 +267,139 @@ export const CLIENT_CONFIG = {
                 fontSize: '32px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 3,
+                    stroke: true,
+                    fill: true
+                }
             },
             TITLE_SMALL: {
                 fontSize: '24px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             HEADER: {
                 fontSize: '20px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             
             // Body text
             BODY_LARGE: {
                 fontSize: '18px',
                 fontFamily: 'Arial',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             BODY_MEDIUM: {
                 fontSize: '16px',
                 fontFamily: 'Arial',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             BODY_SMALL: {
                 fontSize: '14px',
                 fontFamily: 'Arial',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             BODY_TINY: {
                 fontSize: '12px',
                 fontFamily: 'Arial',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 1,
+                    stroke: true,
+                    fill: true
+                }
             },
             SUBTLE_HINT: {
                 fontSize: '14px',
                 fontFamily: 'Arial',
-                color: '#888888'
+                color: '#888888',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             
             BUTTON_TEXT: {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff'
+                color: '#ffffff',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             BUTTON_TEXT_DISABLED: {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#888888'
+                color: '#888888',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             },
             // Specialized text
             HUD_TEXT: {
@@ -334,7 +414,15 @@ export const CLIENT_CONFIG = {
                 fontSize: '20px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ff0000'
+                color: '#ff0000',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             }
         },
         BUTTON_COLORS: {

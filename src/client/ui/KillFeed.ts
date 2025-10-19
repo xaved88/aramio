@@ -176,7 +176,15 @@ export class KillFeed {
             fontSize: fontSize,
             fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
             color: killerColor,
-            fontStyle: killerFontStyle
+            fontStyle: killerFontStyle,
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 1,
+                stroke: true,
+                fill: true
+            }
         });
         killerText.setOrigin(0, 0.5);
         entryContainer.add(killerText);
@@ -190,7 +198,15 @@ export class KillFeed {
                 fontSize: fontSize,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 color: '#FFFFFF',
-                fontStyle: fontWeight
+                fontStyle: fontWeight,
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 1,
+                    stroke: true,
+                    fill: true
+                }
             }
         );
         skullIcon.setOrigin(0, 0.5);
@@ -206,7 +222,15 @@ export class KillFeed {
                 fontSize: fontSize,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
                 color: victimColor,
-                fontStyle: victimFontStyle
+                fontStyle: victimFontStyle,
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 1,
+                    stroke: true,
+                    fill: true
+                }
             }
         );
         victimText.setOrigin(0, 0.5);
