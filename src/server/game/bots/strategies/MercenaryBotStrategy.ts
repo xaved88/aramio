@@ -152,7 +152,7 @@ export class MercenaryBotStrategy {
         }
 
         // Only use rage if we have good targets nearby
-        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= 100);
+        const nearbyEnemies = enemies.filter(enemy => enemy.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.NEARBY_ENEMY_RANGE);
         if (nearbyEnemies.length === 0) {
             return false; // No good targets
         }
@@ -161,10 +161,10 @@ export class MercenaryBotStrategy {
         // Only count heroes for low health check - don't waste rage on minions
         const lowHealthEnemies = nearbyEnemies.filter(enemy => {
             const healthPercent = (enemy.health / enemy.maxHealth) * 100;
-            return enemy.type === 'hero' && healthPercent <= 50; // 50% health or below
+            return enemy.type === 'hero' && healthPercent <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.ENEMY_LOW_HEALTH_THRESHOLD;
         });
         const botHealthPercent = (bot.health / bot.maxHealth) * 100;
-        const inDanger = botHealthPercent <= 60; // Use rage defensively when at 60% health or below
+        const inDanger = botHealthPercent <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.BOT_DANGER_HEALTH_THRESHOLD;
 
         return lowHealthEnemies.length > 0 || inDanger;
     }
@@ -186,14 +186,14 @@ export class MercenaryBotStrategy {
             score += (100 - enemyHealthPercent) * 3;
             
             // Bonus for closer enemies (easier to reach with reduced range)
-            if (enemy.distance <= 100) {
+            if (enemy.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.SCORING_DISTANCE_CLOSE) {
                 score += 30;
-            } else if (enemy.distance <= 150) {
+            } else if (enemy.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.SCORING_DISTANCE_MEDIUM) {
                 score += 15;
             }
             
             // Bonus for enemies that are isolated (easier to kill without interference)
-            const nearbyAllies = this.countNearbyAllies(enemy, state, 100);
+            const nearbyAllies = this.countNearbyAllies(enemy, state, this.gameplayConfig.AI_BEHAVIOR.MERCENARY.ALLY_DETECTION_RADIUS);
             score += (3 - nearbyAllies) * 10; // Fewer allies = higher score
             
             return { ...enemy, score };
@@ -207,14 +207,14 @@ export class MercenaryBotStrategy {
         // During rage mode, be aggressive and chase enemies
         // Filter out minions since hunter effect prevents targeting them
         const heroEnemies = enemies.filter(enemy => enemy.type === 'hero');
-        const nearbyHeroEnemies = heroEnemies.filter(enemy => enemy.distance <= 100);
+        const nearbyHeroEnemies = heroEnemies.filter(enemy => enemy.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.NEARBY_ENEMY_RANGE);
         
         if (nearbyHeroEnemies.length > 0) {
             // Prioritize the best target (same logic as selectRageTarget)
             const bestTarget = this.selectRageTarget(enemies, bot, state);
             
             // If best target is nearby, chase it; otherwise chase closest
-            const targetEnemy = (bestTarget && bestTarget.distance <= 100) 
+            const targetEnemy = (bestTarget && bestTarget.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.NEARBY_ENEMY_RANGE) 
                 ? bestTarget 
                 : nearbyHeroEnemies.sort((a, b) => a.distance - b.distance)[0];
             
@@ -461,18 +461,18 @@ export class MercenaryBotStrategy {
         // Check if bot was recently damaged (within last 2 seconds)
         // This is a simple heuristic - in a real game you'd track actual damage events
         const timeSinceLastDamage = currentTime - healingState.lastDamageTime;
-        const wasRecentlyDamaged = timeSinceLastDamage < 2000; // 2 seconds
+        const wasRecentlyDamaged = timeSinceLastDamage < this.gameplayConfig.AI_BEHAVIOR.MERCENARY.DAMAGE_WINDOW_MS;
         
         // Update healing state based on health percentage and damage
         const healthPercent = (bot.health / bot.maxHealth) * 100;
         
-        if (healthPercent <= 33) {
-            // Start healing if health drops to 33% or below
+        if (healthPercent <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.HEALING_START_THRESHOLD) {
+            // Start healing if health drops to threshold or below
             healingState.isHealing = true;
-        } else if (healthPercent >= 70) {
-            // Stop healing if health reaches 70% or above
+        } else if (healthPercent >= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.HEALING_STOP_THRESHOLD) {
+            // Stop healing if health reaches threshold or above
             healingState.isHealing = false;
-        } else if (wasRecentlyDamaged && healingState.isHealing && healthPercent > 33) {
+        } else if (wasRecentlyDamaged && healingState.isHealing && healthPercent > this.gameplayConfig.AI_BEHAVIOR.MERCENARY.HEALING_START_THRESHOLD) {
             // Stop healing if we were recently damaged (healing interrupted) - but only if above critical health
             healingState.isHealing = false;
         }

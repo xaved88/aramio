@@ -194,6 +194,28 @@ export const GAMEPLAY_CONFIG = {
         CRADLE_RETREAT_DISTANCE: 100, // Distance to retreat behind cradle
         SAFE_FIGHTING_BUFFER: 160, // Buffer for safe fighting near structures
         SAFE_FIGHTING_MIN: 120, // Minimum safe fighting range
+        
+        // Bot strategy specific values
+        HOOKSHOT: {
+            TEAMMATE_OFFSET_DISTANCE: 100, // Distance to stay behind teammate
+            RETREAT_BUFFER_DISTANCE: 100, // Buffer distance when retreating
+            RECOVERY_TIME_MS: 3000, // Time to stay and fight after hookshot
+        },
+        MERCENARY: {
+            NEARBY_ENEMY_RANGE: 200, // Range for detecting nearby enemies
+            ENEMY_LOW_HEALTH_THRESHOLD: 50, // Enemy health percentage considered low (triggers aggressive rage)
+            BOT_DANGER_HEALTH_THRESHOLD: 60, // Bot health percentage considered dangerous (triggers defensive rage)
+            SCORING_DISTANCE_CLOSE: 200, // Close distance for scoring
+            SCORING_DISTANCE_MEDIUM: 300, // Medium distance for scoring
+            ALLY_DETECTION_RADIUS: 200, // Radius for detecting nearby allies
+            DAMAGE_WINDOW_MS: 2000, // Time window for recent damage
+            HEALING_START_THRESHOLD: 33, // Health percentage to start healing
+            HEALING_STOP_THRESHOLD: 70, // Health percentage to stop healing
+        },
+        SIMPLETON: {
+            TARGET_NEAREST_CHANCE: 0.3, // 30% chance to target nearest enemy
+            TARGET_LOW_HEALTH_CHANCE: 0.8, // 80% chance to target low health enemy
+        },
     },
     REWARDS: {
         LEVEL_CHESTS: {

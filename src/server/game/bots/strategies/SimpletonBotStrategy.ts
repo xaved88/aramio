@@ -179,14 +179,14 @@ export class SimpletonBotStrategy {
         
         const targetingStrategy = Math.random();
         
-        if (targetingStrategy < 0.3) {
-            // 30% chance: target nearest enemy
+        if (targetingStrategy < this.gameplayConfig.AI_BEHAVIOR.SIMPLETON.TARGET_NEAREST_CHANCE) {
+            // Target nearest enemy
             return targetPool.sort((a, b) => a.distance - b.distance)[0];
-        } else if (targetingStrategy < 0.8) {
-            // 50% chance: target lowest health enemy (increased from 30%)
+        } else if (targetingStrategy < this.gameplayConfig.AI_BEHAVIOR.SIMPLETON.TARGET_LOW_HEALTH_CHANCE) {
+            // Target lowest health enemy
             return targetPool.sort((a, b) => a.health - b.health)[0];
         } else {
-            // 20% chance: target random enemy (decreased from 30%)
+            // Target random enemy
             return targetPool[Math.floor(Math.random() * targetPool.length)];
         }
     }

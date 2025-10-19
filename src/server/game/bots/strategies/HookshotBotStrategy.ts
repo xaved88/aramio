@@ -188,7 +188,7 @@ export class HookshotBotStrategy {
 
         // Move to position behind teammate
         const directionToOurBase = this.getDirectionToBase(bot, bot.team);
-        const offsetDistance = 50; // Stay 50 pixels behind teammate
+        const offsetDistance = this.gameplayConfig.AI_BEHAVIOR.HOOKSHOT.TEAMMATE_OFFSET_DISTANCE;
         
         // Calculate new position behind teammate
         const newX = teammateClosestToEnemy.x + (directionToOurBase.x * offsetDistance);
@@ -282,7 +282,7 @@ export class HookshotBotStrategy {
         });
 
         // Return position near the closest friendly structure, but outside its attack range
-        const retreatDistance = closestStructure.attackRadius + 50; // 50 pixels buffer
+        const retreatDistance = closestStructure.attackRadius + this.gameplayConfig.AI_BEHAVIOR.HOOKSHOT.RETREAT_BUFFER_DISTANCE;
         const dx = bot.x - closestStructure.x;
         const dy = bot.y - closestStructure.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -374,9 +374,9 @@ export class HookshotBotStrategy {
             return false;
         }
         
-        // Check if we used Hookshot recently (within the last 2 seconds)
+        // Check if we used Hookshot recently
         const timeSinceHookshot = currentTime - lastUsedTime;
-        const hookshotRecoveryTime = 3000; // 3 seconds to recover from Hookshot
+        const hookshotRecoveryTime = this.gameplayConfig.AI_BEHAVIOR.HOOKSHOT.RECOVERY_TIME_MS;
         
         if (timeSinceHookshot > hookshotRecoveryTime) {
             return false;
