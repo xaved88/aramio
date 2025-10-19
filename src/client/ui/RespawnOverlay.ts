@@ -164,48 +164,66 @@ export class RespawnOverlay {
 
     show(): void {
         if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
-            // Core elements that always show (timer visibility is managed by updateTimer)
-            const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
-            elements.forEach(el => el.setAlpha(0).setVisible(true));
-            
-            this.scene.tweens.add({
-                targets: elements,
-                alpha: 1,
-                duration: 600,
-                ease: 'Power2'
-            });
-            
-            // If timer is visible (managed by updateTimer), animate it too
-            if (this.timer.visible) {
-                this.timer.setAlpha(0);
+            // Only animate if not already visible to prevent flashing
+            if (!this.isVisible) {
+                // Core elements that always show (timer visibility is managed by updateTimer)
+                const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
+                elements.forEach(el => el.setAlpha(0).setVisible(true));
+                
                 this.scene.tweens.add({
-                    targets: this.timer,
+                    targets: elements,
                     alpha: 1,
                     duration: 600,
                     ease: 'Power2'
                 });
-            }
-            
-            // If timer circle is visible, animate it too
-            if (this.timerCircle && this.timerCircle.visible) {
-                this.timerCircle.setAlpha(0);
-                this.scene.tweens.add({
-                    targets: this.timerCircle,
-                    alpha: 1,
-                    duration: 600,
-                    ease: 'Power2'
-                });
-            }
-            
-            // If rewardsText is visible (managed by updateTimer), animate it too
-            if (this.rewardsText.visible) {
-                this.rewardsText.setAlpha(0);
-                this.scene.tweens.add({
-                    targets: this.rewardsText,
-                    alpha: 1,
-                    duration: 600,
-                    ease: 'Power2'
-                });
+                
+                // If timer is visible (managed by updateTimer), animate it too
+                if (this.timer.visible) {
+                    this.timer.setAlpha(0);
+                    this.scene.tweens.add({
+                        targets: this.timer,
+                        alpha: 1,
+                        duration: 600,
+                        ease: 'Power2'
+                    });
+                }
+                
+                // If timer circle is visible, animate it too
+                if (this.timerCircle && this.timerCircle.visible) {
+                    this.timerCircle.setAlpha(0);
+                    this.scene.tweens.add({
+                        targets: this.timerCircle,
+                        alpha: 1,
+                        duration: 600,
+                        ease: 'Power2'
+                    });
+                }
+                
+                // If rewardsText is visible (managed by updateTimer), animate it too
+                if (this.rewardsText.visible) {
+                    this.rewardsText.setAlpha(0);
+                    this.scene.tweens.add({
+                        targets: this.rewardsText,
+                        alpha: 1,
+                        duration: 600,
+                        ease: 'Power2'
+                    });
+                }
+            } else {
+                // Just ensure elements are visible and at full alpha when already showing
+                const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
+                elements.forEach(el => el.setVisible(true).setAlpha(1));
+                
+                // Update timer and timer circle visibility without animation
+                if (this.timer && this.timer.visible) {
+                    this.timer.setAlpha(1);
+                }
+                if (this.timerCircle && this.timerCircle.visible) {
+                    this.timerCircle.setAlpha(1);
+                }
+                if (this.rewardsText && this.rewardsText.visible) {
+                    this.rewardsText.setAlpha(1);
+                }
             }
             
             this.isVisible = true;
@@ -334,7 +352,12 @@ export class RespawnOverlay {
 
     showWithTimer(remainingTimeMs: number, hasUnspentRewards: boolean = false): void {
         this.updateTimer(remainingTimeMs, hasUnspentRewards);
-        this.updateBackground();
+        
+        // Only update background if not already visible to prevent flashing
+        if (!this.isVisible) {
+            this.updateBackground();
+        }
+        
         this.show();
     }
 
