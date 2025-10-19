@@ -81,6 +81,44 @@ export class EntityFactory {
     }
 
     /**
+     * Creates a shadow sprite for any entity
+     */
+    createShadowSprite(entitySprite: Phaser.GameObjects.Sprite, entityX: number, entityY: number, entityType?: string): Phaser.GameObjects.Sprite {
+        if (!CLIENT_CONFIG.DROP_SHADOW.ENABLED) {
+            return this.scene.add.sprite(0, 0, 'blank'); // Return invisible sprite if shadows disabled
+        }
+
+        // Create a shadow sprite using the same texture as the entity
+        const shadowSprite = this.scene.add.sprite(0, 0, entitySprite.texture.key);
+        
+        // Set depth based on entity type - hero/minion shadows behind structure shadows
+        if (entityType === 'cradle' || entityType === 'turret') {
+            // Structure shadows
+            shadowSprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.SHADOWS_STRUCTURE);
+        } else {
+            // Hero/minion shadows render behind structure shadows
+            shadowSprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.SHADOWS_HERO_MINION);
+        }
+        
+        shadowSprite.setOrigin(0.5, 0.5);
+        
+        // Apply shadow styling
+        shadowSprite.setTint(CLIENT_CONFIG.DROP_SHADOW.COLOR);
+        shadowSprite.setAlpha(CLIENT_CONFIG.DROP_SHADOW.ALPHA);
+        
+        // Set initial position with offset using the provided coordinates
+        shadowSprite.setPosition(
+            entityX + CLIENT_CONFIG.DROP_SHADOW.OFFSET_X,
+            entityY + CLIENT_CONFIG.DROP_SHADOW.OFFSET_Y
+        );
+        
+        // Initial scale - will be updated by EntityManager after proper scaling
+        shadowSprite.setScale(1, 1);
+        
+        return shadowSprite;
+    }
+
+    /**
      * Gets the appropriate texture key based on hero ability type
      */
     private getHeroTextureKey(abilityType: string): string {

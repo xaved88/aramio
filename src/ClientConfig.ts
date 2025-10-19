@@ -51,6 +51,8 @@ export const CLIENT_CONFIG = {
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
         SCENE_BACKGROUND: -10,    // Scene backgrounds (behind everything)
+        SHADOWS_STRUCTURE: -7,   // Structure drop shadows
+        SHADOWS_HERO_MINION: -6, // Hero and minion drop shadows
         BACKGROUND: -5,         // Radius indicators, respawn rings
         STRUCTURES: 0,          // Turrets, cradles
         TARGETING_LINES: 1,     // Targeting lines between combatants
@@ -65,6 +67,13 @@ export const CLIENT_CONFIG = {
         GAME_UI: 1000,          // Stats overlay, game interface
         MODALS: 2000            // Victory screen, modals
     } as const,
+    DROP_SHADOW: {
+        ENABLED: true,          // Whether to render drop shadows for entities
+        OFFSET_X: 2,            // Horizontal offset of shadow from entity
+        OFFSET_Y: 4,            // Vertical offset of shadow from entity
+        COLOR: 0x000000,        // Shadow color (black)
+        ALPHA: 0.3,             // Shadow opacity
+    },
     VICTORY_COLORS: {
         VICTORY: 0x4CAF50, // green for victory
         DEFEAT: 0xF44336,  // red for defeat

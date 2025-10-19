@@ -27,6 +27,7 @@ export class EntityManager {
     // Entity storage
     private entityGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entitySprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
+    private entityShadowSprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
     private entityHealthBars: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityTexts: Map<CombatantId, Phaser.GameObjects.Text> = new Map();
     private entityEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
@@ -323,9 +324,26 @@ export class EntityManager {
             combatantData.y
         );
         
+        // Animate shadow sprite to follow entity with offset
+        const shadowSprite = this.entityShadowSprites.get(entityId);
+        if (shadowSprite) {
+            this.scene.tweens.add({
+                targets: shadowSprite,
+                x: combatantData.x + CLIENT_CONFIG.DROP_SHADOW.OFFSET_X,
+                y: combatantData.y + CLIENT_CONFIG.DROP_SHADOW.OFFSET_Y,
+                duration: CLIENT_CONFIG.ENTITY_MOVEMENT_DURATION_MS,
+                ease: 'Linear'
+            });
+        }
+        
         // Animate rotation for sprites (if they exist)
         if (entitySprite) {
             this.animateEntityRotation(entityId, entitySprite, combatantData.direction);
+        }
+        
+        // Update shadow sprite scale to match entity
+        if (shadowSprite && entitySprite) {
+            shadowSprite.setScale(entitySprite.scaleX, entitySprite.scaleY);
         }
         
         // Render the entity
@@ -342,6 +360,19 @@ export class EntityManager {
             this.playerSessionId,
             this.isRecentAttacker(entityId)
         );
+        
+        // Create shadow sprite immediately after entity is positioned and scaled
+        if (entitySprite && !this.entityShadowSprites.has(entityId)) {
+            const shadowSprite = this.entityFactory.createShadowSprite(entitySprite, combatantData.x, combatantData.y, combatantData.type);
+            
+            // Apply the same scale as the entity sprite
+            shadowSprite.setScale(entitySprite.scaleX, entitySprite.scaleY);
+            
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(shadowSprite);
+            }
+            this.entityShadowSprites.set(entityId, shadowSprite);
+        }
     }
 
     /**
@@ -925,6 +956,13 @@ export class EntityManager {
             }
         });
         
+        // Check shadow sprites specifically
+        this.entityShadowSprites.forEach((shadowSprite, entityId) => {
+            if (!state.combatants.has(entityId)) {
+                this.destroyCombatantEntity(entityId);
+            }
+        });
+        
         // Check health bar entities
         this.entityHealthBars.forEach((entityHealthBar, entityId) => {
             if (!state.combatants.has(entityId)) {
@@ -952,6 +990,13 @@ export class EntityManager {
         if (entitySprite) {
             entitySprite.destroy();
             this.entitySprites.delete(entityId);
+        }
+        
+        // Destroy shadow sprite
+        const shadowSprite = this.entityShadowSprites.get(entityId);
+        if (shadowSprite) {
+            shadowSprite.destroy();
+            this.entityShadowSprites.delete(entityId);
         }
         
         // Destroy health bar
@@ -1019,6 +1064,13 @@ export class EntityManager {
         // Only update if the texture has changed
         if (sprite.texture.key !== expectedTextureKey) {
             sprite.setTexture(expectedTextureKey);
+            
+            // Also update the shadow sprite texture to match
+            const entityId = combatant.id;
+            const shadowSprite = this.entityShadowSprites.get(entityId);
+            if (shadowSprite) {
+                shadowSprite.setTexture(expectedTextureKey);
+            }
         }
     }
 
@@ -1149,6 +1201,7 @@ export class EntityManager {
         });
     }
 
+
     /**
      * Animates rotation for a sprite entity
      */
@@ -1175,7 +1228,14 @@ export class EntityManager {
             targets: sprite,
             rotation: finalRotation,
             duration: CLIENT_CONFIG.ENTITY_ROTATION_DURATION_MS,
-            ease: 'Linear'
+            ease: 'Linear',
+            onUpdate: () => {
+                // Update shadow rotation to match entity rotation during animation
+                const shadowSprite = this.entityShadowSprites.get(entityId);
+                if (shadowSprite) {
+                    shadowSprite.setRotation(sprite.rotation);
+                }
+            }
         });
     }
 
@@ -1193,6 +1253,7 @@ export class EntityManager {
     destroy(): void {
         this.entityGraphics.forEach(graphics => graphics.destroy());
         this.entitySprites.forEach(sprite => sprite.destroy());
+        this.entityShadowSprites.forEach(sprite => sprite.destroy());
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
         this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
@@ -1262,6 +1323,7 @@ export class EntityManager {
         // Clear all entity graphics
         this.entityGraphics.forEach(graphics => graphics.destroy());
         this.entitySprites.forEach(sprite => sprite.destroy());
+        this.entityShadowSprites.forEach(sprite => sprite.destroy());
         this.entityHealthBars.forEach(healthBar => healthBar.destroy());
         this.entityEffectOverlays.forEach(overlay => overlay.destroy());
         this.entityTexts.forEach(text => text.destroy());
@@ -1283,6 +1345,7 @@ export class EntityManager {
         // Clear all collections
         this.entityGraphics.clear();
         this.entitySprites.clear();
+        this.entityShadowSprites.clear();
         this.entityHealthBars.clear();
         this.entityEffectOverlays.clear();
         this.entityTexts.clear();
