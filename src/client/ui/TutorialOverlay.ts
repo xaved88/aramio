@@ -90,7 +90,7 @@ export class TutorialOverlay {
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
-            TextStyleHelper.getStyle('TITLE_MEDIUM'));
+            TextStyleHelper.getStyle('BUTTON_TEXT'));
         closeText.setOrigin(0.5);
         this.contentContainer.add(closeText);
         
@@ -123,7 +123,7 @@ export class TutorialOverlay {
         
         // Title
         const title = this.scene.add.text(centerX, currentY, 'Welcome to ARAM.IO!', 
-            TextStyleHelper.getStyleWithColor('TITLE_MEDIUM', '#3498db'));
+            TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
@@ -142,7 +142,7 @@ export class TutorialOverlay {
         
         // Controls section
         const controlsTitle = this.scene.add.text(leftX, currentY, 'How to Play:', 
-            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
+            TextStyleHelper.getStyle('HEADER'));
         this.contentContainer.add(controlsTitle);
         currentY += 30;
         
@@ -259,7 +259,7 @@ export class TutorialOverlay {
         
         // Heroes section
         const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Abilities:', 
-            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
+            TextStyleHelper.getStyle('HEADER'));
         this.contentContainer.add(heroesTitle);
         currentY += 60;
         
@@ -312,7 +312,7 @@ export class TutorialOverlay {
         
         // Advanced Controls section
         const advancedControlsTitle = this.scene.add.text(leftX, currentY, 'Advanced Controls:', 
-            TextStyleHelper.getStyleWithColor('HEADER', '#f1c40f'));
+            TextStyleHelper.getStyle('HEADER'));
         this.contentContainer.add(advancedControlsTitle);
         currentY += 30;
         

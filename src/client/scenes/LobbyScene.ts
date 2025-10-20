@@ -256,7 +256,7 @@ export class LobbyScene extends Phaser.Scene {
         pyromancerIcon.setOrigin(0.5);
 
         const titleText = this.add.text(centerX + 25, centerY - 300, 'ARAM.IO Lobby', 
-            TextStyleHelper.getTitleStyle('medium')
+            TextStyleHelper.getStyle('PAGE_TITLE')
         ).setOrigin(0.5);
 
         // Team size selector
@@ -311,11 +311,11 @@ export class LobbyScene extends Phaser.Scene {
         this.redTeamContainer = this.add.container(centerX + 200, teamY);
 
         this.add.text(centerX - 200, teamY - 40, 'Blue Team', 
-            TextStyleHelper.getStyleWithColor('TITLE_SMALL', TextStyleHelper.getTeamColor('blue'))
+            TextStyleHelper.getStyleWithColor('TITLE', TextStyleHelper.getTeamColor('blue'))
         ).setOrigin(0.5);
 
         this.add.text(centerX + 200, teamY - 40, 'Red Team', 
-            TextStyleHelper.getStyleWithColor('TITLE_SMALL', TextStyleHelper.getTeamColor('red'))
+            TextStyleHelper.getStyleWithColor('TITLE', TextStyleHelper.getTeamColor('red'))
         ).setOrigin(0.5);
 
         // Start button (below How to Play button)
@@ -402,7 +402,7 @@ export class LobbyScene extends Phaser.Scene {
         
         // Question mark text
         const questionMark = this.add.text(-60, 0, '?', 
-            TextStyleHelper.getStyle('HEADER')
+            TextStyleHelper.getStyleWithColor('HEADER', '#ffffff')
         );
         questionMark.setOrigin(0.5, 0.5);
         

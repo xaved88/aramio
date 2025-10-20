@@ -126,9 +126,9 @@ export class EntityRenderer {
         if (isStunned) {
             // Add pulsing yellowish grey border for stun effect
             const pulseIntensity = Math.sin(Date.now() * 0.01) * 0.5 + 0.5; // Pulsing between 0.5 and 1.0
-            const borderThickness = 4 + (pulseIntensity * 3); // Pulsing between 4px and 10px
+            const borderThickness = 3 + (pulseIntensity * 3); // Pulsing between 4px and 10px
             graphics.lineStyle(borderThickness, 0xCCCC66); // Slightly brighter yellowish border
-            graphics.strokeCircle(0, 0, combatant.size + 2); // Slightly larger than entity
+            graphics.strokeCircle(0, 0, combatant.size + 4); // Slightly larger than entity
             
             // Add stun icon above the hero
             graphics.setAlpha(1); // Semi-opaque but visible
@@ -203,7 +203,7 @@ export class EntityRenderer {
             
             // Draw border matching stun style
             graphics.lineStyle(borderThickness, 0x228B22, 0.4); // Darker green border with transparency
-            graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
+            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
             
             // Add healing icon above the entity (matching stun icon style)
             graphics.lineStyle(6, 0x228B22); // Darker green lines for icon
@@ -234,14 +234,14 @@ export class EntityRenderer {
             
             // Draw border matching stun style but with red color
             graphics.lineStyle(borderThickness, 0xFF4444, 0.6); // Bright red border with more opacity
-            graphics.strokeCircle(0, 0, (combatant.size + 3) * spriteScale); // Scale with sprite
+            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
             
             // Add rage icon above the entity (matching stun icon style)
             graphics.lineStyle(8, 0xFF4444); // Bright red lines for icon, thicker than other icons
             
             // Draw a simple flame/anger symbol for rage icon
             const iconSize = 16 * spriteScale; // Scale icon
-            const iconY = -(combatant.size + 36) * spriteScale; // Scale position
+            const iconY = -(combatant.size + 32) * spriteScale; // Scale position
             
             // Draw flame-like shape (zigzag pattern)
             graphics.moveTo(-iconSize, iconY + iconSize/2);
@@ -264,14 +264,14 @@ export class EntityRenderer {
             
             // Draw border with orange-red flame color
             graphics.lineStyle(borderThickness, 0xFF6600, 0.5); // Orange-red border with more transparency
-            graphics.strokeCircle(0, 0, (combatant.size + 2) * spriteScale); // Scale with sprite
+            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
             
             // Add flame icon above the entity
             graphics.lineStyle(3, 0xFF6600); // Orange-red lines for icon (thinner)
             
             // Draw a flame shape for burning icon
             const iconSize = 8 * spriteScale; // Scale icon (smaller)
-            const iconY = -(combatant.size + 32) * spriteScale; // Scale position
+            const iconY = -(combatant.size + 30) * spriteScale; // Scale position
             
             // Draw flame outline (zigzag upward pattern)
             graphics.beginPath();
@@ -296,7 +296,7 @@ export class EntityRenderer {
             // Draw a simple black cross on the minion
             graphics.lineStyle(2, 0x000000, 0.8); // Black lines with slight transparency
             
-            const crossSize = 4 * spriteScale; // Small cross size
+            const crossSize = 7 * spriteScale; // Small cross size
             
             // Draw horizontal line
             graphics.moveTo(-crossSize, 0);

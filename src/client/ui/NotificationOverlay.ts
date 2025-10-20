@@ -54,15 +54,15 @@ export class NotificationOverlay {
             }
         },
         [NotificationType.KILLING_SPREE]: {
-            title: (team: string, heroName?: string) => `${heroName} Killing Spree!`,
+            title: (team: string, heroName?: string) => `${heroName} is on a Killing Spree!`,
             subtitle: (team: string, heroName?: string) => `${heroName} has 5 kills without dying!`
         },
         [NotificationType.RAMPAGE]: {
-            title: (team: string, heroName?: string) => `${heroName} Rampage!`,
+            title: (team: string, heroName?: string) => `${heroName} is on a Rampage!`,
             subtitle: (team: string, heroName?: string) => `${heroName} has 10 kills without dying!`
         },
         [NotificationType.UNSTOPPABLE]: {
-            title: (team: string, heroName?: string) => `${heroName} Unstoppable!`,
+            title: (team: string, heroName?: string) => `${heroName} is Unstoppable!`,
             subtitle: (team: string, heroName?: string) => `${heroName} has 15 kills without dying!`
         }
     };
@@ -105,7 +105,7 @@ export class NotificationOverlay {
         
         // Create title text
         this.titleText = this.scene.add.text(0, 0, '', 
-            TextStyleHelper.getStyleWithCustom('TITLE_SMALL', {
+            TextStyleHelper.getStyleWithCustom('TITLE', {
                 align: 'center'
             }));
         this.titleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MODALS);
@@ -161,7 +161,7 @@ export class NotificationOverlay {
         const subtitleText = typeof content.subtitle === 'function' ? content.subtitle(teamName, config.heroName) : content.subtitle;
         
         // Create background with team color
-        const overlayWidth = 400;
+        const overlayWidth = 450;
         const overlayHeight = 80;
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 4; // Top quarter of screen

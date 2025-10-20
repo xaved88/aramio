@@ -109,7 +109,7 @@ export class RespawnOverlay {
             getCanvasWidth() / 2,
             getCanvasHeight() / 7 + 90, // Moved down
             'Respawning',
-            TextStyleHelper.getStyleWithCustom('TITLE_MEDIUM', {
+            TextStyleHelper.getStyleWithCustom('TITLE', {
                 stroke: '#000000',
                 strokeThickness: 2
             })
@@ -143,7 +143,7 @@ export class RespawnOverlay {
             getCanvasWidth() / 2,
             getCanvasHeight() / 2 - 60, // Positioned higher above the reward cards
             'Choose your rewards',
-            TextStyleHelper.getStyleWithCustom('TITLE_SMALL', {
+            TextStyleHelper.getStyleWithCustom('TITLE', {
                 color: '#f1c40f',
                 stroke: '#000000',
                 strokeThickness: 2

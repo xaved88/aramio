@@ -256,7 +256,7 @@ export const CLIENT_CONFIG = {
         },
         TEXT_STYLES: {
             // Headers and titles
-            TITLE_LARGE: {
+            VICTORY_TITLE: {
                 fontSize: '72px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
@@ -264,11 +264,11 @@ export const CLIENT_CONFIG = {
                 stroke: '#000000',
                 strokeThickness: 4
             },
-            TITLE_MEDIUM: {
+            PAGE_TITLE: {
                 fontSize: '32px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff',
+                color: '#f1c40f',
                 shadow: {
                     offsetX: 2,
                     offsetY: 2,
@@ -278,7 +278,7 @@ export const CLIENT_CONFIG = {
                     fill: true
                 }
             },
-            TITLE_SMALL: {
+            TITLE: {
                 fontSize: '24px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
@@ -296,7 +296,7 @@ export const CLIENT_CONFIG = {
                 fontSize: '20px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#ffffff',
+                color: '#f1c40f',
                 shadow: {
                     offsetX: 1,
                     offsetY: 1,

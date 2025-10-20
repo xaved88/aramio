@@ -116,13 +116,13 @@ export class CoordinateDebugOverlay {
         for (let x = 0; x <= CLIENT_CONFIG.MAP_WIDTH; x += 100) {
             // Top label - positioned in world coordinates
             const topLabel = this.gameObjectFactory.createText(x, 5, x.toString(), 
-                TextStyleHelper.getStyleWithColor('BODY_TINY', 0xffffff), 
+                TextStyleHelper.getStyle('BODY_TINY'), 
                 CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5, 0);
             this.gridLabels.push(topLabel);
             
             // Bottom label - positioned in world coordinates
             const bottomLabel = this.gameObjectFactory.createText(x, CLIENT_CONFIG.MAP_HEIGHT - 5, x.toString(), 
-                TextStyleHelper.getStyleWithColor('BODY_TINY', 0xffffff), 
+                TextStyleHelper.getStyle('BODY_TINY'), 
                 CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0.5, 1);
             this.gridLabels.push(bottomLabel);
         }
@@ -131,13 +131,13 @@ export class CoordinateDebugOverlay {
         for (let y = 0; y <= CLIENT_CONFIG.MAP_HEIGHT; y += 100) {
             // Left label - positioned in world coordinates
             const leftLabel = this.gameObjectFactory.createText(5, y, y.toString(), 
-                TextStyleHelper.getStyleWithColor('BODY_TINY', 0xffffff), 
+                TextStyleHelper.getStyle('BODY_TINY'), 
                 CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(0, 0.5);
             this.gridLabels.push(leftLabel);
             
             // Right label - positioned in world coordinates
             const rightLabel = this.gameObjectFactory.createText(CLIENT_CONFIG.MAP_WIDTH - 5, y, y.toString(), 
-                TextStyleHelper.getStyleWithColor('BODY_TINY', 0xffffff), 
+                TextStyleHelper.getStyle('BODY_TINY'), 
                 CLIENT_CONFIG.RENDER_DEPTH.BACKGROUND).setOrigin(1, 0.5);
             this.gridLabels.push(rightLabel);
         }

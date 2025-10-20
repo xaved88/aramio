@@ -185,7 +185,7 @@ export class StatsOverlay {
      * Creates team header with consistent styling
      */
     private createTeamInfo(x: number, y: number, teamName: string, teamColor: number): void {
-        const header = this.scene.add.text(x, y, teamName, TextStyleHelper.getStyleWithColor('TITLE_SMALL', teamColor));
+        const header = this.scene.add.text(x, y, teamName, TextStyleHelper.getStyleWithColor('TITLE', teamColor));
         header.setDepth(this.DEPTHS.UI_CONTENT);
         header.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(header);
@@ -217,21 +217,33 @@ export class StatsOverlay {
         const redTeamStats = playerStats.filter(p => p.team === 'red');
 
         const centerX = getCanvasWidth() / 2;
+        const centerY = getCanvasHeight() / 2;
         const tableWidth = this.getTotalTableWidth();
         const tableX = centerX - tableWidth / 2 - 30;
 
-        const gameTimeText = this.scene.add.text(centerX, 35, `Game Time: ${this.formatGameTime(state.gameTime)}`, TextStyleHelper.getStyle('HEADER'));
+        // Calculate dynamic positioning based on canvas height with better spacing
+        const topMargin = getCanvasHeight() * 0.03; // 3% from top - closer to top
+        const gameTimeY = topMargin;
+        
+        // Responsive spacing that scales with screen height
+        const baseSpacing = Math.max(50, getCanvasHeight() * 0.06); // Minimum 50px, scales with height
+        const redTeamInfoY = gameTimeY + baseSpacing; // Closer to game time
+        const redTeamTableY = redTeamInfoY + 50; // Standard spacing after team header
+        const blueTeamInfoY = centerY + baseSpacing; // More space from center
+        const blueTeamTableY = blueTeamInfoY + 50; // Standard spacing after team header
+
+        const gameTimeText = this.scene.add.text(centerX, gameTimeY, `Game Time: ${this.formatGameTime(state.gameTime)}`, TextStyleHelper.getStyle('HEADER'));
         gameTimeText.setOrigin(0.5, 0);
         gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
         gameTimeText.setScrollFactor(0, 0); // Fixed to screen
         this.overlayElements.push(gameTimeText);
         this.hudContainer.add(gameTimeText);
 
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 90, 'Red Team', TextStyleHelper.getTeamColor('red'));
-        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, 400, 'Blue Team', TextStyleHelper.getTeamColor('blue'));
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, redTeamInfoY, 'Red Team', TextStyleHelper.getTeamColor('red'));
+        this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, blueTeamInfoY, 'Blue Team', TextStyleHelper.getTeamColor('blue'));
 
-        this.createTeamTable(redTeamStats, tableX, 140, TextStyleHelper.getTeamColor('red'));
-        this.createTeamTable(blueTeamStats, tableX, 450, TextStyleHelper.getTeamColor('blue'));
+        this.createTeamTable(redTeamStats, tableX, redTeamTableY, TextStyleHelper.getTeamColor('red'));
+        this.createTeamTable(blueTeamStats, tableX, blueTeamTableY, TextStyleHelper.getTeamColor('blue'));
 
         // Add hints about additional overlays at the bottom
         this.createOverlayHints();
@@ -482,7 +494,7 @@ export class StatsOverlay {
             getCanvasWidth() - 20,
             20,
             text,
-            TextStyleHelper.getStyleWithCustom('TITLE_LARGE', {
+            TextStyleHelper.getStyleWithCustom('VICTORY_TITLE', {
                 color: textColor,
                 strokeThickness: 3,
                 shadow: {

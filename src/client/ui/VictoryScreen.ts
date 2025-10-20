@@ -78,7 +78,7 @@ export class VictoryScreen {
             getCanvasWidth() / 2,
             getCanvasHeight() / 2,
             text,
-            TextStyleHelper.getStyleWithCustom('TITLE_LARGE', {
+            TextStyleHelper.getStyleWithCustom('VICTORY_TITLE', {
                 color: textColor,
                 strokeThickness: 4,
                 shadow: {
