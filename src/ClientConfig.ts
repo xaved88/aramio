@@ -473,10 +473,9 @@ export const CLIENT_CONFIG = {
         },
     },
     PATH_COLORS: {
-        STONE_BASE: 0xB8A46F, // slightly darker sandy base
-        STONE_SHADOW: 0x8F7653, // deeper warm sand shadow
-        STONE_HIGHLIGHT: 0xD7C48F, // slightly darker light sand highlight
-        GRADIENT_OVERLAY: 0xCBB98F, // darker soft beige for gradient fade
+        STONE_BASE: 0xE8E8E8, // light gray-white base
+        STONE_SHADOW: 0xC0C0C0, // medium gray shadow
+        STONE_HIGHLIGHT: 0xF5F5F5, // very light gray-white highlight
     },
     REWARDS: {
         DISPLAY: {

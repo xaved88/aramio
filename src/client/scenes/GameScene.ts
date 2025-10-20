@@ -9,7 +9,7 @@ import { convertToSharedGameState } from '../../shared/utils/StateConverter';
 import { EntityManager } from '../entity/EntityManager';
 import { AnimationManager } from '../animation/AnimationManager';
 import { UIManager } from '../ui/UIManager';
-import { PathRenderer } from '../PathRenderer';
+import { MapDecorationRenderer } from '../map/MapDecorationRenderer';
 import { CameraManager } from '../CameraManager';
 import { GameObjectFactory } from '../GameObjectFactory';
 import { IconManager } from '../utils/IconManager';
@@ -28,7 +28,7 @@ export class GameScene extends Phaser.Scene {
     private entityManager!: EntityManager;
     private animationManager!: AnimationManager;
     private uiManager!: UIManager;
-    private pathRenderer!: PathRenderer;
+    private mapDecorationRenderer!: MapDecorationRenderer;
     private cameraManager!: CameraManager;
     private gameObjectFactory!: GameObjectFactory;
     private processedAttackEvents: Set<string> = new Set();
@@ -377,18 +377,18 @@ export class GameScene extends Phaser.Scene {
         this.uiManager = new UIManager(this, this.gameplayConfig, (rewardId: string) => {
             this.handleRewardChosen(rewardId);
         });
-        this.pathRenderer = new PathRenderer(this, this.gameplayConfig);
+        this.mapDecorationRenderer = new MapDecorationRenderer(this, this.gameplayConfig);
         
         // Set HUD camera for UI components
         this.uiManager.setHUDCamera(this.cameraManager.getHUDCamera());
         this.uiManager.setCameraManager(this.cameraManager);
         this.uiManager.setRoom(this.room);
         
-        // Set camera manager for path renderer
-        this.pathRenderer.setCameraManager(this.cameraManager);
+        // Set camera manager for map decoration renderer
+        this.mapDecorationRenderer.setCameraManager(this.cameraManager);
         
-        // Create path highlight from corner to corner
-        this.pathRenderer.createPathHighlight();
+        // Create map decorations (paths, stones, etc.)
+        this.mapDecorationRenderer.createPathHighlight();
         
         // Create spawn indicators
         this.createSpawnIndicators();

@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { GameplayConfig } from '../server/config/ConfigProvider';
-import { CLIENT_CONFIG } from '../ClientConfig';
+import { GameplayConfig } from '../../server/config/ConfigProvider';
+import { CLIENT_CONFIG } from '../../ClientConfig';
 
-export class PathRenderer {
+export class MapDecorationRenderer {
     private scene: Phaser.Scene;
     private gameplayConfig: GameplayConfig; // Deserialized gameplay configuration
     private cameraManager: any = null;
@@ -34,19 +34,18 @@ export class PathRenderer {
         
         // Calculate path dimensions
         const pathWidth = 160; // 80 * 2
-        const dx = redCradle.x - blueCradle.x;
-        const dy = redCradle.y - blueCradle.y;
-        const pathLength = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx);
         
         // Create circular patterns around each cradle first
         this.drawCradleCircles(pathHighlight, blueCradle, redCradle, pathWidth);
         
         // Create straight path between cradles with gap to avoid overlap
-        this.drawStraightCobblestonePath(pathHighlight, blueCradle, redCradle, pathWidth, pathLength, angle);
+        this.drawStraightCobblestonePath(pathHighlight, blueCradle, redCradle, pathWidth);
         
-        // Add gradient fade at the edges
-        this.addPathGradient(pathHighlight, blueCradle, redCradle, pathWidth, pathLength, angle);
+        // Add corner decorations for orientation
+        this.addCornerDecorations(pathHighlight);
+        
+        // Add scattered decorative stones throughout the map
+        this.addScatteredDecorations(pathHighlight, 12, CLIENT_CONFIG.PATH_COLORS.STONE_BASE);
         
     }
     
@@ -57,12 +56,14 @@ export class PathRenderer {
         graphics: Phaser.GameObjects.Graphics,
         start: { x: number, y: number },
         end: { x: number, y: number },
-        width: number,
-        length: number,
-        angle: number
+        width: number
     ): void {
         const stoneSize = 16; // 8 * 2
         const stoneSpacing = 24; // 12 * 2
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
         const rows = Math.ceil(width / stoneSpacing);
         const cols = Math.ceil(length / stoneSpacing);
         
@@ -164,40 +165,13 @@ export class PathRenderer {
                 
                 // Calculate fade based on distance from center (fade outward)
                 const distanceFromCenter = currentRadius;
-                const fadeDistance = radius * 0.8; // Start fading at 70% from center
+                const fadeDistance = radius * 1.2;
                 const fadeAlpha = Math.max(0.3, (distanceFromCenter / fadeDistance));
                 
                 // Draw individual stone with fade
                 this.drawStoneWithAlpha(graphics, finalX, finalY, stoneSize, baseColor, fadeAlpha);
             }
         }
-    }
-    
-    /**
-     * Draws a single cobblestone
-     */
-    private drawStone(
-        graphics: Phaser.GameObjects.Graphics,
-        x: number,
-        y: number,
-        size: number,
-        baseColor: number
-    ): void {
-        // Stone shadow
-        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1);
-        graphics.fillRect(x - size/2 + 1, y - size/2 + 1, size, size);
-        
-        // Stone base
-        graphics.fillStyle(baseColor, 0.15);
-        graphics.fillRect(x - size/2, y - size/2, size, size);
-        
-        // Stone highlight
-        graphics.fillStyle(CLIENT_CONFIG.PATH_COLORS.STONE_HIGHLIGHT, 0.08);
-        graphics.fillRect(x - size/2, y - size/2, size, size/3);
-        
-        // Stone border
-        graphics.lineStyle(1, CLIENT_CONFIG.PATH_COLORS.STONE_SHADOW, 0.1);
-        graphics.strokeRect(x - size/2, y - size/2, size, size);
     }
     
     /**
@@ -229,29 +203,109 @@ export class PathRenderer {
     }
     
     /**
-     * Adds a gradient overlay to fade the path edges
+     * Adds corner stone clusters for orientation
      */
-    private addPathGradient(
-        graphics: Phaser.GameObjects.Graphics,
-        start: { x: number, y: number },
-        end: { x: number, y: number },
-        width: number,
-        length: number,
-        angle: number
-    ): void {
-        const gradientSteps = 6;
+    private addCornerDecorations(graphics: Phaser.GameObjects.Graphics): void {
+        const mapWidth = CLIENT_CONFIG.MAP_WIDTH;
+        const mapHeight = CLIENT_CONFIG.MAP_HEIGHT;
+        const cornerMargin = 80; // Distance from map edges for corners (further out)
+        const stoneSize = 12; // Smaller than main path stones
+        const baseColor = CLIENT_CONFIG.PATH_COLORS.STONE_BASE;
         
-        for (let i = 0; i < gradientSteps; i++) {
-            const progress = i / (gradientSteps - 1);
-            const currentWidth = width * (1 - progress * 0.2); // Less taper
+        // Corner decorations - small stone clusters (excluding cradle corners)
+        const cornerDecorations = [
+            // Top-left corner (further from corner)
+            { x: cornerMargin, y: cornerMargin },
+            // Bottom-right corner (further from corner)
+            { x: mapWidth - cornerMargin, y: mapHeight - cornerMargin }
+        ];
+        
+        cornerDecorations.forEach(corner => {
+            this.drawStoneCluster(graphics, corner.x, corner.y, 3, stoneSize, baseColor, 0.7);
+        });
+    }
+    
+    /**
+     * Draws a small cluster of stones at a given position
+     */
+    private drawStoneCluster(
+        graphics: Phaser.GameObjects.Graphics,
+        centerX: number,
+        centerY: number,
+        stoneCount: number,
+        stoneSize: number,
+        baseColor: number,
+        alpha: number
+    ): void {
+        // Simple grid-based placement to avoid expensive collision detection
+        const spacing = stoneSize * 2;
+        const offset = spacing / 2;
+        
+        for (let i = 0; i < stoneCount; i++) {
+            // Simple grid pattern with slight variation
+            const gridX = (i % 2) * spacing - offset;
+            const gridY = Math.floor(i / 2) * spacing - offset;
             
-            // Create gradient mask effect by drawing semi-transparent overlays
-            const alpha = 0.01 + (progress * 0.03);
-            graphics.lineStyle(currentWidth, CLIENT_CONFIG.PATH_COLORS.GRADIENT_OVERLAY, alpha);
-            graphics.beginPath();
-            graphics.moveTo(start.x, start.y);
-            graphics.lineTo(end.x, end.y);
-            graphics.strokePath();
+            // Add small random offset for organic look
+            const randomOffsetX = (Math.random() - 0.5) * 8;
+            const randomOffsetY = (Math.random() - 0.5) * 8;
+            
+            const stoneX = centerX + gridX + randomOffsetX;
+            const stoneY = centerY + gridY + randomOffsetY;
+            
+            // Simple size variation
+            const finalSize = stoneSize * (0.9 + Math.random() * 0.2);
+            
+            this.drawStoneWithAlpha(graphics, stoneX, stoneY, finalSize, baseColor, alpha);
         }
     }
+    
+    /**
+     * Adds scattered decorative stone clusters throughout the map
+     */
+    private addScatteredDecorations(
+        graphics: Phaser.GameObjects.Graphics,
+        stoneSize: number,
+        baseColor: number
+    ): void {
+        // Simplified positions - closer to edges and more bottom middle coverage
+        const clusterPositions = [
+            // Top-left quadrant (closer to edges)
+            { x: 150, y: 200, size: 2, alpha: 0.7 },
+            { x: 380, y: 220, size: 1, alpha: 0.6 },
+            { x: 200, y: 450, size: 2, alpha: 0.8 },
+            
+            // Top-middle and top-right quadrant (closer to edges)
+            { x: 650, y: 150, size: 2, alpha: 0.6 },
+            { x: 800, y: 250, size: 1, alpha: 0.7 },
+            { x: 490, y: 550, size: 2, alpha: 0.6 },
+            { x: 1250, y: 160, size: 1, alpha: 0.5 },
+            { x: 950, y: 300, size: 2, alpha: 0.7 },
+            { x: 1350, y: 100, size: 1, alpha: 0.8 },
+            
+            // Bottom-left quadrant (closer to edges)
+            { x: 220, y: 1220, size: 2, alpha: 0.6 },
+            { x: 550, y: 1240, size: 1, alpha: 0.5 },
+            { x: 100, y: 950, size: 2, alpha: 0.8 },
+            
+            // Bottom-middle (more coverage)
+            { x: 700, y: 1050, size: 1, alpha: 0.6 },
+            { x: 800, y: 1300, size: 2, alpha: 0.5 },
+            { x: 950, y: 870, size: 2, alpha: 0.6 },
+            
+            // Bottom-right quadrant (closer to edges)
+            { x: 1100, y: 1150, size: 1, alpha: 0.7 },
+            { x: 1250, y: 750, size: 2, alpha: 0.6 },
+            { x: 1350, y: 1180, size: 2, alpha: 0.5 },
+        ];
+        
+        // Place clusters with simple variation
+        clusterPositions.forEach(pos => {
+            const offsetX = (Math.random() - 0.5) * 20;
+            const offsetY = (Math.random() - 0.5) * 20;
+            this.drawStoneCluster(graphics, pos.x + offsetX, pos.y + offsetY, pos.size, stoneSize, baseColor, pos.alpha);
+        });
+    }
+    
+    
 }
