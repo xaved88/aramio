@@ -7,10 +7,10 @@ export const CLIENT_CONFIG = {
     },
     HERO_SPRITE_SCALES: {
         'default': 1.0,
-        'hookshot': 1.0,
-        'mercenary': 1.0,
-        'pyromancer': 1.0,
-        'sniper': 1.0,
+        'hookshot': 1.1,
+        'mercenary': 1.1,
+        'pyromancer': 1.1,
+        'sniper': 1.1,
         'thorndive': 1.25,
     } as Record<string, number>,
     CAMERA: {
