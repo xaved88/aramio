@@ -17,6 +17,7 @@ export class CameraManager {
     private entityManager: any = null;
     private lastFollowedHeroId: string | null = null;
     private activeRedFlashGraphics: Set<Phaser.GameObjects.Rectangle> = new Set(); // Track red flash graphics for cleanup
+    private redFlashCooldown: number = 0; // Track when the last red flash was triggered
     
     // Mouse position tracking for lookahead
     private mouseX: number = 0;
@@ -202,6 +203,16 @@ export class CameraManager {
      */
     triggerRedFlash(): void {
         if (!CLIENT_CONFIG.CAMERA.RED_FLASH.ENABLED) return;
+        
+        // Prevent overlapping red flashes - only allow one every COOLDOWN_MS
+        const currentTime = this.scene.time.now;
+        const cooldownDuration = CLIENT_CONFIG.CAMERA.RED_FLASH.COOLDOWN_MS;
+        
+        if (currentTime - this.redFlashCooldown < cooldownDuration) {
+            return; // Skip this flash if we're still in cooldown
+        }
+        
+        this.redFlashCooldown = currentTime;
         
         // Create a red overlay rectangle that covers the entire screen
         const flashOverlay = this.scene.add.rectangle(

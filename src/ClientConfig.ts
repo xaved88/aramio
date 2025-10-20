@@ -33,6 +33,7 @@ export const CLIENT_CONFIG = {
             COLOR: 0xff0000, // red color
             ALPHA: 0.10, // opacity of the flash overlay
             DURATION_MS: 200, // how long the flash lasts
+            COOLDOWN_MS: 100, // minimum time between red flashes to prevent overlap
         },
     },
     // Canvas/Viewport size is now calculated dynamically in main.ts
