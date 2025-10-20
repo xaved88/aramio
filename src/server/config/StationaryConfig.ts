@@ -17,21 +17,21 @@ STATIONARY_CONFIG.DEBUG.STARTING_LEVEL = 3;
 
 // Triple all ability ranges and set all cooldowns to 1000ms for stationary testing
 STATIONARY_CONFIG.COMBAT.ABILITIES.default.COOLDOWN_MS = 1000; // Fast cooldown for testing
-STATIONARY_CONFIG.COMBAT.ABILITIES.default.RANGE = 300; // Tripled range (was 100)
+STATIONARY_CONFIG.COMBAT.ABILITIES.default.RANGE = 600; // Doubled range for game size increase (was 300)
 
 STATIONARY_CONFIG.COMBAT.ABILITIES.hookshot.COOLDOWN_MS = 1000; // Fast cooldown for testing
-STATIONARY_CONFIG.COMBAT.ABILITIES.hookshot.RANGE = 375; // Tripled range (was 125)
+STATIONARY_CONFIG.COMBAT.ABILITIES.hookshot.RANGE = 750; // Doubled range for game size increase (was 375)
 
 STATIONARY_CONFIG.COMBAT.ABILITIES.mercenary.COOLDOWN_MS = 1000; // Fast cooldown for testing
 
 STATIONARY_CONFIG.COMBAT.ABILITIES.pyromancer.COOLDOWN_MS = 1000; // Fast cooldown for testing
-STATIONARY_CONFIG.COMBAT.ABILITIES.pyromancer.RANGE = 450; // Tripled range (was 150)
+STATIONARY_CONFIG.COMBAT.ABILITIES.pyromancer.RANGE = 900; // Doubled range for game size increase (was 450)
 
 STATIONARY_CONFIG.COMBAT.ABILITIES.thorndive.COOLDOWN_MS = 1000; // Fast cooldown for testing
-STATIONARY_CONFIG.COMBAT.ABILITIES.thorndive.RANGE = 150; // Increased range (was 100)
+STATIONARY_CONFIG.COMBAT.ABILITIES.thorndive.RANGE = 300; // Doubled range for game size increase (was 150)
 
 STATIONARY_CONFIG.COMBAT.ABILITIES.sniper.COOLDOWN_MS = 1000; // Fast cooldown for testing
-STATIONARY_CONFIG.COMBAT.ABILITIES.sniper.RANGE = 400; // Increased range (was 300)
+STATIONARY_CONFIG.COMBAT.ABILITIES.sniper.RANGE = 800; // Doubled range for game size increase (was 400)
 
 // Spawn each player with a different ability for testing all abilities in stationary mode
 STATIONARY_CONFIG.BOTS.ABILITY_TYPES = ['hookshot', 'mercenary', 'pyromancer', 'thorndive', 'sniper'];

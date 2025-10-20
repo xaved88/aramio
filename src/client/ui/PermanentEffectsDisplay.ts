@@ -141,7 +141,7 @@ export class PermanentEffectsDisplay {
                 const borderColor = isAbilityStat ? 0x3182ce : 0x38a169; // Darker blue for ability stats, darker green for base stats
                 const borderWidth = 1
                 
-                background.fillStyle(backgroundColor, 1.0); // Full opacity
+                background.fillStyle(backgroundColor, config.BACKGROUND_ALPHA); // Use config alpha
                 background.lineStyle(borderWidth, borderColor, 1.0);
                 background.fillRoundedRect(
                     x - config.ICON_SIZE / 2 - config.BACKGROUND_PADDING,

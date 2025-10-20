@@ -46,39 +46,6 @@ export class TextStyleHelper {
         return { ...this.getStyle(styleName), ...overrides };
     }
 
-    /**
-     * Creates a title style with custom color
-     */
-    static getTitleStyle(
-        size: 'large' | 'medium' | 'small' = 'medium',
-        color?: string | number
-    ): Phaser.Types.GameObjects.Text.TextStyle {
-        const styleName = `TITLE_${size.toUpperCase()}` as keyof typeof CLIENT_CONFIG.UI.TEXT_STYLES;
-        const style = this.getStyle(styleName);
-        
-        if (color !== undefined) {
-            style.color = typeof color === 'number' ? hexToColorString(color) : color;
-        }
-        
-        return style;
-    }
-
-    /**
-     * Creates a body text style with custom size and color
-     */
-    static getBodyStyle(
-        size: 'large' | 'medium' | 'small' | 'tiny' = 'medium',
-        color?: string | number
-    ): Phaser.Types.GameObjects.Text.TextStyle {
-        const styleName = `BODY_${size.toUpperCase()}` as keyof typeof CLIENT_CONFIG.UI.TEXT_STYLES;
-        const style = this.getStyle(styleName);
-        
-        if (color !== undefined) {
-            style.color = typeof color === 'number' ? hexToColorString(color) : color;
-        }
-        
-        return style;
-    }
 
     /**
      * Gets team color for a given team name

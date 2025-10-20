@@ -523,14 +523,14 @@ export class EntityManager {
         // Determine color based on team
         let zoneColor = 0xff6b35; // Default orange
         if (zoneData.team === 'blue') {
-            zoneColor = 0x4a90e2; // Blue
+            zoneColor = 0x1e90ff; // Bright blue for better contrast against beige
         } else if (zoneData.team === 'red') {
             zoneColor = 0xe24a4a; // Red
         }
         
         // Draw filled circle with border
-        zoneGraphics.fillStyle(zoneColor, 0.2); // Low opacity fill
-        zoneGraphics.lineStyle(2, zoneColor, 0.6); // Border with medium opacity
+        zoneGraphics.fillStyle(zoneColor, 0.5); // Low opacity fill
+        zoneGraphics.lineStyle(2, zoneColor, 0.9); // More visible border
         zoneGraphics.fillCircle(0, 0, zoneData.radius);
         zoneGraphics.strokeCircle(0, 0, zoneData.radius);
     }

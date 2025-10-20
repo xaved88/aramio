@@ -160,7 +160,7 @@ export class CheatMenu {
             centerX,
             80,
             'Cheat Menu',
-            TextStyleHelper.getTitleStyle('medium')
+            TextStyleHelper.getStyle('TITLE')
         ).setOrigin(0.5).setDepth(this.DEPTHS.UI_CONTENT).setScrollFactor(0, 0);
         this.overlayElements.push(title);
         this.hudContainer.add(title);

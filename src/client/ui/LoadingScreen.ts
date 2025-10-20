@@ -24,7 +24,7 @@ export class LoadingScreen {
             getCanvasWidth() / 2,
             getCanvasHeight() / 2,
             'Loading...',
-            TextStyleHelper.getTitleStyle('small')
+            TextStyleHelper.getStyle('TITLE')
         ).setOrigin(0.5);
     }
 

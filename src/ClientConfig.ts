@@ -239,8 +239,8 @@ export const CLIENT_CONFIG = {
             ICON_SIZE: 30,
             SPACING: 12,
             MAX_ICONS_PER_ROW: 11, // Changed from 4 to 12
-            BACKGROUND_COLOR: 0x7a8a9a, // Lighter blue-gray to match game theme
-            BACKGROUND_ALPHA: 0.7,
+            BACKGROUND_COLOR: 0xdac4a0, // Whiter beige to match game theme
+            BACKGROUND_ALPHA: 0.9, // Increased from 0.7 to make background brighter
             BACKGROUND_PADDING: 4,
         },
     },
@@ -432,8 +432,8 @@ export const CLIENT_CONFIG = {
             PROCEED: 0x4CAF50, // green for proceed/action buttons
             PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
             DISABLED: 0x4A4A4A, // gray for disabled buttons
-            SUBTLE: 0x4a6b8a, // More vibrant blue background for subtle buttons
-            SUBTLE_HOVER: 0x5a7b9a, // More vibrant hover color for subtle buttons
+            SUBTLE: 0xaa9a7a, // Even brighter beige background for subtle buttons
+            SUBTLE_HOVER: 0xbaaa8a, // Even brighter hover color for subtle buttons
         },
         COLORS: {
             DISABLED: 0xaaaaaa, // lighter gray to match subtle hint text
@@ -441,9 +441,9 @@ export const CLIENT_CONFIG = {
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
-            VIEWPORT: 0x3a4f63, // Even lighter blue-gray for viewport background
-            GAME_MAP: 0x4a6b8a, // More vibrant blue for game map
-            LOBBY: 0x4a6b8a, // More vibrant blue for lobby
+            VIEWPORT: 0x8b7d6a, // Even brighter beige-gray for viewport background
+            GAME_MAP: 0xaa9a7a, // Even brighter beige for game map
+            LOBBY: 0xaa9a7a, // Even brighter beige for lobby
         },
         OVERLAY: {
             BACKGROUND: 0x000000, // black overlay background
