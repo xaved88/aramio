@@ -574,6 +574,7 @@ export class EntityManager {
         // Special styling for last hits
         if (xpEvent.type === 'minionKill') {
             color = CLIENT_CONFIG.XP_EVENTS.COLORS.LAST_HIT;
+            text = `+${Math.round(xpEvent.amount)}XP Last Hit!`;
         } else if (xpEvent.type === 'heroKill') {
             color = CLIENT_CONFIG.XP_EVENTS.COLORS.LAST_HIT;
             text = `+${Math.round(xpEvent.amount)}XP Kill!`;
