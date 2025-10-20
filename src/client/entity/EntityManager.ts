@@ -583,7 +583,15 @@ export class EntityManager {
         const xpText = this.scene.add.text(xpEvent.x, xpEvent.y, text, {
             fontSize: fontSize,
             color: color,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Assign to main camera and apply inverse zoom to counteract camera zoom
@@ -601,7 +609,15 @@ export class EntityManager {
                 fontSize: '17px',
                 color: color,
                 fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
-                fontStyle: fontStyle
+                fontStyle: fontStyle,
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
             }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY);
             
             // Assign to main camera and apply inverse zoom to counteract camera zoom
@@ -737,7 +753,15 @@ export class EntityManager {
         const levelUpText = this.scene.add.text(levelUpEvent.x, levelUpEvent.y, `Level Up!`, {
             fontSize: CLIENT_CONFIG.LEVEL_UP_EVENTS.FONT_SIZE,
             color: CLIENT_CONFIG.LEVEL_UP_EVENTS.COLOR,
-            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY
+            fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
+            shadow: {
+                offsetX: 1,
+                offsetY: 1,
+                color: '#000000',
+                blur: 2,
+                stroke: true,
+                fill: true
+            }
         }).setOrigin(0.5).setDepth(CLIENT_CONFIG.RENDER_DEPTH.OVERLAY); // High depth to appear above everything
         
         // Assign to main camera and apply inverse zoom to counteract camera zoom

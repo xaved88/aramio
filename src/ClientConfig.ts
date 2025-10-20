@@ -286,7 +286,7 @@ export const CLIENT_CONFIG = {
                     offsetX: 1,
                     offsetY: 1,
                     color: '#000000',
-                    blur: 2,
+                    blur: 1,
                     stroke: true,
                     fill: true
                 }
@@ -315,7 +315,7 @@ export const CLIENT_CONFIG = {
                     offsetX: 1,
                     offsetY: 1,
                     color: '#000000',
-                    blur: 2,
+                    blur: 1,
                     stroke: true,
                     fill: true
                 }
@@ -362,7 +362,7 @@ export const CLIENT_CONFIG = {
             SUBTLE_HINT: {
                 fontSize: '14px',
                 fontFamily: 'Arial',
-                color: '#888888',
+                color: '#aaaaaa',
                 shadow: {
                     offsetX: 1,
                     offsetY: 1,
@@ -391,13 +391,13 @@ export const CLIENT_CONFIG = {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#888888',
+                color: '#aaaaaa',
                 shadow: {
-                    offsetX: 1,
-                    offsetY: 1,
+                    offsetX: 0.5,
+                    offsetY: 0.5,
                     color: '#000000',
-                    blur: 2,
-                    stroke: true,
+                    blur: 1,
+                    stroke: false,
                     fill: true
                 }
             },
@@ -431,22 +431,22 @@ export const CLIENT_CONFIG = {
             PROCEED: 0x4CAF50, // green for proceed/action buttons
             PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
             DISABLED: 0x4A4A4A, // gray for disabled buttons
-            SUBTLE: 0x34495e, // Lighter blue-gray background for subtle buttons
-            SUBTLE_HOVER: 0x4a5f7a, // Lighter hover color for subtle buttons
+            SUBTLE: 0x4a6b8a, // More vibrant blue background for subtle buttons
+            SUBTLE_HOVER: 0x5a7b9a, // More vibrant hover color for subtle buttons
         },
         COLORS: {
-            DISABLED: 0x7f8c8d, // gray
+            DISABLED: 0xaaaaaa, // lighter gray to match subtle hint text
             BORDER: 0x7f8c8d, // gray border
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
-            VIEWPORT: 0x2c3e50, // Lighter blue-gray for viewport background
-            GAME_MAP: 0x34495e, // Slightly lighter than before
-            LOBBY: 0x34495e, // Slightly lighter than before
+            VIEWPORT: 0x3a4f63, // Even lighter blue-gray for viewport background
+            GAME_MAP: 0x4a6b8a, // More vibrant blue for game map
+            LOBBY: 0x4a6b8a, // More vibrant blue for lobby
         },
         OVERLAY: {
             BACKGROUND: 0x000000, // black overlay background
-            ALPHA: 0.7, // overlay transparency
+            ALPHA: 0.6, // overlay transparency
         },
     },
     XP_EVENTS: {
@@ -472,10 +472,10 @@ export const CLIENT_CONFIG = {
         },
     },
     PATH_COLORS: {
-        STONE_BASE: 0x6B6B6B, // Base stone color for cobblestone path
-        STONE_SHADOW: 0x5A5A5A, // Shadow color for stone depth
-        STONE_HIGHLIGHT: 0x7A7A7A, // Highlight color for stone top
-        GRADIENT_OVERLAY: 0x2c3e50, // Color for path gradient fade effect
+        STONE_BASE: 0xB8A46F, // slightly darker sandy base
+        STONE_SHADOW: 0x8F7653, // deeper warm sand shadow
+        STONE_HIGHLIGHT: 0xD7C48F, // slightly darker light sand highlight
+        GRADIENT_OVERLAY: 0xCBB98F, // darker soft beige for gradient fade
     },
     REWARDS: {
         DISPLAY: {

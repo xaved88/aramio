@@ -111,7 +111,7 @@ export class RespawnOverlay {
             'Respawning',
             TextStyleHelper.getStyleWithCustom('TITLE_MEDIUM', {
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 2
             })
         );
         this.text.setOrigin(0.5);
@@ -340,7 +340,7 @@ export class RespawnOverlay {
     private updateBackground(): void {
         if (this.overlay) {
             this.overlay.clear();
-            this.overlay.fillStyle(0x000000, 0.3);
+			this.overlay.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
             this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         }
     }
