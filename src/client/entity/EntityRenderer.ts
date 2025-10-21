@@ -289,25 +289,6 @@ export class EntityRenderer {
             graphics.strokePath();
         }
 
-        // Check for super minion - add black cross indicator
-        if (isMinionCombatant(combatant) && combatant.isBuffed) {
-            const spriteScale = getSpriteScale(combatant);
-            
-            // Draw a simple black cross on the minion
-            graphics.lineStyle(2, 0x000000, 0.8); // Black lines with slight transparency
-            
-            const crossSize = 7 * spriteScale; // Small cross size
-            
-            // Draw horizontal line
-            graphics.moveTo(-crossSize, 0);
-            graphics.lineTo(crossSize, 0);
-            
-            // Draw vertical line
-            graphics.moveTo(0, -crossSize);
-            graphics.lineTo(0, crossSize);
-            
-            graphics.strokePath();
-        }
     }
 
     /**

@@ -152,7 +152,8 @@ export class EntityFactory {
      * Creates a sprite for minion entities
      */
     createMinionSprite(minionType: string, combatant?: any): Phaser.GameObjects.Sprite {
-        const textureKey = this.getMinionTextureKey(minionType);
+        const isBuffed = combatant?.isBuffed || false;
+        const textureKey = this.getMinionTextureKey(minionType, isBuffed);
         const sprite = this.scene.add.sprite(0, 0, textureKey);
         sprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.MINIONS);
         sprite.setOrigin(0.5, 0.5);
@@ -168,14 +169,25 @@ export class EntityFactory {
     /**
      * Gets the appropriate texture key based on minion type
      */
-    private getMinionTextureKey(minionType: string): string {
-        switch (minionType) {
-            case 'warrior':
-                return 'minion-warrior';
-            case 'archer':
-                return 'minion-archer';
-            default:
-                return 'minion-warrior';
+    private getMinionTextureKey(minionType: string, isBuffed: boolean = false): string {
+        if (isBuffed) {
+            switch (minionType) {
+                case 'warrior':
+                    return 'super-minion-warrior';
+                case 'archer':
+                    return 'super-minion-archer';
+                default:
+                    return 'super-minion-warrior';
+            }
+        } else {
+            switch (minionType) {
+                case 'warrior':
+                    return 'minion-warrior';
+                case 'archer':
+                    return 'minion-archer';
+                default:
+                    return 'minion-warrior';
+            }
         }
     }
 
