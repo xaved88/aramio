@@ -105,8 +105,8 @@ export const CLIENT_CONFIG = {
     TARGETING_LINES: {
         BLUE: 0x85c1e9, // lighter blue (same as respawning)
         RED: 0xf5b7b1, // lighter red (same as respawning)
-        BASE_ALPHA: 0.2, // base alpha for other combatants
-        PLAYER_BASE_ALPHA: 0.5, // higher alpha when player's hero is involved
+        BASE_ALPHA: 0.6, // base alpha for other combatants (increased from 0.4)
+        PLAYER_BASE_ALPHA: 0.85, // higher alpha when player's hero is involved (increased from 0.7)
         LINE_THICKNESS: 4,
         FLASH_LINE_THICKNESS: 6,
         OFFSET_PIXELS: 10, // offset for line endpoints to prevent overlap
@@ -239,8 +239,8 @@ export const CLIENT_CONFIG = {
             ICON_SIZE: 30,
             SPACING: 12,
             MAX_ICONS_PER_ROW: 11, // Changed from 4 to 12
-            BACKGROUND_COLOR: 0xdac4a0, // Whiter beige to match game theme
-            BACKGROUND_ALPHA: 0.9, // Increased from 0.7 to make background brighter
+            BACKGROUND_COLOR: 0xc4b89a, // Brighter beige to stand out from background
+            BACKGROUND_ALPHA: 1.0, // No transparency - solid background
             BACKGROUND_PADDING: 4,
         },
     },
@@ -363,7 +363,7 @@ export const CLIENT_CONFIG = {
             SUBTLE_HINT: {
                 fontSize: '14px',
                 fontFamily: 'Arial',
-                color: '#aaaaaa',
+                color: '#cccccc',
                 shadow: {
                     offsetX: 1,
                     offsetY: 1,
@@ -392,7 +392,7 @@ export const CLIENT_CONFIG = {
                 fontSize: '18px',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                color: '#aaaaaa',
+                color: '#cccccc',
                 shadow: {
                     offsetX: 0.5,
                     offsetY: 0.5,
@@ -432,18 +432,18 @@ export const CLIENT_CONFIG = {
             PROCEED: 0x4CAF50, // green for proceed/action buttons
             PROCEED_HOVER: 0x388E3C, // green hover for proceed/action buttons
             DISABLED: 0x4A4A4A, // gray for disabled buttons
-            SUBTLE: 0xaa9a7a, // Even brighter beige background for subtle buttons
-            SUBTLE_HOVER: 0xbaaa8a, // Even brighter hover color for subtle buttons
+            SUBTLE: 0xa8a595, // Same as game background for subtle buttons
+            SUBTLE_HOVER: 0xb8b5a5, // Lighter beige hover color for subtle buttons
         },
         COLORS: {
-            DISABLED: 0xaaaaaa, // lighter gray to match subtle hint text
+            DISABLED: 0xcccccc, // lighter gray to match subtle hint text
             BORDER: 0x7f8c8d, // gray border
             CONTROL_TOGGLE: 0x5a6c7d, // darker gray-blue for control mode toggle
         },
         BACKGROUND: {
-            VIEWPORT: 0x8b7d6a, // Even brighter beige-gray for viewport background
-            GAME_MAP: 0xaa9a7a, // Even brighter beige for game map
-            LOBBY: 0xaa9a7a, // Even brighter beige for lobby
+            VIEWPORT: 0xa8a595, // Brighter beige-gray for viewport background
+            GAME_MAP: 0xa8a595, // Brighter beige for game map
+            LOBBY: 0xa8a595, // Brighter beige for lobby
         },
         OVERLAY: {
             BACKGROUND: 0x000000, // black overlay background

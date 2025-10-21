@@ -67,12 +67,12 @@ export class DamageDealtOverlay {
         }
 
         // Position on the right side of the screen, vertically centered
-        this.hudContainer.setPosition(getCanvasWidth() - 320, getCanvasHeight() / 2 - 150);
+        this.hudContainer.setPosition(getCanvasWidth() - 345, getCanvasHeight() / 2 - 150);
 
         // Create semi-transparent background
         this.background = this.scene.add.graphics();
         this.background.fillStyle(0x000000, 0.7);
-        this.background.fillRoundedRect(0, 0, 300, 300, 8);
+        this.background.fillRoundedRect(0, 0, 325, 300, 8);
         this.hudContainer.add(this.background);
 
         // Create title (will be updated dynamically)

@@ -99,7 +99,7 @@ export class MapDecorationRenderer {
                 const totalPathLength = Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
                 const distanceFromCenter = Math.abs(progress - 0.5) * totalPathLength;
                 const fadeDistance = totalPathLength * 0.8;
-                const fadeAlpha = Math.max(0.5, 1 - (distanceFromCenter / fadeDistance));
+                const fadeAlpha = Math.max(0.4, 0.8 - (distanceFromCenter / fadeDistance)) * 0.7;
                 
                 // Draw individual stone with fade
                 this.drawStoneWithAlpha(graphics, finalX, finalY, stoneSize, baseColor, fadeAlpha);
@@ -221,7 +221,7 @@ export class MapDecorationRenderer {
         ];
         
         cornerDecorations.forEach(corner => {
-            this.drawStoneCluster(graphics, corner.x, corner.y, 3, stoneSize, baseColor, 0.7);
+            this.drawStoneCluster(graphics, corner.x, corner.y, 3, stoneSize, baseColor, 0.4);
         });
     }
     
@@ -271,32 +271,32 @@ export class MapDecorationRenderer {
         // Simplified positions - closer to edges and more bottom middle coverage
         const clusterPositions = [
             // Top-left quadrant (closer to edges)
-            { x: 150, y: 200, size: 2, alpha: 0.7 },
-            { x: 380, y: 220, size: 1, alpha: 0.6 },
-            { x: 200, y: 450, size: 2, alpha: 0.8 },
+            { x: 150, y: 200, size: 2, alpha: 0.4 },
+            { x: 380, y: 220, size: 1, alpha: 0.4 },
+            { x: 200, y: 450, size: 2, alpha: 0.5 },
             
             // Top-middle and top-right quadrant (closer to edges)
-            { x: 650, y: 150, size: 2, alpha: 0.6 },
-            { x: 800, y: 250, size: 1, alpha: 0.7 },
-            { x: 490, y: 550, size: 2, alpha: 0.6 },
+            { x: 650, y: 150, size: 2, alpha: 0.4 },
+            { x: 800, y: 250, size: 1, alpha: 0.4 },
+            { x: 490, y: 550, size: 2, alpha: 0.4 },
             { x: 1250, y: 160, size: 1, alpha: 0.5 },
-            { x: 950, y: 300, size: 2, alpha: 0.7 },
-            { x: 1350, y: 100, size: 1, alpha: 0.8 },
+            { x: 950, y: 300, size: 2, alpha: 0.4 },
+            { x: 1350, y: 100, size: 1, alpha: 0.5 },
             
             // Bottom-left quadrant (closer to edges)
-            { x: 220, y: 1220, size: 2, alpha: 0.6 },
-            { x: 550, y: 1240, size: 1, alpha: 0.5 },
-            { x: 100, y: 950, size: 2, alpha: 0.8 },
+            { x: 220, y: 1220, size: 2, alpha: 0.4 },
+            { x: 550, y: 1240, size: 1, alpha: 0.4 },
+            { x: 100, y: 950, size: 2, alpha: 0.5 },
             
             // Bottom-middle (more coverage)
-            { x: 700, y: 1050, size: 1, alpha: 0.6 },
-            { x: 800, y: 1300, size: 2, alpha: 0.5 },
-            { x: 950, y: 870, size: 2, alpha: 0.6 },
+            { x: 700, y: 1050, size: 1, alpha: 0.4 },
+            { x: 800, y: 1300, size: 2, alpha: 0.4 },
+            { x: 950, y: 870, size: 2, alpha: 0.3 },
             
             // Bottom-right quadrant (closer to edges)
-            { x: 1100, y: 1150, size: 1, alpha: 0.7 },
-            { x: 1250, y: 750, size: 2, alpha: 0.6 },
-            { x: 1350, y: 1180, size: 2, alpha: 0.5 },
+            { x: 1100, y: 1150, size: 1, alpha: 0.5 },
+            { x: 1250, y: 750, size: 2, alpha: 0.4 },
+            { x: 1350, y: 1180, size: 2, alpha: 0.4 },
         ];
         
         // Place clusters with simple variation

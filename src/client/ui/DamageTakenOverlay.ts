@@ -74,7 +74,7 @@ export class DamageTakenOverlay {
         // Create semi-transparent background
         this.background = this.scene.add.graphics();
         this.background.fillStyle(0x000000, 0.7);
-        this.background.fillRoundedRect(0, 0, 300, 300, 8);
+        this.background.fillRoundedRect(0, 0, 325, 300, 8);
         this.hudContainer.add(this.background);
 
         // Create title (will be updated dynamically)
