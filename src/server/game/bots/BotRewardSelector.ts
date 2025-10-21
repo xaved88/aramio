@@ -34,13 +34,13 @@ export class BotRewardSelector {
             const teamAbilityCounts = this.getTeamAbilityCounts(bot.team, state);
             
             // Filter out abilities that already have 2+ team members (avoid duplicates)
-            // Special case: mercenary is limited to 1 per team
+            // Special case: mercenary and hookshot are limited to 1 per team
             const allowedAbilityRewards = newAbilityRewards.filter((rewardId: string) => {
                 const abilityType = this.extractAbilityTypeFromReward(rewardId);
                 if (!abilityType) return false;
                 const count = teamAbilityCounts[abilityType] || 0;
-                // Mercenary gets special treatment - only 1 per team
-                const maxCount = abilityType === 'mercenary' ? 1 : 2;
+                // Mercenary and hookshot get special treatment - only 1 per team
+                const maxCount = (abilityType === 'mercenary' || abilityType === 'hookshot') ? 1 : 2;
                 return count < maxCount;
             });
 
