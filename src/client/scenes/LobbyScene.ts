@@ -117,8 +117,8 @@ export class LobbyScene extends Phaser.Scene {
         // Hide the default cursor (use custom cursor like in game)
         this.input.setDefaultCursor('none');
         
-        // Create lobby background
-        this.createLobbyBackground();
+        // Set lobby background color
+        this.cameras.main.setBackgroundColor(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         
         // Reset all state for fresh scene
         this.resetSceneState();
@@ -264,21 +264,35 @@ export class LobbyScene extends Phaser.Scene {
             TextStyleHelper.getStyle('HEADER')
         ).setOrigin(0.5);
 
-        // Team size buttons
-        for (let i = 1; i <= 5; i++) {
-            const button = new Button(this, {
-                x: centerX - 80 + (i - 1) * 40,
-                y: centerY - 200,
-                text: i.toString(),
-                type: 'subtle',
-                onClick: () => {
-                    this.room.send('setTeamSize', { size: i });
-                }
-            });
+        // Team size buttons - only 1 and 5
+        const button1 = new Button(this, {
+            x: centerX - 30,
+            y: centerY - 200,
+            text: '1',
+            type: 'subtle',
+            onClick: () => {
+                this.room.send('setTeamSize', { size: 1 });
+            }
+        });
+        this.add.existing(button1);
+        this.teamSizeButtons.push(button1);
 
-            this.add.existing(button);
-            this.teamSizeButtons.push(button);
-        }
+        // Separator between buttons
+        this.add.text(centerX, centerY - 200, '|', 
+            TextStyleHelper.getStyleWithColor('BODY_LARGE', '#666666')
+        ).setOrigin(0.5);
+
+        const button5 = new Button(this, {
+            x: centerX + 30,
+            y: centerY - 200,
+            text: '5',
+            type: 'subtle',
+            onClick: () => {
+                this.room.send('setTeamSize', { size: 5 });
+            }
+        });
+        this.add.existing(button5);
+        this.teamSizeButtons.push(button5);
 
         // Config selector
         this.add.text(centerX, centerY - 130, 'Config:', 
@@ -445,9 +459,10 @@ export class LobbyScene extends Phaser.Scene {
             this.configValue.setText(this.lobbyState.selectedConfig || 'default');
         }
 
-        // Update team size buttons
+        // Update team size buttons - only 1 and 5
+        const allowedSizes = [1, 5];
         this.teamSizeButtons.forEach((button, index) => {
-            const size = index + 1;
+            const size = allowedSizes[index];
             if (size === this.lobbyState!.teamSize) {
                 // Selected state: green stroke and text
                 button.setStyle({ 
@@ -863,19 +878,4 @@ export class LobbyScene extends Phaser.Scene {
         });
     }
 
-    /**
-     * Creates a background for the lobby scene
-     * This overrides the viewport background to use the original blue color
-     */
-    private createLobbyBackground(): void {
-        // Create a graphics object for the lobby background
-        const lobbyBackground = this.add.graphics();
-        
-        // Set it to the lowest depth so it appears behind everything else
-        lobbyBackground.setDepth(CLIENT_CONFIG.RENDER_DEPTH.SCENE_BACKGROUND);
-        
-        // Fill the entire canvas with the lobby background color
-        lobbyBackground.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
-        lobbyBackground.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
-    }
 }
