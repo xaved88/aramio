@@ -399,7 +399,7 @@ export class GameScene extends Phaser.Scene {
         this.uiManager.createHUD();
         
         // Set up InputHandler dependencies now that UI is initialized
-        this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager);
+        this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager, this.uiManager.getCursorRenderer());
         
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);

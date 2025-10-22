@@ -31,6 +31,7 @@ export class InputHandler {
     // Dependencies for keyboard input handling
     private gameplayConfig: any = null;
     private uiManager: any = null;
+    private cursorRenderer: any = null;
 
     // Control mode
     private controlMode: ControlMode = 'mouse';
@@ -54,9 +55,10 @@ export class InputHandler {
     /**
      * Sets dependencies needed for keyboard input handling
      */
-    setDependencies(gameplayConfig: any, uiManager: any): void {
+    setDependencies(gameplayConfig: any, uiManager: any, cursorRenderer?: any): void {
         this.gameplayConfig = gameplayConfig;
         this.uiManager = uiManager;
+        this.cursorRenderer = cursorRenderer;
     }
 
     /**
@@ -328,10 +330,7 @@ export class InputHandler {
             // Mouse mode: ability on mouse up
             if (this.isClickHeld) {
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
+                this.attemptAbilityUse(worldPos.x, worldPos.y);
                 
                 // Notify scene for UI updates (hide ability range display)
                 this.notifyScenePointerUp(pointer);
@@ -343,10 +342,7 @@ export class InputHandler {
             // Keyboard mode: ability on mouse up (same UI behavior as mouse mode)
             if (this.isClickHeld) {
                 const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
+                this.attemptAbilityUse(worldPos.x, worldPos.y);
                 
                 // Notify scene for UI updates (hide ability range display)
                 this.notifyScenePointerUp(pointer);
@@ -447,5 +443,56 @@ export class InputHandler {
      */
     getControlMode(): ControlMode {
         return this.controlMode;
+    }
+
+    /**
+     * Attempts to use ability with client-side cooldown checking
+     */
+    private attemptAbilityUse(x: number, y: number): void {
+        // Check if ability is on cooldown before sending to server
+        if (this.isAbilityOnCooldown()) {
+            // Trigger cooldown pulse effect
+            if (this.cursorRenderer) {
+                this.cursorRenderer.triggerCooldownPulse();
+            }
+            return; // Don't send to server if on cooldown
+        }
+
+        // Send ability command to server
+        this.room.send('useAbility', {
+            x: x,
+            y: y
+        });
+    }
+
+    /**
+     * Checks if the current player's ability is on cooldown
+     */
+    private isAbilityOnCooldown(): boolean {
+        const gameScene = this.scene as any;
+        if (!gameScene.lastState) return false;
+
+        // Find the current player's hero
+        for (const combatant of gameScene.lastState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                const ability = combatant.ability;
+                if (!ability) return true; // No ability means on cooldown
+
+                // Check if ability is ready
+                if (ability.lastUsedTime === 0) {
+                    return false; // First use, not on cooldown
+                }
+
+                const currentTime = gameScene.lastState.gameTime;
+                const timeSinceLastUse = currentTime - ability.lastUsedTime;
+                
+                // Use the modified cooldown (with stat modifications) like the server does
+                const cooldown = combatant.getAbilityCooldown ? combatant.getAbilityCooldown() : ability.cooldown;
+
+                return timeSinceLastUse < cooldown;
+            }
+        }
+
+        return true; // No hero found, consider on cooldown
     }
 }
