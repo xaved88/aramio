@@ -76,7 +76,7 @@ export class TutorialOverlay {
         const panelBg = this.scene.add.graphics();
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         panelBg.fillRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
-        panelBg.lineStyle(2, 0x3498db, 1);
+        panelBg.lineStyle(2, 0xf1c40f, 1);
         panelBg.strokeRoundedRect(leftX - 20, startY - 20, contentWidth + 40, panelHeight + 40, 10);
         this.contentContainer.add(panelBg);
         

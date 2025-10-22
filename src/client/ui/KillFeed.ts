@@ -25,8 +25,8 @@ export class KillFeed {
     private playerSessionId: ControllerId | null = null;
     
     private readonly MAX_ENTRIES = 5;
-    private readonly ENTRY_HEIGHT = 20;
-    private readonly ENTRY_SPACING = 3;
+    private readonly ENTRY_HEIGHT = 23;
+    private readonly ENTRY_SPACING = 4;
     private readonly FEED_X = 10; // Top left corner
     private readonly FEED_Y = 105; // Below the HUD elements
     private readonly FADE_DURATION = 5000; // How long before entries start to fade
@@ -55,7 +55,7 @@ export class KillFeed {
     private createContainer(): void {
         // Create HUD container
         this.hudContainer = new HUDContainer(this.scene);
-        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI);
     }
 
     /**
@@ -149,13 +149,13 @@ export class KillFeed {
         
         // Create container for this entry at its final position
         const entryContainer = this.scene.add.container(this.FEED_X, newEntryY);
-        entryContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        entryContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI);
         entryContainer.setScrollFactor(0, 0);
         
         // Create background
         const background = this.scene.add.graphics();
-        background.fillStyle(0x000000, 0.2);
-        background.fillRoundedRect(0, 0, 160, this.ENTRY_HEIGHT, 3);
+        background.fillStyle(0x000000, 0.5);
+        background.fillRoundedRect(0, 0, 170, this.ENTRY_HEIGHT, 3);
         entryContainer.add(background);
         
         // Get team colors - use player color (purple) if this is the player
@@ -167,7 +167,7 @@ export class KillFeed {
             : hexToColorString(victimTeam === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED);
         
         // Create text: "KillerName killed VictimName"
-        const fontSize = involvedPlayer ? '13px' : '12px';
+        const fontSize = involvedPlayer ? '14px' : '13px';
         const fontWeight = involvedPlayer ? 'bold' : 'normal';
         
         // Killer name - use italic for bots
