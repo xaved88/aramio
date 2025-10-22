@@ -86,9 +86,14 @@ export class EntityRenderer {
             }
         }
         
-        // Render health bar for heroes and structures
+        // Render health bar for heroes and structures (but not for respawning heroes)
         if (healthBar && (combatant.type === COMBATANT_TYPES.HERO || combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET)) {
-            this.renderHealthBar(combatant, healthBar);
+            // Don't show health bars for respawning heroes
+            if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
+                healthBar.clear();
+            } else {
+                this.renderHealthBar(combatant, healthBar);
+            }
         }
         
         // Render radius indicator
@@ -287,6 +292,55 @@ export class EntityRenderer {
             graphics.fillStyle(0xFF6600, 0.6); // Orange fill with some transparency
             graphics.fillPath();
             graphics.strokePath();
+        }
+
+        // Check for respawning state - add skull icon above the hero
+        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
+            const spriteScale = getSpriteScale(combatant);
+            
+            // Add skull icon above the respawning hero
+            graphics.lineStyle(4, 0xFFFFFF); // White lines for skull icon
+            
+            // Draw a simple skull shape
+            const iconSize = 20 * spriteScale; // Scale icon
+            const iconY = 0; // Center it on the hero
+            
+            // Draw black circle background (slightly larger)
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(0, iconY, iconSize * 0.7);
+            
+            // Draw black circle outline for the border
+            graphics.lineStyle(1, 0x000000, 1);
+            graphics.strokeCircle(0, iconY, iconSize * 0.7);
+            
+            // Draw skull background (white circle)
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(0, iconY, iconSize * 0.6);
+            
+            // Draw skull outline (circle for head)
+            graphics.strokeCircle(0, iconY, iconSize * 0.6);
+            
+            // Draw eye sockets (two circles)
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(-iconSize * 0.2, iconY - iconSize * 0.1, iconSize * 0.15);
+            graphics.fillCircle(iconSize * 0.2, iconY - iconSize * 0.1, iconSize * 0.15);
+            
+            // Draw nose (triangle)
+            graphics.beginPath();
+            graphics.moveTo(0, iconY - iconSize * 0.1);
+            graphics.lineTo(-iconSize * 0.1, iconY + iconSize * 0.1);
+            graphics.lineTo(iconSize * 0.1, iconY + iconSize * 0.1);
+            graphics.closePath();
+            graphics.fillPath();
+            
+            // Draw mouth (grin)
+            graphics.lineStyle(2, 0x000000);
+            graphics.beginPath();
+            graphics.arc(0, iconY + iconSize * 0.2, iconSize * 0.2, 0, Math.PI);
+            graphics.strokePath();
+            
+            // Reset fill style
+            graphics.fillStyle(0x000000, 0);
         }
 
     }
