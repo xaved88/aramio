@@ -491,7 +491,7 @@ export const CLIENT_CONFIG = {
             },
             "stat:ability_armor": {
                 title: "Ability Armor", 
-                description: "+30 armor against abilities",
+                description: "+30 armor against ability damage",
                 rarity: "common"
             },
             "stat:damage": {
@@ -515,27 +515,27 @@ export const CLIENT_CONFIG = {
                 rarity: "common"
             },
             "ability:thorndive": {
-                title: "Ability: Thorndive",
+                title: "Class: Thorndive",
                 description: "Dash, taunt, reflect damage",
                 rarity: "ability"
             },
             "ability:pyromancer": {
-                title: "Ability: Pyromancer",
+                title: "Class: Pyromancer",
                 description: "AOE fire damage",
                 rarity: "ability"
             },
             "ability:hookshot": {
-                title: "Ability: Hookshot",
+                title: "Class: Hookshot",
                 description: "Grappling hook with stun",
                 rarity: "ability"
             },
             "ability:mercenary": {
-                title: "Ability: Mercenary",
-                description: "Rage-mode assassin",
+                title: "Class: Mercenary",
+                description: "Rage-mode assassin with faster heal",
                 rarity: "ability"
             },
             "ability:sniper": {
-                title: "Ability: Sniper",
+                title: "Class: Sniper",
                 description: "Precise ranged projectile",
                 rarity: "ability"
             },
@@ -566,7 +566,7 @@ export const CLIENT_CONFIG = {
             },
             "ability_stat:pyromancer_radius": {
                 title: "Fire Radius",
-                description: "+25% fireball radius",
+                description: "+25% fire radius",
                 rarity: "upgrade"
             },
             "ability_stat:speed": {

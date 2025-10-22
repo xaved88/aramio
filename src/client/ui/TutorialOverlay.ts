@@ -151,7 +151,7 @@ export class TutorialOverlay {
         const controlsList = [
             '- Your hero follows your mouse cursor',
             '- An enemy within your attack radius will be auto-attacked',
-            '- Click to aim your special Ability, release to fire',
+            '- Click to aim your Class Ability, release to fire',
             '- Gather xp from defeating enemies',
             '- Choose level-up rewards while respawning',
             '',
@@ -242,8 +242,8 @@ export class TutorialOverlay {
         for (const entity of structureData) {
             // Entity image
             const entityImage = this.scene.add.image(structuresStartX, structureY, entity.key);
-            // Both structures get squashed to square
-            entityImage.setDisplaySize(entity.size, entity.size);
+            // Scale proportionally to maintain aspect ratio
+            entityImage.setScale(entity.size / entityImage.width);
             this.contentContainer.add(entityImage);
             
             // Entity label
@@ -258,7 +258,7 @@ export class TutorialOverlay {
         currentY += 170;
         
         // Heroes section
-        const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Abilities:', 
+        const heroesTitle = this.scene.add.text(leftX, currentY, 'Hero Classes:', 
             TextStyleHelper.getStyle('HEADER'));
         this.contentContainer.add(heroesTitle);
         currentY += 60;
@@ -267,11 +267,11 @@ export class TutorialOverlay {
         // Strip "Ability: " prefix from titles for cleaner display
         const heroData = [
             { type: 'default', name: 'Starter', desc: 'Basic projectile attack' },
-            { type: 'hookshot', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].description },
-            { type: 'mercenary', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].description },
-            { type: 'pyromancer', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].description },
-            { type: 'sniper', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].description },
-            { type: 'thorndive', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].title.replace('Ability: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].description }
+            { type: 'hookshot', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].description },
+            { type: 'mercenary', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].description },
+            { type: 'pyromancer', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].description },
+            { type: 'sniper', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:sniper'].description },
+            { type: 'thorndive', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:thorndive'].description }
         ];
         
         const heroIconSize = 40;
@@ -288,7 +288,13 @@ export class TutorialOverlay {
             // Hero image
             const heroKey = hero.type === 'default' ? 'hero-base' : `hero-${hero.type}`;
             const heroImage = this.scene.add.image(x, y, heroKey);
-            heroImage.setScale(heroIconSize / heroImage.width); // Scale proportionally
+            
+            // Apply proper scaling like in the game - scale to target size and apply hero-specific scale
+            const maxDimension = Math.max(heroImage.width, heroImage.height);
+            const baseScale = heroIconSize / maxDimension;
+            const heroScale = CLIENT_CONFIG.HERO_SPRITE_SCALES[hero.type] || 1.0;
+            heroImage.setScale(baseScale * heroScale);
+            
             // No tint - show original sprite colors (team colors are applied via shaders in-game)
             this.contentContainer.add(heroImage);
             
