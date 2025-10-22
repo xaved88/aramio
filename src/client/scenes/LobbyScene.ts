@@ -18,7 +18,6 @@ export class LobbyScene extends Phaser.Scene {
     private lobbyState: LobbyState | null = null;
     private playerSessionId: string | null = null;
     private connectionManager!: ConnectionManager;
-    private isNameDialogOpen: boolean = false;
     private hasLoadedSavedName: boolean = false;
     
     // UI Elements
@@ -33,6 +32,19 @@ export class LobbyScene extends Phaser.Scene {
     private tutorialOverlay!: TutorialOverlay;
     private tutorialButton!: Phaser.GameObjects.Container;
     private cursorRenderer!: CursorRenderer;
+    
+    // Welcome section elements
+    private welcomeText!: Phaser.GameObjects.Text;
+    private welcomeSaveButton!: Button;
+    private welcomeInputElement!: HTMLInputElement;
+    private originalPlayerName: string = '';
+    
+    // Team size selection circles
+    private teamSizeCircles: Phaser.GameObjects.GameObject[] = [];
+    
+    // Click outside listener for input field
+    private clickOutsideListener?: (event: Event) => void;
+    
 
     constructor() {
         super({ key: 'LobbyScene' });
@@ -47,6 +59,160 @@ export class LobbyScene extends Phaser.Scene {
         });
     }
 
+    private createPlayerNameHighlight(textDisplay: Phaser.GameObjects.Text, y: number): Phaser.GameObjects.Ellipse {
+        const textBounds = textDisplay.getBounds();
+        const padding = 10;
+        const highlightBg = this.add.ellipse(
+            0, y, 
+            textBounds.width + padding * 2, 
+            textBounds.height + padding * 2,
+            CLIENT_CONFIG.SELF_COLORS.PRIMARY, // Purple background
+            0.8 // Slightly transparent
+        );
+        highlightBg.setStrokeStyle(2, 0x6c3483); // Dark purple border
+        highlightBg.setOrigin(0.5);
+        
+        // Move highlight behind the text
+        highlightBg.setDepth(-1);
+        textDisplay.setDepth(0);
+        
+        return highlightBg;
+    }
+
+    private createWelcomeSection(centerX: number, y: number) {
+        // Welcome text
+        const welcomeText = this.add.text(centerX - 30, y, 'Welcome, ', 
+            TextStyleHelper.getStyle('BODY_LARGE')
+        ).setOrigin(1, 0.5);
+
+        // Create actual HTML input field
+        this.createWelcomeInputField(centerX - 25, y);
+
+        // Save button positioned to the right of the input field
+        const inputFieldStart = centerX - 25; // Phaser coordinate of input field start
+        const inputFieldWidth = 120;
+        const gap = 50;
+        const saveButtonX = inputFieldStart + inputFieldWidth + gap; // Right edge + gap
+        
+        const saveButton = new Button(this, {
+            x: saveButtonX,
+            y: y,
+            text: 'Save',
+            type: 'proceed',
+            onClick: () => {
+                this.savePlayerName();
+            }
+        });
+        saveButton.setVisible(false); // Start hidden
+        this.add.existing(saveButton);
+
+        // Store references for updating
+        this.welcomeText = welcomeText;
+        this.welcomeSaveButton = saveButton;
+        
+        // Update input field visibility based on tutorial state
+        this.updateInputFieldVisibility();
+    }
+
+    private createWelcomeInputField(x: number, y: number) {
+        // Create actual HTML input field with minimal styling
+        const canvasElement = this.game.canvas;
+        const canvasRect = canvasElement.getBoundingClientRect();
+        
+        this.welcomeInputElement = document.createElement('input');
+        this.welcomeInputElement.type = 'text';
+        this.welcomeInputElement.value = 'Player';
+        this.welcomeInputElement.maxLength = CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH;
+        this.welcomeInputElement.style.position = 'absolute';
+        this.welcomeInputElement.style.left = (canvasRect.left + x) + 'px';
+        this.welcomeInputElement.style.top = (canvasRect.top + y - 15) + 'px';
+        this.welcomeInputElement.style.width = '120px';
+        this.welcomeInputElement.style.height = '20px';
+        this.welcomeInputElement.style.zIndex = '500'; // Lower than tutorial overlay (1050)
+        
+        // Add input to document
+        document.body.appendChild(this.welcomeInputElement);
+
+        // Track original value for change detection
+        this.originalPlayerName = this.welcomeInputElement.value;
+
+        // Handle input changes to show/hide save button
+        this.welcomeInputElement.addEventListener('input', () => {
+            // Clear original name as soon as any edit is made
+            this.originalPlayerName = '';
+            this.updateSaveButtonVisibility();
+        });
+
+        // Select all text when clicking into the field
+        this.welcomeInputElement.addEventListener('focus', () => {
+            this.welcomeInputElement.select();
+        });
+
+        // Add click outside listener to blur input field
+        this.clickOutsideListener = (event) => {
+            if (this.welcomeInputElement && 
+                !this.welcomeInputElement.contains(event.target as Node) && 
+                this.welcomeInputElement === document.activeElement) {
+                this.welcomeInputElement.blur();
+            }
+        };
+        document.addEventListener('click', this.clickOutsideListener);
+
+        // Handle Enter key to save
+        this.welcomeInputElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                this.savePlayerName();
+            }
+        });
+    }
+
+    private updateWelcomeSection() {
+        if (!this.welcomeInputElement) return;
+
+        const currentPlayerSlot = this.getCurrentPlayerSlot();
+        if (currentPlayerSlot) {
+            this.welcomeInputElement.value = currentPlayerSlot.playerDisplayName;
+            this.originalPlayerName = currentPlayerSlot.playerDisplayName;
+            this.updateSaveButtonVisibility();
+        }
+    }
+
+    private updateSaveButtonVisibility() {
+        if (!this.welcomeInputElement || !this.welcomeSaveButton) return;
+
+        // Show save button if no original name (editing started) or if value differs from original
+        const hasBeenEdited = this.originalPlayerName === '' || this.welcomeInputElement.value !== this.originalPlayerName;
+        this.welcomeSaveButton.setVisible(hasBeenEdited);
+    }
+
+    private updateInputFieldVisibility(): void {
+        if (!this.welcomeInputElement || !this.tutorialOverlay) return;
+        
+        const isTutorialVisible = this.tutorialOverlay.isShowing();
+        this.welcomeInputElement.style.display = isTutorialVisible ? 'none' : 'block';
+    }
+
+
+    private savePlayerName() {
+        if (!this.welcomeInputElement) return;
+
+        const newName = this.welcomeInputElement.value.trim();
+        if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
+            // Save to localStorage for persistence
+            PlayerNameStorage.savePlayerName(newName);
+            // Send to server
+            this.room.send('setPlayerDisplayName', { displayName: newName });
+            
+            // Update original name and hide save button
+            this.originalPlayerName = newName;
+            this.updateSaveButtonVisibility();
+            
+            // Remove focus from input field
+            this.welcomeInputElement.blur();
+        }
+    }
+
+
     /**
      * Reset all scene state for fresh initialization
      */
@@ -56,7 +222,6 @@ export class LobbyScene extends Phaser.Scene {
         this.room = null;
         this.playerSessionId = null;
         this.lobbyState = null;
-        this.isNameDialogOpen = false;
         this.hasLoadedSavedName = false;
         
         // Reset UI elements
@@ -65,6 +230,16 @@ export class LobbyScene extends Phaser.Scene {
         this.redTeamContainer = null as any;
         this.startButton = null as any;
         this.versionText = null as any;
+        this.welcomeText = null as any;
+        this.welcomeSaveButton = null as any;
+        this.welcomeInputElement = null as any;
+        this.teamSizeCircles = [];
+        
+        // Clean up click outside listener
+        if (this.clickOutsideListener) {
+            document.removeEventListener('click', this.clickOutsideListener);
+            this.clickOutsideListener = undefined;
+        }
         
         // Destroy control mode toggle if it exists
         if (this.controlModeToggle) {
@@ -174,20 +349,6 @@ export class LobbyScene extends Phaser.Scene {
     }
 
     private setupKeyboardHandlers() {
-        // E key handler for opening name edit dialog
-        this.input.keyboard?.on('keydown-E', (event: KeyboardEvent) => {
-            // Don't open dialog if one is already open
-            if (this.isNameDialogOpen) {
-                return;
-            }
-            
-            const currentPlayerSlot = this.getCurrentPlayerSlot();
-            if (currentPlayerSlot) {
-                event.preventDefault(); // Prevent the 'E' from being typed
-                this.showNameEditDialog(currentPlayerSlot.playerDisplayName, true);
-            }
-        });
-
         // ESC key handler for closing tutorial
         this.input.keyboard?.on('keydown-ESC', (event: KeyboardEvent) => {
             if (this.tutorialOverlay && this.tutorialOverlay.isShowing()) {
@@ -197,8 +358,15 @@ export class LobbyScene extends Phaser.Scene {
 
         // T key handler for tutorial toggle
         this.input.keyboard?.on('keydown-T', (event: KeyboardEvent) => {
+            // Don't open tutorial if input field is focused
+            if (this.welcomeInputElement && document.activeElement === this.welcomeInputElement) {
+                return;
+            }
+            
             if (this.tutorialOverlay) {
                 this.tutorialOverlay.toggle();
+                // Hide/show input field based on tutorial state
+                this.updateInputFieldVisibility();
             }
         });
     }
@@ -261,15 +429,18 @@ export class LobbyScene extends Phaser.Scene {
             TextStyleHelper.getStyle('PAGE_TITLE')
         ).setOrigin(0.5);
 
-        // Team size selector
-        this.add.text(centerX, centerY - 230, 'Team Size:', 
+        // Welcome section with player name
+        this.createWelcomeSection(centerX, centerY - 250);
+
+        // Team size selector - positioned between welcome and config
+        this.add.text(centerX, centerY - 200, 'Team Size:', 
             TextStyleHelper.getStyle('HEADER')
         ).setOrigin(0.5);
 
         // Team size buttons - only 1 and 5
         const button1 = new Button(this, {
             x: centerX - 30,
-            y: centerY - 200,
+            y: centerY - 170,
             text: '1',
             type: 'subtle',
             onClick: () => {
@@ -280,13 +451,13 @@ export class LobbyScene extends Phaser.Scene {
         this.teamSizeButtons.push(button1);
 
         // Separator between buttons
-        this.add.text(centerX, centerY - 200, '|', 
+        this.add.text(centerX, centerY - 170, '|', 
             TextStyleHelper.getStyleWithColor('BODY_LARGE', '#666666')
         ).setOrigin(0.5);
 
         const button5 = new Button(this, {
             x: centerX + 30,
-            y: centerY - 200,
+            y: centerY - 170,
             text: '5',
             type: 'subtle',
             onClick: () => {
@@ -391,6 +562,9 @@ export class LobbyScene extends Phaser.Scene {
         // Initialize tutorial overlay
         this.tutorialOverlay = new TutorialOverlay(this);
         
+        // Set initial input field visibility based on tutorial state
+        this.updateInputFieldVisibility();
+        
         // Initialize cursor renderer
         this.cursorRenderer = new CursorRenderer(this);
         this.cursorRenderer.create();
@@ -413,7 +587,7 @@ export class LobbyScene extends Phaser.Scene {
         const bgRect = this.add.rectangle(0, 0, 160, 45, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         
         // Background circle for the ? icon
-        const bg = this.add.circle(-60, 0, buttonSize / 2, CLIENT_CONFIG.UI.COLORS.CONTROL_TOGGLE);
+        const bg = this.add.circle(-60, 0, buttonSize / 2, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
         bg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         
         // Question mark text
@@ -456,29 +630,50 @@ export class LobbyScene extends Phaser.Scene {
     private updateUI() {
         if (!this.lobbyState) return;
 
+        // Update welcome section with current player name
+        this.updateWelcomeSection();
+
         // Update config selector
         if (this.configValue) {
             this.configValue.setText(this.lobbyState.selectedConfig || 'default');
         }
+
+        // Clear existing circles
+        this.teamSizeCircles.forEach(circle => circle.destroy());
+        this.teamSizeCircles = [];
 
         // Update team size buttons - only 1 and 5
         const allowedSizes = [1, 5];
         this.teamSizeButtons.forEach((button, index) => {
             const size = allowedSizes[index];
             if (size === this.lobbyState!.teamSize) {
-                // Selected state: green stroke and text
+                // Selected state: add circle around button
+                const circle = this.add.circle(button.x, button.y, 15, 0x000000, 0);
+                circle.setStrokeStyle(3, 0xf1c40f); // Golden yellow from header styles
+                circle.setDepth(button.depth + 1); // In front of the button
+                
+                // Add shadow circle behind the main circle
+                const shadowCircle = this.add.circle(button.x + 1, button.y + 1, 15, 0x000000, 0);
+                shadowCircle.setStrokeStyle(3, 0x000000); // Black shadow
+                shadowCircle.setDepth(button.depth); // Behind the main circle
+                shadowCircle.setAlpha(0.3); // Semi-transparent shadow
+                
+                // Store circle references for cleanup
+                if (!this.teamSizeCircles) {
+                    this.teamSizeCircles = [];
+                }
+                this.teamSizeCircles.push(circle);
+                this.teamSizeCircles.push(shadowCircle);
+                
+                // Keep button styling simple
                 button.setStyle({ 
                     backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE),
-                    stroke: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED),
-                    strokeThickness: 2,
-                    color: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED)
+                    color: '#ffffff'
                 });
             } else {
-                // Unselected state: white text, no stroke
+                // Unselected state: white text, no circle
                 button.setStyle({ 
                     backgroundColor: hexToColorString(CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE),
-                    stroke: '',
-                    strokeThickness: 0,
                     color: '#ffffff'
                 });
             }
@@ -535,22 +730,20 @@ export class LobbyScene extends Phaser.Scene {
             let slotText = '';
             let textColor: number = 0xffffff; // white
             let isSelf = false;
-            let fontStyle: string | undefined = undefined;
+            let fontStyle: string = 'bold'; // All player names are bold
             
             if (slot.playerId) {
                 if (slot.isBot) {
                     slotText = `Bot ${index + 1}`;
                     textColor = CLIENT_CONFIG.UI.COLORS.DISABLED;
+                    fontStyle = 'normal'; // Bots are not bold
                 } else {
                     slotText = slot.playerDisplayName;
                     if (slot.playerId === this.playerSessionId) {
-                        // Your own name uses the character's purple color and is bolded
-                        textColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY;
+                        // Your own name uses white text with purple shadow
                         isSelf = true;
-                        fontStyle = 'bold';
-                    } else {
-                        // Other players use team colors
-                        textColor = TextStyleHelper.getTeamColor(team as 'blue' | 'red');
+                        textColor = 0xffffff; // White text
+                        // fontStyle already set to 'bold' above
                     }
                 }
                 
@@ -560,9 +753,10 @@ export class LobbyScene extends Phaser.Scene {
             } else {
                 slotText = 'Empty';
                 textColor = CLIENT_CONFIG.UI.COLORS.DISABLED;
-                fontStyle = 'italic';
+                fontStyle = 'italic'; // Empty slots are italic, not bold
             }
 
+            // Create the main player name text
             const slotDisplay = this.add.text(0, y, slotText, 
                 TextStyleHelper.getStyleWithCustom('BODY_LARGE', {
                     color: hexToColorString(textColor),
@@ -570,14 +764,48 @@ export class LobbyScene extends Phaser.Scene {
                 })
             ).setOrigin(0.5);
             
-
+            // Add purple shadow for current player
+            if (isSelf) {
+                slotDisplay.setShadow(2, 2, hexToColorString(CLIENT_CONFIG.SELF_COLORS.TEXT), 3, true, true);
+            }
+            
             // Add team switching arrows for players (not bots)
             if (slot.playerId && !slot.isBot) {
-                const elementsToAdd = [slotDisplay];
+                const elementsToAdd: Phaser.GameObjects.GameObject[] = [slotDisplay];
+                
+                // Add "(you)" indicator if this is the current player
+                if (isSelf) {
+                    const youIndicator = this.add.text(0, y, ' (you)', 
+                        TextStyleHelper.getStyle('BODY_MEDIUM')
+                    ).setOrigin(0, 0.5);
+                    
+                    // Position the "(you)" text right after the player name
+                    const slotBounds = slotDisplay.getBounds();
+                    youIndicator.setX(slotBounds.right + 2);
+                    
+                    // Calculate total width including "(you)" text for proper centering
+                    const youBounds = youIndicator.getBounds();
+                    const totalWidth = slotBounds.width + youBounds.width + 2; // +2 for spacing
+                    
+                    // Reposition both texts to center the combined width
+                    const offsetX = totalWidth / 2 - slotBounds.width / 2;
+                    slotDisplay.setX(-offsetX);
+                    youIndicator.setX(youIndicator.x - offsetX);
+                    
+                    elementsToAdd.push(youIndicator);
+                }
+                
+                // No highlight background needed - using shadow pattern instead
                 
                 // Only show left arrow (to blue team) if player is not already on blue team
                 if (team !== 'blue') {
-                     const arrowLeft = this.add.text(-100, y, '←', {
+                     // Calculate position based on name length - blue arrow goes on the left
+                     const textBounds = slotDisplay.getBounds();
+                     // For current player, account for the "(you)" text width
+                     const extraSpace = isSelf ? 25 : 0; // Space for "(you)" text
+                     const arrowX = -(textBounds.width / 2) - 20 - extraSpace; // 20px before the name - space for "(you)"
+                     
+                     const arrowLeft = this.add.text(arrowX, y, '←', {
                          fontSize: '24px',
                           color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.BLUE),
                          fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -607,7 +835,13 @@ export class LobbyScene extends Phaser.Scene {
 
                 // Only show right arrow (to red team) if player is not already on red team
                 if (team !== 'red') {
-                     const arrowRight = this.add.text(100, y, '→', {
+                     // Calculate position based on name length - red arrow goes on the right
+                     const textBounds = slotDisplay.getBounds();
+                     // For current player, account for the "(you)" text width
+                     const extraSpace = isSelf ? 25 : 0; // Space for "(you)" text
+                     const arrowX = (textBounds.width / 2) + 20 + extraSpace; // 20px after the name + space for "(you)"
+                     
+                     const arrowRight = this.add.text(arrowX, y, '→', {
                          fontSize: '24px',
                           color: hexToColorString(CLIENT_CONFIG.TEAM_COLORS.RED),
                          fontFamily: CLIENT_CONFIG.UI.FONTS.PRIMARY,
@@ -635,24 +869,10 @@ export class LobbyScene extends Phaser.Scene {
                     elementsToAdd.push(arrowRight);
                 }
 
-                // Add edit button for current player's own slot
-                if (isSelf) {
-                    const editButton = new Button(this, {
-                        x: 70,
-                        y: y,
-                        text: '✏️',
-                        type: 'icon',
-                        onClick: () => {
-                            this.showNameEditDialog(slot.playerDisplayName);
-                        }
-                    });
-
-                    this.add.existing(editButton);
-                    elementsToAdd.push(editButton);
-                }
 
                 container.add(elementsToAdd);
             } else {
+                // For empty slots or bots, just add the text display
                 container.add(slotDisplay);
             }
         });
@@ -754,130 +974,5 @@ export class LobbyScene extends Phaser.Scene {
     }
 
 
-    private showNameEditDialog(currentName: string, autoFocus: boolean = true) {
-        // Set flag to prevent multiple dialogs
-        this.isNameDialogOpen = true;
-        
-        const centerX = this.cameras.main.width / 2;
-        const centerY = this.cameras.main.height / 2;
-
-        // Create semi-transparent overlay
-        const overlay = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
-
-        // Create dialog background
-        const dialogBg = this.add.rectangle(centerX, centerY, 400, 200, CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
-        dialogBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-
-        // Title
-        const title = this.add.text(centerX, centerY - 60, 'Change Display Name', 
-            TextStyleHelper.getStyle('HEADER')
-        ).setOrigin(0.5);
-
-        // Create HTML input field over the canvas
-        const canvasElement = this.game.canvas;
-        const canvasRect = canvasElement.getBoundingClientRect();
-        
-        const inputElement = document.createElement('input');
-        inputElement.type = 'text';
-        // Use current name, or fall back to stored name if current is empty
-        const defaultValue = currentName || PlayerNameStorage.getPlayerName() || '';
-        inputElement.value = defaultValue;
-        inputElement.maxLength = CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH;
-        inputElement.style.position = 'absolute';
-        inputElement.style.left = (canvasRect.left + centerX - 150) + 'px';
-        inputElement.style.top = (canvasRect.top + centerY - 25) + 'px';
-        inputElement.style.width = '300px';
-        inputElement.style.height = '30px';
-        inputElement.style.border = '2px solid #7f8c8d';
-        inputElement.style.borderRadius = '4px';
-        inputElement.style.padding = '5px 10px';
-        inputElement.style.fontSize = '16px';
-        inputElement.style.fontFamily = 'Arial';
-        inputElement.style.backgroundColor = '#ecf0f1';
-        inputElement.style.color = '#2c3e50';
-        inputElement.style.zIndex = '1000';
-        
-        // Add input to document
-        document.body.appendChild(inputElement);
-        
-        // Only auto-focus and select if autoFocus is true
-        if (autoFocus) {
-            inputElement.focus();
-            inputElement.select(); // Select all text for easy editing
-        }
-
-        // Buttons
-        const cancelButton = new Button(this, {
-            x: centerX - 80,
-            y: centerY + 60,
-            text: 'Cancel',
-            type: 'standard',
-            onClick: () => cleanup()
-        });
-
-        const saveButton = new Button(this, {
-            x: centerX + 80,
-            y: centerY + 60,
-            text: 'Save',
-            type: 'proceed',
-            onClick: () => {
-                const newName = inputElement.value.trim();
-                if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
-                    // Save to localStorage for persistence
-                    PlayerNameStorage.savePlayerName(newName);
-                    // Send to server
-                    this.room.send('setPlayerDisplayName', { displayName: newName });
-                    cleanup();
-                }
-            }
-        });
-
-        // Add buttons to scene
-        this.add.existing(cancelButton);
-        this.add.existing(saveButton);
-
-        // Store dialog elements for cleanup
-        const dialogElements = [overlay, dialogBg, title, cancelButton, saveButton];
-
-        // Cleanup function
-        const cleanup = () => {
-            this.isNameDialogOpen = false; // Clear flag when dialog closes
-            document.body.removeChild(inputElement);
-            dialogElements.forEach(element => element.destroy());
-        };
-
-
-        // Handle Enter key in input field
-        inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                const newName = inputElement.value.trim();
-                if (newName && newName.length <= CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH) {
-                    // Save to localStorage for persistence
-                    PlayerNameStorage.savePlayerName(newName);
-                    // Send to server
-                    this.room.send('setPlayerDisplayName', { displayName: newName });
-                    cleanup();
-                }
-            } else if (event.key === 'Escape') {
-                cleanup();
-            }
-        });
-
-        // Handle clicking outside the dialog
-        overlay.setInteractive();
-        overlay.on('pointerdown', (pointer: Phaser.Input.Pointer, localX: number, localY: number, event: Phaser.Types.Input.EventData) => {
-            // Only close if clicking directly on the overlay (not on dialog content)
-            // Check if the pointer is within the dialog bounds
-            const dialogLeft = centerX - 200; // Half of dialog width
-            const dialogRight = centerX + 200;
-            const dialogTop = centerY - 100; // Half of dialog height
-            const dialogBottom = centerY + 100;
-            
-            if (pointer.x < dialogLeft || pointer.x > dialogRight || 
-                pointer.y < dialogTop || pointer.y > dialogBottom) {
-                cleanup();
-            }
-        });
-    }
 
 }
