@@ -241,6 +241,11 @@ export class LobbyScene extends Phaser.Scene {
             this.clickOutsideListener = undefined;
         }
         
+        // Hide input field
+        if (this.welcomeInputElement) {
+            this.welcomeInputElement.style.display = 'none';
+        }
+        
         // Destroy control mode toggle if it exists
         if (this.controlModeToggle) {
             this.controlModeToggle.destroy();
@@ -340,6 +345,10 @@ export class LobbyScene extends Phaser.Scene {
 
         this.room.onMessage('gameStarting', (message: any) => {
             console.log('Game starting, transitioning to game scene...');
+            // Hide input field before transitioning
+            if (this.welcomeInputElement) {
+                this.welcomeInputElement.style.display = 'none';
+            }
             this.scene.start('GameScene', { lobbyData: message.lobbyData, playerLobbyId: this.playerSessionId });
         });
 
@@ -560,7 +569,9 @@ export class LobbyScene extends Phaser.Scene {
         this.controlModeToggle.setScrollFactor(0, 0);
         
         // Initialize tutorial overlay
-        this.tutorialOverlay = new TutorialOverlay(this);
+        this.tutorialOverlay = new TutorialOverlay(this, () => {
+            this.updateInputFieldVisibility();
+        });
         
         // Set initial input field visibility based on tutorial state
         this.updateInputFieldVisibility();
@@ -576,6 +587,8 @@ export class LobbyScene extends Phaser.Scene {
             this.cursorRenderer.update(null, 0, false);
         }
     }
+    
+    
     
     private createTutorialButton(x: number, y: number): void {
         const buttonSize = 30;
@@ -623,6 +636,7 @@ export class LobbyScene extends Phaser.Scene {
         // Click handler
         this.tutorialButton.on('pointerdown', () => {
             this.tutorialOverlay.show();
+            this.updateInputFieldVisibility();
         });
     }
     
