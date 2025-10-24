@@ -45,6 +45,9 @@ export class LobbyScene extends Phaser.Scene {
     // Click outside listener for input field
     private clickOutsideListener?: (event: Event) => void;
     
+    // Resize listener for input field positioning
+    private resizeListener?: () => void;
+    
 
     constructor() {
         super({ key: 'LobbyScene' });
@@ -116,19 +119,17 @@ export class LobbyScene extends Phaser.Scene {
 
     private createWelcomeInputField(x: number, y: number) {
         // Create actual HTML input field with minimal styling
-        const canvasElement = this.game.canvas;
-        const canvasRect = canvasElement.getBoundingClientRect();
-        
         this.welcomeInputElement = document.createElement('input');
         this.welcomeInputElement.type = 'text';
         this.welcomeInputElement.value = 'Player';
         this.welcomeInputElement.maxLength = CLIENT_CONFIG.UI.MAX_DISPLAY_NAME_LENGTH;
         this.welcomeInputElement.style.position = 'absolute';
-        this.welcomeInputElement.style.left = (canvasRect.left + x) + 'px';
-        this.welcomeInputElement.style.top = (canvasRect.top + y - 15) + 'px';
         this.welcomeInputElement.style.width = '120px';
         this.welcomeInputElement.style.height = '20px';
         this.welcomeInputElement.style.zIndex = '500'; // Lower than tutorial overlay (1050)
+        
+        // Set initial position
+        this.setInputFieldPosition(x, y);
         
         // Add input to document
         document.body.appendChild(this.welcomeInputElement);
@@ -157,6 +158,12 @@ export class LobbyScene extends Phaser.Scene {
             }
         };
         document.addEventListener('click', this.clickOutsideListener);
+
+        // Add resize listener to update input field position
+        this.resizeListener = () => {
+            this.updateInputFieldPosition();
+        };
+        window.addEventListener('resize', this.resizeListener);
 
         // Handle Enter key to save
         this.welcomeInputElement.addEventListener('keydown', (event) => {
@@ -190,6 +197,30 @@ export class LobbyScene extends Phaser.Scene {
         
         const isTutorialVisible = this.tutorialOverlay.isShowing();
         this.welcomeInputElement.style.display = isTutorialVisible ? 'none' : 'block';
+    }
+
+    private setInputFieldPosition(x: number, y: number): void {
+        if (!this.welcomeInputElement) return;
+
+        // Get current canvas position and size
+        const canvasElement = this.game.canvas;
+        const canvasRect = canvasElement.getBoundingClientRect();
+        
+        // Set the input field position relative to the canvas
+        this.welcomeInputElement.style.left = (canvasRect.left + x) + 'px';
+        this.welcomeInputElement.style.top = (canvasRect.top + y - 15) + 'px';
+    }
+
+    private updateInputFieldPosition(): void {
+        if (!this.welcomeInputElement) return;
+
+        // Calculate the input field position relative to the canvas
+        const centerX = getCanvasWidth() / 2;
+        const inputFieldX = centerX - 25; // Same as in createWelcomeSection
+        const inputFieldY = (getCanvasHeight() / 2) - 250; // Same as in createWelcomeSection
+        
+        // Update the input field position
+        this.setInputFieldPosition(inputFieldX, inputFieldY);
     }
 
 
@@ -239,6 +270,12 @@ export class LobbyScene extends Phaser.Scene {
         if (this.clickOutsideListener) {
             document.removeEventListener('click', this.clickOutsideListener);
             this.clickOutsideListener = undefined;
+        }
+        
+        // Clean up resize listener
+        if (this.resizeListener) {
+            window.removeEventListener('resize', this.resizeListener);
+            this.resizeListener = undefined;
         }
         
         // Hide input field
