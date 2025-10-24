@@ -175,14 +175,6 @@ export const CLIENT_CONFIG = {
         COOLDOWN_COLOR: 0xe74c3c, // red when on cooldown
         ALPHA: 0.9,
     },
-    ABILITY_NOT_READY_FEEDBACK: {
-        COOLDOWN_PULSE: {
-            DURATION_MS: 300, // How long the pulse effect lasts
-            MAX_SCALE: 2.5, // How much bigger the cursor gets during pulse
-            PULSE_COLOR: 0xff0000, // Bright red for cooldown pulse
-            PULSE_ALPHA: 0.8,
-        },
-    },
     RADIUS_INDICATOR: {
         LINE_THICKNESS: 2,
         LINE_COLOR: 0x000000, // black

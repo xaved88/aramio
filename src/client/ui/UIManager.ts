@@ -142,13 +142,6 @@ export class UIManager {
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
-    /**
-     * Gets the cursor renderer for external access
-     */
-    getCursorRenderer(): CursorRenderer {
-        return this.cursorRenderer;
-    }
-
     setRoom(room: any): void {
         this.statsOverlay.setRoom(room);
         this.cheatMenu.setRoom(room);

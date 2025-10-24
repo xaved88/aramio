@@ -11,11 +11,6 @@ export class CursorRenderer {
     private cameraManager: any = null;
     private wasOnCooldown: boolean = false;
     private flashIntensity: number = 0; // 0 = no flash, 1 = full flash
-    
-    // Cooldown pulse effect
-    private cooldownPulseIntensity: number = 0; // 0 = no pulse, 1 = full pulse
-    private cooldownPulseStartTime: number = 0;
-    
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -95,9 +90,6 @@ export class CursorRenderer {
             if (this.flashIntensity < 0) this.flashIntensity = 0;
         }
 
-        // Update cooldown pulse effect
-        this.updateCooldownPulse();
-
         // Draw crosshair with reduced visibility if on cooldown
         this.drawCrosshair(mouseX, mouseY, !isAbilityReady);
 
@@ -126,20 +118,14 @@ export class CursorRenderer {
     private drawCrosshair(x: number, y: number, isOnCooldown: boolean = false): void {
         if (!this.cursorGraphics) return;
         
-        // Calculate size with flash and pulse effects (more prominent base size)
-        const baseSize = 12; // Increased from 8 to 12
-        const flashSize = this.flashIntensity * 6; // Increased from 4 to 6
-        const pulseSize = this.cooldownPulseIntensity * (CLIENT_CONFIG.ABILITY_NOT_READY_FEEDBACK.COOLDOWN_PULSE.MAX_SCALE - 1) * baseSize;
-        const crosshairSize = baseSize + flashSize + pulseSize;
-        
-        const lineThickness = 3; // Increased from 2 to 3
-        const outlineThickness = 4; // Increased from 3 to 4
+        const crosshairSize = 8 + (this.flashIntensity * 4); // Expand when flashing
+        const lineThickness = 2;
+        const outlineThickness = 3;
         const color = 0xffffff; // White crosshair
         const outlineColor = 0x000000; // Black outline
-        
-        // More prominent visibility - full white when ready, even during flash
-        const baseAlpha = isOnCooldown ? 0.6 : 1.0; // Dim when on cooldown, full white when ready
-        const alpha = isOnCooldown ? baseAlpha : 1.0; // Always full white when not on cooldown, regardless of flash
+        // Dim during cooldown, bright with flash effect when ready
+        const baseAlpha = isOnCooldown ? 0.4 : 0.9;
+        const alpha = baseAlpha + (this.flashIntensity * 0.1); // Slightly brighter when flashing
 
         // Draw black outline first (thicker)
         this.cursorGraphics.lineStyle(outlineThickness, outlineColor, alpha);
@@ -170,50 +156,8 @@ export class CursorRenderer {
         this.cursorGraphics.moveTo(x, y - crosshairSize);
         this.cursorGraphics.lineTo(x, y + crosshairSize);
         this.cursorGraphics.strokePath();
-
-        // Draw cooldown pulse effect (red ring)
-        if (this.cooldownPulseIntensity > 0) {
-            const config = CLIENT_CONFIG.ABILITY_NOT_READY_FEEDBACK.COOLDOWN_PULSE;
-            const pulseRadius = CLIENT_CONFIG.CURSOR_COOLDOWN_INDICATOR.RADIUS + (pulseSize * 0.5);
-            
-            this.cursorGraphics.lineStyle(
-                CLIENT_CONFIG.CURSOR_COOLDOWN_INDICATOR.THICKNESS + 2,
-                config.PULSE_COLOR,
-                config.PULSE_ALPHA * this.cooldownPulseIntensity
-            );
-            
-            this.cursorGraphics.beginPath();
-            this.cursorGraphics.arc(x, y, pulseRadius, 0, Math.PI * 2);
-            this.cursorGraphics.strokePath();
-        }
     }
 
-
-    /**
-     * Updates the cooldown pulse effect
-     */
-    private updateCooldownPulse(): void {
-        if (this.cooldownPulseIntensity > 0) {
-            const config = CLIENT_CONFIG.ABILITY_NOT_READY_FEEDBACK.COOLDOWN_PULSE;
-            const elapsed = this.scene.time.now - this.cooldownPulseStartTime;
-            const progress = Math.min(elapsed / config.DURATION_MS, 1);
-            
-            // Use a sine wave for smooth pulse effect
-            this.cooldownPulseIntensity = Math.sin(progress * Math.PI) * (1 - progress);
-            
-            if (progress >= 1) {
-                this.cooldownPulseIntensity = 0;
-            }
-        }
-    }
-
-    /**
-     * Triggers a cooldown pulse effect when ability is attempted while on cooldown
-     */
-    triggerCooldownPulse(): void {
-        this.cooldownPulseIntensity = 1.0;
-        this.cooldownPulseStartTime = this.scene.time.now;
-    }
 
     /**
      * Destroys the cursor graphics
