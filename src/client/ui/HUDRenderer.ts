@@ -333,7 +333,7 @@ export class HUDRenderer {
         this.healthBar.fillStyle(config.HEALTH_COLOR, 1);
         this.healthBar.fillRect(x, y, healthBarWidth, config.HEIGHT);
         
-        this.healthText.setText(`${Math.round(player.health)} / ${Math.round(player.maxHealth)}`);
+        this.healthText.setText(`${Math.round(player.health).toLocaleString()} / ${Math.round(player.maxHealth).toLocaleString()}`);
     }
     
     private updateXPIndicator(player: HeroCombatant): void {
@@ -437,8 +437,8 @@ export class HUDRenderer {
             this.abilityFlashOverlay.clear();
             
             if (isAbilityReady && this.flashIntensity > 0) {
-                const flashSize = (config.SIZE + (this.flashIntensity * 20)) * config.ICON_SCALE;
-                const flashAlpha = this.flashIntensity * 0.8;
+                const flashSize = config.SIZE; // Match full ability icon size
+                const flashAlpha = this.flashIntensity * 0.8; // Only fade alpha
                 
                 this.abilityFlashOverlay.fillStyle(0xffffff, flashAlpha);
                 this.abilityFlashOverlay.fillCircle(abilityX, abilityY, flashSize / 2);
