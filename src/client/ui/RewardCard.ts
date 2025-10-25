@@ -526,10 +526,10 @@ export class RewardCard {
         this.recommendationStar.fillStyle(0xFFD700, 0.3);
         this.recommendationStar.fillCircle(starX, starY, starSize / 2 + 3);
         
-        // Create the "RECOMMENDED" text above the card
+        // Create the "RECOMMENDED" text below the card
         this.recommendationText = this.scene.add.text(
             0, // Center horizontally on the card
-            -halfHeight - 15, // Position above the card
+            halfHeight + 15, // Position below the card
             'RECOMMENDED',
             {
                 fontSize: '14px',
