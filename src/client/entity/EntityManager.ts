@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Combatant, COMBATANT_TYPES, isHeroCombatant, isMinionCombatant, HeroCombatant, MinionCombatant, CombatantId, ControllerId, ProjectileId } from '../../shared/types/CombatantTypes';
+import { Obstacle, ObstacleId } from '../../shared/types/ObstacleTypes';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent } from '../../shared/types/GameStateTypes';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { EntityFactory } from './EntityFactory';
@@ -36,6 +37,7 @@ export class EntityManager {
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
     private zoneGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private obstacleGraphics: Map<ObstacleId, Phaser.GameObjects.Graphics> = new Map();
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private processedXPEvents: Set<string> = new Set();
@@ -164,6 +166,9 @@ export class EntityManager {
         
         // Update zones
         this.updateZoneEntities(state);
+        
+        // Update obstacles
+        this.updateObstacleEntities(state);
         
         // Render targeting lines
         this.renderTargetingLines(state);
@@ -557,6 +562,119 @@ export class EntityManager {
         zoneGraphics.lineStyle(2, zoneColor, 0.9); // More visible border
         zoneGraphics.fillCircle(0, 0, zoneData.radius);
         zoneGraphics.strokeCircle(0, 0, zoneData.radius);
+    }
+
+    /**
+     * Updates all obstacle entities based on the current game state
+     */
+    private updateObstacleEntities(state: SharedGameState): void {
+        state.obstacles.forEach((obstacleData: Obstacle) => {
+            this.updateObstacleEntity(obstacleData, state);
+        });
+    }
+
+    /**
+     * Updates a single obstacle entity, creating it if it doesn't exist
+     */
+    private updateObstacleEntity(obstacleData: Obstacle, state: SharedGameState): void {
+        const entityId = obstacleData.id;
+        
+        // Get or create obstacle graphics
+        let obstacleGraphics = this.obstacleGraphics.get(entityId);
+        
+        if (!obstacleGraphics) {
+            obstacleGraphics = this.entityFactory.createEntityGraphics();
+            obstacleGraphics.setPosition(obstacleData.x, obstacleData.y);
+            
+            // Set depth above ground but below combatants
+            obstacleGraphics.setDepth(0);
+            
+            // Assign to main camera
+            if (this.cameraManager) {
+                this.cameraManager.assignToMainCamera(obstacleGraphics);
+            }
+            
+            this.obstacleGraphics.set(entityId, obstacleGraphics);
+        }
+        
+        // Render the obstacle
+        this.renderObstacle(obstacleData, obstacleGraphics, state);
+    }
+
+    /**
+     * Renders an obstacle (rectangle or circle)
+     */
+    private renderObstacle(obstacleData: Obstacle, obstacleGraphics: Phaser.GameObjects.Graphics, state: SharedGameState): void {
+        obstacleGraphics.clear();
+        
+        switch (obstacleData.hitboxType) {
+            case 'rectangle':
+                if (obstacleData.width && obstacleData.height) {
+                    // Draw rectangle centered at origin
+                    const halfWidth = obstacleData.width / 2;
+                    const halfHeight = obstacleData.height / 2;
+                    
+                    if (obstacleData.rotation && obstacleData.rotation !== 0) {
+                        // Apply rotation using transformation matrix
+                        const cos = Math.cos(obstacleData.rotation);
+                        const sin = Math.sin(obstacleData.rotation);
+                        
+                        // Draw rotated rectangle by transforming each corner
+                        const corners = [
+                            { x: -halfWidth, y: -halfHeight },
+                            { x: halfWidth, y: -halfHeight },
+                            { x: halfWidth, y: halfHeight },
+                            { x: -halfWidth, y: halfHeight }
+                        ];
+                        
+                        const rotatedCorners = corners.map(corner => ({
+                            x: corner.x * cos - corner.y * sin,
+                            y: corner.x * sin + corner.y * cos
+                        }));
+                        
+                        // Draw border (outer rectangle)
+                        obstacleGraphics.fillStyle(0x2f3930, 1); // #2f3930 border color
+                        obstacleGraphics.fillPoints(rotatedCorners);
+                        
+                        // Draw interior (inner rectangle, 3px smaller on each side)
+                        const innerCorners = [
+                            { x: -halfWidth + 3, y: -halfHeight + 3 },
+                            { x: halfWidth - 3, y: -halfHeight + 3 },
+                            { x: halfWidth - 3, y: halfHeight - 3 },
+                            { x: -halfWidth + 3, y: halfHeight - 3 }
+                        ];
+                        
+                        const rotatedInnerCorners = innerCorners.map(corner => ({
+                            x: corner.x * cos - corner.y * sin,
+                            y: corner.x * sin + corner.y * cos
+                        }));
+                        
+                        obstacleGraphics.fillStyle(0x716d53, 1); // #716d53 interior color
+                        obstacleGraphics.fillPoints(rotatedInnerCorners);
+                    } else {
+                        // Draw border (outer rectangle)
+                        obstacleGraphics.fillStyle(0x2f3930, 1); // #2f3930 border color
+                        obstacleGraphics.fillRect(-halfWidth, -halfHeight, obstacleData.width, obstacleData.height);
+                        
+                        // Draw interior (inner rectangle, 3px smaller on each side)
+                        obstacleGraphics.fillStyle(0x716d53, 1); // #716d53 interior color
+                        obstacleGraphics.fillRect(-halfWidth + 3, -halfHeight + 3, obstacleData.width - 6, obstacleData.height - 6);
+                    }
+                }
+                break;
+                
+            case 'circle':
+                if (obstacleData.radius) {
+                    // Draw border (outer circle)
+                    obstacleGraphics.fillStyle(0x2f3930, 1); // #2f3930 border color
+                    obstacleGraphics.fillCircle(0, 0, obstacleData.radius);
+                    
+                    // Draw interior (inner circle, 3px smaller radius)
+                    obstacleGraphics.fillStyle(0x716d53, 1); // #716d53 interior color
+                    obstacleGraphics.fillCircle(0, 0, obstacleData.radius - 3);
+                }
+                break;
+        }
     }
 
     /**

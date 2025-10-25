@@ -1,4 +1,5 @@
 import { Combatant, AttackEvent, DamageEvent, KillEvent, Projectile, CombatantId, ProjectileId } from './CombatantTypes';
+import { Obstacle, ObstacleId } from './ObstacleTypes';
 
 export interface XPEvent {
     playerId: CombatantId;
@@ -67,6 +68,7 @@ export interface SharedGameState {
     killEvents: KillEvent[];
     projectiles: Map<ProjectileId, Projectile>;
     zones: Map<string, any>; // Zones for area effects
+    obstacles: Map<ObstacleId, Obstacle>;
     aoeDamageEvents: AOEDamageEvent[];
     deathEffectEvents: DeathEffectEvent[];
     projectileMissEvents: ProjectileMissEvent[];

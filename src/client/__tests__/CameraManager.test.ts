@@ -76,13 +76,14 @@ describe('CameraManager', () => {
             damageEvents: [],
             killEvents: [],
             projectiles: new Map(),
+            zones: new Map(),
+            obstacles: new Map(),
             aoeDamageEvents: [],
             deathEffectEvents: [],
             projectileMissEvents: [],
             killStreakEvents: [],
             blueSuperMinionsTriggered: false,
             redSuperMinionsTriggered: false,
-            zones: new Map(),
         };
     });
 
