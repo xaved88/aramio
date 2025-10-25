@@ -465,11 +465,18 @@ export class StatsOverlay {
      * Destroys the overlay elements
      */
     private destroyOverlay(): void {
+        // Destroy all overlay elements before clearing the array
+        this.overlayElements.forEach(element => {
+            if (element && typeof element.destroy === 'function') {
+                element.destroy();
+            }
+        });
+        this.overlayElements = [];
+        
         if (this.hudContainer) {
             this.hudContainer.destroy();
             this.hudContainer = null;
         }
-        this.overlayElements = [];
     }
 
     /**
