@@ -57,20 +57,22 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
     
     // Convert obstacles
     const sharedObstacles = new Map<ObstacleId, Obstacle>();
-    colyseusState.obstacles.forEach((obstacle: ColyseusObstacle, id: string) => {
-        sharedObstacles.set(id, {
-            id: obstacle.id,
-            x: obstacle.x,
-            y: obstacle.y,
-            hitboxType: obstacle.hitboxType,
-            blocksMovement: obstacle.blocksMovement,
-            blocksProjectiles: obstacle.blocksProjectiles,
-            width: obstacle.width,
-            height: obstacle.height,
-            rotation: obstacle.rotation,
-            radius: obstacle.radius
+    if (colyseusState.obstacles) {
+        colyseusState.obstacles.forEach((obstacle: ColyseusObstacle, id: string) => {
+            sharedObstacles.set(id, {
+                id: obstacle.id,
+                x: obstacle.x,
+                y: obstacle.y,
+                hitboxType: obstacle.hitboxType,
+                blocksMovement: obstacle.blocksMovement,
+                blocksProjectiles: obstacle.blocksProjectiles,
+                width: obstacle.width,
+                height: obstacle.height,
+                rotation: obstacle.rotation,
+                radius: obstacle.radius
+            });
         });
-    });
+    }
     
     // Convert attack events
     const sharedAttackEvents: AttackEvent[] = colyseusState.attackEvents.map(event => ({
