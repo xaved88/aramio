@@ -323,9 +323,21 @@ export class GameEngine {
                     return;
                 }
             } else {
-                // Check obstacle collision first (stub for now)
+                // Check obstacle collision with trajectory
                 const obstacles = Array.from(this.state.obstacles.values());
-                if (checkProjectileObstacleCollision(projectile, obstacles)) {
+                const nextX = projectile.x + projectile.directionX * distance;
+                const nextY = projectile.y + projectile.directionY * distance;
+                if (checkProjectileObstacleCollision(projectile, obstacles, nextX, nextY)) {
+                    // Create projectile miss event for wall collision
+                    const missEvent = new ProjectileMissEvent();
+                    missEvent.projectileId = projectile.id;
+                    missEvent.x = projectile.x;
+                    missEvent.y = projectile.y;
+                    missEvent.team = projectile.team || 'neutral';
+                    missEvent.ownerId = projectile.ownerId;
+                    missEvent.timestamp = this.state.gameTime;
+                    this.state.projectileMissEvents.push(missEvent);
+                    
                     projectilesToRemove.push(projectile.id);
                     return;
                 }

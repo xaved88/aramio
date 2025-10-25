@@ -81,6 +81,157 @@ export function circleRectangleIntersection(
 /**
  * Check if a circle intersects with a rotated rectangle
  */
+/**
+ * Check if a line segment intersects a circle
+ * @param x1 Start X of line segment
+ * @param y1 Start Y of line segment
+ * @param x2 End X of line segment
+ * @param y2 End Y of line segment
+ * @param circleX Circle center X
+ * @param circleY Circle center Y
+ * @param radius Circle radius
+ * @returns true if line segment intersects circle
+ */
+export function lineSegmentIntersectsCircle(
+    x1: number, y1: number, x2: number, y2: number,
+    circleX: number, circleY: number, radius: number
+): boolean {
+    // Vector from line start to circle center
+    const dx = circleX - x1;
+    const dy = circleY - y1;
+    
+    // Vector from line start to line end
+    const lineDx = x2 - x1;
+    const lineDy = y2 - y1;
+    
+    // Length of line segment
+    const lineLengthSquared = lineDx * lineDx + lineDy * lineDy;
+    
+    if (lineLengthSquared === 0) {
+        // Line segment is a point, check if it's inside circle
+        return dx * dx + dy * dy <= radius * radius;
+    }
+    
+    // Project circle center onto line segment
+    const t = Math.max(0, Math.min(1, (dx * lineDx + dy * lineDy) / lineLengthSquared));
+    
+    // Find closest point on line segment to circle center
+    const closestX = x1 + t * lineDx;
+    const closestY = y1 + t * lineDy;
+    
+    // Distance from circle center to closest point on line
+    const distanceSquared = (circleX - closestX) * (circleX - closestX) + (circleY - closestY) * (circleY - closestY);
+    
+    return distanceSquared <= radius * radius;
+}
+
+/**
+ * Check if a line segment intersects a rotated rectangle
+ * @param x1 Start X of line segment
+ * @param y1 Start Y of line segment
+ * @param x2 End X of line segment
+ * @param y2 End Y of line segment
+ * @param rectX Rectangle center X
+ * @param rectY Rectangle center Y
+ * @param width Rectangle width
+ * @param height Rectangle height
+ * @param rotation Rectangle rotation in radians
+ * @returns true if line segment intersects rectangle
+ */
+export function lineSegmentIntersectsRectangle(
+    x1: number, y1: number, x2: number, y2: number,
+    rectX: number, rectY: number, width: number, height: number, rotation: number
+): boolean {
+    // If no rotation, use simple axis-aligned rectangle check
+    if (rotation === 0) {
+        return lineSegmentIntersectsAxisAlignedRectangle(x1, y1, x2, y2, rectX, rectY, width, height);
+    }
+    
+    // Transform line segment to rectangle's local coordinate system
+    const cos = Math.cos(-rotation);
+    const sin = Math.sin(-rotation);
+    
+    // Translate line points to rectangle's local space
+    const localX1 = (x1 - rectX) * cos - (y1 - rectY) * sin;
+    const localY1 = (x1 - rectX) * sin + (y1 - rectY) * cos;
+    const localX2 = (x2 - rectX) * cos - (y2 - rectY) * sin;
+    const localY2 = (x2 - rectX) * sin + (y2 - rectY) * cos;
+    
+    // Now check against axis-aligned rectangle centered at origin
+    return lineSegmentIntersectsAxisAlignedRectangle(localX1, localY1, localX2, localY2, 0, 0, width, height);
+}
+
+/**
+ * Check if a line segment intersects an axis-aligned rectangle
+ * @param x1 Start X of line segment
+ * @param y1 Start Y of line segment
+ * @param x2 End X of line segment
+ * @param y2 End Y of line segment
+ * @param rectX Rectangle center X
+ * @param rectY Rectangle center Y
+ * @param width Rectangle width
+ * @param height Rectangle height
+ * @returns true if line segment intersects rectangle
+ */
+function lineSegmentIntersectsAxisAlignedRectangle(
+    x1: number, y1: number, x2: number, y2: number,
+    rectX: number, rectY: number, width: number, height: number
+): boolean {
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    
+    const left = rectX - halfWidth;
+    const right = rectX + halfWidth;
+    const top = rectY - halfHeight;
+    const bottom = rectY + halfHeight;
+    
+    // Check if line segment is completely outside rectangle
+    if ((x1 < left && x2 < left) || (x1 > right && x2 > right) ||
+        (y1 < top && y2 < top) || (y1 > bottom && y2 > bottom)) {
+        return false;
+    }
+    
+    // Check if either endpoint is inside rectangle
+    if ((x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) ||
+        (x2 >= left && x2 <= right && y2 >= top && y2 <= bottom)) {
+        return true;
+    }
+    
+    // Check if line segment intersects any of the rectangle edges
+    // This is a simplified check - for a more robust implementation,
+    // we would check each edge intersection individually
+    
+    // Check intersection with left edge
+    if (x1 <= left && x2 >= left) {
+        const t = (left - x1) / (x2 - x1);
+        const intersectY = y1 + t * (y2 - y1);
+        if (intersectY >= top && intersectY <= bottom) return true;
+    }
+    
+    // Check intersection with right edge
+    if (x1 >= right && x2 <= right) {
+        const t = (right - x1) / (x2 - x1);
+        const intersectY = y1 + t * (y2 - y1);
+        if (intersectY >= top && intersectY <= bottom) return true;
+    }
+    
+    // Check intersection with top edge
+    if (y1 <= top && y2 >= top) {
+        const t = (top - y1) / (y2 - y1);
+        const intersectX = x1 + t * (x2 - x1);
+        if (intersectX >= left && intersectX <= right) return true;
+    }
+    
+    // Check intersection with bottom edge
+    if (y1 >= bottom && y2 <= bottom) {
+        const t = (bottom - y1) / (y2 - y1);
+        const intersectX = x1 + t * (x2 - x1);
+        if (intersectX >= left && intersectX <= right) return true;
+    }
+    
+    return false;
+}
+
 export function circleRotatedRectangleIntersection(
     circleX: number, 
     circleY: number, 
