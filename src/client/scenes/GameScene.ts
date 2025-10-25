@@ -83,6 +83,24 @@ export class GameScene extends Phaser.Scene {
         
         // Load respawn indicator image for respawning heroes
         this.load.image('respawn-indicator', '/assets/icons/respawn-indicator.png');
+        
+        // Load PNG stat icons
+        this.load.image('icon_stat:health', '/assets/icons/stats/max_health.png');
+        this.load.image('icon_stat:damage', '/assets/icons/stats/damage.png');
+        this.load.image('icon_stat:attack_speed', '/assets/icons/stats/attack_speed.png');
+        this.load.image('icon_stat:attack_range', '/assets/icons/stats/attack_range.png');
+        this.load.image('icon_stat:move_speed', '/assets/icons/stats/move_speed.png');
+        this.load.image('icon_stat:bullet_armor', '/assets/icons/stats/auto_attack_armor.png');
+        this.load.image('icon_stat:ability_armor', '/assets/icons/stats/ability_armor.png');
+        
+        // Load PNG ability stat icons
+        this.load.image('icon_ability_stat:strength', '/assets/icons/stats/ability_power.png');
+        this.load.image('icon_ability_stat:duration', '/assets/icons/stats/ability_duration.png');
+        this.load.image('icon_ability_stat:cooldown', '/assets/icons/stats/ability_cooldown.png');
+        this.load.image('icon_ability_stat:range', '/assets/icons/stats/attack_range.png');
+        this.load.image('icon_ability_stat:speed', '/assets/icons/stats/ability_projectile_speed.png');
+        this.load.image('icon_ability_stat:mercenary_rage_speed', '/assets/icons/stats/ability_rage_move_speed.png');
+        this.load.image('icon_ability_stat:pyromancer_radius', '/assets/icons/stats/ability_pyromancer_radius.png');
     }
 
     async create() {

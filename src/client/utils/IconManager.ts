@@ -18,49 +18,27 @@ export class IconManager {
         if (this.loaded) return;
 
         const iconMappings = {
-            // Stat icons - mapping to actual file names
-            'stat:health': 'stats/health_plus',
-            'stat:bullet_armor': 'stats/attack_armor_shield_sword',
-            'stat:ability_armor': 'stats/ability_armor_shield_wand', 
-            'stat:damage': 'stats/attack_power_sword',
-            'stat:attack_speed': 'stats/attack_speed_sword_lines',
-            'stat:attack_range': 'stats/attack_range_bow_arrow',
-            'stat:move_speed': 'stats/move_speed_boots',
-            
-            // Ability icons - these would need to be created
+            // Ability icons (SVG only)
             'ability:default': 'ability_default',
             'ability:thorndive': 'thorndive',
             'ability:pyromancer': 'pyromancer',
             'ability:hookshot': 'hookshot',
             'ability:mercenary': 'mercenary',
-            'ability:sniper': 'sniper',
-            
-            // Ability stat upgrade icons
-            'ability_stat:range': 'stats/attack_range_bow_arrow',
-            'ability_stat:strength': 'stats/ability_power_wand',
-            'ability_stat:duration': 'stats/cooldown_stopwatch',
-            'ability_stat:mercenary_rage_speed': 'stats/move_speed_boots',
-            'ability_stat:pyromancer_radius': 'stats/reticle_bonus',
-            'ability_stat:cooldown': 'stats/cooldown_stopwatch',
-            'ability_stat:speed': 'stats/attack_speed_sword_lines',
-            
-            // Direct stat names for other uses
-            'health': 'stats/health_plus',
-            'defense': 'stats/attack_armor_shield_sword',
-            'damage': 'stats/attack_power_sword',
-            'attack_speed': 'stats/attack_speed_sword_lines',
-            'attack_range': 'stats/attack_range_bow_arrow',
-            'move_speed': 'stats/move_speed_boots',
-            'thorndive': 'thorndive',
-            'pyromancer': 'pyromancer',
-            'hookshot': 'hookshot',
-            'mercenary': 'mercenary',
-            'sniper': 'sniper'
+            'ability:sniper': 'sniper'
         };
 
         for (const [key, iconName] of Object.entries(iconMappings)) {
             try {
+                // Check if texture is already preloaded in scene
+                if (scene && scene.textures.exists(`icon_${key}`)) {
+                    // Texture is already loaded, just mark it as available
+                    this.icons.set(key, `preloaded:${key}`);
+                    continue;
+                }
+                
+                // Load SVG files for ability icons
                 const response = await fetch(`/assets/icons/${iconName}.svg`);
+                
                 if (response.ok) {
                     const svgContent = await response.text();
                     this.icons.set(key, svgContent);
@@ -73,10 +51,10 @@ export class IconManager {
                         }
                     }
                 } else {
-                    console.warn(`Failed to load icon: ${iconName}.svg`);
+                    console.warn(`Failed to load SVG icon: ${iconName}.svg`);
                 }
             } catch (error) {
-                console.warn(`Error loading icon ${iconName}.svg:`, error);
+                console.warn(`Error loading icon ${iconName}:`, error);
             }
         }
 
@@ -91,7 +69,15 @@ export class IconManager {
         const textureKey = `icon_${rewardId}`;
         
         if (!scene.textures.exists(textureKey)) {
-            console.warn(`Texture not found for ${rewardId}, icons may not be preloaded`);
+            console.warn(`Texture not found for ${rewardId}, trying to load dynamically`);
+            
+            // Try to load the icon dynamically if we have the data
+            const iconData = this.getIcon(rewardId);
+            if (iconData && iconData.startsWith('<svg')) {
+                // It's SVG content, create texture from it
+                scene.textures.addBase64(textureKey, this.svgToBase64(iconData));
+                return this.createImageWithAspectRatio(scene, x, y, textureKey, size);
+            }
             
             // Create a "missing image" fallback
             const fallbackKey = `missing_${rewardId}`;
@@ -105,10 +91,29 @@ export class IconManager {
                 graphics.destroy();
             }
             
-            return scene.add.image(x, y, fallbackKey).setDisplaySize(size, size);
+            return this.createImageWithAspectRatio(scene, x, y, fallbackKey, size);
         }
 
-        return scene.add.image(x, y, textureKey).setDisplaySize(size, size);
+        return this.createImageWithAspectRatio(scene, x, y, textureKey, size);
+    }
+
+    private createImageWithAspectRatio(scene: Phaser.Scene, x: number, y: number, textureKey: string, maxSize: number): Phaser.GameObjects.Image {
+        const image = scene.add.image(x, y, textureKey);
+        
+        // Get the original texture dimensions
+        const texture = scene.textures.get(textureKey);
+        const originalWidth = texture.source[0].width;
+        const originalHeight = texture.source[0].height;
+        
+        // Calculate the scale to fit within maxSize while maintaining aspect ratio
+        const scaleX = maxSize / originalWidth;
+        const scaleY = maxSize / originalHeight;
+        const scale = Math.min(scaleX, scaleY); // Use the smaller scale to ensure it fits
+        
+        // Set the display size maintaining aspect ratio
+        image.setDisplaySize(originalWidth * scale, originalHeight * scale);
+        
+        return image;
     }
 
     private svgToBase64(svgContent: string): string {

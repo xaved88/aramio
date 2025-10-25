@@ -170,7 +170,7 @@ export class PermanentEffectsDisplay {
                 // Map stat names to reward IDs
                 const rewardId = this.mapStatToRewardId(statName);
                 
-                const iconImage = iconManager.createIconImage(this.scene, x, y, rewardId, config.ICON_SIZE);
+                const iconImage = iconManager.createIconImage(this.scene, x, y, rewardId, config.ICON_SIZE - 4);
                 if (iconImage) {
                     iconImage.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + stackLayer);
                     iconImage.setScrollFactor(0, 0);
