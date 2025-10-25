@@ -56,12 +56,12 @@ export class BotRewardPreferences {
             case 'pyromancer':
                 // Pyromancer prefers radius and strength for better AOE damage
                 preferences.push(
-                    { rewardId: 'ability_stat:strength', weight: 25 },
-                    { rewardId: 'ability_stat:pyromancer_radius', weight: 15 },
+                    { rewardId: 'ability_stat:pyromancer_radius', weight: 25 },
+                    { rewardId: 'ability_stat:strength', weight: 20 },
+                    { rewardId: 'stat:attack_range', weight: 18 },
                     { rewardId: 'ability_stat:range', weight: 15 },
-                    { rewardId: 'stat:damage', weight: 18 },
-                    { rewardId: 'ability_stat:cooldown', weight: 10 },
-                    { rewardId: 'stat:attack_range', weight: 12 },
+                    { rewardId: 'ability_stat:cooldown', weight: 15 },
+                    { rewardId: 'stat:damage', weight: 12 },
                     { rewardId: 'stat:attack_speed', weight: 10 }
                 );
                 break;
@@ -69,12 +69,12 @@ export class BotRewardPreferences {
             case 'thorndive':
                 // Thorndive prefers cooldown and range for better engage frequency and distance
                 preferences.push(
+                    { rewardId: 'ability_stat:duration', weight: 30 },
                     { rewardId: 'ability_stat:cooldown', weight: 25 },
                     { rewardId: 'ability_stat:range', weight: 20 },
                     { rewardId: 'stat:health', weight: 18 },
-                    { rewardId: 'ability_stat:strength', weight: 12 },
-                    { rewardId: 'stat:ability_armor', weight: 10 },
-                    { rewardId: 'stat:bullet_armor', weight: 10 }
+                    { rewardId: 'stat:bullet_armor', weight: 15 },
+                    { rewardId: 'stat:ability_armor', weight: 10 }
                 );
                 break;
                 
@@ -83,10 +83,10 @@ export class BotRewardPreferences {
                 preferences.push(
                     { rewardId: 'ability_stat:strength', weight: 20 },
                     { rewardId: 'stat:damage', weight: 18 },
-                    { rewardId: 'stat:attack_range', weight: 15 },
+                    { rewardId: 'ability_stat:cooldown', weight: 15 },
+                    { rewardId: 'stat:attack_speed', weight: 12 },
                     { rewardId: 'ability_stat:range', weight: 10 },
-                    { rewardId: 'ability_stat:cooldown', weight: 10 },
-                    { rewardId: 'stat:attack_speed', weight: 12 }
+                    { rewardId: 'stat:attack_range', weight: 10 }
                 );
                 break;
                 
@@ -94,10 +94,10 @@ export class BotRewardPreferences {
             default:
                 // Default ability prefers general combat stats
                 preferences.push(
+                    { rewardId: 'stat:attack_range', weight: 20 },
                     { rewardId: 'stat:damage', weight: 15 },
                     { rewardId: 'stat:attack_speed', weight: 12 },
                     { rewardId: 'stat:health', weight: 8 },
-                    { rewardId: 'stat:attack_range', weight: 6 },
                     { rewardId: 'stat:move_speed', weight: 4 }
                 );
                 break;

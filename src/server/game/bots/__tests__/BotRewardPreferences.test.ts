@@ -58,13 +58,13 @@ describe('BotRewardPreferences', () => {
             const attackSpeedPref = preferences.find(p => p.rewardId === 'stat:attack_speed');
             
             expect(radiusPref).toBeDefined();
-            expect(radiusPref?.weight).toBe(15);
+            expect(radiusPref?.weight).toBe(25);
             expect(strengthPref).toBeDefined();
-            expect(strengthPref?.weight).toBe(25);
+            expect(strengthPref?.weight).toBe(20);
             expect(damagePref).toBeDefined();
-            expect(damagePref?.weight).toBe(18); // Increased weight for normal stats
+            expect(damagePref?.weight).toBe(12); // Increased weight for normal stats
             expect(attackRangePref).toBeDefined();
-            expect(attackRangePref?.weight).toBe(12); // Increased weight for normal stats
+            expect(attackRangePref?.weight).toBe(18); // Increased weight for normal stats
             expect(attackSpeedPref).toBeDefined();
             expect(attackSpeedPref?.weight).toBe(10); // Increased weight for normal stats
         });
@@ -88,7 +88,7 @@ describe('BotRewardPreferences', () => {
             expect(abilityArmorPref).toBeDefined();
             expect(abilityArmorPref?.weight).toBe(10); // Increased weight for normal stats
             expect(bulletArmorPref).toBeDefined();
-            expect(bulletArmorPref?.weight).toBe(10); // Increased weight for normal stats
+            expect(bulletArmorPref?.weight).toBe(15); // Increased weight for normal stats
         });
 
         it('should return preferences for sniper ability', () => {
@@ -108,7 +108,7 @@ describe('BotRewardPreferences', () => {
             expect(damagePref).toBeDefined();
             expect(damagePref?.weight).toBe(18); // Increased weight for normal stats
             expect(attackRangePref).toBeDefined();
-            expect(attackRangePref?.weight).toBe(15); // Increased weight for normal stats
+            expect(attackRangePref?.weight).toBe(10); // Increased weight for normal stats
             expect(attackSpeedPref).toBeDefined();
             expect(attackSpeedPref?.weight).toBe(12); // Increased weight for normal stats
         });
