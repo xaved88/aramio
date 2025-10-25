@@ -620,17 +620,21 @@ export class EntityRenderer {
      */
     private updateTextDisplay(combatant: Combatant, text: Phaser.GameObjects.Text): void {
         if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
+            // Check if this hero is controlled by the current player
+            const isControlledByPlayer = this.playerSessionId && combatant.controller === this.playerSessionId;
+            
+            // Don't show level for the currently controlled hero (it's shown in HUD)
+            if (isControlledByPlayer) {
+                text.setText(''); // Clear text for player-controlled hero
+                return;
+            }
+            
             const level = combatant.level;
             const romanNumeral = this.toRomanNumeral(level);
             text.setText(romanNumeral);
             
-            // Check if this hero is controlled by the current player
-            const isControlledByPlayer = this.playerSessionId && combatant.controller === this.playerSessionId;
-            
-            // Set color based on control
-            const textColor = isControlledByPlayer 
-                ? CLIENT_CONFIG.SELF_COLORS.TEXT
-                : (combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a); // Team colors for others
+            // Set color based on team
+            const textColor = combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a; // Team colors
             
             text.setStyle({ 
                 fontSize: '24px', 
