@@ -166,7 +166,7 @@ export const CLIENT_CONFIG = {
     CURSOR_COOLDOWN_INDICATOR: {
         RADIUS: 15, // larger circle around cursor with buffer from crosshair
         THICKNESS: 3,
-        COOLDOWN_COLOR: 0xe74c3c, // red when on cooldown
+        COOLDOWN_COLOR: 0x9b59b6, // purple when on cooldown (matches player color)
         ALPHA: 0.9,
     },
     RADIUS_INDICATOR: {

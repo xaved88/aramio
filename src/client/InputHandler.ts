@@ -423,11 +423,18 @@ export class InputHandler {
         if (this.controlMode === 'mouse') {
             // Mouse mode: ability on mouse up
             if (this.isClickHeld) {
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
+                // Check if ability is on cooldown before sending
+                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
+                    // Trigger red flash when clicking while on cooldown
+                    this.uiManager.triggerCursorRedFlash();
+                } else {
+                    // Send ability use to server
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                    this.room.send('useAbility', {
+                        x: worldPos.x,
+                        y: worldPos.y
+                    });
+                }
                 
                 // Notify scene for UI updates (hide ability range display)
                 this.notifyScenePointerUp(pointer);
@@ -438,11 +445,18 @@ export class InputHandler {
         } else if (this.controlMode === 'keyboard') {
             // Keyboard mode: ability on mouse up (same UI behavior as mouse mode)
             if (this.isClickHeld) {
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
+                // Check if ability is on cooldown before sending
+                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
+                    // Trigger red flash when clicking while on cooldown
+                    this.uiManager.triggerCursorRedFlash();
+                } else {
+                    // Send ability use to server
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                    this.room.send('useAbility', {
+                        x: worldPos.x,
+                        y: worldPos.y
+                    });
+                }
                 
                 // Notify scene for UI updates (hide ability range display)
                 this.notifyScenePointerUp(pointer);
@@ -452,11 +466,18 @@ export class InputHandler {
         } else if (this.controlMode === 'moba') {
             // MOBA mode: ability on mouse up (only if targeting was started with mouse)
             if (this.isClickHeld && !this.isTargetingWithSpace) {
-                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                this.room.send('useAbility', {
-                    x: worldPos.x,
-                    y: worldPos.y
-                });
+                // Check if ability is on cooldown before sending
+                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
+                    // Trigger red flash when clicking while on cooldown
+                    this.uiManager.triggerCursorRedFlash();
+                } else {
+                    // Send ability use to server
+                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                    this.room.send('useAbility', {
+                        x: worldPos.x,
+                        y: worldPos.y
+                    });
+                }
                 
                 // Notify scene for UI updates (hide ability range display)
                 this.notifyScenePointerUp(pointer);

@@ -124,6 +124,20 @@ export class UIManager {
         this.inputHandler = inputHandler;
     }
 
+    /**
+     * Checks if the current player's ability is on cooldown (delegates to cursor)
+     */
+    isAbilityOnCooldown(): boolean {
+        return this.cursorRenderer.isAbilityOnCooldown();
+    }
+
+    /**
+     * Triggers red flash on cursor when clicking while ability is on cooldown
+     */
+    triggerCursorRedFlash(): void {
+        this.cursorRenderer.triggerRedFlash();
+    }
+
     private createControlModeToggle(): void {
         if (this.controlModeToggle) {
             this.controlModeToggle.destroy();

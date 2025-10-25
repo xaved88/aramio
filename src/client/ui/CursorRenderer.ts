@@ -11,6 +11,9 @@ export class CursorRenderer {
     private cameraManager: any = null;
     private wasOnCooldown: boolean = false;
     private flashIntensity: number = 0; // 0 = no flash, 1 = full flash
+    private redFlashIntensity: number = 0; // 0 = no red flash, 1 = full red flash
+    private redFlashTime: number = 0; // Time since red flash started
+    private redFlashDuration: number = 600; // Total duration of red flash sequence (ms)
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -21,6 +24,21 @@ export class CursorRenderer {
      */
     setCameraManager(cameraManager: any): void {
         this.cameraManager = cameraManager;
+    }
+
+    /**
+     * Triggers a red flash when clicking while ability is on cooldown
+     */
+    triggerRedFlash(): void {
+        this.redFlashIntensity = 1.0;
+        this.redFlashTime = 0; // Reset timer
+    }
+
+    /**
+     * Checks if the ability is currently on cooldown
+     */
+    isAbilityOnCooldown(): boolean {
+        return this.wasOnCooldown;
     }
 
     /**
@@ -90,6 +108,21 @@ export class CursorRenderer {
             if (this.flashIntensity < 0) this.flashIntensity = 0;
         }
 
+        // Update red flash animation (simple fade)
+        if (this.redFlashIntensity > 0) {
+            this.redFlashTime += 16; // Assume ~60fps, so ~16ms per frame
+            
+            // Simple fade out
+            const flashProgress = this.redFlashTime / this.redFlashDuration;
+            this.redFlashIntensity = Math.max(0, 1.0 - flashProgress);
+            
+            // Stop when duration is complete
+            if (this.redFlashTime >= this.redFlashDuration) {
+                this.redFlashIntensity = 0;
+                this.redFlashTime = 0;
+            }
+        }
+
         // Draw crosshair with reduced visibility if on cooldown
         this.drawCrosshair(mouseX, mouseY, !isAbilityReady);
 
@@ -156,6 +189,17 @@ export class CursorRenderer {
         this.cursorGraphics.moveTo(x, y - crosshairSize);
         this.cursorGraphics.lineTo(x, y + crosshairSize);
         this.cursorGraphics.strokePath();
+
+        // Draw red flash ring when clicking on cooldown (simple and visible)
+        if (this.redFlashIntensity > 0) {
+            const redFlashSize = 30; // Smaller, more reasonable size
+            const redFlashAlpha = this.redFlashIntensity; // Full intensity
+            const lineWidth = 4; // Thinner but still visible
+            
+            // Simple, bright red circle
+            this.cursorGraphics.lineStyle(lineWidth, 0xff0000, redFlashAlpha);
+            this.cursorGraphics.strokeCircle(x, y, redFlashSize / 2);
+        }
     }
 
 
