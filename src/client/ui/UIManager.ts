@@ -12,6 +12,7 @@ import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
 import { DamageTakenOverlay } from './DamageTakenOverlay';
 import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
+import { BottomUIRenderer } from './BottomUIRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { ControlModeToggle } from './ControlModeToggle';
@@ -36,6 +37,7 @@ export class UIManager {
     private damageTakenOverlay: DamageTakenOverlay;
     private damageDealtOverlay: DamageDealtOverlay;
     private cursorRenderer: CursorRenderer;
+    private bottomUIRenderer: BottomUIRenderer;
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
@@ -94,6 +96,7 @@ export class UIManager {
         this.damageTakenOverlay = new DamageTakenOverlay(scene);
         this.damageDealtOverlay = new DamageDealtOverlay(scene);
         this.cursorRenderer = new CursorRenderer(scene);
+        this.bottomUIRenderer = new BottomUIRenderer(scene);
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
         this.killFeed = new KillFeed(scene);
@@ -118,6 +121,7 @@ export class UIManager {
         this.damageTakenOverlay.setHUDCamera(hudCamera);
         this.damageDealtOverlay.setHUDCamera(hudCamera);
         this.cursorRenderer.setCameraManager(this.cameraManager);
+        this.bottomUIRenderer.setHUDCamera(hudCamera);
         this.cheatMenu.setHUDCamera(hudCamera);
         this.notificationOverlay.setHUDCamera(hudCamera);
         this.killFeed.setHUDCamera(hudCamera);
@@ -134,6 +138,7 @@ export class UIManager {
         this.damageTakenOverlay.setCameraManager(cameraManager);
         this.damageDealtOverlay.setCameraManager(cameraManager);
         this.cursorRenderer.setCameraManager(cameraManager);
+        this.bottomUIRenderer.setCameraManager(cameraManager);
         this.cheatMenu.setCameraManager(cameraManager);
         this.notificationOverlay.setCameraManager(cameraManager);
         this.killFeed.setCameraManager(cameraManager);
@@ -185,6 +190,9 @@ export class UIManager {
         
         // Initialize cursor renderer
         this.cursorRenderer.create();
+        
+        // Initialize bottom UI renderer
+        this.bottomUIRenderer.create();
         
         // Create control mode toggle after HUD is created
         this.createControlModeToggle();
@@ -419,6 +427,7 @@ export class UIManager {
         
         if (currentPlayer && isHeroCombatant(currentPlayer)) {
             this.cursorRenderer.update(currentPlayer, gameTime);
+            this.bottomUIRenderer.update(currentPlayer, gameTime);
         }
     }
 

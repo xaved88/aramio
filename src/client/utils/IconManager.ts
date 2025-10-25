@@ -28,6 +28,7 @@ export class IconManager {
             'stat:move_speed': 'stats/move_speed_boots',
             
             // Ability icons - these would need to be created
+            'ability:default': 'ability_default',
             'ability:thorndive': 'thorndive',
             'ability:pyromancer': 'pyromancer',
             'ability:hookshot': 'hookshot',

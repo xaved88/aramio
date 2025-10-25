@@ -244,6 +244,53 @@ export const CLIENT_CONFIG = {
             BACKGROUND_PADDING: 4,
         },
     },
+    BOTTOM_UI: {
+        BACKGROUND: {
+            COLOR: 0x2c2c2c,
+            ALPHA: 0.9,
+            PADDING: 20,
+            BORDER_RADIUS: 15,
+            HEIGHT: 80,
+        },
+        HEALTH_BAR: {
+            WIDTH: 200,
+            HEIGHT: 24,
+            BACKGROUND_COLOR: 0x1a1a1a,
+            HEALTH_COLOR: 0x2ecc71, // green
+            TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
+            FONT_SIZE: '16px',
+        },
+        XP_INDICATOR: {
+            RADIUS: 20, // Match top HUD size
+            BACKGROUND_COLOR: 0x333333, // Match top HUD color
+            EXPERIENCE_COLOR: 0xf1c40f, // yellow/gold
+            TEXT_COLOR: 0xffffff,
+            BACKGROUND_ALPHA: 0.8,
+            LINE_WIDTH: 10, // Match top HUD thickness
+            FONT_SIZE: '18px',
+        },
+        ABILITY_COOLDOWN: {
+            SIZE: 50,
+            BACKGROUND_COLOR: 0x1a1a1a,
+            COOLDOWN_COLOR: 0x9b59b6, // purple
+            READY_COLOR: 0xd2b4de, // lighter purple
+            BACKGROUND_ALPHA: 0.8,
+            FLASH_DURATION_MS: 500,
+            ICON_SCALE: 0.7,
+        },
+        REWARDS_COUNTER: {
+            ICON_SIZE: 12,
+            SPACING: 8,
+            TEXT_COLOR: 0xf1c40f, // yellow/gold
+            FONT_SIZE: '14px',
+            ICON_COLOR: 0xf1c40f, // yellow/gold
+        },
+        SPACING: {
+            BETWEEN_ELEMENTS: 15, // Reduced from 30 to move circles closer
+            FROM_EDGES: 40,
+        },
+    },
     UI: {
         MAX_DISPLAY_NAME_LENGTH: 12,
         FONTS: {
