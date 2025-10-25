@@ -1,7 +1,9 @@
 import { GameState } from '../../../schema/GameState';
 import { Combatant, Hero } from '../../../schema/Combatants';
+import { Obstacle } from '../../../schema/Obstacles';
 import { SetupGameAction, StateMachineResult } from '../types';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
+import { HITBOX_TYPES } from '../../../../shared/types/ObstacleTypes';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { resetBotNames } from './spawnPlayer';
 
@@ -13,6 +15,7 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
     state.combatants.clear();
     state.attackEvents.clear();
     state.projectiles.clear();
+    state.obstacles.clear();
     state.gameTime = 0;
     state.gamePhase = 'playing';
     state.winningTeam = '';
@@ -111,6 +114,21 @@ export function handleSetupGame(state: GameState, action: SetupGameAction, gamep
         redTurret.abilityArmor = 0;
         redTurret.direction = 0; // Initialize direction
         state.combatants.set(redTurret.id, redTurret);
+    });
+    
+    // Create obstacles
+    gameplayConfig.OBSTACLES.WALLS.forEach((wallConfig: any) => {
+        const obstacle = new Obstacle();
+        obstacle.id = wallConfig.id;
+        obstacle.x = wallConfig.x;
+        obstacle.y = wallConfig.y;
+        obstacle.hitboxType = wallConfig.hitboxType;
+        obstacle.blocksMovement = wallConfig.blocksMovement;
+        obstacle.blocksProjectiles = wallConfig.blocksProjectiles;
+        obstacle.width = wallConfig.width;
+        obstacle.height = wallConfig.height;
+        obstacle.rotation = wallConfig.rotation;
+        state.obstacles.set(obstacle.id, obstacle);
     });
     
     // Initialize currentWave to 0 (minions will spawn via waves)

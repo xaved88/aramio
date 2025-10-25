@@ -17,6 +17,7 @@ import { MinionManager } from './combatants/MinionManager';
 import { calculateXPForSpecificLevel } from '../../shared/utils/XPUtils';
 import { grantExperience } from './stateMachine/actions/updateGame';
 import { calculateDirectionFromVector } from '../../shared/utils/DirectionUtils';
+import { checkProjectileObstacleCollision } from './collisions/ProjectileCollision';
 
 export class GameEngine {
     private state: GameState;
@@ -322,6 +323,13 @@ export class GameEngine {
                     return;
                 }
             } else {
+                // Check obstacle collision first (stub for now)
+                const obstacles = Array.from(this.state.obstacles.values());
+                if (checkProjectileObstacleCollision(projectile, obstacles)) {
+                    projectilesToRemove.push(projectile.id);
+                    return;
+                }
+                
                 // Standard collision detection for regular projectiles
                 let closestCombatant: any = null;
                 let closestDistance = Infinity;

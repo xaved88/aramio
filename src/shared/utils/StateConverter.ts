@@ -1,7 +1,9 @@
 import { GameState as ColyseusGameState } from '../../server/schema/GameState';
 import { Combatant as ColyseusCombatant, Hero as ColyseusHero, Minion as ColyseusMinion } from '../../server/schema/Combatants';
+import { Obstacle as ColyseusObstacle } from '../../server/schema/Obstacles';
 import { SharedGameState, XPEvent, LevelUpEvent, AOEDamageEvent, DeathEffectEvent, ProjectileMissEvent, KillStreakEvent } from '../types/GameStateTypes';
 import { Combatant, HeroCombatant, CradleCombatant, TurretCombatant, MinionCombatant, AttackEvent, DamageEvent, KillEvent, Projectile, DefaultAbility, HookshotAbility, MercenaryAbility, PyromancerAbility, ThorndiveAbility, SniperAbility, COMBATANT_TYPES, CombatantId, ProjectileId } from '../types/CombatantTypes';
+import { Obstacle, ObstacleId } from '../types/ObstacleTypes';
 import { applyStatModifications } from './StatModification';
 
 export function convertToSharedGameState(colyseusState: ColyseusGameState): SharedGameState {
@@ -50,6 +52,23 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
                         return null;
                 }
             }).filter(Boolean) : []
+        });
+    });
+    
+    // Convert obstacles
+    const sharedObstacles = new Map<ObstacleId, Obstacle>();
+    colyseusState.obstacles.forEach((obstacle: ColyseusObstacle, id: string) => {
+        sharedObstacles.set(id, {
+            id: obstacle.id,
+            x: obstacle.x,
+            y: obstacle.y,
+            hitboxType: obstacle.hitboxType,
+            blocksMovement: obstacle.blocksMovement,
+            blocksProjectiles: obstacle.blocksProjectiles,
+            width: obstacle.width,
+            height: obstacle.height,
+            rotation: obstacle.rotation,
+            radius: obstacle.radius
         });
     });
     
@@ -172,6 +191,7 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         killEvents: sharedKillEvents,
         projectiles: sharedProjectiles,
         zones: sharedZones,
+        obstacles: sharedObstacles,
         aoeDamageEvents: sharedAOEDamageEvents,
         deathEffectEvents: sharedDeathEffectEvents,
         projectileMissEvents: sharedProjectileMissEvents,

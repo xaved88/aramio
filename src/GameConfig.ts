@@ -36,6 +36,33 @@ export const GAMEPLAY_CONFIG = {
         ]
     },
 
+    OBSTACLES: {
+        WALLS: [
+            {
+                id: 'wall-1',
+                x: 466, // 1/3 of diagonal (0,0) to (1400,1400)
+                y: 466,
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: Math.PI / 4, // 45 degrees to align with y = x diagonal (game coordinates)
+                blocksMovement: true,
+                blocksProjectiles: true
+            },
+            {
+                id: 'wall-2',
+                x: 933, // 2/3 of diagonal (0,0) to (1400,1400)
+                y: 933,
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: Math.PI / 4, // 45 degrees to align with y = x diagonal (game coordinates)
+                blocksMovement: true,
+                blocksProjectiles: true
+            }
+        ]
+    },
+
     COMBAT: {
         COLLISION_THRESHOLD_MULTIPLIER: 0.95,
         HERO: {
