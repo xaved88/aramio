@@ -712,7 +712,7 @@ export class GameScene extends Phaser.Scene {
      */
     private drawTargetingCircle(targetX: number, targetY: number, radius: number, color: number): void {
         // Draw targeting circle at target location (relative coordinates)
-        this.abilityRangeDisplay!.lineStyle(1, color, 0.3);
+        this.abilityRangeDisplay!.lineStyle(4, color, 0.3);
         this.abilityRangeDisplay!.strokeCircle(targetX, targetY, radius);
         this.abilityRangeDisplay!.fillStyle(color, 0.1);
         this.abilityRangeDisplay!.fillCircle(targetX, targetY, radius);

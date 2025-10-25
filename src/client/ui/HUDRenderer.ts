@@ -473,7 +473,7 @@ export class HUDRenderer {
                 const fallbackKey = `ability_fallback_${abilityType}`;
                 if (!this.scene.textures.exists(fallbackKey)) {
                     const graphics = this.scene.add.graphics();
-                    graphics.fillStyle(0x9b59b6, 0.8);
+                    graphics.fillStyle(CLIENT_CONFIG.UI.ABILITY_COOLDOWN.READY_COLOR, 0.8);
                     graphics.fillCircle(25, 25, 25);
                     graphics.lineStyle(2, 0xffffff);
                     graphics.strokeCircle(25, 25, 25);

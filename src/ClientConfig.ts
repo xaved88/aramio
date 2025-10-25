@@ -130,7 +130,7 @@ export const CLIENT_CONFIG = {
         THICKNESS: 4, // thickness of hit marker lines
         COLORS: {
             AUTO_ATTACK: 0xffffff, // white for auto-attacks
-            ABILITY: 0x9b59b6, // purple for abilities
+            ABILITY: 0x9b59b6, // purple for abilities (matches SELF_COLORS.PRIMARY)
         },
         OUTLINE: {
             COLOR: 0xffffff, // white outline
@@ -166,7 +166,7 @@ export const CLIENT_CONFIG = {
     CURSOR_COOLDOWN_INDICATOR: {
         RADIUS: 15, // larger circle around cursor with buffer from crosshair
         THICKNESS: 3,
-        COOLDOWN_COLOR: 0x9b59b6, // purple when on cooldown (matches player color)
+        COOLDOWN_COLOR: 0x9b59b6, // purple when on cooldown (matches SELF_COLORS.PRIMARY)
         ALPHA: 0.9,
     },
     RADIUS_INDICATOR: {
@@ -415,8 +415,8 @@ export const CLIENT_CONFIG = {
         ABILITY_COOLDOWN: {
             SIZE: 50,
             BACKGROUND_COLOR: 0x1a1a1a,
-            COOLDOWN_COLOR: 0x9b59b6, // purple
-            READY_COLOR: 0xd2b4de, // lighter purple
+            COOLDOWN_COLOR: 0x9b59b6, // purple for non-ready abilities
+            READY_COLOR: 0xffffff, // white for ready abilities
             BACKGROUND_ALPHA: 0.8,
             FLASH_DURATION_MS: 500,
             ICON_SCALE: 0.7,
