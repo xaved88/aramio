@@ -1,4 +1,4 @@
-export type ControlMode = 'mouse' | 'keyboard';
+export type ControlMode = 'mouse' | 'keyboard' | 'moba';
 
 export class ControlModeStorage {
     private static readonly STORAGE_KEY = 'aramio_control_mode';
@@ -14,10 +14,10 @@ export class ControlModeStorage {
     static getControlMode(): ControlMode {
         try {
             const mode = localStorage.getItem(this.STORAGE_KEY);
-            return (mode === 'keyboard' || mode === 'mouse') ? mode : 'mouse';
+            return (mode === 'keyboard' || mode === 'mouse' || mode === 'moba') ? mode : 'keyboard';
         } catch (error) {
             console.warn('Failed to load control mode:', error);
-            return 'mouse';
+            return 'keyboard';
         }
     }
 }

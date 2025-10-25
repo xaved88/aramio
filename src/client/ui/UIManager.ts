@@ -212,6 +212,27 @@ export class UIManager {
         
         // Clear kill feed on HUD clear (game restart)
         this.killFeed.clear();
+        
+        // Hide stats overlay to prevent memory leaks during game restarts
+        this.statsOverlay.hide();
+        
+        // Clear all state tracking variables to prevent memory leaks
+        this.clearStateTracking();
+    }
+    
+    /**
+     * Clears all state tracking variables to prevent memory leaks between games
+     */
+    private clearStateTracking(): void {
+        this.lastState = null;
+        this.lastRewardIds = [];
+        this.processedKillStreakEvents.clear();
+        this.lastKillerName = null;
+        this.lastKillerTeam = null;
+        this.lastKillerIsBot = false;
+        this.lastBlueSuperMinionsTriggered = false;
+        this.lastRedSuperMinionsTriggered = false;
+        this.wasPlayerAlive = true;
     }
 
     hideVictoryScreen(): void {

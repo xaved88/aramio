@@ -149,7 +149,7 @@ export class TutorialOverlay {
         const controlsStartY = currentY;
         
         const controlsList = [
-            '- Your hero follows your mouse cursor',
+            '- WASD keys to move your hero (default mode)',
             '- An enemy within your attack radius will be auto-attacked',
             '- Click to aim your Class Ability, release to fire',
             '- Gather xp from defeating enemies',
@@ -327,8 +327,10 @@ export class TutorialOverlay {
             '- \'Shift\': Hold to open Damage Summary',
             '- \'Ctrl\': Hold to open Cheat Menu (sneaky)',
             '',
-            'Toggle Control Mode in bottom right',
-            '- Keyboard Mode: \'WASD\' to move',
+            'Toggle Control Mode in bottom right:',
+            '- WASD Mode: \'WASD\' to move, mouse to aim/fire',
+            '- MOBA Mode: Right-click to move, Space/Click to aim/fire, \'S\' to stop',
+            '- Mouse Mode: Mouse follows cursor, click to aim/fire',
         ];
         
         const advancedControlsText = this.scene.add.text(leftX + 20, currentY, advancedControlsList.join('\n'), 

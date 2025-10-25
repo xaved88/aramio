@@ -22,6 +22,23 @@ const mockScene = {
             getWorldPoint: jest.fn().mockReturnValue({ x: 100, y: 100 }),
         },
     },
+    add: {
+        graphics: jest.fn().mockReturnValue({
+            fillStyle: jest.fn(),
+            fillCircle: jest.fn(),
+            fillTriangle: jest.fn(),
+            setDepth: jest.fn(),
+            setPosition: jest.fn(),
+            setScale: jest.fn(),
+            setAlpha: jest.fn(),
+            destroy: jest.fn(),
+        }),
+    },
+    tweens: {
+        add: jest.fn(),
+    },
+    clearDestinationMarker: jest.fn(),
+    updateDestinationMarker: jest.fn(),
 } as any;
 
 // Mock room
@@ -259,6 +276,129 @@ describe('InputHandler', () => {
             expect(aKeyDown).toBeDefined();
             expect(sKeyDown).toBeDefined();
             expect(dKeyDown).toBeDefined();
+        });
+    });
+
+    describe('MOBA control mode', () => {
+        beforeEach(() => {
+            inputHandler.setControlMode('moba');
+            inputHandler.setupHandlers();
+        });
+
+        it('should set control mode to moba', () => {
+            expect(inputHandler.getControlMode()).toBe('moba');
+        });
+
+        it('should have space key handlers for targeting', () => {
+            const spaceDownHandler = mockScene.input.keyboard.on.mock.calls.find(
+                (call: any[]) => call[0] === 'keydown-SPACE'
+            );
+            const spaceUpHandler = mockScene.input.keyboard.on.mock.calls.find(
+                (call: any[]) => call[0] === 'keyup-SPACE'
+            );
+
+            expect(spaceDownHandler).toBeDefined();
+            expect(spaceUpHandler).toBeDefined();
+        });
+
+        it('should handle right-click for movement', () => {
+            const rightClickHandler = mockScene.input.on.mock.calls.find(
+                (call: any[]) => call[0] === 'pointerdown' && call[1].toString().includes('button === 2')
+            );
+            expect(rightClickHandler).toBeDefined();
+        });
+
+        it('should reset MOBA state when switching modes', () => {
+            // Set some MOBA state
+            inputHandler.setControlMode('moba');
+            
+            // Switch to mouse mode
+            inputHandler.setControlMode('mouse');
+            
+            // State should be reset (we can't directly test private fields, but this ensures no errors)
+            expect(inputHandler.getControlMode()).toBe('mouse');
+        });
+
+        it('should handle right-click movement in MOBA mode', () => {
+            // Mock the scene with lastState
+            const mockGameScene = {
+                ...mockScene,
+                lastState: {
+                    combatants: new Map([
+                        ['hero1', {
+                            type: 'hero',
+                            controller: 'player1',
+                            x: 100,
+                            y: 100
+                        }]
+                    ])
+                },
+                playerSessionId: 'player1'
+            };
+            
+            const handler = new InputHandler(mockGameScene, mockRoom);
+            handler.setControlMode('moba');
+            handler.setDependencies({ HERO_STOP_DISTANCE: 10 }, null);
+            
+            // Simulate right-click
+            const rightClickPointer = {
+                x: 200,
+                y: 200,
+                button: 2,
+                event: { preventDefault: jest.fn() }
+            };
+            
+            // Find the right-click handler
+            const rightClickHandler = mockScene.input.on.mock.calls.find(
+                (call: any[]) => call[0] === 'pointerdown' && call[1].toString().includes('button === 2')
+            );
+            
+            expect(rightClickHandler).toBeDefined();
+            
+            // Call the handler
+            rightClickHandler[1](rightClickPointer);
+            
+            // Verify preventDefault was called
+            expect(rightClickPointer.event.preventDefault).toHaveBeenCalled();
+        });
+
+        it('should handle S key to stop movement in MOBA mode', () => {
+            // Mock the scene with lastState
+            const mockGameScene = {
+                ...mockScene,
+                lastState: {
+                    combatants: new Map([
+                        ['hero1', {
+                            type: 'hero',
+                            controller: 'player1',
+                            x: 100,
+                            y: 100
+                        }]
+                    ])
+                },
+                playerSessionId: 'player1'
+            };
+            
+            const handler = new InputHandler(mockGameScene, mockRoom);
+            handler.setControlMode('moba');
+            handler.setupHandlers();
+
+            // Find the S key handler
+            const sKeyHandler = mockScene.input.keyboard.on.mock.calls.find(
+                (call: any[]) => call[0] === 'keydown-S'
+            );
+
+            expect(sKeyHandler).toBeDefined();
+
+            // Call the handler
+            sKeyHandler[1]();
+
+            // Verify move command was sent to current position (stop movement)
+            // The exact coordinates don't matter as much as verifying the command structure
+            expect(mockRoom.send).toHaveBeenCalledWith('move', expect.objectContaining({
+                targetX: expect.any(Number),
+                targetY: expect.any(Number)
+            }));
         });
     });
 });

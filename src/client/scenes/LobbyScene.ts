@@ -314,6 +314,7 @@ export class LobbyScene extends Phaser.Scene {
         // Load control mode icons
         this.load.image('control-mouse', '/assets/config/mouse.png');
         this.load.image('control-keyboard', '/assets/config/keyboard.png');
+        this.load.image('control-moba', '/assets/config/moba.png');
         
         // Load assets for tutorial overlay
         this.load.image('hero-base', '/assets/heroes/hero_base.png');
