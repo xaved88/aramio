@@ -19,6 +19,7 @@ import { LoadingScreen } from '../ui/LoadingScreen';
 import { ConnectionManager } from '../ConnectionManager';
 import { CoordinateDebugOverlay } from '../ui/CoordinateDebugOverlay';
 import { InputHandler } from '../InputHandler';
+import { DestinationMarker } from '../ui/DestinationMarker';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -41,6 +42,9 @@ export class GameScene extends Phaser.Scene {
     private isRestarting: boolean = false;
     private isReturningToLobby: boolean = false;
     private abilityRangeDisplay: Phaser.GameObjects.Graphics | null = null;
+    
+    // Destination marker for MOBA controls
+    private destinationMarker: DestinationMarker | null = null;
     
     // New component-based architecture
     private loadingScreen!: LoadingScreen;
@@ -75,6 +79,7 @@ export class GameScene extends Phaser.Scene {
         // Load control mode icons
         this.load.image('control-mouse', '/assets/config/mouse.png');
         this.load.image('control-keyboard', '/assets/config/keyboard.png');
+        this.load.image('control-moba', '/assets/config/moba.png');
     }
 
     async create() {
@@ -399,7 +404,7 @@ export class GameScene extends Phaser.Scene {
         this.uiManager.createHUD();
         
         // Set up InputHandler dependencies now that UI is initialized
-        this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager);
+        this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager, this.cameraManager);
         
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);
@@ -874,11 +879,36 @@ export class GameScene extends Phaser.Scene {
     }
 
     /**
+     * Updates the destination marker for MOBA controls
+     */
+    updateDestinationMarker(x: number, y: number, color: number): void {
+        // Create destination marker if it doesn't exist
+        if (!this.destinationMarker) {
+            this.destinationMarker = new DestinationMarker(this, this.cameraManager);
+        }
+        
+        // Create new marker (automatically cleans up any existing animation)
+        this.destinationMarker.createMarker(x, y, color);
+    }
+
+    /**
+     * Clears the destination marker
+     */
+    clearDestinationMarker(): void {
+        if (this.destinationMarker) {
+            this.destinationMarker.destroy();
+        }
+    }
+
+    /**
      * Called when scene is shut down - Phaser handles most cleanup automatically
      */
     shutdown() {
         // Reset cursor visibility when leaving game scene
         this.input.setDefaultCursor('default');
+        
+        // Clear destination marker
+        this.clearDestinationMarker();
         
         // Only clean up custom resources that Phaser doesn't handle automatically
         if (this.entityManager) {

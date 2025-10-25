@@ -20,7 +20,7 @@ export class ControlModeToggle {
         this.background = this.scene.add.graphics();
         
         // Create icon (will be updated in updateDisplay)
-        const iconKey = this.currentMode === 'mouse' ? 'control-mouse' : 'control-keyboard';
+        const iconKey = this.getIconKey(this.currentMode);
         this.modeIcon = this.scene.add.image(0, 0, iconKey);
         this.modeIcon.setOrigin(0.5);
         this.modeIcon.setDisplaySize(this.ICON_SIZE, this.ICON_SIZE);
@@ -30,8 +30,21 @@ export class ControlModeToggle {
         this.setupInteraction();
     }
 
+    private getIconKey(mode: ControlMode): string {
+        switch (mode) {
+            case 'mouse':
+                return 'control-mouse';
+            case 'keyboard':
+                return 'control-keyboard';
+            case 'moba':
+                return 'control-moba';
+            default:
+                return 'control-mouse';
+        }
+    }
+
     private updateDisplay(): void {
-        const iconKey = this.currentMode === 'mouse' ? 'control-mouse' : 'control-keyboard';
+        const iconKey = this.getIconKey(this.currentMode);
         this.modeIcon.setTexture(iconKey);
         this.modeIcon.setDisplaySize(this.ICON_SIZE, this.ICON_SIZE);
 
@@ -74,7 +87,15 @@ export class ControlModeToggle {
     }
 
     private toggleMode(): void {
-        this.currentMode = this.currentMode === 'mouse' ? 'keyboard' : 'mouse';
+        // Cycle through: keyboard → moba → mouse → keyboard
+        if (this.currentMode === 'keyboard') {
+            this.currentMode = 'moba';
+        } else if (this.currentMode === 'moba') {
+            this.currentMode = 'mouse';
+        } else {
+            this.currentMode = 'keyboard';
+        }
+        
         ControlModeStorage.saveControlMode(this.currentMode);
         this.updateDisplay();
         
