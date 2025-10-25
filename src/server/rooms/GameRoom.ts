@@ -669,12 +669,12 @@ export class GameRoom extends Room<GameState> {
             this.postGameTimer = null;
         }
         
-        // Set a timer to destroy room after a longer delay (30 seconds)
+        // Set a timer to destroy room after a longer delay (60 seconds)
         // This gives time for victory/defeat screen and stats display
         this.postGameTimer = setTimeout(() => {
             console.log('Post-game timeout reached, returning to lobby...');
             this.returnToLobby();
-        }, 30000); // 30 seconds for post-game screen
+        }, 60000); // 60 seconds for post-game screen
     }
 
     private returnToLobby(): void {
