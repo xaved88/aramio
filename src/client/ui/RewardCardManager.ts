@@ -4,6 +4,7 @@ import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { RewardCard } from './RewardCard';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
+import { BotRewardPreferences } from '../../server/game/bots/BotRewardPreferences';
 
 /**
  * RewardCardManager handles the display and interaction of reward cards during respawn
@@ -70,11 +71,15 @@ export class RewardCardManager {
             }
         }
 
+        // Determine which reward should be recommended based on hero's ability
+        const recommendedRewardId = this.getRecommendedReward(hero);
+
         // Create cards off-screen initially
         for (let i = 0; i < numCards; i++) {
             const cardX = startX + (cardWidth + cardSpacing) * i + cardWidth / 2;
             const rewardId = hero.rewardsForChoice[i];
             const rewardDisplay = CLIENT_CONFIG.REWARDS.DISPLAY[rewardId as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
+            const isRecommended = rewardId === recommendedRewardId;
             
             const card = new RewardCard(this.scene, {
                 x: cardX,
@@ -84,6 +89,7 @@ export class RewardCardManager {
                 rewardId: rewardId,
                 title: rewardDisplay?.title || `Reward ${i + 1}`,
                 description: rewardDisplay?.description || 'Click to claim this reward',
+                isRecommended: isRecommended,
                 onClick: (rewardId: string) => {
                     if (this.onRewardChosen) {
                         this.onRewardChosen(rewardId);
@@ -179,6 +185,59 @@ export class RewardCardManager {
                 });
             });
         });
+    }
+
+    /**
+     * Determines which reward should be recommended based on the hero's ability type
+     * Uses bot preferences to find the highest-weighted reward
+     * Only recommends for heroes with 5 or fewer permanent effects (newer to reward system)
+     */
+    private getRecommendedReward(hero: HeroCombatant): string | null {
+        if (!hero.rewardsForChoice || hero.rewardsForChoice.length === 0) {
+            return null;
+        }
+
+        // Only recommend for heroes with 9 or fewer permanent effects
+        // This indicates they're newer to the reward system
+        if (hero.permanentEffects && hero.permanentEffects.length > 9) {
+            return null;
+        }
+
+        const abilityType = hero.ability?.type || 'default';
+        let bestRewardId: string | null = null;
+        let highestWeight = 0;
+
+        // Find the reward with the highest weight based on bot preferences
+        // Skip ability rewards - only recommend stat and ability_stat rewards
+        for (const rewardId of hero.rewardsForChoice) {
+            // Skip ability rewards from recommendations
+            if (rewardId.startsWith('ability:')) {
+                continue;
+            }
+            
+            // Create a mock gameplay config for weight calculation
+            // BotRewardPreferences only needs REWARDS.REWARD_TYPES structure
+            const mockGameplayConfig = {
+                REWARDS: {
+                    REWARD_TYPES: {
+                        // Create a minimal REWARD_TYPES structure for weight calculation
+                        [rewardId]: {
+                            type: rewardId.startsWith('stat:') ? 'stat' : 
+                                  rewardId.startsWith('ability_stat:') ? 'ability_stat' : 'ability'
+                        }
+                    }
+                }
+            } as any;
+
+            const weight = BotRewardPreferences.calculateSelectionWeight(rewardId, abilityType, mockGameplayConfig);
+            
+            if (weight > highestWeight) {
+                highestWeight = weight;
+                bestRewardId = rewardId;
+            }
+        }
+
+        return bestRewardId;
     }
 
     private getChestDisplayName(chestType: string): string {

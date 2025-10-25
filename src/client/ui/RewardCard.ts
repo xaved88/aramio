@@ -12,6 +12,7 @@ export interface RewardCardConfig {
     rewardId: string;
     title?: string;
     description?: string;
+    isRecommended?: boolean;
     onClick?: (rewardId: string) => void;
 }
 
@@ -44,6 +45,9 @@ export class RewardCard {
     private _isInteractive: boolean = false;
     private rewardType: RewardType;
     private cardStyle: RewardCardStyle;
+    private isRecommended: boolean = false;
+    private recommendationStar: Phaser.GameObjects.Graphics | null = null;
+    private recommendationText: Phaser.GameObjects.Text | null = null;
 
     get isInteractive(): boolean {
         return this._isInteractive;
@@ -57,6 +61,7 @@ export class RewardCard {
         this.scene = scene;
         this.rewardId = config.rewardId;
         this.onClick = config.onClick;
+        this.isRecommended = config.isRecommended || false;
         
         this.rewardType = this.detectRewardType(config.rewardId);
         this.cardStyle = this.getStyleForRewardType(this.rewardType);
@@ -238,6 +243,11 @@ export class RewardCard {
         // Add corner decorations based on reward type
         this.createCornerDecorations(config);
         
+        // Add recommendation indicator if this card is recommended
+        if (this.isRecommended) {
+            this.createRecommendationIndicator(config);
+        }
+        
         this.hudContainer.add(this.background);
         
         // Create icon
@@ -282,6 +292,12 @@ export class RewardCard {
         const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText, ...this.cornerDecorations];
         if (this.iconImage) {
             elements.push(this.iconImage);
+        }
+        if (this.recommendationStar) {
+            elements.push(this.recommendationStar);
+        }
+        if (this.recommendationText) {
+            elements.push(this.recommendationText);
         }
         this.hudContainer.addMultiple(elements);
         
@@ -468,10 +484,88 @@ export class RewardCard {
         this.cornerDecorations.push(topLeft);
     }
 
+    private createRecommendationIndicator(config: RewardCardConfig): void {
+        const halfWidth = config.width / 2;
+        const halfHeight = config.height / 2;
+        const starSize = 20;
+        const starX = halfWidth - 15; // Position in top-right corner
+        const starY = -halfHeight + 15;
+        
+        // Create the golden star
+        this.recommendationStar = this.scene.add.graphics();
+        this.recommendationStar.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 3);
+        this.recommendationStar.setScrollFactor(0, 0);
+        
+        // Draw a golden star
+        this.recommendationStar.fillStyle(0xFFD700, 1.0); // Gold color
+        this.recommendationStar.lineStyle(2, 0xFFA500, 1.0); // Orange border
+        
+        // Create a 5-pointed star
+        const points = 5;
+        const outerRadius = starSize / 2;
+        const innerRadius = starSize / 4;
+        
+        this.recommendationStar.beginPath();
+        for (let i = 0; i < points * 2; i++) {
+            const angle = (i * Math.PI) / points;
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const x = starX + Math.cos(angle) * radius;
+            const y = starY + Math.sin(angle) * radius;
+            
+            if (i === 0) {
+                this.recommendationStar.moveTo(x, y);
+            } else {
+                this.recommendationStar.lineTo(x, y);
+            }
+        }
+        this.recommendationStar.closePath();
+        this.recommendationStar.fillPath();
+        this.recommendationStar.strokePath();
+        
+        // Add a subtle glow effect
+        this.recommendationStar.fillStyle(0xFFD700, 0.3);
+        this.recommendationStar.fillCircle(starX, starY, starSize / 2 + 3);
+        
+        // Create the "RECOMMENDED" text above the card
+        this.recommendationText = this.scene.add.text(
+            0, // Center horizontally on the card
+            -halfHeight - 15, // Position above the card
+            'RECOMMENDED',
+            {
+                fontSize: '14px',
+                fontFamily: 'Arial',
+                color: '#FFD700',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2,
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    fill: true
+                }
+            }
+        );
+        this.recommendationText.setOrigin(0.5, 0.5); // Center-aligned
+        this.recommendationText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 3);
+        this.recommendationText.setScrollFactor(0, 0);
+    }
+
     destroy(): void {
         if (this.hudContainer) {
             this.hudContainer.destroy();
             this.hudContainer = null;
+        }
+        
+        if (this.recommendationStar) {
+            this.recommendationStar.destroy();
+            this.recommendationStar = null;
+        }
+        
+        if (this.recommendationText) {
+            this.recommendationText.destroy();
+            this.recommendationText = null;
         }
     }
 }
