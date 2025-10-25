@@ -43,6 +43,8 @@ export class EntityManager {
     private processedAOEDamageEvents: Set<string> = new Set();
     private lastProcessedTime: number = 0;
     private activeExplosionGraphics: Set<Phaser.GameObjects.Graphics> = new Set(); // Track explosion, AOE effect, and other visual effect graphics for cleanup
+    private activeXPTexts: Set<Phaser.GameObjects.Text> = new Set(); // Track XP text displays for cleanup
+    private activeLevelUpTexts: Set<Phaser.GameObjects.Text> = new Set(); // Track level-up text displays for cleanup
     
     // Track recent attackers (heroes that attacked the player in the last 1 second)
     private recentAttackers: Map<CombatantId, number> = new Map();
@@ -86,6 +88,12 @@ export class EntityManager {
         // Clean up any lingering explosion graphics when window regains focus
         this.cleanupActiveExplosions();
         
+        // Clean up any lingering XP text displays when window regains focus
+        this.cleanupActiveXPTexts();
+        
+        // Clean up any lingering level-up text displays when window regains focus
+        this.cleanupActiveLevelUpTexts();
+        
         // Clean up any lingering muzzle flash graphics when window regains focus
         if (this.animationManager) {
             this.animationManager.cleanupActiveMuzzleFlashes();
@@ -101,12 +109,45 @@ export class EntityManager {
      * Cleans up all active explosion and AOE effect graphics (rings, particles, and AOE circles)
      */
     private cleanupActiveExplosions(): void {
-        this.activeExplosionGraphics.forEach(graphics => {
+        this.cleanupGraphicsSet(this.activeExplosionGraphics);
+    }
+
+    /**
+     * Cleans up all active XP text displays
+     */
+    private cleanupActiveXPTexts(): void {
+        this.cleanupTextsSet(this.activeXPTexts);
+    }
+
+    /**
+     * Cleans up all active level-up text displays
+     */
+    private cleanupActiveLevelUpTexts(): void {
+        this.cleanupTextsSet(this.activeLevelUpTexts);
+    }
+
+    /**
+     * Generic helper to cleanup a set of graphics objects
+     */
+    private cleanupGraphicsSet(set: Set<Phaser.GameObjects.Graphics>): void {
+        set.forEach(graphics => {
             if (graphics && graphics.scene) {
                 graphics.destroy();
             }
         });
-        this.activeExplosionGraphics.clear();
+        set.clear();
+    }
+
+    /**
+     * Generic helper to cleanup a set of text objects
+     */
+    private cleanupTextsSet(set: Set<Phaser.GameObjects.Text>): void {
+        set.forEach(text => {
+            if (text && text.scene) {
+                text.destroy();
+            }
+        });
+        set.clear();
     }
 
     /**
@@ -585,6 +626,9 @@ export class EntityManager {
             xpText.setScale(1 / currentZoom);
         }
         
+        // Track for cleanup
+        this.activeXPTexts.add(xpText);
+        
         // Create secondary text for hero name if available
         let heroNameText: Phaser.GameObjects.Text | null = null;
         if (xpEvent.type === 'heroKill' && xpEvent.targetName) {
@@ -610,6 +654,9 @@ export class EntityManager {
                 const currentZoom = this.cameraManager.camera.zoom;
                 heroNameText.setScale(1 / currentZoom);
             }
+            
+            // Track for cleanup
+            this.activeXPTexts.add(heroNameText);
         }
         
         // Animate the text floating up and fading out
@@ -621,8 +668,10 @@ export class EntityManager {
             duration: CLIENT_CONFIG.XP_EVENTS.ANIMATION.DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
+                this.activeXPTexts.delete(xpText);
                 xpText.destroy();
                 if (heroNameText) {
+                    this.activeXPTexts.delete(heroNameText);
                     heroNameText.destroy();
                 }
             }
@@ -755,6 +804,9 @@ export class EntityManager {
             levelUpText.setScale(1 / currentZoom);
         }
         
+        // Track for cleanup
+        this.activeLevelUpTexts.add(levelUpText);
+        
         // Animate the text floating up and fading out
         this.scene.tweens.add({
             targets: levelUpText,
@@ -763,6 +815,7 @@ export class EntityManager {
             duration: CLIENT_CONFIG.LEVEL_UP_EVENTS.ANIMATION.DURATION_MS,
             ease: 'Power2',
             onComplete: () => {
+                this.activeLevelUpTexts.delete(levelUpText);
                 levelUpText.destroy();
             }
         });
@@ -1300,6 +1353,11 @@ export class EntityManager {
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
         
+        // Clear active transient effects
+        this.cleanupActiveExplosions();
+        this.cleanupActiveXPTexts();
+        this.cleanupActiveLevelUpTexts();
+        
         if (this.targetingLinesGraphics) {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
@@ -1310,12 +1368,14 @@ export class EntityManager {
         
         this.entityGraphics.clear();
         this.entitySprites.clear();
+        this.entityShadowSprites.clear();
         this.entityHealthBars.clear();
         this.entityEffectOverlays.clear();
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
         this.projectileGraphics.clear();
+        this.zoneGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
         this.processedDeathEffectEvents.clear();
@@ -1367,6 +1427,11 @@ export class EntityManager {
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
+        
+        // Clear active transient effects
+        this.cleanupActiveExplosions();
+        this.cleanupActiveXPTexts();
+        this.cleanupActiveLevelUpTexts();
         
         // Clear targeting lines graphics
         if (this.targetingLinesGraphics) {
