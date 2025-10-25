@@ -28,7 +28,7 @@ export class KillFeed {
     private readonly ENTRY_HEIGHT = 23;
     private readonly ENTRY_SPACING = 4;
     private readonly FEED_X = 10; // Top left corner
-    private readonly FEED_Y = 105; // Below the HUD elements
+    private readonly FEED_Y = 10; // Top of screen since HUD is removed
     private readonly FADE_DURATION = 5000; // How long before entries start to fade
     private readonly REMOVE_DELAY = 6000; // How long before entries are removed
 

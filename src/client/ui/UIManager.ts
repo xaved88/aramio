@@ -12,7 +12,6 @@ import { PermanentEffectsDisplay } from './PermanentEffectsDisplay';
 import { DamageTakenOverlay } from './DamageTakenOverlay';
 import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
-import { BottomUIRenderer } from './BottomUIRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { ControlModeToggle } from './ControlModeToggle';
@@ -37,7 +36,6 @@ export class UIManager {
     private damageTakenOverlay: DamageTakenOverlay;
     private damageDealtOverlay: DamageDealtOverlay;
     private cursorRenderer: CursorRenderer;
-    private bottomUIRenderer: BottomUIRenderer;
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
@@ -56,34 +54,7 @@ export class UIManager {
     private lastKillerTeam: string | null = null; // Track killer's team
     private lastKillerIsBot: boolean = false; // Track if killer was a bot
 
-    // HUD elements
-    private hudElements: {
-        healthBar: Phaser.GameObjects.Graphics | null;
-        healthBarBackground: Phaser.GameObjects.Graphics | null;
-        healthText: Phaser.GameObjects.Text | null;
-        experienceBar: Phaser.GameObjects.Graphics | null;
-        experienceBarBackground: Phaser.GameObjects.Graphics | null;
-        levelText: Phaser.GameObjects.Text | null;
-        heroKillIcon: Phaser.GameObjects.Graphics | null;
-        heroKillText: Phaser.GameObjects.Text | null;
-        minionKillIcon: Phaser.GameObjects.Graphics | null;
-        minionKillText: Phaser.GameObjects.Text | null;
-        rewardsIcon: Phaser.GameObjects.Graphics | null;
-        rewardsText: Phaser.GameObjects.Text | null;
-    } = {
-        healthBar: null,
-        healthBarBackground: null,
-        healthText: null,
-        experienceBar: null,
-        experienceBarBackground: null,
-        levelText: null,
-        heroKillIcon: null,
-        heroKillText: null,
-        minionKillIcon: null,
-        minionKillText: null,
-        rewardsIcon: null,
-        rewardsText: null
-    };
+    // HUD elements are now managed entirely by HUDRenderer
 
     constructor(scene: Phaser.Scene, gameplayConfig: GameplayConfig, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
@@ -96,7 +67,6 @@ export class UIManager {
         this.damageTakenOverlay = new DamageTakenOverlay(scene);
         this.damageDealtOverlay = new DamageDealtOverlay(scene);
         this.cursorRenderer = new CursorRenderer(scene);
-        this.bottomUIRenderer = new BottomUIRenderer(scene);
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
         this.killFeed = new KillFeed(scene);
@@ -121,7 +91,6 @@ export class UIManager {
         this.damageTakenOverlay.setHUDCamera(hudCamera);
         this.damageDealtOverlay.setHUDCamera(hudCamera);
         this.cursorRenderer.setCameraManager(this.cameraManager);
-        this.bottomUIRenderer.setHUDCamera(hudCamera);
         this.cheatMenu.setHUDCamera(hudCamera);
         this.notificationOverlay.setHUDCamera(hudCamera);
         this.killFeed.setHUDCamera(hudCamera);
@@ -138,7 +107,6 @@ export class UIManager {
         this.damageTakenOverlay.setCameraManager(cameraManager);
         this.damageDealtOverlay.setCameraManager(cameraManager);
         this.cursorRenderer.setCameraManager(cameraManager);
-        this.bottomUIRenderer.setCameraManager(cameraManager);
         this.cheatMenu.setCameraManager(cameraManager);
         this.notificationOverlay.setCameraManager(cameraManager);
         this.killFeed.setCameraManager(cameraManager);
@@ -185,30 +153,25 @@ export class UIManager {
 
     createHUD(): void {
         this.clearHUD();
-        const newHudElements = this.hudRenderer.createHUDElements();
-        Object.assign(this.hudElements, newHudElements);
+        
+        // Create HUD elements (managed entirely by HUDRenderer)
+        this.hudRenderer.createHUDElements();
         
         // Initialize cursor renderer
         this.cursorRenderer.create();
-        
-        // Initialize bottom UI renderer
-        this.bottomUIRenderer.create();
         
         // Create control mode toggle after HUD is created
         this.createControlModeToggle();
     }
 
     clearHUD(): void {
-        Object.values(this.hudElements).forEach(el => el?.destroy());
+        // HUD elements are managed by HUDRenderer, no need to clear them here
         
         // Destroy control mode toggle if it exists
         if (this.controlModeToggle) {
             this.controlModeToggle.destroy();
             this.controlModeToggle = null;
         }
-        Object.keys(this.hudElements).forEach(key => {
-            this.hudElements[key as keyof typeof this.hudElements] = null;
-        });
         
         // Clear kill feed on HUD clear (game restart)
         this.killFeed.clear();
@@ -399,28 +362,11 @@ export class UIManager {
         // Update kill feed
         this.killFeed.processKillEvents(state);
         
-        if (Object.values(this.hudElements).some(el => !el)) return;
-        
         const currentPlayer = this.findCurrentPlayer(state, playerSessionId);
         if (!currentPlayer || !isHeroCombatant(currentPlayer)) return;
         
-        // At this point, we know all HUD elements are non-null due to the guard clause above
-        const nonNullHudElements = {
-            healthBar: this.hudElements.healthBar!,
-            healthBarBackground: this.hudElements.healthBarBackground!,
-            healthText: this.hudElements.healthText!,
-            experienceBar: this.hudElements.experienceBar!,
-            experienceBarBackground: this.hudElements.experienceBarBackground!,
-            levelText: this.hudElements.levelText!,
-            heroKillIcon: this.hudElements.heroKillIcon!,
-            heroKillText: this.hudElements.heroKillText!,
-            minionKillIcon: this.hudElements.minionKillIcon!,
-            minionKillText: this.hudElements.minionKillText!,
-            rewardsIcon: this.hudElements.rewardsIcon!,
-            rewardsText: this.hudElements.rewardsText!
-        };
-        
-        this.hudRenderer.updateHUD(currentPlayer, nonNullHudElements, state.gameTime);
+        // Update HUD (HUDRenderer manages all elements internally)
+        this.hudRenderer.updateHUD(currentPlayer, state.gameTime);
         this.updateStatsOverlay(state);
         this.updateRespawnOverlay(currentPlayer, state);
         this.permanentEffectsDisplay.updateDisplay(currentPlayer);
@@ -448,7 +394,6 @@ export class UIManager {
         
         if (currentPlayer && isHeroCombatant(currentPlayer)) {
             this.cursorRenderer.update(currentPlayer, gameTime);
-            this.bottomUIRenderer.update(currentPlayer, gameTime);
         }
     }
 
@@ -730,7 +675,6 @@ export class UIManager {
     }
 
     destroy(): void {
-        Object.values(this.hudElements).forEach(el => el?.destroy());
         this.respawnOverlay.destroy();
         this.victoryScreen.destroy();
         this.statsOverlay.destroy();
