@@ -78,12 +78,12 @@ export class HUDRenderer {
     private calculatePositions() {
         const canvasWidth = getCanvasWidth();
         const canvasHeight = getCanvasHeight();
-        const spacing = CLIENT_CONFIG.BOTTOM_UI.SPACING.BETWEEN_ELEMENTS;
-        const fromEdges = CLIENT_CONFIG.BOTTOM_UI.SPACING.FROM_EDGES;
+        const spacing = CLIENT_CONFIG.UI.SPACING.BETWEEN_ELEMENTS;
+        const fromEdges = CLIENT_CONFIG.UI.SPACING.FROM_EDGES;
         
-        const xpDiameter = CLIENT_CONFIG.BOTTOM_UI.XP_INDICATOR.RADIUS * 2;
-        const healthWidth = CLIENT_CONFIG.BOTTOM_UI.HEALTH_BAR.WIDTH;
-        const abilitySize = CLIENT_CONFIG.BOTTOM_UI.ABILITY_COOLDOWN.SIZE;
+        const xpDiameter = CLIENT_CONFIG.UI.XP_INDICATOR.RADIUS * 2;
+        const healthWidth = CLIENT_CONFIG.UI.HEALTH_BAR.WIDTH;
+        const abilitySize = CLIENT_CONFIG.UI.ABILITY_COOLDOWN.SIZE;
         
         // Calculate total width needed for main elements
         const totalWidth = xpDiameter + spacing + healthWidth + spacing + abilitySize;
@@ -94,10 +94,10 @@ export class HUDRenderer {
         
         // Align circles with health bar center
         const healthX = startX + xpDiameter + spacing;
-        const healthY = bottomY - CLIENT_CONFIG.BOTTOM_UI.HEALTH_BAR.HEIGHT;
-        const healthCenterY = healthY + CLIENT_CONFIG.BOTTOM_UI.HEALTH_BAR.HEIGHT / 2;
+        const healthY = bottomY - CLIENT_CONFIG.UI.HEALTH_BAR.HEIGHT;
+        const healthCenterY = healthY + CLIENT_CONFIG.UI.HEALTH_BAR.HEIGHT / 2;
         
-        const xpX = startX + CLIENT_CONFIG.BOTTOM_UI.XP_INDICATOR.RADIUS;
+        const xpX = startX + CLIENT_CONFIG.UI.XP_INDICATOR.RADIUS;
         const xpY = healthCenterY;
         
         const abilityX = startX + xpDiameter + spacing + healthWidth + spacing + abilitySize / 2;
@@ -105,13 +105,13 @@ export class HUDRenderer {
         
         // Position rewards counter centered above the XP indicator
         const rewardsX = xpX; // Center horizontally with XP circle
-        const rewardsY = xpY - CLIENT_CONFIG.BOTTOM_UI.XP_INDICATOR.RADIUS - 20;
+        const rewardsY = xpY - CLIENT_CONFIG.UI.XP_INDICATOR.RADIUS - 20;
         
         return { startX, xpX, xpY, healthX, healthY, abilityX, abilityY, rewardsX, rewardsY };
     }
     
     private createHealthBar(): void {
-        const config = CLIENT_CONFIG.BOTTOM_UI.HEALTH_BAR;
+        const config = CLIENT_CONFIG.UI.HEALTH_BAR;
         const positions = this.calculatePositions();
         
         const x = positions.healthX;
@@ -152,7 +152,7 @@ export class HUDRenderer {
     }
     
     private createXPIndicator(): void {
-        const config = CLIENT_CONFIG.BOTTOM_UI.XP_INDICATOR;
+        const config = CLIENT_CONFIG.UI.XP_INDICATOR;
         const positions = this.calculatePositions();
         
         const x = positions.xpX;
@@ -193,7 +193,7 @@ export class HUDRenderer {
     }
     
     private createAbilityCooldown(): void {
-        const config = CLIENT_CONFIG.BOTTOM_UI.ABILITY_COOLDOWN;
+        const config = CLIENT_CONFIG.UI.ABILITY_COOLDOWN;
         const positions = this.calculatePositions();
         
         const x = positions.abilityX;
@@ -228,7 +228,7 @@ export class HUDRenderer {
     }
     
     private createRewardsCounter(): void {
-        const config = CLIENT_CONFIG.BOTTOM_UI.REWARDS_COUNTER;
+        const config = CLIENT_CONFIG.UI.REWARDS_COUNTER;
         const positions = this.calculatePositions();
         
         const x = positions.rewardsX;
@@ -320,7 +320,7 @@ export class HUDRenderer {
     private updateHealthBar(player: HeroCombatant): void {
         if (!this.healthBar || !this.healthText) return;
 
-        const config = CLIENT_CONFIG.BOTTOM_UI.HEALTH_BAR;
+        const config = CLIENT_CONFIG.UI.HEALTH_BAR;
         const positions = this.calculatePositions();
         
         const x = positions.healthX;
@@ -339,7 +339,7 @@ export class HUDRenderer {
     private updateXPIndicator(player: HeroCombatant): void {
         if (!this.xpBar || !this.levelText) return;
 
-        const config = CLIENT_CONFIG.BOTTOM_UI.XP_INDICATOR;
+        const config = CLIENT_CONFIG.UI.XP_INDICATOR;
         const positions = this.calculatePositions();
         
         const x = positions.xpX;
@@ -361,7 +361,7 @@ export class HUDRenderer {
     private updateAbilityCooldown(player: HeroCombatant, gameTime: number): void {
         if (!this.abilityCooldownRing || !this.abilityIcon) return;
 
-        const config = CLIENT_CONFIG.BOTTOM_UI.ABILITY_COOLDOWN;
+        const config = CLIENT_CONFIG.UI.ABILITY_COOLDOWN;
         const ability = player.ability;
         const positions = this.calculatePositions();
         

@@ -577,7 +577,7 @@ export class GameScene extends Phaser.Scene {
      * Gets the appropriate color for the ability range display based on ability cooldown status
      */
     private getAbilityRangeDisplayColor(hero: any): number {
-        if (!this.lastState) return CLIENT_CONFIG.HUD.ABILITY_BAR.COOLDOWN_COLOR;
+        if (!this.lastState) return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.COOLDOWN_COLOR;
         
         const currentTime = this.lastState.gameTime;
         const ability = hero.ability as any;
@@ -592,9 +592,9 @@ export class GameScene extends Phaser.Scene {
         }
         
         if (isAbilityReady) {
-            return CLIENT_CONFIG.HUD.ABILITY_BAR.READY_COLOR; // Light purple when ready
+            return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.READY_COLOR; // Light purple when ready
         } else {
-            return CLIENT_CONFIG.HUD.ABILITY_BAR.COOLDOWN_COLOR; // Darker purple when on cooldown
+            return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.COOLDOWN_COLOR; // Darker purple when on cooldown
         }
     }
 
