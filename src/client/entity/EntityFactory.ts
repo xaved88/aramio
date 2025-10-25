@@ -54,14 +54,6 @@ export class EntityFactory {
         return ring;
     }
 
-    /**
-     * Creates the ability ready indicator for players
-     */
-    createAbilityReadyIndicator(): Phaser.GameObjects.Graphics {
-        const indicator = this.scene.add.graphics();
-        indicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-        return indicator;
-    }
 
     /**
      * Creates a sprite for hero entities

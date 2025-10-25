@@ -33,7 +33,6 @@ export class EntityManager {
     private entityEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
-    private entityAbilityReadyIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
     private zoneGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
@@ -303,7 +302,6 @@ export class EntityManager {
         
         // Handle respawn ring for heroes
         let respawnRing = this.entityRespawnRings.get(entityId);
-        let abilityReadyIndicator = this.entityAbilityReadyIndicators.get(entityId);
         if (combatantData.type === COMBATANT_TYPES.HERO) {
             if (!respawnRing) {
                 respawnRing = this.entityFactory.createRespawnRing();
@@ -318,19 +316,6 @@ export class EntityManager {
                 
                 this.entityRespawnRings.set(entityId, respawnRing);
             }
-            if (!abilityReadyIndicator) {
-                abilityReadyIndicator = this.entityFactory.createAbilityReadyIndicator();
-                // Set initial position immediately to avoid spawning at (0,0)
-                abilityReadyIndicator.setPosition(combatantData.x, combatantData.y);
-                abilityReadyIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-                
-                // Assign to main camera
-                if (this.cameraManager) {
-                    this.cameraManager.assignToMainCamera(abilityReadyIndicator);
-                }
-                
-                this.entityAbilityReadyIndicators.set(entityId, abilityReadyIndicator);
-            }
         }
         
         // Create smooth movement animation
@@ -340,7 +325,6 @@ export class EntityManager {
         if (entityHealthBar) targets.push(entityHealthBar);
         targets.push(entityText, radiusIndicator);
         if (respawnRing) targets.push(respawnRing);
-        if (abilityReadyIndicator) targets.push(abilityReadyIndicator);
         if (entityEffectOverlay) targets.push(entityEffectOverlay);
         
         this.animateEntityMovement(
@@ -379,7 +363,6 @@ export class EntityManager {
             entityText,
             radiusIndicator,
             respawnRing,
-            abilityReadyIndicator,
             entityHealthBar,
             entityEffectOverlay,
             state,
@@ -1092,11 +1075,6 @@ export class EntityManager {
             this.entityRespawnRings.delete(entityId);
         }
         
-        const abilityReadyIndicator = this.entityAbilityReadyIndicators.get(entityId);
-        if (abilityReadyIndicator) {
-            abilityReadyIndicator.destroy();
-            this.entityAbilityReadyIndicators.delete(entityId);
-        }
     }
 
     /**
@@ -1319,7 +1297,6 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
-        this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
         
@@ -1338,7 +1315,6 @@ export class EntityManager {
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
-        this.entityAbilityReadyIndicators.clear();
         this.projectileGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
@@ -1389,7 +1365,6 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
-        this.entityAbilityReadyIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
         
@@ -1411,7 +1386,6 @@ export class EntityManager {
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
-        this.entityAbilityReadyIndicators.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
         this.processedXPEvents.clear();

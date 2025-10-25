@@ -163,12 +163,6 @@ export const CLIENT_CONFIG = {
         THICKNESS: 6,
         ALPHA: 0.8,
     },
-    ABILITY_READY_INDICATOR: {
-        RADIUS: 34, // slightly larger than player radius
-        THICKNESS: 4,
-        ALPHA: 0.8,
-        COLOR: 0xd2b4de, // lighter purple to match ability bar
-    },
     CURSOR_COOLDOWN_INDICATOR: {
         RADIUS: 15, // larger circle around cursor with buffer from crosshair
         THICKNESS: 3,

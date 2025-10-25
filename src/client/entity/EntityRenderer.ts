@@ -53,7 +53,6 @@ export class EntityRenderer {
         text: Phaser.GameObjects.Text,
         radiusIndicator: Phaser.GameObjects.Graphics,
         respawnRing: Phaser.GameObjects.Graphics | undefined,
-        abilityReadyIndicator: Phaser.GameObjects.Graphics | undefined,
         healthBar: Phaser.GameObjects.Graphics | undefined,
         effectOverlay?: Phaser.GameObjects.Graphics,
         state?: SharedGameState,
@@ -75,16 +74,6 @@ export class EntityRenderer {
             this.renderRespawnRing(combatant, respawnRing, state);
         }
         
-        // Render ability ready indicator only for the current player
-        if (abilityReadyIndicator && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant)) {
-            // Only show ability indicator for the current player
-            if (playerSessionId && combatant.controller === playerSessionId) {
-                this.renderAbilityReadyIndicator(combatant, abilityReadyIndicator, state);
-            } else {
-                // Clear the indicator if this hero is not controlled by the current player
-                abilityReadyIndicator.clear();
-            }
-        }
         
         // Render health bar for heroes and structures (but not for respawning heroes)
         if (healthBar && (combatant.type === COMBATANT_TYPES.HERO || combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET)) {
@@ -590,37 +579,6 @@ export class EntityRenderer {
         }
     }
 
-    /**
-     * Renders the ability ready indicator for heroes only
-     */
-    private renderAbilityReadyIndicator(hero: HeroCombatant, abilityReadyIndicator: Phaser.GameObjects.Graphics, state?: SharedGameState): void {
-        abilityReadyIndicator.clear();
-        
-        // Check if ability is ready
-        const currentTime = state?.gameTime || 0;
-        
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
-        let isAbilityReady = false;
-        if (hero.ability.lastUsedTime === 0) {
-            isAbilityReady = true;
-        } else {
-            const timeSinceLastUse = currentTime - hero.ability.lastUsedTime;
-            isAbilityReady = timeSinceLastUse >= hero.ability.cooldown;
-        }
-        
-        if (isAbilityReady && hero.state === 'alive') {
-            // Scale radius based on sprite scale
-            const spriteScale = getSpriteScale(hero);
-            const scaledRadius = CLIENT_CONFIG.ABILITY_READY_INDICATOR.RADIUS * spriteScale;
-            
-            abilityReadyIndicator.lineStyle(
-                CLIENT_CONFIG.ABILITY_READY_INDICATOR.THICKNESS, 
-                CLIENT_CONFIG.ABILITY_READY_INDICATOR.COLOR, 
-                CLIENT_CONFIG.ABILITY_READY_INDICATOR.ALPHA
-            );
-            abilityReadyIndicator.strokeCircle(0, 0, scaledRadius);
-        }
-    }
 
     /**
      * Renders the radius indicator for attack ranges
