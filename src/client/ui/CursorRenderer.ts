@@ -118,7 +118,7 @@ export class CursorRenderer {
     private drawCrosshair(x: number, y: number, isOnCooldown: boolean = false): void {
         if (!this.cursorGraphics) return;
         
-        const crosshairSize = 8 + (this.flashIntensity * 4); // Expand when flashing
+        const crosshairSize = 10 + (this.flashIntensity * 4); // Expand when flashing
         const lineThickness = 2;
         const outlineThickness = 3;
         const color = 0xffffff; // White crosshair
