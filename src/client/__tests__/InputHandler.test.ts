@@ -361,6 +361,45 @@ describe('InputHandler', () => {
             // Verify preventDefault was called
             expect(rightClickPointer.event.preventDefault).toHaveBeenCalled();
         });
+
+        it('should handle S key to stop movement in MOBA mode', () => {
+            // Mock the scene with lastState
+            const mockGameScene = {
+                ...mockScene,
+                lastState: {
+                    combatants: new Map([
+                        ['hero1', {
+                            type: 'hero',
+                            controller: 'player1',
+                            x: 100,
+                            y: 100
+                        }]
+                    ])
+                },
+                playerSessionId: 'player1'
+            };
+            
+            const handler = new InputHandler(mockGameScene, mockRoom);
+            handler.setControlMode('moba');
+            handler.setupHandlers();
+
+            // Find the S key handler
+            const sKeyHandler = mockScene.input.keyboard.on.mock.calls.find(
+                (call: any[]) => call[0] === 'keydown-S'
+            );
+
+            expect(sKeyHandler).toBeDefined();
+
+            // Call the handler
+            sKeyHandler[1]();
+
+            // Verify move command was sent to current position (stop movement)
+            // The exact coordinates don't matter as much as verifying the command structure
+            expect(mockRoom.send).toHaveBeenCalledWith('move', expect.objectContaining({
+                targetX: expect.any(Number),
+                targetY: expect.any(Number)
+            }));
+        });
     });
 });
 

@@ -224,7 +224,11 @@ export class InputHandler {
 
         // S key
         this.scene.input.keyboard?.on('keydown-S', () => {
-            this.keyStates.S = true;
+            if (this.controlMode === 'moba') {
+                this.handleStopMovement();
+            } else {
+                this.keyStates.S = true;
+            }
         });
         this.scene.input.keyboard?.on('keyup-S', () => {
             this.keyStates.S = false;
@@ -613,6 +617,32 @@ export class InputHandler {
         this.isClickHeld = false;
         this.isTargetingWithSpace = false;
         this.clickDownPosition = null;
+    }
+
+    /**
+     * Handles S key press to stop movement in MOBA mode
+     */
+    private handleStopMovement(): void {
+        // Clear the movement target
+        this.moveTargetPosition = null;
+        
+        // Hide the destination marker
+        this.hideDestinationMarker();
+        
+        // Get current hero position and send move command to current location (effectively stops movement)
+        const gameScene = this.scene as any;
+        if (gameScene.lastState) {
+            for (const combatant of gameScene.lastState.combatants.values()) {
+                if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                    // Send move command to current position to stop movement
+                    this.room.send('move', {
+                        targetX: combatant.x,
+                        targetY: combatant.y
+                    });
+                    break;
+                }
+            }
+        }
     }
 
     /**
