@@ -59,6 +59,52 @@ export const GAMEPLAY_CONFIG = {
                 rotation: Math.PI / 4, // 45 degrees to align with y = x diagonal (game coordinates)
                 blocksMovement: true,
                 blocksProjectiles: true
+            },
+            // Corner obstacles perpendicular to diagonal walls
+            {
+                id: 'corner-wall-1',
+                x: 200, // Top-left corner
+                y: 200,
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: -Math.PI / 4, // -45 degrees (perpendicular to diagonal walls)
+                blocksMovement: true,
+                blocksProjectiles: true
+            },
+            {
+                id: 'corner-wall-4',
+                x: 1200, // Bottom-right corner
+                y: 1200,
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: -Math.PI / 4, // -45 degrees (perpendicular to diagonal walls)
+                blocksMovement: true,
+                blocksProjectiles: true
+            },
+            // Cradle-adjacent obstacles
+            {
+                id: 'blue-cradle-north',
+                x: 200, // North of blue cradle (200, 1200)
+                y: 700, // 500 pixels north of blue cradle
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: 0, // Horizontal wall
+                blocksMovement: true,
+                blocksProjectiles: true
+            },
+            {
+                id: 'red-cradle-south',
+                x: 1200, // South of red cradle (1200, 200)
+                y: 700, // 500 pixels south of red cradle
+                hitboxType: 'rectangle',
+                width: 150,
+                height: 10,
+                rotation: 0, // Horizontal wall
+                blocksMovement: true,
+                blocksProjectiles: true
             }
         ]
     },
