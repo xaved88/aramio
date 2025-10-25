@@ -363,21 +363,34 @@ export class EntityRenderer {
             if (combatant.target) {
                 const target = combatants.get(combatant.target);
                 if (target && target.health > 0) {
-                    // Determine line color based on team
-                    const lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED;
+                    // Check if player's hero is the one attacking (not being attacked)
+                    const isPlayerAttacking = this.playerSessionId && 
+                        combatant.type === COMBATANT_TYPES.HERO && 
+                        isHeroCombatant(combatant) && 
+                        combatant.controller === this.playerSessionId;
                     
-                    // Check if player's hero is involved in this targeting line
+                    // Check if player's hero is involved in this targeting line (either attacking or being attacked)
                     const isPlayerInvolved = this.playerSessionId && (
-                        (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.controller === this.playerSessionId) ||
+                        isPlayerAttacking ||
                         (target.type === COMBATANT_TYPES.HERO && isHeroCombatant(target) && target.controller === this.playerSessionId)
                     );
-                    
-                    // Calculate alpha - either flash or base alpha
-                    let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
                     
                     // Check if this targeting line should flash
                     const targetingLineKey = `${combatant.id}-${target.id}`;
                     const isFlashing = this.flashingTargetingLines.has(targetingLineKey);
+                    
+                    // Determine line color - white flash only for player attacks, team colors for others
+                    let lineColor: number;
+                    if (isFlashing && isPlayerAttacking) {
+                        lineColor = 0xffffff; // White flash only for player attacks
+                    } else if (isPlayerAttacking) {
+                        lineColor = CLIENT_CONFIG.TARGETING_LINES.PLAYER; // Purple when player attacking (not flashing)
+                    } else {
+                        lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED; // Team colors (including when flashing)
+                    }
+                    
+                    // Calculate alpha - either flash or base alpha
+                    let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
                     if (isFlashing) {
                         alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
                     }
