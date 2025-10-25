@@ -1365,6 +1365,7 @@ export class EntityManager {
         
         // Clear flashing targeting lines
         this.entityRenderer.clearFlashingTargetingLines();
+        this.entityRenderer.destroy();
         
         this.entityGraphics.clear();
         this.entitySprites.clear();

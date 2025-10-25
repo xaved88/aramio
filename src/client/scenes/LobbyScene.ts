@@ -329,6 +329,9 @@ export class LobbyScene extends Phaser.Scene {
         this.load.image('super-minion-archer', '/assets/minions/super_minion_archer.png');
         this.load.image('structure-cradle', '/assets/structures/structure_cradle.png');
         this.load.image('structure-turret', '/assets/structures/structure_tower.png');
+        
+        // Load respawn indicator image for respawning heroes
+        this.load.image('respawn-indicator', '/assets/icons/respawn-indicator.png');
     }
 
     async create() {

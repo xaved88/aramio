@@ -14,6 +14,7 @@ export class EntityRenderer {
     private playerSessionId: ControllerId | null = null;
     private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
     private combatantRenderer: CombatantRenderer;
+    private respawnIndicatorSprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -42,6 +43,14 @@ export class EntityRenderer {
      */
     clearFlashingTargetingLines(): void {
         this.flashingTargetingLines.clear();
+    }
+
+    /**
+     * Cleans up respawn indicator sprites (called when scene is destroyed)
+     */
+    destroy(): void {
+        this.respawnIndicatorSprites.forEach(sprite => sprite.destroy());
+        this.respawnIndicatorSprites.clear();
     }
 
     /**
@@ -96,6 +105,9 @@ export class EntityRenderer {
         if (combatant.type === COMBATANT_TYPES.TURRET) {
             this.handleTurretVisibility(combatant, text, radiusIndicator);
         }
+        
+        // Handle respawn indicator for heroes
+        this.renderRespawnIndicator(combatant, state);
     }
 
     /**
@@ -283,55 +295,55 @@ export class EntityRenderer {
             graphics.strokePath();
         }
 
-        // Check for respawning state - add skull icon above the hero
-        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
-            const spriteScale = getSpriteScale(combatant);
-            
-            // Add skull icon above the respawning hero
-            graphics.lineStyle(4, 0xFFFFFF); // White lines for skull icon
-            
-            // Draw a simple skull shape
-            const iconSize = 20 * spriteScale; // Scale icon
-            const iconY = 0; // Center it on the hero
-            
-            // Draw black circle background (slightly larger)
-            graphics.fillStyle(0x000000, 1);
-            graphics.fillCircle(0, iconY, iconSize * 0.7);
-            
-            // Draw black circle outline for the border
-            graphics.lineStyle(1, 0x000000, 1);
-            graphics.strokeCircle(0, iconY, iconSize * 0.7);
-            
-            // Draw skull background (white circle)
-            graphics.fillStyle(0xFFFFFF, 1);
-            graphics.fillCircle(0, iconY, iconSize * 0.6);
-            
-            // Draw skull outline (circle for head)
-            graphics.strokeCircle(0, iconY, iconSize * 0.6);
-            
-            // Draw eye sockets (two circles)
-            graphics.fillStyle(0x000000, 1);
-            graphics.fillCircle(-iconSize * 0.2, iconY - iconSize * 0.1, iconSize * 0.15);
-            graphics.fillCircle(iconSize * 0.2, iconY - iconSize * 0.1, iconSize * 0.15);
-            
-            // Draw nose (triangle)
-            graphics.beginPath();
-            graphics.moveTo(0, iconY - iconSize * 0.1);
-            graphics.lineTo(-iconSize * 0.1, iconY + iconSize * 0.1);
-            graphics.lineTo(iconSize * 0.1, iconY + iconSize * 0.1);
-            graphics.closePath();
-            graphics.fillPath();
-            
-            // Draw mouth (grin)
-            graphics.lineStyle(2, 0x000000);
-            graphics.beginPath();
-            graphics.arc(0, iconY + iconSize * 0.2, iconSize * 0.2, 0, Math.PI);
-            graphics.strokePath();
-            
-            // Reset fill style
-            graphics.fillStyle(0x000000, 0);
-        }
 
+    }
+
+    /**
+     * Renders respawn indicator for respawning heroes
+     */
+    private renderRespawnIndicator(combatant: Combatant, state?: SharedGameState): void {
+        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning' && state) {
+            let respawnIndicatorSprite = this.respawnIndicatorSprites.get(combatant.id);
+            
+            // Create respawn indicator sprite if it doesn't exist
+            if (!respawnIndicatorSprite) {
+                respawnIndicatorSprite = this.scene.add.sprite(combatant.x, combatant.y, 'respawn-indicator');
+                respawnIndicatorSprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 2); // Above hero sprites
+                respawnIndicatorSprite.setOrigin(0.5, 0.5);
+                respawnIndicatorSprite.setAlpha(0); // Start invisible for fade-in
+                
+                this.respawnIndicatorSprites.set(combatant.id, respawnIndicatorSprite);
+                
+                // Start fade-in animation
+                this.scene.tweens.add({
+                    targets: respawnIndicatorSprite,
+                    alpha: 1,
+                    duration: 2000, // 2 second fade-in
+                    ease: 'Power2'
+                });
+            }
+            
+            // Update respawn indicator sprite position to follow the hero
+            respawnIndicatorSprite.setPosition(combatant.x, combatant.y);
+            respawnIndicatorSprite.setVisible(true);
+            
+            // Scale the respawn indicator to be appropriately sized relative to the hero
+            const texture = respawnIndicatorSprite.texture;
+            const textureWidth = texture.source[0].width;
+            const textureHeight = texture.source[0].height;
+            const maxDimension = Math.max(textureWidth, textureHeight);
+            const baseScale = (combatant.size * 2) / maxDimension; // size is radius, so *2 for diameter
+            
+            // Apply additional sprite scale using utility function
+            const additionalScale = getSpriteScale(combatant);
+            respawnIndicatorSprite.setScale(baseScale * additionalScale);
+        } else {
+            // Hide respawn indicator sprite when not respawning
+            const respawnIndicatorSprite = this.respawnIndicatorSprites.get(combatant.id);
+            if (respawnIndicatorSprite) {
+                respawnIndicatorSprite.setVisible(false);
+            }
+        }
     }
 
     /**

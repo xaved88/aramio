@@ -80,6 +80,9 @@ export class GameScene extends Phaser.Scene {
         this.load.image('control-mouse', '/assets/config/mouse.png');
         this.load.image('control-keyboard', '/assets/config/keyboard.png');
         this.load.image('control-moba', '/assets/config/moba.png');
+        
+        // Load respawn indicator image for respawning heroes
+        this.load.image('respawn-indicator', '/assets/icons/respawn-indicator.png');
     }
 
     async create() {
