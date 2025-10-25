@@ -29,6 +29,18 @@ export class HUDRenderer {
     private rewardsIcon: Phaser.GameObjects.Graphics | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
     
+    // Ability tooltip elements
+    private abilityTooltip: Phaser.GameObjects.Container | null = null;
+    private abilityTooltipBackground: Phaser.GameObjects.Graphics | null = null;
+    private abilityTooltipTitle: Phaser.GameObjects.Text | null = null;
+    private abilityTooltipDescription: Phaser.GameObjects.Text | null = null;
+    
+    // Level tooltip elements
+    private levelTooltip: Phaser.GameObjects.Container | null = null;
+    private levelTooltipBackground: Phaser.GameObjects.Graphics | null = null;
+    private levelTooltipTitle: Phaser.GameObjects.Text | null = null;
+    private levelTooltipDescription: Phaser.GameObjects.Text | null = null;
+    
     // Flash effect for ability ready
     private flashIntensity: number = 0;
     private wasOnCooldown: boolean = false;
@@ -190,6 +202,12 @@ export class HUDRenderer {
         this.levelText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         this.levelText.setScrollFactor(0, 0);
         this.hudContainer!.add(this.levelText);
+        
+        // Make level element interactive for tooltip
+        this.setupLevelInteractivity();
+        
+        // Create level tooltip
+        this.createLevelTooltip();
     }
     
     private createAbilityCooldown(): void {
@@ -225,6 +243,12 @@ export class HUDRenderer {
         this.abilityFlashOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 2);
         this.abilityFlashOverlay.setScrollFactor(0, 0);
         this.hudContainer!.add(this.abilityFlashOverlay);
+        
+        // Make ability element interactive for tooltip
+        this.setupAbilityInteractivity();
+        
+        // Create ability tooltip
+        this.createAbilityTooltip();
     }
     
     private createRewardsCounter(): void {
@@ -282,7 +306,7 @@ export class HUDRenderer {
             })
         ).setOrigin(0, 0.5);
         
-        // Center the entire rewards group above the XP circle
+        // Center the entire rewards group below the XP circle
         const textWidth = this.rewardsText.width;
         const totalRewardsWidth = iconSize + config.SPACING + textWidth;
         const centeredX = x - totalRewardsWidth / 2;
@@ -515,6 +539,314 @@ export class HUDRenderer {
             this.scene.tweens.killTweensOf([this.rewardsIcon]);
             this.rewardsIcon.setData('isPulsing', false);
         }
+    }
+
+    private setupAbilityInteractivity(): void {
+        if (!this.abilityBackground || !this.abilityIcon) return;
+        
+        const config = CLIENT_CONFIG.UI.ABILITY_COOLDOWN;
+        const positions = this.calculatePositions();
+        const x = positions.abilityX;
+        const y = positions.abilityY;
+        
+        // Create an invisible interactive area that covers the ability element
+        const interactiveArea = this.scene.add.circle(x, y, config.SIZE / 2 + 5, 0x000000, 0);
+        interactiveArea.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 10);
+        interactiveArea.setScrollFactor(0, 0);
+        interactiveArea.setInteractive();
+        this.hudContainer!.add(interactiveArea);
+        
+        // Add hover events
+        interactiveArea.on('pointerover', () => {
+            this.showAbilityTooltip();
+        });
+        
+        interactiveArea.on('pointerout', () => {
+            this.hideAbilityTooltip();
+        });
+    }
+    
+    private createAbilityTooltip(): void {
+        // Create tooltip container
+        this.abilityTooltip = this.scene.add.container(0, 0);
+        this.abilityTooltip.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 20);
+        this.abilityTooltip.setScrollFactor(0, 0);
+        this.abilityTooltip.setVisible(false);
+        this.hudContainer!.add(this.abilityTooltip);
+        
+        // Create tooltip background
+        this.abilityTooltipBackground = this.scene.add.graphics();
+        this.abilityTooltip.add(this.abilityTooltipBackground);
+        
+        // Create tooltip title
+        this.abilityTooltipTitle = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
+                color: '#ffffff',
+                fontStyle: 'bold',
+                align: 'left',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
+            })
+        ).setOrigin(0, 0.5);
+        this.abilityTooltip.add(this.abilityTooltipTitle);
+        
+        // Create tooltip description
+        this.abilityTooltipDescription = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                color: '#cccccc',
+                align: 'left',
+                wordWrap: { width: 200 },
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
+            })
+        ).setOrigin(0, 0.5);
+        this.abilityTooltip.add(this.abilityTooltipDescription);
+    }
+    
+    private showAbilityTooltip(): void {
+        if (!this.abilityTooltip || !this.abilityTooltipTitle || !this.abilityTooltipDescription) return;
+        
+        // Get current ability type from the icon texture
+        let abilityType = 'default';
+        if (this.abilityIcon && this.abilityIcon.texture) {
+            const textureKey = this.abilityIcon.texture.key;
+            if (textureKey.startsWith('icon_ability:')) {
+                abilityType = textureKey.replace('icon_ability:', '');
+            }
+        }
+        
+        // Get ability description from config
+        const abilityKey = `ability:${abilityType}`;
+        const abilityConfig = CLIENT_CONFIG.REWARDS.DISPLAY[abilityKey as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
+        
+        if (abilityConfig) {
+            this.abilityTooltipTitle.setText(abilityConfig.title);
+            this.abilityTooltipDescription.setText(abilityConfig.description);
+        } else {
+            // Fallback for unknown abilities
+            this.abilityTooltipTitle.setText(`Ability: ${abilityType}`);
+            this.abilityTooltipDescription.setText('Unknown ability');
+        }
+        
+        // Position tooltip above the ability element
+        const positions = this.calculatePositions();
+        const tooltipX = positions.abilityX;
+        const tooltipY = positions.abilityY - 80; // Position above the ability
+        
+        this.abilityTooltip.setPosition(tooltipX, tooltipY);
+        
+        // Update tooltip background size
+        this.updateTooltipBackground();
+        
+        // Show tooltip with fade-in animation
+        this.abilityTooltip.setVisible(true);
+        this.abilityTooltip.setAlpha(0);
+        this.scene.tweens.add({
+            targets: this.abilityTooltip,
+            alpha: 1,
+            duration: 200,
+            ease: 'Power2'
+        });
+    }
+    
+    private hideAbilityTooltip(): void {
+        if (!this.abilityTooltip) return;
+        
+        // Hide tooltip with fade-out animation
+        this.scene.tweens.add({
+            targets: this.abilityTooltip,
+            alpha: 0,
+            duration: 150,
+            ease: 'Power2',
+            onComplete: () => {
+                this.abilityTooltip!.setVisible(false);
+            }
+        });
+    }
+    
+    private updateTooltipBackground(): void {
+        if (!this.abilityTooltipBackground || !this.abilityTooltipTitle || !this.abilityTooltipDescription) return;
+        
+        // Calculate tooltip dimensions
+        const titleBounds = this.abilityTooltipTitle.getBounds();
+        const descriptionBounds = this.abilityTooltipDescription.getBounds();
+        
+        const padding = 12;
+        const width = Math.max(titleBounds.width, descriptionBounds.width) + padding * 2;
+        const height = titleBounds.height + descriptionBounds.height + padding * 3;
+        
+        // Position title and description for left alignment
+        this.abilityTooltipTitle.setX(-width / 2 + padding);
+        this.abilityTooltipTitle.setY(-height / 2 + padding + titleBounds.height / 2);
+        this.abilityTooltipDescription.setX(-width / 2 + padding);
+        this.abilityTooltipDescription.setY(height / 2 - padding - descriptionBounds.height / 2);
+        
+        // Draw background
+        this.abilityTooltipBackground.clear();
+        this.abilityTooltipBackground.fillStyle(0x1a1a1a, 0.95);
+        this.abilityTooltipBackground.fillRoundedRect(-width / 2, -height / 2, width, height, 8);
+        this.abilityTooltipBackground.lineStyle(2, 0xffffff, 1);
+        this.abilityTooltipBackground.strokeRoundedRect(-width / 2, -height / 2, width, height, 8);
+    }
+
+    private setupLevelInteractivity(): void {
+        if (!this.levelText) return;
+        
+        const config = CLIENT_CONFIG.UI.XP_INDICATOR;
+        const positions = this.calculatePositions();
+        const x = positions.xpX;
+        const y = positions.xpY;
+        
+        // Create an invisible interactive area that covers the level element
+        const interactiveArea = this.scene.add.circle(x, y, config.RADIUS + 5, 0x000000, 0);
+        interactiveArea.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 10);
+        interactiveArea.setScrollFactor(0, 0);
+        interactiveArea.setInteractive();
+        this.hudContainer!.add(interactiveArea);
+        
+        // Add hover events
+        interactiveArea.on('pointerover', () => {
+            this.showLevelTooltip();
+        });
+        
+        interactiveArea.on('pointerout', () => {
+            this.hideLevelTooltip();
+        });
+    }
+    
+    private createLevelTooltip(): void {
+        // Create tooltip container
+        this.levelTooltip = this.scene.add.container(0, 0);
+        this.levelTooltip.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 20);
+        this.levelTooltip.setScrollFactor(0, 0);
+        this.levelTooltip.setVisible(false);
+        this.hudContainer!.add(this.levelTooltip);
+        
+        // Create tooltip background
+        this.levelTooltipBackground = this.scene.add.graphics();
+        this.levelTooltip.add(this.levelTooltipBackground);
+        
+        // Create tooltip title
+        this.levelTooltipTitle = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
+                color: '#ffffff',
+                fontStyle: 'bold',
+                align: 'left',
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
+            })
+        ).setOrigin(0, 0.5);
+        this.levelTooltip.add(this.levelTooltipTitle);
+        
+        // Create tooltip description
+        this.levelTooltipDescription = this.scene.add.text(0, 0, '', 
+            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
+                color: '#cccccc',
+                align: 'left',
+                wordWrap: { width: 200 },
+                shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    color: '#000000',
+                    blur: 2,
+                    stroke: true,
+                    fill: true
+                }
+            })
+        ).setOrigin(0, 0.5);
+        this.levelTooltip.add(this.levelTooltipDescription);
+    }
+    
+    private showLevelTooltip(): void {
+        if (!this.levelTooltip || !this.levelTooltipTitle || !this.levelTooltipDescription) return;
+        
+        // Get current level from the level text
+        let currentLevel = 1;
+        if (this.levelText && this.levelText.text) {
+            currentLevel = parseInt(this.levelText.text) || 1;
+        }
+        
+        // Set tooltip content
+        this.levelTooltipTitle.setText(`Level: ${currentLevel}`);
+        this.levelTooltipDescription.setText('Base stats increase at every level');
+        
+        // Position tooltip above the level element
+        const positions = this.calculatePositions();
+        const tooltipX = positions.xpX;
+        const tooltipY = positions.xpY - 60; // Position above the level circle
+        
+        this.levelTooltip.setPosition(tooltipX, tooltipY);
+        
+        // Update tooltip background size
+        this.updateLevelTooltipBackground();
+        
+        // Show tooltip with fade-in animation
+        this.levelTooltip.setVisible(true);
+        this.levelTooltip.setAlpha(0);
+        this.scene.tweens.add({
+            targets: this.levelTooltip,
+            alpha: 1,
+            duration: 200,
+            ease: 'Power2'
+        });
+    }
+    
+    private hideLevelTooltip(): void {
+        if (!this.levelTooltip) return;
+        
+        // Hide tooltip with fade-out animation
+        this.scene.tweens.add({
+            targets: this.levelTooltip,
+            alpha: 0,
+            duration: 150,
+            ease: 'Power2',
+            onComplete: () => {
+                this.levelTooltip!.setVisible(false);
+            }
+        });
+    }
+    
+    private updateLevelTooltipBackground(): void {
+        if (!this.levelTooltipBackground || !this.levelTooltipTitle || !this.levelTooltipDescription) return;
+        
+        // Calculate tooltip dimensions
+        const titleBounds = this.levelTooltipTitle.getBounds();
+        const descriptionBounds = this.levelTooltipDescription.getBounds();
+        
+        const padding = 12;
+        const width = Math.max(titleBounds.width, descriptionBounds.width) + padding * 2;
+        const height = titleBounds.height + descriptionBounds.height + padding * 3;
+        
+        // Position title and description for left alignment
+        this.levelTooltipTitle.setX(-width / 2 + padding);
+        this.levelTooltipTitle.setY(-height / 2 + padding + titleBounds.height / 2);
+        this.levelTooltipDescription.setX(-width / 2 + padding);
+        this.levelTooltipDescription.setY(height / 2 - padding - descriptionBounds.height / 2);
+        
+        // Draw background
+        this.levelTooltipBackground.clear();
+        this.levelTooltipBackground.fillStyle(0x1a1a1a, 0.95);
+        this.levelTooltipBackground.fillRoundedRect(-width / 2, -height / 2, width, height, 8);
+        this.levelTooltipBackground.lineStyle(2, 0xffffff, 1);
+        this.levelTooltipBackground.strokeRoundedRect(-width / 2, -height / 2, width, height, 8);
     }
 
 } 
