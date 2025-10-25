@@ -378,6 +378,10 @@ export const GAMEPLAY_CONFIG = {
                 type: "ability",
                 abilityType: "sniper"
             },
+            "ability:default": {
+                type: "ability",
+                abilityType: "default"
+            },
             "ability_stat:range": {
                 type: "ability_stat",
                 stats: [

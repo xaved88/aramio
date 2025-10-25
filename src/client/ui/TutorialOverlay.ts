@@ -264,9 +264,9 @@ export class TutorialOverlay {
         currentY += 60;
         
         // Display hero types with images and descriptions - use CLIENT_CONFIG to avoid duplication
-        // Strip "Ability: " prefix from titles for cleaner display
+        // Strip "Class: " prefix from titles for cleaner display
         const heroData = [
-            { type: 'default', name: 'Starter', desc: 'Basic projectile attack' },
+            { type: 'default', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:default'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:default'].description },
             { type: 'hookshot', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:hookshot'].description },
             { type: 'mercenary', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:mercenary'].description },
             { type: 'pyromancer', name: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].title.replace('Class: ', ''), desc: CLIENT_CONFIG.REWARDS.DISPLAY['ability:pyromancer'].description },

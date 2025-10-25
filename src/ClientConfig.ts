@@ -504,7 +504,7 @@ export const CLIENT_CONFIG = {
             },
             "ability:pyromancer": {
                 title: "Class: Pyromancer",
-                description: "AOE fire damage",
+                description: "AOE damage and lingering burn",
                 rarity: "ability"
             },
             "ability:hookshot": {
@@ -520,6 +520,11 @@ export const CLIENT_CONFIG = {
             "ability:sniper": {
                 title: "Class: Sniper",
                 description: "Precise ranged projectile",
+                rarity: "ability"
+            },
+            "ability:default": {
+                title: "Class: Starter",
+                description: "Basic projectile attack",
                 rarity: "ability"
             },
             "ability_stat:range": {
