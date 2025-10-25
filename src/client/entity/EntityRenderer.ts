@@ -155,7 +155,7 @@ export class EntityRenderer {
         // Check for reflect effect - add pulsing spiky border effect
         const hasReflect = combatant.effects.some(effect => effect.type === 'reflect');
         if (hasReflect) {            
-            graphics.lineStyle(6, 0xFFD700); // Orange-red for danger, thicker line
+            graphics.lineStyle(6, 0xFF69B4); // Pink for reflect, thicker line
             
             // Draw spiky border right on the entity's edge
             const numSpikes = 12;
@@ -179,7 +179,7 @@ export class EntityRenderer {
         const isTaunted = combatant.effects.some(effect => effect.type === 'taunt');
         if (isTaunted) {
             // Add taunt icon above the entity
-            graphics.lineStyle(2, 0xFFFF00); // Yellow lines for icon with reduced thickness
+            graphics.lineStyle(2, 0xFF69B4); // Pink lines for icon with reduced thickness
             
             // Draw a simple target/eye shape for taunt icon
             const iconSize = 16; // Slightly smaller icon
@@ -189,7 +189,7 @@ export class EntityRenderer {
             graphics.strokeCircle(0, iconY, iconSize);
             
             // Draw inner target dot
-            graphics.fillStyle(0xFFFF00, 0.8);
+            graphics.fillStyle(0xFF69B4, 0.8);
             graphics.fillCircle(0, iconY, iconSize * 0.5);
             graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillCircle(0, iconY, iconSize * 0.3);
