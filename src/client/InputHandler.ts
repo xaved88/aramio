@@ -425,8 +425,10 @@ export class InputHandler {
             if (this.isClickHeld) {
                 // Check if ability is on cooldown before sending
                 if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Trigger red flash when clicking while on cooldown
-                    this.uiManager.triggerCursorRedFlash();
+                    // Only trigger red flash if not respawning
+                    if (!this.isPlayerRespawning()) {
+                        this.uiManager.triggerCursorRedFlash();
+                    }
                 } else {
                     // Send ability use to server
                     const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
@@ -447,8 +449,10 @@ export class InputHandler {
             if (this.isClickHeld) {
                 // Check if ability is on cooldown before sending
                 if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Trigger red flash when clicking while on cooldown
-                    this.uiManager.triggerCursorRedFlash();
+                    // Only trigger red flash if not respawning
+                    if (!this.isPlayerRespawning()) {
+                        this.uiManager.triggerCursorRedFlash();
+                    }
                 } else {
                     // Send ability use to server
                     const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
@@ -468,8 +472,10 @@ export class InputHandler {
             if (this.isClickHeld && !this.isTargetingWithSpace) {
                 // Check if ability is on cooldown before sending
                 if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Trigger red flash when clicking while on cooldown
-                    this.uiManager.triggerCursorRedFlash();
+                    // Only trigger red flash if not respawning
+                    if (!this.isPlayerRespawning()) {
+                        this.uiManager.triggerCursorRedFlash();
+                    }
                 } else {
                     // Send ability use to server
                     const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
@@ -589,6 +595,23 @@ export class InputHandler {
      */
     getControlMode(): ControlMode {
         return this.controlMode;
+    }
+
+    /**
+     * Checks if the current player is respawning
+     */
+    private isPlayerRespawning(): boolean {
+        const gameScene = this.scene as any;
+        if (!gameScene.lastState) return false;
+        
+        // Find the current player's hero
+        for (const combatant of gameScene.lastState.combatants.values()) {
+            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
+                return combatant.state === 'respawning';
+            }
+        }
+        
+        return false;
     }
 
     /**
