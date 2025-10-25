@@ -15,6 +15,7 @@ export class RewardCardManager {
     private rewardCards: RewardCard[] = [];
     private chestNameText: Phaser.GameObjects.Text | null = null;
     private onRewardChosen?: (rewardId: string) => void;
+    private animationCount: number = 0; // Track how many times animations have been shown
 
     constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
@@ -34,6 +35,8 @@ export class RewardCardManager {
         this.destroy();
         
         if (!hero.rewardsForChoice || hero.rewardsForChoice.length === 0) {
+            // Reset animation count when no rewards (player respawned)
+            this.animationCount = 0;
             return;
         }
 
@@ -129,6 +132,14 @@ export class RewardCardManager {
     }
 
     private slideUpCards(targetY: number): void {
+        // Increment animation count
+        this.animationCount++;
+        
+        // Use faster animations after the first time
+        const isFirstAnimation = this.animationCount === 1;
+        const baseDelay = isFirstAnimation ? 200 : 100; // Faster stagger after first
+        const baseDuration = isFirstAnimation ? 500 : 350; // Much faster animation after first
+        
         // Animate cards sliding up from bottom one by one
         this.rewardCards.forEach((card, index) => {
             // Check if card still exists
@@ -137,7 +148,7 @@ export class RewardCardManager {
             }
             
             const container = card.container.getContainer();
-            const delay = index * 200; // Staggered animation
+            const delay = index * baseDelay; // Staggered animation
             
             this.scene.time.delayedCall(delay, () => {
                 // Check if card still exists
@@ -149,7 +160,7 @@ export class RewardCardManager {
                 this.scene.tweens.add({
                     targets: container,
                     y: targetY,
-                    duration: 500,
+                    duration: baseDuration,
                     ease: 'Back.easeOut',
                     onComplete: () => {
                         // Check if card still exists before making it interactive
