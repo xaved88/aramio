@@ -154,7 +154,7 @@ export class KillFeed {
         
         // Create background
         const background = this.scene.add.graphics();
-        background.fillStyle(0x000000, 0.5);
+        background.fillStyle(0x000000, 0.7);
         background.fillRoundedRect(0, 0, 170, this.ENTRY_HEIGHT, 3);
         entryContainer.add(background);
         
@@ -167,7 +167,7 @@ export class KillFeed {
             : hexToColorString(victimTeam === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED);
         
         // Create text: "KillerName killed VictimName"
-        const fontSize = involvedPlayer ? '14px' : '13px';
+        const fontSize = involvedPlayer ? '14px' : '14px';
         const fontWeight = involvedPlayer ? 'bold' : 'normal';
         
         // Killer name - use italic for bots
