@@ -103,9 +103,9 @@ export class HUDRenderer {
         const abilityX = startX + xpDiameter + spacing + healthWidth + spacing + abilitySize / 2;
         const abilityY = healthCenterY;
         
-        // Position rewards counter centered above the XP indicator
+        // Position rewards counter centered below the XP indicator
         const rewardsX = xpX; // Center horizontally with XP circle
-        const rewardsY = xpY - CLIENT_CONFIG.UI.XP_INDICATOR.RADIUS - 20;
+        const rewardsY = xpY + CLIENT_CONFIG.UI.XP_INDICATOR.RADIUS + 20;
         
         return { startX, xpX, xpY, healthX, healthY, abilityX, abilityY, rewardsX, rewardsY };
     }
