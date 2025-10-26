@@ -174,6 +174,8 @@ export const GAMEPLAY_CONFIG = {
                 STRENGTH_RATIO: 1.8, // damage = abilityPower * ratio (increased from 1.5 for higher damage)
                 SPEED: 400,
                 RANGE: 600,
+                RECOIL_SPEED: 600, // Recoil movement speed (pixels per second) - opposite direction of shot
+                RECOIL_DISTANCE: 80, // Distance to recoil backwards
             }
         },
         CRADLE: {

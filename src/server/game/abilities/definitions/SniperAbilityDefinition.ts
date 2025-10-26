@@ -3,6 +3,8 @@ import { Projectile, ProjectileEffect } from '../../../schema/Projectiles';
 import { Hero } from '../../../schema/Combatants';
 import { AbilityDefinition } from './AbilityDefinition';
 import { GameplayConfig } from '../../../config/ConfigProvider';
+import { MoveEffect, NoCollisionEffect } from '../../../schema/Effects';
+import { COMBATANT_EFFECT_TYPES } from '../../../../shared/types/CombatantTypes';
 
 export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility> {
     private static _instance: SniperAbilityDefinition | null = null;
@@ -101,6 +103,46 @@ export class SniperAbilityDefinition implements AbilityDefinition<SniperAbility>
         damageEffect.damage = hero.getAbilityStrength();
         projectile.effects.push(damageEffect);
         
+        // Apply recoil effect - move backwards from shot direction
+        this.applyRecoilEffect(hero, directionX, directionY, state, gameplayConfig);
+        
         state.projectiles.set(projectile.id, projectile);
+    }
+
+    private applyRecoilEffect(hero: Hero, shotDirectionX: number, shotDirectionY: number, state: any, gameplayConfig: GameplayConfig): void {
+        const config = gameplayConfig.COMBAT.ABILITIES.sniper;
+        const currentTime = state.gameTime;
+        
+        // Calculate recoil direction (opposite of shot direction)
+        const recoilDirectionX = -shotDirectionX;
+        const recoilDirectionY = -shotDirectionY;
+        
+        // Calculate recoil target position
+        const recoilTargetX = hero.x + recoilDirectionX * config.RECOIL_DISTANCE;
+        const recoilTargetY = hero.y + recoilDirectionY * config.RECOIL_DISTANCE;
+        
+        // Create recoil movement effect
+        const moveEffect = new MoveEffect();
+        moveEffect.type = COMBATANT_EFFECT_TYPES.MOVE;
+        moveEffect.moveTargetX = recoilTargetX;
+        moveEffect.moveTargetY = recoilTargetY;
+        moveEffect.moveSpeed = config.RECOIL_SPEED;
+        moveEffect.duration = this.calculateRecoilDuration(hero.x, hero.y, recoilTargetX, recoilTargetY, config.RECOIL_SPEED);
+        moveEffect.appliedAt = currentTime;
+
+        // Create no collision effect for the recoil (like thorndive)
+        const noCollisionEffect = new NoCollisionEffect();
+        noCollisionEffect.type = COMBATANT_EFFECT_TYPES.NOCOLLISION;
+        noCollisionEffect.duration = moveEffect.duration;
+        noCollisionEffect.appliedAt = currentTime;
+
+        // Apply recoil effects
+        hero.effects.push(moveEffect);
+        hero.effects.push(noCollisionEffect);
+    }
+
+    private calculateRecoilDuration(startX: number, startY: number, targetX: number, targetY: number, speed: number): number {
+        const distance = Math.sqrt(Math.pow(targetX - startX, 2) + Math.pow(targetY - startY, 2));
+        return (distance / speed) * 1000; // Convert to milliseconds
     }
 }
