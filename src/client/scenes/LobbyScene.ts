@@ -324,6 +324,14 @@ export class LobbyScene extends Phaser.Scene {
         
         // Load respawn indicator image for respawning heroes
         this.load.image('respawn-indicator', '/assets/icons/respawn-indicator.png');
+        
+        // Load ability icons for tutorial
+        this.load.image('icon_ability:default', '/assets/icons/default.png');
+        this.load.image('icon_ability:thorndive', '/assets/icons/thorndive.png');
+        this.load.image('icon_ability:pyromancer', '/assets/icons/pyromancer.png');
+        this.load.image('icon_ability:hookshot', '/assets/icons/hookshot.png');
+        this.load.image('icon_ability:mercenary', '/assets/icons/mercenary.png');
+        this.load.image('icon_ability:sniper', '/assets/icons/sniper.png');
     }
 
     async create() {

@@ -105,12 +105,24 @@ export class HowToPlay extends TutorialStep {
         const heroVisualizationY = controlsStartY + 20;
         
         const radiusGraphics = this.scene.add.graphics();
+        // Draw dashed circle to match game visuals (auto-attack ranges are dashed)
+        const dashAngle = 0.15; // angle of each dash in radians
+        const gapAngle = 0.1; // angle of each gap in radians
+        const angleStep = dashAngle + gapAngle;
         radiusGraphics.lineStyle(
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA
         );
-        radiusGraphics.strokeCircle(heroVisualizationX, heroVisualizationY, 55);
+        
+        let currentAngle = 0;
+        while (currentAngle < Math.PI * 2) {
+            const endAngle = Math.min(currentAngle + dashAngle, Math.PI * 2);
+            radiusGraphics.beginPath();
+            radiusGraphics.arc(heroVisualizationX, heroVisualizationY, 55, currentAngle, endAngle);
+            radiusGraphics.strokePath();
+            currentAngle += angleStep;
+        }
         this.contentContainer.add(radiusGraphics);
         
         const heroVisual = this.scene.add.image(heroVisualizationX, heroVisualizationY, 'hero-base');
@@ -253,13 +265,28 @@ export class HowToPlay extends TutorialStep {
             }));
         this.contentContainer.add(advancedControlsText);
         
-        // Mercenary icon visualization (right side of advanced controls)
-        const mercenaryIconX = leftX + 480;
-        const mercenaryIconY = currentY + 50;
+        // Hero ability icons visualization (right side of advanced controls)
+        const iconSize = 50;
+        const iconStartX = leftX + 480;
+        const iconStartY = currentY + 50;
+        const iconSpacing = 50;
+        const numIcons = 3;
         
-        const mercenaryIcon = this.scene.add.image(mercenaryIconX, mercenaryIconY, 'mercenary-icon');
-        mercenaryIcon.setDisplaySize(100, 100); // Set explicit display size for proper scaling
-        this.contentContainer.add(mercenaryIcon);
+        // Show 3 ability icons equally spaced
+        const abilityIcons = [
+            'icon_ability:default',
+            'icon_ability:hookshot',
+            'icon_ability:mercenary'
+        ];
+        
+        for (let i = 0; i < numIcons; i++) {
+            const x = iconStartX + (i - (numIcons - 1) / 2) * iconSpacing;
+            const y = iconStartY;
+            
+            const abilityIcon = this.scene.add.image(x, y, abilityIcons[i]);
+            abilityIcon.setDisplaySize(iconSize, iconSize);
+            this.contentContainer.add(abilityIcon);
+        }
     }
 }
 
