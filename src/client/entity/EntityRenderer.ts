@@ -473,41 +473,42 @@ export class EntityRenderer {
     }
 
     /**
-     * Renders a single targeting reticle for a target combatant
+     * Renders a targeting reticle using relative coordinates (graphics object is at the entity position)
      */
-    renderTargetingReticle(target: Combatant, graphics: Phaser.GameObjects.Graphics): void {
+    renderTargetingReticleRelative(entitySize: number, graphics: Phaser.GameObjects.Graphics): void {
         graphics.clear();
         
-        // Draw a white targeting reticle on the target entity
-        const reticleSize = target.size + CLIENT_CONFIG.TARGETING_RETICLE.SIZE_OFFSET;
+        // Draw a white targeting reticle centered at (0,0) since graphics is positioned at entity
+        const reticleSize = entitySize + CLIENT_CONFIG.TARGETING_RETICLE.SIZE_OFFSET;
         const config = CLIENT_CONFIG.TARGETING_RETICLE;
+        const halfSize = reticleSize / 2;
         
         graphics.lineStyle(config.THICKNESS, config.COLOR, config.ALPHA);
         graphics.beginPath();
         
         // Top-left corner
-        graphics.moveTo(target.x - reticleSize / 2, target.y - reticleSize / 2);
-        graphics.lineTo(target.x - reticleSize / 2 + config.CORNER_LENGTH, target.y - reticleSize / 2);
-        graphics.moveTo(target.x - reticleSize / 2, target.y - reticleSize / 2);
-        graphics.lineTo(target.x - reticleSize / 2, target.y - reticleSize / 2 + config.CORNER_LENGTH);
+        graphics.moveTo(-halfSize, -halfSize);
+        graphics.lineTo(-halfSize + config.CORNER_LENGTH, -halfSize);
+        graphics.moveTo(-halfSize, -halfSize);
+        graphics.lineTo(-halfSize, -halfSize + config.CORNER_LENGTH);
         
         // Top-right corner
-        graphics.moveTo(target.x + reticleSize / 2, target.y - reticleSize / 2);
-        graphics.lineTo(target.x + reticleSize / 2 - config.CORNER_LENGTH, target.y - reticleSize / 2);
-        graphics.moveTo(target.x + reticleSize / 2, target.y - reticleSize / 2);
-        graphics.lineTo(target.x + reticleSize / 2, target.y - reticleSize / 2 + config.CORNER_LENGTH);
+        graphics.moveTo(halfSize, -halfSize);
+        graphics.lineTo(halfSize - config.CORNER_LENGTH, -halfSize);
+        graphics.moveTo(halfSize, -halfSize);
+        graphics.lineTo(halfSize, -halfSize + config.CORNER_LENGTH);
         
         // Bottom-left corner
-        graphics.moveTo(target.x - reticleSize / 2, target.y + reticleSize / 2);
-        graphics.lineTo(target.x - reticleSize / 2 + config.CORNER_LENGTH, target.y + reticleSize / 2);
-        graphics.moveTo(target.x - reticleSize / 2, target.y + reticleSize / 2);
-        graphics.lineTo(target.x - reticleSize / 2, target.y + reticleSize / 2 - config.CORNER_LENGTH);
+        graphics.moveTo(-halfSize, halfSize);
+        graphics.lineTo(-halfSize + config.CORNER_LENGTH, halfSize);
+        graphics.moveTo(-halfSize, halfSize);
+        graphics.lineTo(-halfSize, halfSize - config.CORNER_LENGTH);
         
         // Bottom-right corner
-        graphics.moveTo(target.x + reticleSize / 2, target.y + reticleSize / 2);
-        graphics.lineTo(target.x + reticleSize / 2 - config.CORNER_LENGTH, target.y + reticleSize / 2);
-        graphics.moveTo(target.x + reticleSize / 2, target.y + reticleSize / 2);
-        graphics.lineTo(target.x + reticleSize / 2, target.y + reticleSize / 2 - config.CORNER_LENGTH);
+        graphics.moveTo(halfSize, halfSize);
+        graphics.lineTo(halfSize - config.CORNER_LENGTH, halfSize);
+        graphics.moveTo(halfSize, halfSize);
+        graphics.lineTo(halfSize, halfSize - config.CORNER_LENGTH);
         
         graphics.strokePath();
     }

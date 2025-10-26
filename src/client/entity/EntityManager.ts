@@ -41,6 +41,7 @@ export class EntityManager {
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
     private targetingReticleGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map(); // Individual reticles per target
+    private targetingReticleSizes: Map<CombatantId, number> = new Map(); // Track size for each reticle
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
     private processedAOEDamageEvents: Set<string> = new Set();
@@ -1588,7 +1589,14 @@ export class EntityManager {
                 targetsToRemove.push(targetId);
             }
         });
-        targetsToRemove.forEach(id => this.targetingReticleGraphics.delete(id));
+        targetsToRemove.forEach(id => {
+            const reticleGraphics = this.targetingReticleGraphics.get(id);
+            if (reticleGraphics) {
+                reticleGraphics.destroy();
+            }
+            this.targetingReticleGraphics.delete(id);
+            this.targetingReticleSizes.delete(id);
+        });
         
         // Create/update reticle for current target
         if (currentTargetId) {
@@ -1597,12 +1605,10 @@ export class EntityManager {
                 let reticleGraphics = this.targetingReticleGraphics.get(currentTargetId);
                 
                 if (!reticleGraphics) {
-                    // Create new reticle graphics
+                    // Create new reticle graphics at the target's position
                     reticleGraphics = this.scene.add.graphics();
                     reticleGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-                    
-                    // Graphics object stays at origin, we draw with absolute world coordinates
-                    reticleGraphics.setPosition(0, 0);
+                    reticleGraphics.setPosition(target.x, target.y);
                     
                     if (this.cameraManager) {
                         this.cameraManager.assignToMainCamera(reticleGraphics);
@@ -1611,8 +1617,23 @@ export class EntityManager {
                     this.targetingReticleGraphics.set(currentTargetId, reticleGraphics);
                 }
                 
-                // Draw the reticle at the target's position
-                this.entityRenderer.renderTargetingReticle(target, reticleGraphics);
+                // Store the entity size for proper reticle sizing
+                this.targetingReticleSizes.set(currentTargetId, target.size);
+                
+                // Animate the reticle position smoothly like entity movement
+                this.animateEntityMovement(
+                    `reticle-${currentTargetId}`,
+                    [reticleGraphics],
+                    target.x,
+                    target.y
+                );
+                
+                // Draw the reticle centered at its position (relative coordinates)
+                // The graphics object is positioned at the target, so we draw relative to (0,0)
+                this.entityRenderer.renderTargetingReticleRelative(
+                    target.size,
+                    reticleGraphics
+                );
             }
         }
     }
@@ -1671,6 +1692,7 @@ export class EntityManager {
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
         this.targetingReticleGraphics.clear();
+        this.targetingReticleSizes.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
         this.processedDeathEffectEvents.clear();
