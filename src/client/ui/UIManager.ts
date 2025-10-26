@@ -14,7 +14,6 @@ import { DamageDealtOverlay } from './DamageDealtOverlay';
 import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
-import { ControlModeToggle } from './ControlModeToggle';
 import { KillFeed } from './KillFeed';
 import { TutorialOverlay } from './TutorialOverlay';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
@@ -40,7 +39,6 @@ export class UIManager {
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
     private tutorialOverlay: TutorialOverlay;
-    private controlModeToggle: ControlModeToggle | null = null;
     private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null;
@@ -138,32 +136,6 @@ export class UIManager {
         this.cursorRenderer.triggerRedFlash();
     }
 
-    private createControlModeToggle(): void {
-        if (this.controlModeToggle) {
-            this.controlModeToggle.destroy();
-        }
-        
-        const padding = 10;
-        this.controlModeToggle = new ControlModeToggle(
-            this.scene,
-            getCanvasWidth() - padding - 15,
-            getCanvasHeight() - padding - 15,
-            (mode) => {
-                // Update input handler when mode changes
-                if (this.inputHandler) {
-                    this.inputHandler.setControlMode(mode);
-                }
-            }
-        );
-        this.controlModeToggle.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
-        this.controlModeToggle.setScrollFactor(0, 0);
-        
-        // Add to HUD container if it exists
-        const hudContainer = this.hudRenderer.getHUDContainer();
-        if (hudContainer) {
-            hudContainer.add(this.controlModeToggle.getContainer());
-        }
-    }
 
     createHUD(): void {
         this.clearHUD();
@@ -174,18 +146,11 @@ export class UIManager {
         // Initialize cursor renderer
         this.cursorRenderer.create();
         
-        // Create control mode toggle after HUD is created
-        this.createControlModeToggle();
     }
 
     clearHUD(): void {
         // HUD elements are managed by HUDRenderer, no need to clear them here
         
-        // Destroy control mode toggle if it exists
-        if (this.controlModeToggle) {
-            this.controlModeToggle.destroy();
-            this.controlModeToggle = null;
-        }
         
         // Clear kill feed on HUD clear (game restart)
         this.killFeed.clear();

@@ -7,7 +7,6 @@ import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ConnectionManager } from '../ConnectionManager';
 import { PlayerNameStorage } from '../utils/PlayerNameStorage';
-import { ControlModeToggle } from '../ui/ControlModeToggle';
 import { TutorialOverlay } from '../ui/TutorialOverlay';
 import { CursorRenderer } from '../ui/CursorRenderer';
 import { Button } from '../ui/Button';
@@ -28,7 +27,6 @@ export class LobbyScene extends Phaser.Scene {
     private startButton!: Button;
     private teamSizeButtons: Button[] = [];
     private versionText!: Phaser.GameObjects.Text;
-    private controlModeToggle!: ControlModeToggle;
     private tutorialOverlay!: TutorialOverlay;
     private tutorialButton!: Phaser.GameObjects.Container;
     private cursorRenderer!: CursorRenderer;
@@ -281,12 +279,6 @@ export class LobbyScene extends Phaser.Scene {
         // Hide input field
         if (this.welcomeInputElement) {
             this.welcomeInputElement.style.display = 'none';
-        }
-        
-        // Destroy control mode toggle if it exists
-        if (this.controlModeToggle) {
-            this.controlModeToggle.destroy();
-            this.controlModeToggle = null as any;
         }
         
         // Destroy tutorial overlay if it exists
@@ -601,14 +593,6 @@ export class LobbyScene extends Phaser.Scene {
             TextStyleHelper.getSubtleHintStyle()
         ).setOrigin(0.5, 1);
 
-        // Control mode toggle in bottom right
-        this.controlModeToggle = new ControlModeToggle(
-            this,
-            this.cameras.main.width - padding - 15,
-            this.cameras.main.height - padding - 15
-        );
-        this.controlModeToggle.setScrollFactor(0, 0);
-        
         // Initialize tutorial overlay
         this.tutorialOverlay = new TutorialOverlay(this, () => {
             this.updateInputFieldVisibility();

@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../ClientConfig';
-import { ControlMode, ControlModeStorage } from './utils/ControlModeStorage';
 
 /**
  * SINGLE SOURCE OF TRUTH FOR ALL INPUT HANDLING
@@ -12,20 +11,10 @@ import { ControlMode, ControlModeStorage } from './utils/ControlModeStorage';
  * - Simple modification of control schemes
  * - Better testing and debugging of input logic
  * 
- * Control Schemes:
- * 1. Mouse-only: Point-to-move + Click-down-to-stop + Click-up-for-ability
- *    - Mouse not pressed: Move towards mouse pointer
- *    - Mouse pressed: Stop sending move events, show ability targeting
- *    - Mouse released: Fire ability at release position
- * 
- * 2. Keyboard + Mouse: WASD for movement + Click for ability
- *    - WASD: Directional movement (additive vectors)
- *    - Mouse click: Fire ability at click position
- * 
- * 3. MOBA: Right-click-to-move + Space/Left-click-to-target + Release-to-fire
- *    - Right-click: Set move target, hero continues until arrival
- *    - Space or Left-click: Enter targeting mode, show ability targeting
- *    - Release: Fire ability at current mouse position
+ * Unified Control Scheme:
+ * - WASD: Movement
+ * - Space OR Left-click: Hold to enter targeting mode, release to cast ability
+ * - Right-click: Toggle "move to mouse" mode (cancels on WASD/right-click)
  */
 export class InputHandler {
     private scene: Phaser.Scene;
@@ -37,9 +26,6 @@ export class InputHandler {
     private gameplayConfig: any = null;
     private uiManager: any = null;
     private cameraManager: any = null;
-
-    // Control mode
-    private controlMode: ControlMode = 'mouse';
     
     // Keyboard movement state
     private keyStates: {
@@ -51,14 +37,12 @@ export class InputHandler {
     
     private readonly KEYBOARD_MOVE_DISTANCE = 100;
     
-    // MOBA mode state
-    private moveTargetPosition: { x: number; y: number } | null = null;
-    private isTargetingWithSpace: boolean = false;
+    // Mouse follow mode (right-click toggle)
+    private isMouseFollowMode: boolean = false;
 
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
         this.room = room;
-        this.controlMode = ControlModeStorage.getControlMode();
     }
 
     /**
@@ -75,7 +59,7 @@ export class InputHandler {
      * This is the ONLY place where input events should be registered
      */
     setupHandlers(): void {
-        // Pointer down: Start ability targeting, stop movement (left click only)
+        // Pointer down: Start ability targeting (left click only)
         this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             // Only handle left mouse button (button 0)
             if (pointer.button === 0) {
@@ -83,7 +67,7 @@ export class InputHandler {
             }
         });
 
-        // Pointer up: Fire ability, resume movement (left click only)
+        // Pointer up: Fire ability (left click only)
         this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
             // Only handle left mouse button (button 0)
             if (pointer.button === 0) {
@@ -91,14 +75,11 @@ export class InputHandler {
             }
         });
 
-        // Prevent right-click context menu
+        // Prevent right-click context menu and handle right-click toggle
         this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             if (pointer.button === 2) { // Right mouse button
                 pointer.event.preventDefault();
-                // Handle right-click for MOBA mode
-                if (this.controlMode === 'moba') {
-                    this.handleRightClick(pointer);
-                }
+                this.handleRightClick();
             }
         });
 
@@ -110,34 +91,40 @@ export class InputHandler {
      * Sets up all keyboard input handlers
      */
     private setupKeyboardHandlers(): void {
-        // WASD for movement (keyboard mode only)
+        // WASD for movement
         this.setupWASDHandlers();
         
-        // MOBA mode handlers
-        this.setupMOBAHandlers();
+        // Space key for ability targeting
+        this.scene.input.keyboard?.on('keydown-SPACE', () => {
+            this.handleSpaceDown();
+        });
+        
+        this.scene.input.keyboard?.on('keyup-SPACE', () => {
+            this.handleSpaceUp();
+        });
 
-        // H key handler for hero cycling (was S, moved due to WASD)
+        // H key handler for hero cycling
         this.scene.input.keyboard?.on('keydown-H', (event: KeyboardEvent) => {
             if (this.room) {
                 this.room.send('toggleHero');
             }
         });
 
-        // K key handler for debug kill (was D, moved due to WASD)
+        // K key handler for debug kill
         this.scene.input.keyboard?.on('keydown-K', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_KILL_PLAYER_ENABLED) {
                 this.room.send('debugKill');
             }
         });
 
-        // R key handler for instant respawn (was L, moved to more accessible key)
+        // R key handler for instant respawn
         this.scene.input.keyboard?.on('keydown-R', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_INSTANT_RESPAWN_ENABLED) {
                 this.room.send('instantRespawn');
             }
         });
 
-        // U key handler for level up (keeping U)
+        // U key handler for level up
         this.scene.input.keyboard?.on('keydown-U', (event: KeyboardEvent) => {
             if (this.room && this.gameplayConfig?.DEBUG.CHEAT_LEVEL_UP_ENABLED) {
                 this.room.send('debugLevelUp');
@@ -146,7 +133,7 @@ export class InputHandler {
 
         // Tab key handlers for stats overlay (hold to show)
         this.scene.input.keyboard?.on('keydown-TAB', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default tab behavior
+            event.preventDefault();
             if (this.uiManager) {
                 this.uiManager.showStatsOverlay();
             }
@@ -160,7 +147,7 @@ export class InputHandler {
 
         // Shift key handlers for damage overlay (hold to show)
         this.scene.input.keyboard?.on('keydown-SHIFT', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default shift behavior
+            event.preventDefault();
             if (this.uiManager) {
                 this.uiManager.showDamageOverlays();
             }
@@ -174,14 +161,14 @@ export class InputHandler {
 
         // Ctrl key handlers for cheat menu (hold to show)
         this.scene.input.keyboard?.on('keydown-CTRL', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default behavior
+            event.preventDefault();
             if (this.uiManager) {
                 this.uiManager.showCheatMenu();
             }
         });
 
         this.scene.input.keyboard?.on('keyup-CTRL', (event: KeyboardEvent) => {
-            event.preventDefault(); // Prevent default behavior
+            event.preventDefault();
             if (this.uiManager) {
                 this.uiManager.hideCheatMenu();
             }
@@ -209,6 +196,7 @@ export class InputHandler {
         // W key
         this.scene.input.keyboard?.on('keydown-W', () => {
             this.keyStates.W = true;
+            this.isMouseFollowMode = false;
         });
         this.scene.input.keyboard?.on('keyup-W', () => {
             this.keyStates.W = false;
@@ -217,6 +205,7 @@ export class InputHandler {
         // A key
         this.scene.input.keyboard?.on('keydown-A', () => {
             this.keyStates.A = true;
+            this.isMouseFollowMode = false;
         });
         this.scene.input.keyboard?.on('keyup-A', () => {
             this.keyStates.A = false;
@@ -224,11 +213,8 @@ export class InputHandler {
 
         // S key
         this.scene.input.keyboard?.on('keydown-S', () => {
-            if (this.controlMode === 'moba') {
-                this.handleStopMovement();
-            } else {
-                this.keyStates.S = true;
-            }
+            this.keyStates.S = true;
+            this.isMouseFollowMode = false;
         });
         this.scene.input.keyboard?.on('keyup-S', () => {
             this.keyStates.S = false;
@@ -237,27 +223,10 @@ export class InputHandler {
         // D key
         this.scene.input.keyboard?.on('keydown-D', () => {
             this.keyStates.D = true;
+            this.isMouseFollowMode = false;
         });
         this.scene.input.keyboard?.on('keyup-D', () => {
             this.keyStates.D = false;
-        });
-    }
-
-    /**
-     * Sets up MOBA control handlers
-     */
-    private setupMOBAHandlers(): void {
-        // Space key for targeting mode
-        this.scene.input.keyboard?.on('keydown-SPACE', () => {
-            if (this.controlMode === 'moba') {
-                this.handleSpaceDown();
-            }
-        });
-        
-        this.scene.input.keyboard?.on('keyup-SPACE', () => {
-            if (this.controlMode === 'moba') {
-                this.handleSpaceUp();
-            }
         });
     }
 
@@ -271,19 +240,17 @@ export class InputHandler {
             return;
         }
 
-        if (this.controlMode === 'mouse') {
-            this.updateMouseMovement();
-        } else if (this.controlMode === 'keyboard') {
+        if (this.isMouseFollowMode) {
+            this.updateMouseFollowMovement();
+        } else {
             this.updateKeyboardMovement();
-        } else if (this.controlMode === 'moba') {
-            this.updateMOBAMovement();
         }
     }
 
     /**
-     * Handles movement for mouse-only mode
+     * Handles movement for mouse-follow mode (right-click toggle)
      */
-    private updateMouseMovement(): void {
+    private updateMouseFollowMovement(): void {
         // Only send movement commands when not clicking (for ability targeting)
         if (!this.isClickHeld) {
             const pointer = this.scene.input.activePointer;
@@ -340,48 +307,6 @@ export class InputHandler {
     }
 
     /**
-     * Handles movement for MOBA mode
-     */
-    private updateMOBAMovement(): void {
-        // Only send movement commands when there's a move target set
-        if (this.moveTargetPosition) {
-            // Check if we're close to the target
-            const gameScene = this.scene as any;
-            if (!gameScene.lastState) {
-                return;
-            }
-
-            let heroX = 0;
-            let heroY = 0;
-            
-            for (const combatant of gameScene.lastState.combatants.values()) {
-                if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
-                    heroX = combatant.x;
-                    heroY = combatant.y;
-                    break;
-                }
-            }
-
-            const dx = this.moveTargetPosition.x - heroX;
-            const dy = this.moveTargetPosition.y - heroY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // If we're close enough, stop moving
-            if (distance < (this.gameplayConfig?.HERO_STOP_DISTANCE || 10)) {
-                this.moveTargetPosition = null;
-                this.hideDestinationMarker();
-                return;
-            }
-
-            // Send move command to target position
-            this.room.send('move', {
-                targetX: this.moveTargetPosition.x,
-                targetY: this.moveTargetPosition.y
-            });
-        }
-    }
-
-    /**
      * Handles pointer down events - starts ability targeting
      */
     private handlePointerDown(pointer: Phaser.Input.Pointer): void {
@@ -390,19 +315,6 @@ export class InputHandler {
             return;
         }
 
-        // In MOBA mode, left-click starts targeting mode
-        if (this.controlMode === 'moba') {
-            this.isClickHeld = true;
-            this.isTargetingWithSpace = false; // This was triggered by mouse, not space
-            const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-            this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
-            
-            // Notify scene for UI updates (ability range display)
-            this.notifyScenePointerDown(pointer);
-            return;
-        }
-
-        // Original behavior for mouse and keyboard modes
         this.isClickHeld = true;
         const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
         this.clickDownPosition = { x: worldPos.x, y: worldPos.y };
@@ -420,81 +332,28 @@ export class InputHandler {
             return;
         }
 
-        if (this.controlMode === 'mouse') {
-            // Mouse mode: ability on mouse up
-            if (this.isClickHeld) {
-                // Check if ability is on cooldown before sending
-                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Only trigger red flash if not respawning
-                    if (!this.isPlayerRespawning()) {
-                        this.uiManager.triggerCursorRedFlash();
-                    }
-                } else {
-                    // Send ability use to server
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
+        if (this.isClickHeld) {
+            // Check if ability is on cooldown before sending
+            if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
+                // Only trigger red flash if not respawning
+                if (!this.isPlayerRespawning()) {
+                    this.uiManager.triggerCursorRedFlash();
                 }
-                
-                // Notify scene for UI updates (hide ability range display)
-                this.notifyScenePointerUp(pointer);
+            } else {
+                // Send ability use to server
+                const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
+                this.room.send('useAbility', {
+                    x: worldPos.x,
+                    y: worldPos.y
+                });
             }
             
-            this.isClickHeld = false;
-            this.clickDownPosition = null;
-        } else if (this.controlMode === 'keyboard') {
-            // Keyboard mode: ability on mouse up (same UI behavior as mouse mode)
-            if (this.isClickHeld) {
-                // Check if ability is on cooldown before sending
-                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Only trigger red flash if not respawning
-                    if (!this.isPlayerRespawning()) {
-                        this.uiManager.triggerCursorRedFlash();
-                    }
-                } else {
-                    // Send ability use to server
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
-                }
-                
-                // Notify scene for UI updates (hide ability range display)
-                this.notifyScenePointerUp(pointer);
-            }
-            
-            this.isClickHeld = false;
-        } else if (this.controlMode === 'moba') {
-            // MOBA mode: ability on mouse up (only if targeting was started with mouse)
-            if (this.isClickHeld && !this.isTargetingWithSpace) {
-                // Check if ability is on cooldown before sending
-                if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
-                    // Only trigger red flash if not respawning
-                    if (!this.isPlayerRespawning()) {
-                        this.uiManager.triggerCursorRedFlash();
-                    }
-                } else {
-                    // Send ability use to server
-                    const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-                    this.room.send('useAbility', {
-                        x: worldPos.x,
-                        y: worldPos.y
-                    });
-                }
-                
-                // Notify scene for UI updates (hide ability range display)
-                this.notifyScenePointerUp(pointer);
-            }
-            
-            // Only reset if this was mouse-triggered targeting
-            if (!this.isTargetingWithSpace) {
-                this.isClickHeld = false;
-                this.clickDownPosition = null;
-            }
+            // Notify scene for UI updates (hide ability range display)
+            this.notifyScenePointerUp(pointer);
         }
+        
+        this.isClickHeld = false;
+        this.clickDownPosition = null;
     }
 
     /**
@@ -572,32 +431,6 @@ export class InputHandler {
     }
 
     /**
-     * Sets the control mode and updates internal state
-     */
-    setControlMode(mode: ControlMode): void {
-        this.controlMode = mode;
-        
-        // Reset keyboard state when switching modes
-        if (mode === 'mouse') {
-            this.keyStates = { W: false, A: false, S: false, D: false };
-        }
-        
-        // Reset MOBA state when switching modes
-        if (mode !== 'moba') {
-            this.moveTargetPosition = null;
-            this.isTargetingWithSpace = false;
-            this.hideDestinationMarker();
-        }
-    }
-
-    /**
-     * Gets the current control mode
-     */
-    getControlMode(): ControlMode {
-        return this.controlMode;
-    }
-
-    /**
      * Checks if the current player is respawning
      */
     private isPlayerRespawning(): boolean {
@@ -615,22 +448,17 @@ export class InputHandler {
     }
 
     /**
-     * Handles right-click for MOBA mode movement
+     * Handles right-click to toggle mouse-follow mode
      */
-    private handleRightClick(pointer: Phaser.Input.Pointer): void {
-        const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-        this.moveTargetPosition = { x: worldPos.x, y: worldPos.y };
-        
-        // Create or update destination marker
-        this.updateDestinationMarker();
+    private handleRightClick(): void {
+        this.isMouseFollowMode = !this.isMouseFollowMode;
     }
 
     /**
-     * Handles space key down for MOBA mode targeting
+     * Handles space key down for ability targeting
      */
     private handleSpaceDown(): void {
         this.isClickHeld = true;
-        this.isTargetingWithSpace = true;
         
         // Get current mouse position for targeting
         const pointer = this.scene.input.activePointer;
@@ -642,100 +470,32 @@ export class InputHandler {
     }
 
     /**
-     * Handles space key up for MOBA mode ability firing
+     * Handles space key up to fire ability
      */
     private handleSpaceUp(): void {
-        if (this.isClickHeld && this.isTargetingWithSpace) {
+        if (this.isClickHeld) {
             // Get current mouse position for ability target
             const pointer = this.scene.input.activePointer;
             const worldPos = this.screenToWorldCoordinates(pointer.x, pointer.y);
-            this.room.send('useAbility', {
-                x: worldPos.x,
-                y: worldPos.y
-            });
+            
+            // Check if ability is on cooldown before sending
+            if (this.uiManager && this.uiManager.isAbilityOnCooldown()) {
+                // Only trigger red flash if not respawning
+                if (!this.isPlayerRespawning()) {
+                    this.uiManager.triggerCursorRedFlash();
+                }
+            } else {
+                this.room.send('useAbility', {
+                    x: worldPos.x,
+                    y: worldPos.y
+                });
+            }
             
             // Notify scene for UI updates (hide ability range display)
             this.notifyScenePointerUp(pointer);
         }
         
         this.isClickHeld = false;
-        this.isTargetingWithSpace = false;
         this.clickDownPosition = null;
-    }
-
-    /**
-     * Handles S key press to stop movement in MOBA mode
-     */
-    private handleStopMovement(): void {
-        // Clear the movement target
-        this.moveTargetPosition = null;
-        
-        // Hide the destination marker
-        this.hideDestinationMarker();
-        
-        // Get current hero position and send move command to current location (effectively stops movement)
-        const gameScene = this.scene as any;
-        if (gameScene.lastState) {
-            for (const combatant of gameScene.lastState.combatants.values()) {
-                if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
-                    // Send move command to current position to stop movement
-                    this.room.send('move', {
-                        targetX: combatant.x,
-                        targetY: combatant.y
-                    });
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates or updates the destination marker for MOBA mode
-     */
-    private updateDestinationMarker(): void {
-        if (!this.moveTargetPosition) return;
-
-        // Get the current player's hero color
-        const gameScene = this.scene as any;
-        if (!gameScene.lastState) return;
-
-        let heroColor: number = CLIENT_CONFIG.SELF_COLORS.PRIMARY; // Default to purple for player hero
-        
-        // Find the player's hero to get the correct color
-        for (const combatant of gameScene.lastState.combatants.values()) {
-            if (combatant.type === 'hero' && combatant.controller === gameScene.playerSessionId) {
-                // Check if this is the player's hero
-                const isControlledByPlayer = combatant.controller === gameScene.playerSessionId;
-                
-                if (isControlledByPlayer) {
-                    // Use purple palette for player-controlled heroes
-                    if (combatant.state === 'respawning') {
-                        heroColor = CLIENT_CONFIG.SELF_COLORS.RESPAWNING as number;
-                    } else {
-                        heroColor = CLIENT_CONFIG.SELF_COLORS.PRIMARY as number;
-                    }
-                } else {
-                    // Use team colors for other heroes
-                    if (combatant.state === 'respawning') {
-                        heroColor = (combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE_RESPAWNING : CLIENT_CONFIG.TEAM_COLORS.RED_RESPAWNING) as number;
-                    } else {
-                        heroColor = (combatant.team === 'blue' ? CLIENT_CONFIG.TEAM_COLORS.BLUE : CLIENT_CONFIG.TEAM_COLORS.RED) as number;
-                    }
-                }
-                break;
-            }
-        }
-
-        // Use GameScene's destination marker management
-        gameScene.updateDestinationMarker(this.moveTargetPosition.x, this.moveTargetPosition.y, heroColor);
-    }
-
-
-    /**
-     * Hides the destination marker
-     */
-    private hideDestinationMarker(): void {
-        const gameScene = this.scene as any;
-        gameScene.clearDestinationMarker();
     }
 }

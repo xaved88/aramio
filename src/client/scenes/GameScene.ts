@@ -76,10 +76,6 @@ export class GameScene extends Phaser.Scene {
         this.load.image('structure-cradle', '/assets/structures/structure_cradle.png');
         this.load.image('structure-turret', '/assets/structures/structure_tower.png');
         
-        // Load control mode icons
-        this.load.image('control-mouse', '/assets/config/mouse.png');
-        this.load.image('control-keyboard', '/assets/config/keyboard.png');
-        this.load.image('control-moba', '/assets/config/moba.png');
         
         // Load respawn indicator image for respawning heroes
         this.load.image('respawn-indicator', '/assets/icons/respawn-indicator.png');
