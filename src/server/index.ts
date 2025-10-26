@@ -42,5 +42,28 @@ app.get('*', (_req, res) => {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
 
+function formatBytes(bytes: number): string {
+    return (bytes / 1024 / 1024).toFixed(2);
+}
+
+let lastCpuUsage = process.cpuUsage();
+let lastHrTime = process.hrtime();
+
+function logPerformanceMetrics() {
+    const memUsage = process.memoryUsage();
+    const hrTime = process.hrtime();
+    const cpuUsage = process.cpuUsage(lastCpuUsage);
+    const elapsedTime = (hrTime[0] * 1e9 + hrTime[1] - (lastHrTime[0] * 1e9 + lastHrTime[1])) / 1e6;
+    
+    const cpuPercent = ((cpuUsage.user + cpuUsage.system) / 1000 / elapsedTime * 100).toFixed(2);
+    
+    console.log(`[Performance] RAM: ${formatBytes(memUsage.heapUsed)}MB used / ${formatBytes(memUsage.heapTotal)}MB total / ${formatBytes(memUsage.rss)}MB RSS | CPU: ${cpuPercent}%`);
+    
+    lastCpuUsage = process.cpuUsage();
+    lastHrTime = process.hrtime();
+}
+
+setInterval(logPerformanceMetrics, 30000);
+
 console.log(`Server running on port ${port}`);
 console.log('Room types defined: lobby, game'); 
