@@ -115,7 +115,7 @@ export const GAMEPLAY_CONFIG = {
         COLLISION_THRESHOLD_MULTIPLIER: 0.95,
         HERO: {
             HEALTH: 75,
-            ATTACK_RADIUS: 100,
+            ATTACK_RADIUS: 120,
             ATTACK_STRENGTH: 5,
             ATTACK_SPEED: 1, // attacks per second
             WIND_UP: 0.25, // wind-up time before attack
@@ -219,7 +219,7 @@ export const GAMEPLAY_CONFIG = {
         LEVEL_UP_QUADRATIC_THRESHOLD: 10, // Level where quadratic scaling kicks in
         LEVEL_UP_QUADRATIC_MULTIPLIER: 5, // Additional XP per level above threshold
         STAT_BOOST_PERCENTAGE: 0.10, // 10% boost per level
-        RANGE_BOOST_PERCENTAGE: 0.025, // reduced from 0.10 to prevent excessive late-game range at higher levels
+        RANGE_BOOST_PERCENTAGE: 0.02, // reduced from 0.10 to prevent excessive late-game range at higher levels
         ABILITY_POWER_BOOST_PERCENTAGE: 0.05, // 5% boost per level
         RESPAWN_LEVEL_MULTIPLIER: 0.10, // 10% increase per level
         RESPAWN_MAX_TIME_MS: 20000, // Maximum respawn time cap
@@ -378,7 +378,6 @@ export const GAMEPLAY_CONFIG = {
                     { id: "stat:ability_armor", weight: 1.5 },
                     { id: "stat:damage", weight: 1.5 },
                     { id: "stat:attack_speed", weight: 1.5 },
-                    { id: "stat:attack_range", weight: 1.5 },
                     { id: "stat:move_speed", weight: 1.5 },
                     // Ability stats (lower weights)
                     { id: "ability_stat:range", weight: 0.9 },
