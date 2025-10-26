@@ -97,6 +97,14 @@ export class GameScene extends Phaser.Scene {
         this.load.image('icon_ability_stat:speed', '/assets/icons/stats/ability_projectile_speed.png');
         this.load.image('icon_ability_stat:mercenary_rage_speed', '/assets/icons/stats/ability_rage_move_speed.png');
         this.load.image('icon_ability_stat:pyromancer_radius', '/assets/icons/stats/ability_pyromancer_radius.png');
+        
+        // Load ability icons (PNG)
+        this.load.image('icon_ability:default', '/assets/icons/default.png');
+        this.load.image('icon_ability:thorndive', '/assets/icons/thorndive.png');
+        this.load.image('icon_ability:pyromancer', '/assets/icons/pyromancer.png');
+        this.load.image('icon_ability:hookshot', '/assets/icons/hookshot.png');
+        this.load.image('icon_ability:mercenary', '/assets/icons/mercenary.png');
+        this.load.image('icon_ability:sniper', '/assets/icons/sniper.png');
     }
 
     async create() {

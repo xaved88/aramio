@@ -18,7 +18,7 @@ export class IconManager {
         if (this.loaded) return;
 
         const iconMappings = {
-            // Ability icons (SVG only)
+            // Ability icons (PNG - preloaded in GameScene)
             'ability:default': 'ability_default',
             'ability:thorndive': 'thorndive',
             'ability:pyromancer': 'pyromancer',
@@ -28,33 +28,10 @@ export class IconManager {
         };
 
         for (const [key, iconName] of Object.entries(iconMappings)) {
-            try {
-                // Check if texture is already preloaded in scene
-                if (scene && scene.textures.exists(`icon_${key}`)) {
-                    // Texture is already loaded, just mark it as available
-                    this.icons.set(key, `preloaded:${key}`);
-                    continue;
-                }
-                
-                // Load SVG files for ability icons
-                const response = await fetch(`/assets/icons/${iconName}.svg`);
-                
-                if (response.ok) {
-                    const svgContent = await response.text();
-                    this.icons.set(key, svgContent);
-                    
-                    // Pre-generate texture if scene is provided
-                    if (scene) {
-                        const textureKey = `icon_${key}`;
-                        if (!scene.textures.exists(textureKey)) {
-                            scene.textures.addBase64(textureKey, this.svgToBase64(svgContent));
-                        }
-                    }
-                } else {
-                    console.warn(`Failed to load SVG icon: ${iconName}.svg`);
-                }
-            } catch (error) {
-                console.warn(`Error loading icon ${iconName}:`, error);
+            // Check if texture is already preloaded in scene
+            if (scene && scene.textures.exists(`icon_${key}`)) {
+                // Texture is already loaded as PNG, just mark it as available
+                this.icons.set(key, `preloaded:${key}`);
             }
         }
 
@@ -69,15 +46,7 @@ export class IconManager {
         const textureKey = `icon_${rewardId}`;
         
         if (!scene.textures.exists(textureKey)) {
-            console.warn(`Texture not found for ${rewardId}, trying to load dynamically`);
-            
-            // Try to load the icon dynamically if we have the data
-            const iconData = this.getIcon(rewardId);
-            if (iconData && iconData.startsWith('<svg')) {
-                // It's SVG content, create texture from it
-                scene.textures.addBase64(textureKey, this.svgToBase64(iconData));
-                return this.createImageWithAspectRatio(scene, x, y, textureKey, size);
-            }
+            console.warn(`Texture not found for ${rewardId}, creating fallback`);
             
             // Create a "missing image" fallback
             const fallbackKey = `missing_${rewardId}`;
@@ -116,8 +85,5 @@ export class IconManager {
         return image;
     }
 
-    private svgToBase64(svgContent: string): string {
-        const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-        return URL.createObjectURL(blob);
-    }
+
 }

@@ -87,8 +87,7 @@ export class HowToPlay extends TutorialStep {
         
         const controlsList = [
             '- WASD keys to move your hero',
-            '- Space OR Left-click: Hold to aim ability, release to fire',
-            '- Right-click: Toggle mouse-follow movement mode',
+            '- Space OR Left-click: Hold to aim Class Ability, release to fire',
             '- An enemy within your attack radius will be auto-attacked',
             '- Gather xp from defeating enemies',
             '- Choose level-up rewards while respawning',
@@ -254,12 +253,13 @@ export class HowToPlay extends TutorialStep {
             }));
         this.contentContainer.add(advancedControlsText);
         
-        const pyroIconX = leftX + 480;
-        const pyroIconY = currentY + 50;
+        // Mercenary icon visualization (right side of advanced controls)
+        const mercenaryIconX = leftX + 480;
+        const mercenaryIconY = currentY + 50;
         
-        const pyroIcon = this.scene.add.image(pyroIconX, pyroIconY, 'pyromancer-icon');
-        pyroIcon.setScale(100 / pyroIcon.width);
-        this.contentContainer.add(pyroIcon);
+        const mercenaryIcon = this.scene.add.image(mercenaryIconX, mercenaryIconY, 'mercenary-icon');
+        mercenaryIcon.setDisplaySize(100, 100); // Set explicit display size for proper scaling
+        this.contentContainer.add(mercenaryIcon);
     }
 }
 

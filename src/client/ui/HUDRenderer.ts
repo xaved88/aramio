@@ -234,7 +234,7 @@ export class HUDRenderer {
         
         // Ability icon (will be set when hero data is available)
         this.abilityIcon = this.scene.add.image(x, y, 'missing_texture');
-        this.abilityIcon.setScale(config.ICON_SCALE);
+        this.abilityIcon.setDisplaySize(config.SIZE * config.ICON_SCALE * 0.8, config.SIZE * config.ICON_SCALE * 0.8);
         this.abilityIcon.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD + 1);
         this.abilityIcon.setScrollFactor(0, 0);
         this.hudContainer!.add(this.abilityIcon);
@@ -471,14 +471,14 @@ export class HUDRenderer {
         }
         
         // Apply highlighting
+        const baseSize = config.SIZE * config.ICON_SCALE * 1;
         if (isAbilityReady) {
-            const flashScale = config.ICON_SCALE + (this.flashIntensity * 0.4);
             this.abilityIcon.setAlpha(1.0);
-            this.abilityIcon.setScale(flashScale);
+            this.abilityIcon.setDisplaySize(baseSize, baseSize);
             this.abilityIcon.clearTint();
         } else {
             this.abilityIcon.setAlpha(0.5);
-            this.abilityIcon.setScale(config.ICON_SCALE);
+            this.abilityIcon.setDisplaySize(baseSize, baseSize);
             this.abilityIcon.clearTint();
         }
     }

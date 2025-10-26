@@ -300,8 +300,8 @@ export class LobbyScene extends Phaser.Scene {
 
 
     preload() {
-        // Load pyromancer icon for the title
-        this.load.image('pyromancer-icon', '/assets/icons/pyromancer.svg');
+        // Load mercenary icon for the title
+        this.load.image('mercenary-icon', '/assets/icons/mercenary.png');
         
         // Load control mode icons
         this.load.image('control-mouse', '/assets/config/mouse.png');
@@ -462,10 +462,11 @@ export class LobbyScene extends Phaser.Scene {
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 2;
 
-        // Add pyromancer icon and title
-        const pyromancerIcon = this.add.image(centerX - 115, centerY - 300, 'pyromancer-icon');
-        pyromancerIcon.setScale(0.6);
-        pyromancerIcon.setOrigin(0.5);
+        // Add mercenary icon and title
+        const mercenaryIcon = this.add.image(centerX - 115, centerY - 300, 'mercenary-icon');
+        mercenaryIcon.setScale(0.6);
+        mercenaryIcon.setDisplaySize(60, 60);
+        mercenaryIcon.setOrigin(0.5);
 
         const titleText = this.add.text(centerX + 25, centerY - 300, 'ARAM.IO Lobby', 
             TextStyleHelper.getStyle('PAGE_TITLE')
