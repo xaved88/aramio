@@ -403,11 +403,10 @@ export class EntityManager {
             shadowSprite.setScale(entitySprite.scaleX, entitySprite.scaleY);
         }
         
-        // Check if structure is targeting the player
-        const isStructure = combatantData.type === COMBATANT_TYPES.CRADLE || combatantData.type === COMBATANT_TYPES.TURRET;
+        // Check if this entity is targeting the player
         let isTargetingPlayer = false;
         
-        if (isStructure && combatantData.target && this.playerSessionId) {
+        if (combatantData.target && this.playerSessionId) {
             // Find the player's hero ID
             const playerHeroId = this.findPlayerHeroId(state);
             if (playerHeroId && combatantData.target === playerHeroId) {

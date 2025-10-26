@@ -711,13 +711,14 @@ export class EntityRenderer {
                 // For structures: only show if they're recent attackers (red) OR targeting the player (yellow)
                 shouldShowRadius = (isRecentAttacker ?? false) || (isTargetingPlayer ?? false);
             } else {
-                // For non-structures: show if player's hero (if not respawning) OR recent attacker
+                // For non-structures: show if player's hero (if not respawning) OR recent attacker OR targeting player
                 shouldShowRadius = (
                     (combatant.type === COMBATANT_TYPES.HERO && 
                      isHeroCombatant(combatant) && 
                      combatant.state !== 'respawning' &&
                      combatant.controller === this.playerSessionId) ||
-                    (isRecentAttacker ?? false)
+                    (isRecentAttacker ?? false) ||
+                    (isTargetingPlayer ?? false)
                 );
             }
         }
@@ -729,7 +730,7 @@ export class EntityRenderer {
                 // Red color for recent attackers (structures or heroes)
                 color = 0xff0000;
             } else if (isTargetingPlayer) {
-                // Yellow color for structures targeting the player
+                // Yellow color for enemies targeting the player
                 color = 0xffff00;
             } else {
                 // Default black color with lower alpha (for player's hero)
