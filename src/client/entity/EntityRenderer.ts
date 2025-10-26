@@ -66,7 +66,8 @@ export class EntityRenderer {
         effectOverlay?: Phaser.GameObjects.Graphics,
         state?: SharedGameState,
         playerSessionId?: ControllerId | null,
-        isRecentAttacker?: boolean
+        isRecentAttacker?: boolean,
+        isTargetingPlayer?: boolean
     ): void {
         // Render the main entity graphics or sprite
         this.renderEntityGraphics(combatant, graphics);
@@ -95,7 +96,7 @@ export class EntityRenderer {
         }
         
         // Render radius indicator
-        this.renderRadiusIndicator(combatant, radiusIndicator, isRecentAttacker);
+        this.renderRadiusIndicator(combatant, radiusIndicator, isRecentAttacker, isTargetingPlayer);
         
         // Update text display (level for heroes, nothing for others)
         this.updateTextDisplay(combatant, text);
@@ -363,6 +364,9 @@ export class EntityRenderer {
             if (combatant.target) {
                 const target = combatants.get(combatant.target);
                 if (target && target.health > 0) {
+                    // Check if this is a turret or cradle
+                    const isTurretOrCradle = combatant.type === COMBATANT_TYPES.TURRET || combatant.type === COMBATANT_TYPES.CRADLE;
+                    
                     // Check if player's hero is the one attacking (not being attacked)
                     const isPlayerAttacking = this.playerSessionId && 
                         combatant.type === COMBATANT_TYPES.HERO && 
@@ -389,8 +393,14 @@ export class EntityRenderer {
                         lineColor = combatant.team === 'blue' ? CLIENT_CONFIG.TARGETING_LINES.BLUE : CLIENT_CONFIG.TARGETING_LINES.RED; // Team colors (including when flashing)
                     }
                     
-                    // Calculate alpha - either flash or base alpha
-                    let alpha: number = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                    // Calculate alpha - turrets/cradles have higher alpha for better visibility
+                    let alpha: number;
+                    if (isTurretOrCradle) {
+                        alpha = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA + 0.15 : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA + 0.2;
+                    } else {
+                        alpha = isPlayerInvolved ? CLIENT_CONFIG.TARGETING_LINES.PLAYER_BASE_ALPHA : CLIENT_CONFIG.TARGETING_LINES.BASE_ALPHA;
+                    }
+                    
                     if (isFlashing) {
                         alpha = CLIENT_CONFIG.TARGETING_LINES.FLASH_ALPHA;
                     }
@@ -410,13 +420,53 @@ export class EntityRenderer {
                         targetX -= offset;
                     }
                     
-                    // Draw targeting line with appropriate thickness
-                    const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
-                    graphics.lineStyle(lineThickness, lineColor, alpha);
-                    graphics.beginPath();
-                    graphics.moveTo(sourceX, sourceY);
-                    graphics.lineTo(targetX, targetY);
-                    graphics.strokePath();
+                    // Turrets use dashed lines for better distinction
+                    if (isTurretOrCradle) {
+                        // Draw as a dashed line for turrets/cradles
+                        let dashLength = 10;
+                        let gapLength = 5;
+                        
+                        // Make flash more distinct with longer dashes and shorter gaps
+                        if (isFlashing) {
+                            dashLength = 15;
+                            gapLength = 3;
+                        }
+                        
+                        const dx = targetX - sourceX;
+                        const dy = targetY - sourceY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const dashCount = Math.floor(distance / (dashLength + gapLength));
+                        
+                        const baseLineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
+                        
+                        // Draw a thicker, more prominent line for turrets
+                        // Flash lines are EXTRA thick to make them very distinct
+                        const turretLineThickness = baseLineThickness + (isFlashing ? 4 : 2);
+                        graphics.lineStyle(turretLineThickness, lineColor, alpha);
+                        
+                        for (let i = 0; i < dashCount; i++) {
+                            const startPercent = i * (dashLength + gapLength) / distance;
+                            const endPercent = (i * (dashLength + gapLength) + dashLength) / distance;
+                            
+                            const startX = sourceX + dx * startPercent;
+                            const startY = sourceY + dy * startPercent;
+                            const endX = sourceX + dx * Math.min(endPercent, 1);
+                            const endY = sourceY + dy * Math.min(endPercent, 1);
+                            
+                            graphics.beginPath();
+                            graphics.moveTo(startX, startY);
+                            graphics.lineTo(endX, endY);
+                            graphics.strokePath();
+                        }
+                    } else {
+                        // Regular solid line for heroes and minions
+                        const lineThickness = isFlashing ? CLIENT_CONFIG.TARGETING_LINES.FLASH_LINE_THICKNESS : CLIENT_CONFIG.TARGETING_LINES.LINE_THICKNESS;
+                        graphics.lineStyle(lineThickness, lineColor, alpha);
+                        graphics.beginPath();
+                        graphics.moveTo(sourceX, sourceY);
+                        graphics.lineTo(targetX, targetY);
+                        graphics.strokePath();
+                    }
                 }
             }
         });
@@ -648,35 +698,75 @@ export class EntityRenderer {
     /**
      * Renders the radius indicator for attack ranges
      */
-    private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics, isRecentAttacker?: boolean): void {
+    private renderRadiusIndicator(combatant: Combatant, radiusIndicator: Phaser.GameObjects.Graphics, isRecentAttacker?: boolean, isTargetingPlayer?: boolean): void {
         radiusIndicator.clear();
         
-        // Only show radius indicator for structures (cradles, turrets), the player's hero, and recent attackers
-        const shouldShowRadius = (
-            combatant.health > 0 && 
-            (
-                // Structures always show radius (unless they're recent attackers, then they'll show red)
-                (combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET) ||
-                // Player's hero shows radius (if not respawning)
-                (combatant.type === COMBATANT_TYPES.HERO && 
-                 isHeroCombatant(combatant) && 
-                 combatant.state !== 'respawning' &&
-                 combatant.controller === this.playerSessionId) ||
-                // Recent attackers show radius (heroes, turrets, cradles)
-                isRecentAttacker
-            )
-        );
+        const isStructure = combatant.type === COMBATANT_TYPES.CRADLE || combatant.type === COMBATANT_TYPES.TURRET;
+        
+        // Determine if we should show radius indicator
+        let shouldShowRadius = false;
+        
+        if (combatant.health > 0) {
+            if (isStructure) {
+                // For structures: only show if they're recent attackers (red) OR targeting the player (yellow)
+                shouldShowRadius = (isRecentAttacker ?? false) || (isTargetingPlayer ?? false);
+            } else {
+                // For non-structures: show if player's hero (if not respawning) OR recent attacker
+                shouldShowRadius = (
+                    (combatant.type === COMBATANT_TYPES.HERO && 
+                     isHeroCombatant(combatant) && 
+                     combatant.state !== 'respawning' &&
+                     combatant.controller === this.playerSessionId) ||
+                    (isRecentAttacker ?? false)
+                );
+            }
+        }
         
         if (shouldShowRadius) {
-            // Use different styling for recent attackers
+            // Determine color and alpha
+            let color: number;
             if (isRecentAttacker) {
-                // Red color for recent attackers with moderate alpha
-                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 0xff0000, 0.3);
+                // Red color for recent attackers (structures or heroes)
+                color = 0xff0000;
+            } else if (isTargetingPlayer) {
+                // Yellow color for structures targeting the player
+                color = 0xffff00;
             } else {
-                // Default black color with lower alpha
-                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 0.2);
+                // Default black color with lower alpha (for player's hero)
+                color = CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR;
             }
-            radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
+            
+            const alpha = isRecentAttacker ? 0.3 : (isTargetingPlayer ? 0.3 : 0.2);
+            
+            // For structures, draw as dashed circle with thicker line
+            if (isStructure) {
+                const lineThickness = CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS + 2;
+                this.drawDashedCircle(radiusIndicator, 0, 0, combatant.attackRadius, color, alpha, lineThickness);
+            } else {
+                // Regular solid circle for heroes
+                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, color, alpha);
+                radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
+            }
+        }
+    }
+    
+    /**
+     * Draws a dashed circle by drawing multiple arc segments
+     */
+    private drawDashedCircle(graphics: Phaser.GameObjects.Graphics, x: number, y: number, radius: number, color: number, alpha: number, thickness: number): void {
+        const dashAngle = 0.15; // angle of each dash in radians
+        const gapAngle = 0.1; // angle of each gap in radians
+        const angleStep = dashAngle + gapAngle;
+        
+        graphics.lineStyle(thickness, color, alpha);
+        
+        let currentAngle = 0;
+        while (currentAngle < Math.PI * 2) {
+            const endAngle = Math.min(currentAngle + dashAngle, Math.PI * 2);
+            graphics.beginPath();
+            graphics.arc(x, y, radius, currentAngle, endAngle);
+            graphics.strokePath();
+            currentAngle += angleStep;
         }
     }
 

@@ -403,6 +403,18 @@ export class EntityManager {
             shadowSprite.setScale(entitySprite.scaleX, entitySprite.scaleY);
         }
         
+        // Check if structure is targeting the player
+        const isStructure = combatantData.type === COMBATANT_TYPES.CRADLE || combatantData.type === COMBATANT_TYPES.TURRET;
+        let isTargetingPlayer = false;
+        
+        if (isStructure && combatantData.target && this.playerSessionId) {
+            // Find the player's hero ID
+            const playerHeroId = this.findPlayerHeroId(state);
+            if (playerHeroId && combatantData.target === playerHeroId) {
+                isTargetingPlayer = true;
+            }
+        }
+        
         // Render the entity
         this.entityRenderer.renderEntity(
             combatantData,
@@ -414,7 +426,8 @@ export class EntityManager {
             entityEffectOverlay,
             state,
             this.playerSessionId,
-            this.isRecentAttacker(entityId)
+            this.isRecentAttacker(entityId),
+            isTargetingPlayer
         );
         
         // Create shadow sprite immediately after entity is positioned and scaled
@@ -1384,6 +1397,25 @@ export class EntityManager {
      */
     isRecentAttacker(combatantId: CombatantId): boolean {
         return this.recentAttackers.has(combatantId);
+    }
+
+    /**
+     * Finds the ID of the player's hero
+     */
+    private findPlayerHeroId(state?: SharedGameState): CombatantId | null {
+        if (!state || !this.playerSessionId) {
+            return null;
+        }
+        
+        for (const [id, combatant] of state.combatants) {
+            if (combatant.type === COMBATANT_TYPES.HERO && 
+                isHeroCombatant(combatant) && 
+                combatant.controller === this.playerSessionId) {
+                return id;
+            }
+        }
+        
+        return null;
     }
 
     /**
