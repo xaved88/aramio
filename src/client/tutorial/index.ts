@@ -3,7 +3,6 @@ export { TutorialManager } from './TutorialManager';
 export { BasicTutorialManager } from './BasicTutorial';
 export { ObjectivesDisplay } from './ObjectivesDisplay';
 export { HowToPlay } from './steps/HowToPlay';
-export { WelcomeStep } from './steps/WelcomeStep';
 export { MovementStep } from './steps/MovementStep';
 export { AutoAttackStep } from './steps/AutoAttackStep';
 export { AbilityStep } from './steps/AbilityStep';

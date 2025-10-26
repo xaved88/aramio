@@ -31,6 +31,7 @@ const TUTORIALS: Record<string, TutorialDefinition> = {
 export class TutorialManager {
     private scene: Phaser.Scene;
     private room: any;
+    private cameraManager: any = null;
     private playerSessionId: string | null = null;
     private currentTutorial: TutorialDefinition | null = null;
     private currentStepIndex: number = -1;
@@ -43,6 +44,7 @@ export class TutorialManager {
     constructor(scene: Phaser.Scene, room: any, cameraManager: any) {
         this.scene = scene;
         this.room = room;
+        this.cameraManager = cameraManager;
         if (room && room.sessionId) {
             this.playerSessionId = room.sessionId;
         }
@@ -58,6 +60,12 @@ export class TutorialManager {
     }
 
     startTutorial(tutorialId: string): void {
+        // If a tutorial is already active, destroy it first
+        if (this.currentStep) {
+            this.currentStep.destroy();
+            this.currentStep = null;
+        }
+        
         const tutorial = TUTORIALS[tutorialId];
         if (!tutorial) {
             console.warn(`Tutorial '${tutorialId}' not found`);
@@ -94,6 +102,12 @@ export class TutorialManager {
         };
         if (this.basicTutorialManager) {
             this.basicTutorialManager.setTrackedState(this.trackedState);
+        }
+        
+        // For single-step tutorials like 'how-to-play', show immediately
+        if (tutorial.steps.length === 1) {
+            this.currentStepIndex = 0;
+            this.showCurrentStep();
         }
     }
 
@@ -173,6 +187,11 @@ export class TutorialManager {
         this.currentStep = new stepDef.stepClass(this.scene, () => {
             this.onStepDismissed();
         }, this.room);
+        
+        // CRITICAL: Set the camera manager so the step can assign its elements to HUD camera
+        if (this.cameraManager) {
+            this.currentStep.setCameraManager(this.cameraManager);
+        }
 
         // Show this objective when the step is displayed
         if (this.objectivesDisplay) {

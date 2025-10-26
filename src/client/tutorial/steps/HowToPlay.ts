@@ -28,7 +28,6 @@ export class HowToPlay extends TutorialStep {
         const closeButtonY = startY - 20 + closeButtonSize / 2 + 10;
         
         const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 

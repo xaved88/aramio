@@ -11,10 +11,9 @@ export class AutoAttackStep extends TutorialStep {
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 2;
         const contentWidth = 500;
-        const leftX = centerX - contentWidth / 2;
-        const startY = centerY - 150;
-        
         const panelHeight = 400;
+        const leftX = centerX - contentWidth / 2;
+        const startY = centerY - panelHeight / 2;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -28,7 +27,6 @@ export class AutoAttackStep extends TutorialStep {
         const closeButtonY = startY - 20 + closeButtonSize / 2 + 10;
         
         const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
@@ -82,12 +80,24 @@ export class AutoAttackStep extends TutorialStep {
         const attackVisualY = centerY + 50;
         
         const radiusGraphics = this.scene.add.graphics();
+        // Draw dashed circle to match game visuals (auto-attack ranges are dashed)
+        const dashAngle = 0.15; // angle of each dash in radians
+        const gapAngle = 0.1; // angle of each gap in radians
+        const angleStep = dashAngle + gapAngle;
         radiusGraphics.lineStyle(
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 
             CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA
         );
-        radiusGraphics.strokeCircle(attackVisualX, attackVisualY, 70);
+        
+        let currentAngle = 0;
+        while (currentAngle < Math.PI * 2) {
+            const endAngle = Math.min(currentAngle + dashAngle, Math.PI * 2);
+            radiusGraphics.beginPath();
+            radiusGraphics.arc(attackVisualX, attackVisualY, 70, currentAngle, endAngle);
+            radiusGraphics.strokePath();
+            currentAngle += angleStep;
+        }
         this.contentContainer.add(radiusGraphics);
         
         const heroVisual = this.scene.add.image(attackVisualX, attackVisualY, 'hero-base');
@@ -124,9 +134,8 @@ export class AutoAttackStep extends TutorialStep {
         tipText.setOrigin(0.5, 0);
         this.contentContainer.add(tipText);
         
-        const nextButtonY = startY + panelHeight - 40;
+        const nextButtonY = startY + panelHeight + 20 - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
-        nextButton.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         const nextText = this.scene.add.text(centerX, nextButtonY, 'Continue', 
             TextStyleHelper.getStyle('BUTTON_TEXT'));
         nextText.setOrigin(0.5);

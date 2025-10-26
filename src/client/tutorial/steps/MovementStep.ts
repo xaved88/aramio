@@ -11,10 +11,9 @@ export class MovementStep extends TutorialStep {
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 2;
         const contentWidth = 500;
-        const leftX = centerX - contentWidth / 2;
-        const startY = centerY - 150;
-        
         const panelHeight = 400;
+        const leftX = centerX - contentWidth / 2;
+        const startY = centerY - panelHeight / 2;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -28,7 +27,6 @@ export class MovementStep extends TutorialStep {
         const closeButtonY = startY - 20 + closeButtonSize / 2 + 10;
         
         const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
@@ -75,7 +73,7 @@ export class MovementStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        currentY += 130;
+        currentY += 180;
         
         // Add visualization of WASD keys in proper T-shape
         const keysY = currentY;
@@ -131,9 +129,8 @@ export class MovementStep extends TutorialStep {
         this.contentContainer.add(hintText);
         currentY += 40;
         
-        const nextButtonY = startY + panelHeight - 40;
+        const nextButtonY = startY + panelHeight + 20 - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
-        nextButton.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         const nextText = this.scene.add.text(centerX, nextButtonY, 'Continue', 
             TextStyleHelper.getStyle('BUTTON_TEXT'));
         nextText.setOrigin(0.5);

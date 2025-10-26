@@ -11,10 +11,9 @@ export class AbilityStep extends TutorialStep {
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 2;
         const contentWidth = 500;
-        const leftX = centerX - contentWidth / 2;
-        const startY = centerY - 150;
-        
         const panelHeight = 420;
+        const leftX = centerX - contentWidth / 2;
+        const startY = centerY - panelHeight / 2;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -28,7 +27,6 @@ export class AbilityStep extends TutorialStep {
         const closeButtonY = startY - 20 + closeButtonSize / 2 + 10;
         
         const closeBg = this.scene.add.circle(closeButtonX, closeButtonY, closeButtonSize / 2, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        closeBg.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         this.contentContainer.add(closeBg);
         
         const closeText = this.scene.add.text(closeButtonX, closeButtonY, '×', 
@@ -77,9 +75,9 @@ export class AbilityStep extends TutorialStep {
         this.contentContainer.add(welcomeText);
         currentY += 130;
         
-        // Add graphics showing ability system - moved down significantly
+        // Add graphics showing ability system
         const abilityVisualX = centerX;
-        const abilityVisualY = centerY + 100;
+        const abilityVisualY = centerY + 50;
         
         // Draw hero with purple ring (ability range)
         const abilityRadiusGraphics = this.scene.add.graphics();
@@ -119,9 +117,8 @@ export class AbilityStep extends TutorialStep {
             this.contentContainer.add(abilityIconImg);
         }
         
-        const nextButtonY = startY + panelHeight - 40;
+        const nextButtonY = startY + panelHeight + 20 - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
-        nextButton.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
         const nextText = this.scene.add.text(centerX, nextButtonY, 'Continue', 
             TextStyleHelper.getStyle('BUTTON_TEXT'));
         nextText.setOrigin(0.5);

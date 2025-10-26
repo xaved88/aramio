@@ -19,8 +19,8 @@ export class ObjectivesDisplay {
     constructor(scene: Phaser.Scene, cameraManager: any) {
         this.scene = scene;
         this.cameraManager = cameraManager;
-        this.container = this.scene.add.container(20, 20);
-        this.container.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 100);
+        this.container = this.scene.add.container(20, 40);
+        this.container.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 30);
         this.container.setScrollFactor(0, 0);
         this.cameraManager.assignToHUDCamera(this.container);
         this.container.setVisible(true);
@@ -63,7 +63,7 @@ export class ObjectivesDisplay {
             const checkbox = this.scene.add.graphics();
             if (objective.completed) {
                 // Filled checkbox with checkmark
-                checkbox.fillStyle(CLIENT_CONFIG.UI.COLORS.PRIMARY, 1);
+                checkbox.fillStyle(CLIENT_CONFIG.SELF_COLORS.PRIMARY, 1);
                 checkbox.fillRect(0, y, checkboxSize, checkboxSize);
                 checkbox.lineStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
                 checkbox.strokeRect(0, y, checkboxSize, checkboxSize);

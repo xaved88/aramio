@@ -181,8 +181,9 @@ export class InputHandler {
 
         // T key handler for tutorial toggle
         this.scene.input.keyboard?.on('keydown-T', (event: KeyboardEvent) => {
-            if (this.uiManager) {
-                this.uiManager.toggleTutorial();
+            if (this.tutorialManager) {
+                // Start the 'how-to-play' tutorial overlay
+                this.tutorialManager.startTutorial('how-to-play');
             }
         });
 

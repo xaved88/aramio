@@ -6,7 +6,7 @@ export abstract class TutorialStep {
     protected scene: Phaser.Scene;
     protected hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     protected cameraManager: any = null;
-    protected overlay: Phaser.GameObjects.Graphics | null = null;
+    protected overlay: Phaser.GameObjects.Rectangle | null = null;
     protected contentContainer: Phaser.GameObjects.Container | null = null;
     protected isVisible: boolean = false;
     protected onDismiss?: () => void;
@@ -25,18 +25,35 @@ export abstract class TutorialStep {
 
     setCameraManager(cameraManager: any): void {
         this.cameraManager = cameraManager;
-        if (this.overlay && this.cameraManager) {
-            this.cameraManager.assignToHUDCamera(this.overlay);
-        }
-        if (this.contentContainer && this.cameraManager) {
-            this.cameraManager.assignToHUDCamera(this.contentContainer);
+        if (this.cameraManager) {
+            // Assign overlay to HUD camera
+            if (this.overlay) {
+                this.cameraManager.assignToHUDCamera(this.overlay);
+            }
+            // Assign container to HUD camera
+            if (this.contentContainer) {
+                this.cameraManager.assignToHUDCamera(this.contentContainer);
+            }
+            // CRITICAL: Assign ALL children to HUD camera (they might have been created before cameraManager was set)
+            if (this.contentContainer) {
+                this.contentContainer.list.forEach((child: Phaser.GameObjects.GameObject) => {
+                    this.cameraManager.assignToHUDCamera(child);
+                });
+            }
         }
     }
 
     private contentBuilt: boolean = false;
 
     protected createOverlay(): void {
-        this.overlay = this.scene.add.graphics();
+        // Use rectangle instead of graphics for better positioning
+        this.overlay = this.scene.add.rectangle(
+            0, 0,
+            getCanvasWidth(), getCanvasHeight(),
+            CLIENT_CONFIG.UI.OVERLAY.BACKGROUND,
+            CLIENT_CONFIG.UI.OVERLAY.ALPHA
+        );
+        this.overlay.setOrigin(0, 0);
         this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 40);
         this.overlay.setScrollFactor(0, 0);
         this.overlay.setVisible(false);
@@ -112,12 +129,8 @@ export abstract class TutorialStep {
     }
 
     protected updateBackground(): void {
-        if (this.overlay) {
-            this.overlay.clear();
-            this.overlay.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
-            this.overlay.setPosition(0, 0);
-            this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
-        }
+        // Rectangle overlay doesn't need updates - it's static
+        // This method is kept for compatibility with Graphics-based overlays
     }
 
     isShowing(): boolean {
