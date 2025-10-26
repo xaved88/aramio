@@ -4,7 +4,7 @@ import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
 import { TutorialStep } from '../TutorialStep';
 
-export class MovementStep extends TutorialStep {
+export class AutoAttackStep extends TutorialStep {
     buildContent(): void {
         if (!this.contentContainer) return;
         
@@ -60,14 +60,14 @@ export class MovementStep extends TutorialStep {
         
         let currentY = startY;
         
-        const title = this.scene.add.text(centerX, currentY, 'Take Your First Steps!', 
+        const title = this.scene.add.text(centerX, currentY, 'Auto-Attack!', 
             TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'You\'ll automatically attack anything within this ring. Keep them inside the ring to keep doing damage.\n\nNow go attack those enemy minions!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -75,61 +75,54 @@ export class MovementStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        currentY += 130;
+        currentY += 90;
         
-        // Add visualization of WASD keys in proper T-shape
-        const keysY = currentY;
-        const keySize = 40;
-        const keySpacing = 50;
+        // Add visualization of attack radius with bigger hero
+        const attackVisualX = centerX;
+        const attackVisualY = centerY + 50;
         
-        // W key (top)
-        const wKey = this.scene.add.rectangle(centerX, keysY - keySpacing, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        wKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        wKey.setOrigin(0.5);
-        this.contentContainer.add(wKey);
-        const wText = this.scene.add.text(centerX, keysY - keySpacing, 'W', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        wText.setOrigin(0.5);
-        this.contentContainer.add(wText);
+        const radiusGraphics = this.scene.add.graphics();
+        radiusGraphics.lineStyle(
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA
+        );
+        radiusGraphics.strokeCircle(attackVisualX, attackVisualY, 70);
+        this.contentContainer.add(radiusGraphics);
         
-        // A key (left)
-        const aKey = this.scene.add.rectangle(centerX - keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        aKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        aKey.setOrigin(0.5);
-        this.contentContainer.add(aKey);
-        const aText = this.scene.add.text(centerX - keySpacing, keysY, 'A', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        aText.setOrigin(0.5);
-        this.contentContainer.add(aText);
+        const heroVisual = this.scene.add.image(attackVisualX, attackVisualY, 'hero-base');
+        heroVisual.setScale(50 / heroVisual.width);
+        this.contentContainer.add(heroVisual);
         
-        // S key (center/bottom)
-        const sKey = this.scene.add.rectangle(centerX, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        sKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        sKey.setOrigin(0.5);
-        this.contentContainer.add(sKey);
-        const sText = this.scene.add.text(centerX, keysY, 'S', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        sText.setOrigin(0.5);
-        this.contentContainer.add(sText);
+        // Add enemy minions vertically aligned
+        const minionY = centerY + 50;
+        const minion1 = this.scene.add.image(attackVisualX + 100, minionY - 40, 'minion-warrior');
+        minion1.setScale(0.25);
+        minion1.setTint(0xe74c3c); // Red tint for enemy
+        this.contentContainer.add(minion1);
         
-        // D key (right)
-        const dKey = this.scene.add.rectangle(centerX + keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        dKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        dKey.setOrigin(0.5);
-        this.contentContainer.add(dKey);
-        const dText = this.scene.add.text(centerX + keySpacing, keysY, 'D', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        dText.setOrigin(0.5);
-        this.contentContainer.add(dText);
+        const minion2 = this.scene.add.image(attackVisualX + 100, minionY, 'minion-archer');
+        minion2.setScale(0.25);
+        minion2.setTint(0xe74c3c); // Red tint for enemy
+        this.contentContainer.add(minion2);
         
-        currentY += keySpacing + 30;
+        const minionsLabel = this.scene.add.text(attackVisualX + 100, minionY + 50, 'Enemy Minions', 
+            TextStyleHelper.getStyle('BODY_SMALL'));
+        minionsLabel.setOrigin(0.5);
+        minionsLabel.setTint(0xffffff);
+        this.contentContainer.add(minionsLabel);
         
-        const hintText = this.scene.add.text(centerX, currentY, 
-            '💡 Tip: Right-click to toggle mouse-only movement mode!', 
+        // Add tip text below
+        currentY = centerY + 130;
+        const tipText = this.scene.add.text(centerX, currentY, 
+            '💡 Be warned though, you can only attack one target at a time!', 
             TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
                 align: 'center',
                 fontStyle: 'italic'
             })
         );
-        hintText.setOrigin(0.5, 0);
-        this.contentContainer.add(hintText);
-        currentY += 40;
+        tipText.setOrigin(0.5, 0);
+        this.contentContainer.add(tipText);
         
         const nextButtonY = startY + panelHeight - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);

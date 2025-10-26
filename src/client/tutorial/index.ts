@@ -3,5 +3,10 @@ export { TutorialManager } from './TutorialManager';
 export { HowToPlay } from './steps/HowToPlay';
 export { WelcomeStep } from './steps/WelcomeStep';
 export { MovementStep } from './steps/MovementStep';
-export { CombatStep } from './steps/CombatStep';
+export { AutoAttackStep } from './steps/AutoAttackStep';
+export { AbilityStep } from './steps/AbilityStep';
+export { XPStep } from './steps/XPStep';
+export { LevelUpStep } from './steps/LevelUpStep';
+export { RespawnRewardsStep } from './steps/RespawnRewardsStep';
+export { EncouragementStep } from './steps/EncouragementStep';
 

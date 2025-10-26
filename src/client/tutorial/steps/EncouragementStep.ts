@@ -4,7 +4,7 @@ import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
 import { TutorialStep } from '../TutorialStep';
 
-export class MovementStep extends TutorialStep {
+export class EncouragementStep extends TutorialStep {
     buildContent(): void {
         if (!this.contentContainer) return;
         
@@ -14,7 +14,7 @@ export class MovementStep extends TutorialStep {
         const leftX = centerX - contentWidth / 2;
         const startY = centerY - 150;
         
-        const panelHeight = 400;
+        const panelHeight = 300;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -60,14 +60,14 @@ export class MovementStep extends TutorialStep {
         
         let currentY = startY;
         
-        const title = this.scene.add.text(centerX, currentY, 'Take Your First Steps!', 
+        const title = this.scene.add.text(centerX, currentY, 'Good Job! 🎉', 
             TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'You now know the basics!\n\nGo forth and destroy the enemy Cradle to achieve victory!\n\nTeam up, level up, and dominate the battlefield!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -75,66 +75,12 @@ export class MovementStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        currentY += 130;
-        
-        // Add visualization of WASD keys in proper T-shape
-        const keysY = currentY;
-        const keySize = 40;
-        const keySpacing = 50;
-        
-        // W key (top)
-        const wKey = this.scene.add.rectangle(centerX, keysY - keySpacing, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        wKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        wKey.setOrigin(0.5);
-        this.contentContainer.add(wKey);
-        const wText = this.scene.add.text(centerX, keysY - keySpacing, 'W', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        wText.setOrigin(0.5);
-        this.contentContainer.add(wText);
-        
-        // A key (left)
-        const aKey = this.scene.add.rectangle(centerX - keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        aKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        aKey.setOrigin(0.5);
-        this.contentContainer.add(aKey);
-        const aText = this.scene.add.text(centerX - keySpacing, keysY, 'A', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        aText.setOrigin(0.5);
-        this.contentContainer.add(aText);
-        
-        // S key (center/bottom)
-        const sKey = this.scene.add.rectangle(centerX, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        sKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        sKey.setOrigin(0.5);
-        this.contentContainer.add(sKey);
-        const sText = this.scene.add.text(centerX, keysY, 'S', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        sText.setOrigin(0.5);
-        this.contentContainer.add(sText);
-        
-        // D key (right)
-        const dKey = this.scene.add.rectangle(centerX + keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        dKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        dKey.setOrigin(0.5);
-        this.contentContainer.add(dKey);
-        const dText = this.scene.add.text(centerX + keySpacing, keysY, 'D', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        dText.setOrigin(0.5);
-        this.contentContainer.add(dText);
-        
-        currentY += keySpacing + 30;
-        
-        const hintText = this.scene.add.text(centerX, currentY, 
-            '💡 Tip: Right-click to toggle mouse-only movement mode!', 
-            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                align: 'center',
-                fontStyle: 'italic'
-            })
-        );
-        hintText.setOrigin(0.5, 0);
-        this.contentContainer.add(hintText);
-        currentY += 40;
+        currentY += 120;
         
         const nextButtonY = startY + panelHeight - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
         nextButton.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        const nextText = this.scene.add.text(centerX, nextButtonY, 'Continue', 
+        const nextText = this.scene.add.text(centerX, nextButtonY, 'Let\'s Play!', 
             TextStyleHelper.getStyle('BUTTON_TEXT'));
         nextText.setOrigin(0.5);
         this.contentContainer.add(nextButton);

@@ -4,7 +4,7 @@ import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
 import { TutorialStep } from '../TutorialStep';
 
-export class MovementStep extends TutorialStep {
+export class AbilityStep extends TutorialStep {
     buildContent(): void {
         if (!this.contentContainer) return;
         
@@ -14,7 +14,7 @@ export class MovementStep extends TutorialStep {
         const leftX = centerX - contentWidth / 2;
         const startY = centerY - 150;
         
-        const panelHeight = 400;
+        const panelHeight = 420;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -60,14 +60,14 @@ export class MovementStep extends TutorialStep {
         
         let currentY = startY;
         
-        const title = this.scene.add.text(centerX, currentY, 'Take Your First Steps!', 
+        const title = this.scene.add.text(centerX, currentY, 'Cast Your Ability!', 
             TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'Just auto-attacks alone won\'t cut it. Try casting your ability instead!\n\nLeft-click (or Space) to aim, then release to fire. See your cooldown on the cursor, or with the icon to the right of your health bar.', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -77,59 +77,47 @@ export class MovementStep extends TutorialStep {
         this.contentContainer.add(welcomeText);
         currentY += 130;
         
-        // Add visualization of WASD keys in proper T-shape
-        const keysY = currentY;
-        const keySize = 40;
-        const keySpacing = 50;
+        // Add graphics showing ability system - moved down significantly
+        const abilityVisualX = centerX;
+        const abilityVisualY = centerY + 100;
         
-        // W key (top)
-        const wKey = this.scene.add.rectangle(centerX, keysY - keySpacing, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        wKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        wKey.setOrigin(0.5);
-        this.contentContainer.add(wKey);
-        const wText = this.scene.add.text(centerX, keysY - keySpacing, 'W', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        wText.setOrigin(0.5);
-        this.contentContainer.add(wText);
+        // Draw hero with purple ring (ability range)
+        const abilityRadiusGraphics = this.scene.add.graphics();
+        abilityRadiusGraphics.lineStyle(3, CLIENT_CONFIG.SELF_COLORS.PRIMARY, 0.8);
+        abilityRadiusGraphics.strokeCircle(abilityVisualX - 60, abilityVisualY, 80);
+        this.contentContainer.add(abilityRadiusGraphics);
         
-        // A key (left)
-        const aKey = this.scene.add.rectangle(centerX - keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        aKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        aKey.setOrigin(0.5);
-        this.contentContainer.add(aKey);
-        const aText = this.scene.add.text(centerX - keySpacing, keysY, 'A', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        aText.setOrigin(0.5);
-        this.contentContainer.add(aText);
+        const heroVisual = this.scene.add.image(abilityVisualX - 60, abilityVisualY, 'hero-base');
+        heroVisual.setScale(40 / heroVisual.width);
+        this.contentContainer.add(heroVisual);
         
-        // S key (center/bottom)
-        const sKey = this.scene.add.rectangle(centerX, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        sKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        sKey.setOrigin(0.5);
-        this.contentContainer.add(sKey);
-        const sText = this.scene.add.text(centerX, keysY, 'S', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        sText.setOrigin(0.5);
-        this.contentContainer.add(sText);
+        // Draw targeting arrow
+        const arrowGraphics = this.scene.add.graphics();
+        arrowGraphics.lineStyle(4, CLIENT_CONFIG.SELF_COLORS.PRIMARY, 1);
+        arrowGraphics.beginPath();
+        arrowGraphics.moveTo(abilityVisualX - 20, abilityVisualY);
+        arrowGraphics.lineTo(abilityVisualX + 30, abilityVisualY);
+        arrowGraphics.lineTo(abilityVisualX + 25, abilityVisualY - 8);
+        arrowGraphics.moveTo(abilityVisualX + 30, abilityVisualY);
+        arrowGraphics.lineTo(abilityVisualX + 25, abilityVisualY + 8);
+        arrowGraphics.strokePath();
+        this.contentContainer.add(arrowGraphics);
         
-        // D key (right)
-        const dKey = this.scene.add.rectangle(centerX + keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        dKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        dKey.setOrigin(0.5);
-        this.contentContainer.add(dKey);
-        const dText = this.scene.add.text(centerX + keySpacing, keysY, 'D', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        dText.setOrigin(0.5);
-        this.contentContainer.add(dText);
+        // Draw ability icon (circular with actual icon) - make circle 50% larger than HUD size
+        const abilityIconSize = CLIENT_CONFIG.UI.ABILITY_COOLDOWN.SIZE / 2 * 1.5; // 37.5px radius (50% larger)
+        const abilityIconBg = this.scene.add.graphics();
+        abilityIconBg.fillStyle(CLIENT_CONFIG.UI.ABILITY_COOLDOWN.BACKGROUND_COLOR, 0.8);
+        abilityIconBg.fillCircle(abilityVisualX + 80, abilityVisualY, abilityIconSize);
+        abilityIconBg.lineStyle(2, 0xffffff);
+        abilityIconBg.strokeCircle(abilityVisualX + 80, abilityVisualY, abilityIconSize);
+        this.contentContainer.add(abilityIconBg);
         
-        currentY += keySpacing + 30;
-        
-        const hintText = this.scene.add.text(centerX, currentY, 
-            '💡 Tip: Right-click to toggle mouse-only movement mode!', 
-            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                align: 'center',
-                fontStyle: 'italic'
-            })
-        );
-        hintText.setOrigin(0.5, 0);
-        this.contentContainer.add(hintText);
-        currentY += 40;
+        // Add actual ability icon image - shrink to fit within the larger circle
+        if (this.scene.textures.exists('icon_ability:default')) {
+            const abilityIconImg = this.scene.add.image(abilityVisualX + 80, abilityVisualY, 'icon_ability:default');
+            abilityIconImg.setScale(0.2); // Shrink to fit within the larger circular background
+            this.contentContainer.add(abilityIconImg);
+        }
         
         const nextButtonY = startY + panelHeight - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);

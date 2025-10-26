@@ -4,7 +4,7 @@ import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
 import { TutorialStep } from '../TutorialStep';
 
-export class MovementStep extends TutorialStep {
+export class XPStep extends TutorialStep {
     buildContent(): void {
         if (!this.contentContainer) return;
         
@@ -14,7 +14,7 @@ export class MovementStep extends TutorialStep {
         const leftX = centerX - contentWidth / 2;
         const startY = centerY - 150;
         
-        const panelHeight = 400;
+        const panelHeight = 320;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -60,14 +60,14 @@ export class MovementStep extends TutorialStep {
         
         let currentY = startY;
         
-        const title = this.scene.add.text(centerX, currentY, 'Take Your First Steps!', 
+        const title = this.scene.add.text(centerX, currentY, 'Gain Experience!', 
             TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'See how you got some experience there? Gain enough XP to level up and get stronger!\n\n💡 Last hit enemies for even more experience. If you go too far away, you won\'t get experience - stay in the fight!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -75,61 +75,41 @@ export class MovementStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        currentY += 130;
+        currentY += 110;
         
-        // Add visualization of WASD keys in proper T-shape
-        const keysY = currentY;
-        const keySize = 40;
-        const keySpacing = 50;
+        // Draw circular XP indicator (level 1, halfway filled)
+        const xpX = centerX;
+        const xpY = centerY + 40;
+        const config = CLIENT_CONFIG.UI.XP_INDICATOR;
         
-        // W key (top)
-        const wKey = this.scene.add.rectangle(centerX, keysY - keySpacing, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        wKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        wKey.setOrigin(0.5);
-        this.contentContainer.add(wKey);
-        const wText = this.scene.add.text(centerX, keysY - keySpacing, 'W', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        wText.setOrigin(0.5);
-        this.contentContainer.add(wText);
+        // Background circle
+        const xpBg = this.scene.add.graphics();
+        xpBg.fillStyle(config.BACKGROUND_COLOR, config.BACKGROUND_ALPHA);
+        xpBg.fillCircle(xpX, xpY, config.RADIUS);
+        xpBg.lineStyle(2, 0x444444);
+        xpBg.strokeCircle(xpX, xpY, config.RADIUS);
+        this.contentContainer.add(xpBg);
         
-        // A key (left)
-        const aKey = this.scene.add.rectangle(centerX - keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        aKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        aKey.setOrigin(0.5);
-        this.contentContainer.add(aKey);
-        const aText = this.scene.add.text(centerX - keySpacing, keysY, 'A', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        aText.setOrigin(0.5);
-        this.contentContainer.add(aText);
+        // XP arc (halfway)
+        const xpArc = this.scene.add.graphics();
+        xpArc.lineStyle(config.LINE_WIDTH, config.EXPERIENCE_COLOR, 1);
+        xpArc.beginPath();
+        xpArc.arc(xpX, xpY, config.RADIUS, -Math.PI / 2, Math.PI); // From top to bottom (half circle)
+        xpArc.strokePath();
+        this.contentContainer.add(xpArc);
         
-        // S key (center/bottom)
-        const sKey = this.scene.add.rectangle(centerX, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        sKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        sKey.setOrigin(0.5);
-        this.contentContainer.add(sKey);
-        const sText = this.scene.add.text(centerX, keysY, 'S', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        sText.setOrigin(0.5);
-        this.contentContainer.add(sText);
+        // Level text in center
+        const levelText = this.scene.add.text(xpX, xpY, '1', 
+            TextStyleHelper.getStyle('BODY_SMALL'));
+        levelText.setOrigin(0.5);
+        levelText.setTint(0xffffff);
+        this.contentContainer.add(levelText);
         
-        // D key (right)
-        const dKey = this.scene.add.rectangle(centerX + keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        dKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        dKey.setOrigin(0.5);
-        this.contentContainer.add(dKey);
-        const dText = this.scene.add.text(centerX + keySpacing, keysY, 'D', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        dText.setOrigin(0.5);
-        this.contentContainer.add(dText);
-        
-        currentY += keySpacing + 30;
-        
-        const hintText = this.scene.add.text(centerX, currentY, 
-            '💡 Tip: Right-click to toggle mouse-only movement mode!', 
-            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                align: 'center',
-                fontStyle: 'italic'
-            })
-        );
-        hintText.setOrigin(0.5, 0);
-        this.contentContainer.add(hintText);
-        currentY += 40;
+        // Add +5XP text
+        const xpGainText = this.scene.add.text(xpX + 50, xpY - 30, '+5 XP', 
+            TextStyleHelper.getStyleWithColor('BODY_SMALL', '#f1c40f'));
+        xpGainText.setOrigin(0.5);
+        this.contentContainer.add(xpGainText);
         
         const nextButtonY = startY + panelHeight - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);

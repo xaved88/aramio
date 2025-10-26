@@ -2,7 +2,12 @@ import Phaser from 'phaser';
 import { TutorialStep } from './TutorialStep';
 import { WelcomeStep } from './steps/WelcomeStep';
 import { MovementStep } from './steps/MovementStep';
-import { CombatStep } from './steps/CombatStep';
+import { AutoAttackStep } from './steps/AutoAttackStep';
+import { AbilityStep } from './steps/AbilityStep';
+import { XPStep } from './steps/XPStep';
+import { LevelUpStep } from './steps/LevelUpStep';
+import { RespawnRewardsStep } from './steps/RespawnRewardsStep';
+import { EncouragementStep } from './steps/EncouragementStep';
 import { HowToPlay } from './steps/HowToPlay';
 
 export type TutorialDefinition = {
@@ -12,9 +17,13 @@ export type TutorialDefinition = {
 const TUTORIALS: Record<string, TutorialDefinition> = {
     'basic-tutorial': {
         steps: [
-            WelcomeStep,
             MovementStep,
-            CombatStep,
+            AutoAttackStep,
+            AbilityStep,
+            XPStep,
+            LevelUpStep,
+            RespawnRewardsStep,
+            EncouragementStep,
         ]
     },
     'how-to-play': {

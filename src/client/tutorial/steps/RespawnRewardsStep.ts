@@ -4,7 +4,7 @@ import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
 import { TutorialStep } from '../TutorialStep';
 
-export class MovementStep extends TutorialStep {
+export class RespawnRewardsStep extends TutorialStep {
     buildContent(): void {
         if (!this.contentContainer) return;
         
@@ -14,7 +14,7 @@ export class MovementStep extends TutorialStep {
         const leftX = centerX - contentWidth / 2;
         const startY = centerY - 150;
         
-        const panelHeight = 400;
+        const panelHeight = 350;
         const panelBg = this.scene.add.graphics();
         panelBg.setScrollFactor(0, 0);
         panelBg.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.LOBBY);
@@ -60,14 +60,14 @@ export class MovementStep extends TutorialStep {
         
         let currentY = startY;
         
-        const title = this.scene.add.text(centerX, currentY, 'Take Your First Steps!', 
+        const title = this.scene.add.text(centerX, currentY, 'Collect Your Rewards!', 
             TextStyleHelper.getStyle('PAGE_TITLE'));
         title.setOrigin(0.5, 0);
         this.contentContainer.add(title);
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'While respawning, you get to collect on your hard-earned levels!\n\nPick rewards to level up your character even more. At level 3, you\'ll get to pick a new class with a powerful ability!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -75,61 +75,37 @@ export class MovementStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        currentY += 130;
+        // Draw reward cards with actual icons
+        const cardStartX = centerX - 100;
+        const cardY = centerY + 50;
         
-        // Add visualization of WASD keys in proper T-shape
-        const keysY = currentY;
-        const keySize = 40;
-        const keySpacing = 50;
+        const rewards = [
+            { iconKey: 'icon_stat:damage', label: 'Damage', cardX: cardStartX },
+            { iconKey: 'icon_stat:health', label: 'Health', cardX: cardStartX + 120 },
+            { iconKey: 'icon_stat:move_speed', label: 'Speed', cardX: cardStartX + 240 }
+        ];
         
-        // W key (top)
-        const wKey = this.scene.add.rectangle(centerX, keysY - keySpacing, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        wKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        wKey.setOrigin(0.5);
-        this.contentContainer.add(wKey);
-        const wText = this.scene.add.text(centerX, keysY - keySpacing, 'W', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        wText.setOrigin(0.5);
-        this.contentContainer.add(wText);
+        rewards.forEach(reward => {
+            // Card background - bigger
+            const card = this.scene.add.rectangle(reward.cardX, cardY, 100, 110, 0x34495e);
+            card.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
+            this.contentContainer.add(card);
+            
+            // Icon if available - smaller to fit within card with padding
+            if (this.scene.textures.exists(reward.iconKey)) {
+                const icon = this.scene.add.image(reward.cardX, cardY - 10, reward.iconKey);
+                icon.setScale(0.3);
+                this.contentContainer.add(icon);
+            }
+            
+            // Label - positioned just off the bottom of the square
+            const label = this.scene.add.text(reward.cardX, cardY + 60, reward.label, 
+                TextStyleHelper.getStyle('BODY_SMALL'));
+            label.setOrigin(0.5);
+            this.contentContainer.add(label);
+        });
         
-        // A key (left)
-        const aKey = this.scene.add.rectangle(centerX - keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        aKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        aKey.setOrigin(0.5);
-        this.contentContainer.add(aKey);
-        const aText = this.scene.add.text(centerX - keySpacing, keysY, 'A', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        aText.setOrigin(0.5);
-        this.contentContainer.add(aText);
-        
-        // S key (center/bottom)
-        const sKey = this.scene.add.rectangle(centerX, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        sKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        sKey.setOrigin(0.5);
-        this.contentContainer.add(sKey);
-        const sText = this.scene.add.text(centerX, keysY, 'S', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        sText.setOrigin(0.5);
-        this.contentContainer.add(sText);
-        
-        // D key (right)
-        const dKey = this.scene.add.rectangle(centerX + keySpacing, keysY, keySize, keySize, CLIENT_CONFIG.UI.BUTTON_COLORS.SUBTLE);
-        dKey.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-        dKey.setOrigin(0.5);
-        this.contentContainer.add(dKey);
-        const dText = this.scene.add.text(centerX + keySpacing, keysY, 'D', TextStyleHelper.getStyle('BUTTON_TEXT'));
-        dText.setOrigin(0.5);
-        this.contentContainer.add(dText);
-        
-        currentY += keySpacing + 30;
-        
-        const hintText = this.scene.add.text(centerX, currentY, 
-            '💡 Tip: Right-click to toggle mouse-only movement mode!', 
-            TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
-                align: 'center',
-                fontStyle: 'italic'
-            })
-        );
-        hintText.setOrigin(0.5, 0);
-        this.contentContainer.add(hintText);
-        currentY += 40;
+        currentY += 140;
         
         const nextButtonY = startY + panelHeight - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);
