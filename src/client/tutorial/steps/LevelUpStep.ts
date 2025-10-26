@@ -74,7 +74,7 @@ export class LevelUpStep extends TutorialStep {
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
         
-        // Draw circular XP indicator (level 2, fully filled)
+        // Draw circular XP indicator (level 3, fully filled)
         const xpX = centerX;
         const xpY = centerY + 60;
         const config = CLIENT_CONFIG.UI.XP_INDICATOR;
@@ -96,7 +96,7 @@ export class LevelUpStep extends TutorialStep {
         this.contentContainer.add(xpArc);
         
         // Level text in center
-        const level2Text = this.scene.add.text(xpX, xpY, '2', 
+        const level2Text = this.scene.add.text(xpX, xpY, '3', 
             TextStyleHelper.getStyle('BODY_SMALL'));
         level2Text.setOrigin(0.5);
         level2Text.setTint(0xffffff);

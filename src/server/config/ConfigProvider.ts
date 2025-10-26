@@ -5,7 +5,6 @@ import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 import { STATIONARY_CONFIG } from './StationaryConfig';
 import { STATIONARY_NORMAL_RANGE_CONFIG } from './StationaryNormalRangeConfig';
 import { MERCENARY_ONLY_CONFIG } from './MercenaryOnlyConfig';
-import { PRACTICE_CONFIG } from './PracticeConfig';
 import { IMPROVED_BOTS_CONFIG } from './ImprovedBotsConfig';
 import { PROJECTILE_SPEED_TESTING_CONFIG } from './ProjectileSpeedTestingConfig';
 
@@ -18,7 +17,6 @@ export class ConfigProvider {
         // Register available configs
         this.registerConfig('default', GAMEPLAY_CONFIG);
         this.registerConfig('tutorial', TUTORIAL_CONFIG);
-        this.registerConfig('practice', PRACTICE_CONFIG);
         this.registerConfig('improved-bots', IMPROVED_BOTS_CONFIG);
         this.registerConfig('test: higher-level', HIGHER_LEVEL_TESTING_CONFIG);
         this.registerConfig('test: death-effects', DEATH_EFFECTS_TESTING_CONFIG);

@@ -53,7 +53,19 @@ TUTORIAL_CONFIG.SUPER_MINIONS.ENABLED = false;
 TUTORIAL_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS = 8000; // Spawn more frequently (was 12000)
 
 // Lower cradle health for easier objective demonstration
-TUTORIAL_CONFIG.COMBAT.CRADLE.HEALTH = 2000; // (was 4000)
+TUTORIAL_CONFIG.COMBAT.CRADLE.HEALTH = 500; // (was 4000, now 25%)
+
+// Lower cradle attack radius for safer tutorial gameplay
+TUTORIAL_CONFIG.COMBAT.CRADLE.ATTACK_RADIUS = 120; // (was 230)
+
+TUTORIAL_CONFIG.EXPERIENCE.MINION_KILLED = 3;
+
+// Triple XP required for level ups in tutorial
+TUTORIAL_CONFIG.EXPERIENCE.LEVEL_UP_BASE_COST = 15; // (was 15, now 3x)
+
+// Reduce minion damage for easier tutorial gameplay
+TUTORIAL_CONFIG.COMBAT.MINION.WARRIOR.ATTACK_STRENGTH = 7; // (was 10, now 70% damage)
+TUTORIAL_CONFIG.COMBAT.MINION.ARCHER.ATTACK_STRENGTH = 3; // (was 5, now 60% damage)
 
 // Enable basic tutorial
 TUTORIAL_CONFIG.tutorial = 'basic-tutorial';

@@ -454,6 +454,9 @@ export class GameScene extends Phaser.Scene {
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);
         
+        // Link UIManager to TutorialManager for hiding objectives during respawn
+        this.uiManager.setTutorialManager(this.tutorialManager);
+        
         // Show tutorial if specified in config
         if (this.gameplayConfig?.tutorial) {
             this.tutorialManager.startTutorial(this.gameplayConfig.tutorial);

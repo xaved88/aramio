@@ -65,7 +65,7 @@ export class XPStep extends TutorialStep {
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'See how you got some experience there? Gain enough XP to level up and get stronger!\n\n💡 Last hit enemies for even more experience. If you go too far away, you won\'t get experience - stay in the fight!', 
+            'You got some XP! Gather XP to level up and get stronger!\n\n💡 If you are far away from a fight, you won\'t get experience - stay close to grow strong!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }

@@ -65,7 +65,7 @@ export class MovementStep extends TutorialStep {
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Welcome to Aramio! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
+            'Welcome to tutorial mode! Time to take your first steps.\n\nUse WASD to move around the battlefield!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }

@@ -231,6 +231,18 @@ export class TutorialManager {
         }
     }
 
+    hideObjectivesForRespawn(): void {
+        if (this.objectivesDisplay) {
+            this.objectivesDisplay.hide();
+        }
+    }
+
+    showObjectivesAfterRespawn(): void {
+        if (this.objectivesDisplay && this.currentStepIndex >= 0) {
+            this.objectivesDisplay.show();
+        }
+    }
+
     destroy(): void {
         if (this.currentStep) {
             this.currentStep.destroy();

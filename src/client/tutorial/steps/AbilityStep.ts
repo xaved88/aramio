@@ -65,7 +65,7 @@ export class AbilityStep extends TutorialStep {
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'Just auto-attacks alone won\'t cut it. Try casting your ability instead!\n\nLeft-click (or Space) to aim, then release to fire. See your cooldown on the cursor, or with the icon to the right of your health bar.', 
+            'Besides auto-attacks, your hero also has an Ability.\n\nLeft-click (or Space) to aim, then release to fire. See your cooldown on the cursor, or with the icon to the right of your health bar.', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }

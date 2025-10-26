@@ -77,7 +77,7 @@ export class AutoAttackStep extends TutorialStep {
         
         // Add visualization of attack radius with bigger hero
         const attackVisualX = centerX;
-        const attackVisualY = centerY + 50;
+        const attackVisualY = centerY + 20;
         
         const radiusGraphics = this.scene.add.graphics();
         // Draw dashed circle to match game visuals (auto-attack ranges are dashed)
@@ -105,7 +105,7 @@ export class AutoAttackStep extends TutorialStep {
         this.contentContainer.add(heroVisual);
         
         // Add enemy minions vertically aligned
-        const minionY = centerY + 50;
+        const minionY = centerY + 20;
         const minion1 = this.scene.add.image(attackVisualX + 100, minionY - 40, 'minion-warrior');
         minion1.setScale(0.25);
         minion1.setTint(0xe74c3c); // Red tint for enemy
@@ -116,9 +116,9 @@ export class AutoAttackStep extends TutorialStep {
         minion2.setTint(0xe74c3c); // Red tint for enemy
         this.contentContainer.add(minion2);
         
-        const minionsLabel = this.scene.add.text(attackVisualX + 100, minionY + 50, 'Enemy Minions', 
+        const minionsLabel = this.scene.add.text(attackVisualX + 125, minionY - 20, 'Enemy Minions', 
             TextStyleHelper.getStyle('BODY_SMALL'));
-        minionsLabel.setOrigin(0.5);
+        minionsLabel.setOrigin(0, 0.5);
         minionsLabel.setTint(0xffffff);
         this.contentContainer.add(minionsLabel);
         

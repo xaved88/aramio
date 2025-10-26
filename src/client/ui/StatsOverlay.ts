@@ -261,7 +261,7 @@ export class StatsOverlay {
      */
     private createTeamTable(stats: PlayerStats[], startX: number, startY: number, teamColor: number): void {
         if (stats.length === 0) {
-            const noPlayersText = this.scene.add.text(startX, startY, 'No players', TextStyleHelper.getStyleWithColor('BODY_SMALL', CLIENT_CONFIG.UI.COLORS.DISABLED));
+            const noPlayersText = this.scene.add.text(startX + this.COLUMN_WIDTHS.arrow, startY, 'No players', TextStyleHelper.getStyleWithColor('BODY_SMALL', CLIENT_CONFIG.UI.COLORS.DISABLED));
             noPlayersText.setDepth(this.DEPTHS.UI_CONTENT);
             noPlayersText.setScrollFactor(0, 0); // Fixed to screen
             this.overlayElements.push(noPlayersText);

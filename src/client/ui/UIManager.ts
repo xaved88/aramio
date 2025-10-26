@@ -40,6 +40,7 @@ export class UIManager {
     private killFeed: KillFeed;
     private tutorialOverlay: TutorialStep | null;
     private inputHandler: any = null; // Reference to input handler for control mode updates
+    private tutorialManager: any = null; // Reference to tutorial manager for hiding objectives during respawn
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null;
     private wasPlayerAlive: boolean = true; // Track previous alive state to detect death transitions
@@ -122,6 +123,10 @@ export class UIManager {
 
     setInputHandler(inputHandler: any): void {
         this.inputHandler = inputHandler;
+    }
+
+    setTutorialManager(tutorialManager: any): void {
+        this.tutorialManager = tutorialManager;
     }
 
     /**
@@ -394,6 +399,10 @@ export class UIManager {
         }
 
         if (currentPlayer.state === 'respawning') {
+            // Hide objectives when respawning
+            if (this.tutorialManager) {
+                this.tutorialManager.hideObjectivesForRespawn();
+            }
             const remainingTime = currentPlayer.respawnTime - state.gameTime;
             const hasUnspentRewards = currentPlayer.levelRewards && currentPlayer.levelRewards.length > 0;
             
@@ -423,6 +432,11 @@ export class UIManager {
             this.respawnOverlay.hide();
             // Reset reward tracking when not respawning
             this.lastRewardIds = [];
+            
+            // Show objectives when not respawning
+            if (this.tutorialManager) {
+                this.tutorialManager.showObjectivesAfterRespawn();
+            }
         }
     }
 

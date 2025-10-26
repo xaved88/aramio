@@ -11,7 +11,7 @@ export class RespawnRewardsStep extends TutorialStep {
         const centerX = getCanvasWidth() / 2;
         const centerY = getCanvasHeight() / 2;
         const contentWidth = 500;
-        const panelHeight = 350;
+        const panelHeight = 250;
         const leftX = centerX - contentWidth / 2;
         const startY = centerY - panelHeight / 2;
         const panelBg = this.scene.add.graphics();
@@ -65,7 +65,7 @@ export class RespawnRewardsStep extends TutorialStep {
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'While respawning, you get to collect on your hard-earned levels!\n\nPick rewards to level up your character even more. At level 3, you\'ll get to pick a new class with a powerful ability!', 
+            'While respawning, you get to collect on your hard-earned levels!\n\nPick rewards to make your hero more powerful. At level 3, you\'ll get to pick a new class with a powerful ability!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }
@@ -73,39 +73,8 @@ export class RespawnRewardsStep extends TutorialStep {
         );
         welcomeText.setOrigin(0.5, 0);
         this.contentContainer.add(welcomeText);
-        // Draw reward cards with actual icons
-        const cardStartX = centerX - 100;
-        const cardY = centerY + 50;
         
-        const rewards = [
-            { iconKey: 'icon_stat:damage', label: 'Damage', cardX: cardStartX },
-            { iconKey: 'icon_stat:health', label: 'Health', cardX: cardStartX + 120 },
-            { iconKey: 'icon_stat:move_speed', label: 'Speed', cardX: cardStartX + 240 }
-        ];
-        
-        const container = this.contentContainer; // Store in local variable to avoid TS errors in forEach
-        
-        rewards.forEach(reward => {
-            // Card background - bigger
-            const card = this.scene.add.rectangle(reward.cardX, cardY, 100, 110, 0x34495e);
-            card.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-            container.add(card);
-            
-            // Icon if available - smaller to fit within card with padding
-            if (this.scene.textures.exists(reward.iconKey)) {
-                const icon = this.scene.add.image(reward.cardX, cardY - 10, reward.iconKey);
-                icon.setScale(0.3);
-                container.add(icon);
-            }
-            
-            // Label - positioned just off the bottom of the square
-            const label = this.scene.add.text(reward.cardX, cardY + 60, reward.label, 
-                TextStyleHelper.getStyle('BODY_SMALL'));
-            label.setOrigin(0.5);
-            container.add(label);
-        });
-        
-        currentY += 140;
+        currentY += 150;
         
         const nextButtonY = startY + panelHeight + 20 - 40;
         const nextButton = this.scene.add.rectangle(centerX, nextButtonY, 120, 40, CLIENT_CONFIG.UI.BUTTON_COLORS.PROCEED);

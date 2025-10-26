@@ -30,27 +30,27 @@ export class BasicTutorialManager {
             {
                 stepClass: MovementStep,
                 condition: this.movementStepCondition.bind(this),
-                objective: 'Take your first steps'
+                objective: 'Move around the map'
             },
             {
                 stepClass: AutoAttackStep,
                 condition: this.autoAttackStepCondition.bind(this),
-                objective: 'Attack enemy minions'
+                objective: 'Defeat enemy minions with your auto-attack'
             },
             {
                 stepClass: AbilityStep,
                 condition: this.abilityStepCondition.bind(this),
-                objective: 'Cast your ability'
+                objective: 'Use your ability to defeat more minions'
             },
             {
                 stepClass: XPStep,
                 condition: this.xpStepCondition.bind(this),
-                objective: 'Gain experience'
+                objective: 'Reach level 3'
             },
             {
                 stepClass: LevelUpStep,
                 condition: this.levelUpStepCondition.bind(this),
-                objective: 'Level up'
+                objective: 'Die and respawn to collect your rewards'
             },
             {
                 stepClass: RespawnRewardsStep,
@@ -71,7 +71,7 @@ export class BasicTutorialManager {
 
     private autoAttackStepCondition(gameState: SharedGameState, lastStepCompletedAt: number): boolean {
         const timeSinceLastStep = Date.now() - lastStepCompletedAt;
-        if (timeSinceLastStep < 3000) return false; // Wait 3 seconds
+        if (timeSinceLastStep < 4000) return false; // Wait 4 seconds
         
         // Check if hero has moved
         if (!this.trackedState.startingPosition || !gameState.combatants) return false;
@@ -81,7 +81,7 @@ export class BasicTutorialManager {
                 const startPos = this.trackedState.startingPosition;
                 const dx = Math.abs(combatant.x - startPos.x);
                 const dy = Math.abs(combatant.y - startPos.y);
-                return dx > 10 || dy > 10; // Has moved at least 10 units
+                return dx > 200 || dy > 200; // Has moved at least 50 units
             }
         }
         return false;
@@ -96,7 +96,7 @@ export class BasicTutorialManager {
                 const hero = combatant as any;
                 if (hero.roundStats && hero.roundStats.damageDealt) {
                     // Check if hero has dealt damage (any amount means they've been attacking)
-                    if (hero.roundStats.damageDealt > 0) {
+                    if (hero.roundStats.damageDealt > 20) {
                         return true;
                     }
                 }
@@ -113,8 +113,10 @@ export class BasicTutorialManager {
         
         for (const combatant of gameState.combatants.values()) {
             if (combatant.type === 'hero' && this.playerSessionId && combatant.controller === this.playerSessionId) {
-                // Check if player has gained some XP (5 points)
-                if (combatant.experience >= 5) {
+                const hero = combatant as any;
+                
+                // Require 100+ damage dealt (gives time to use ability)
+                if (hero.roundStats && hero.roundStats.damageDealt >= 100) {
                     return true;
                 }
             }
@@ -130,9 +132,8 @@ export class BasicTutorialManager {
         
         for (const combatant of gameState.combatants.values()) {
             if (combatant.type === 'hero' && this.playerSessionId && combatant.controller === this.playerSessionId) {
-                // Check if player has leveled up (experienceNeeded suggests they've gained a level)
-                // Or if they're at level 2 or higher
-                return combatant.level >= 2 || (combatant.experience >= 0 && combatant.experienceNeeded > 0);
+                // Check if player has reached level 2
+                return combatant.level >= 3;
             }
         }
         return false;
@@ -143,7 +144,8 @@ export class BasicTutorialManager {
     }
 
     private encouragementStepCondition(gameState: SharedGameState, lastStepCompletedAt: number): boolean {
-        return this.trackedState.playerRespawned === true;
+        return this.trackedState.playerRespawned === true && 
+               this.trackedState.playerRespawning === false;
     }
 }
 
