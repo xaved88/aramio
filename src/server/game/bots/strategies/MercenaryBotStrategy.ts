@@ -8,13 +8,13 @@ import { applyBotCollisionAvoidance } from '../BotCollisionAvoidance';
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability
  * 
  * This strategy operates in two distinct modes:
- * 1. RAGE MODE: Aggressive pursuit of enemies, ignoring minions, maximizing damage output
+ * 1. RAGE MODE: Aggressive pursuit of enemies, ignoring minions and structures, maximizing damage output
  * 2. NORMAL MODE: Calculated assassin positioning - seeks enemies within auto-attack range
  *    while avoiding positions targeted by multiple enemies
  * 
  * Key behaviors:
  * - Uses rage when enemies are nearby and it's off cooldown
- * - During rage: aggressively chases enemies, ignores minions, maximizes damage
+ * - During rage: aggressively chases enemies, ignores minions and structures (hunter effect), maximizes damage
  * - After rage: positions aggressively for auto-attack opportunities while maintaining safety
  * - Always aware of reduced attack range during rage mode
  * - Avoids areas with multiple attackers for strategic positioning
@@ -171,7 +171,7 @@ export class MercenaryBotStrategy {
     }
 
     private selectRageTarget(enemies: any[], bot: any, state: SharedGameState): any {
-        // During rage, only target heroes (hunter effect ignores minions anyway)
+        // During rage, only target heroes (hunter effect ignores minions and structures)
         const heroTargets = enemies.filter(enemy => enemy.type === 'hero');
         
         if (heroTargets.length === 0) {
@@ -206,7 +206,7 @@ export class MercenaryBotStrategy {
 
     private generateRageModeMovement(bot: any, state: SharedGameState, enemies: any[], allCombatants: any[], allObstacles: any[]): GameCommand | null {
         // During rage mode, be aggressive and chase enemies
-        // Filter out minions since hunter effect prevents targeting them
+        // Filter out minions and structures since hunter effect prevents targeting them
         const heroEnemies = enemies.filter(enemy => enemy.type === 'hero');
         const nearbyHeroEnemies = heroEnemies.filter(enemy => enemy.distance <= this.gameplayConfig.AI_BEHAVIOR.MERCENARY.NEARBY_ENEMY_RANGE);
         
@@ -232,21 +232,14 @@ export class MercenaryBotStrategy {
             // Within attack range, stay in place and let auto-attack handle it
             return null;
         } else {
-            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
-            if (nearbyEnemyTurret) {
-                const adjustedPos = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
-                return {
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
-                };
-            } else {
-                const targetPosition = this.getEnemyCradlePosition(bot.team);
-                const adjustedPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
-                return {
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
-                };
-            }
+            // No nearby enemies, move toward enemy base to find hero targets
+            // Don't target structures directly since hunter effect prevents it during rage
+            const targetPosition = this.getEnemyCradlePosition(bot.team);
+            const adjustedPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
+            return {
+                type: 'move',
+                data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
+            };
         }
     }
 

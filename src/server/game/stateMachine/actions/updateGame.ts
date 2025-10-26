@@ -309,7 +309,7 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
         }
     }
 
-    // Check if attacker has hunter effect (ignores minions)
+    // Check if attacker has hunter effect (ignores minions and structures)
     const hasHunterEffect = attacker.effects?.some((effect: any) => effect.type === 'hunter');
     
     // Find alive enemies in attack range
@@ -317,8 +317,8 @@ function updateCombatantTargeting(attacker: any, allCombatants: any[]): void {
         if (!CombatantUtils.isCombatantAlive(target)) return false;
         if (!CombatantUtils.areOpposingTeams(attacker, target)) return false;
         
-        // If attacker has hunter effect, ignore minions
-        if (hasHunterEffect && target.type === 'minion') return false;
+        // If attacker has hunter effect, ignore minions and structures
+        if (hasHunterEffect && (target.type === 'minion' || target.type === COMBATANT_TYPES.TURRET || target.type === COMBATANT_TYPES.CRADLE)) return false;
         
         return CombatantUtils.isInRange(attacker, target, attacker.getAttackRadius());
     });
