@@ -1,4 +1,5 @@
 import { GAMEPLAY_CONFIG } from '../../GameConfig';
+import { TUTORIAL_CONFIG } from './TutorialConfig';
 import { HIGHER_LEVEL_TESTING_CONFIG } from './HigherLevelTestingConfig';
 import { DEATH_EFFECTS_TESTING_CONFIG } from './DeathEffectsTestingConfig';
 import { STATIONARY_CONFIG } from './StationaryConfig';
@@ -16,6 +17,7 @@ export class ConfigProvider {
     constructor() {
         // Register available configs
         this.registerConfig('default', GAMEPLAY_CONFIG);
+        this.registerConfig('tutorial', TUTORIAL_CONFIG);
         this.registerConfig('practice', PRACTICE_CONFIG);
         this.registerConfig('improved-bots', IMPROVED_BOTS_CONFIG);
         this.registerConfig('test: higher-level', HIGHER_LEVEL_TESTING_CONFIG);

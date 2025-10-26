@@ -71,6 +71,12 @@ export class CameraManager {
         this.entityManager = entityManager;
     }
 
+    setMapSize(mapWidth: number, mapHeight: number): void {
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
+        this.setupCamera();
+    }
+
     updateCamera(state: SharedGameState): void {
         if (!this.playerSessionId || !this.entityManager) return;
 

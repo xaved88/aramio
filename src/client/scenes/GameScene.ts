@@ -163,6 +163,11 @@ export class GameScene extends Phaser.Scene {
         this.animationManager = new AnimationManager(this);
         this.cameraManager = new CameraManager(this);
         
+        // Set map size from gameplay config
+        if (this.gameplayConfig && this.gameplayConfig.MAP_WIDTH && this.gameplayConfig.MAP_HEIGHT) {
+            this.cameraManager.setMapSize(this.gameplayConfig.MAP_WIDTH, this.gameplayConfig.MAP_HEIGHT);
+        }
+        
         // Set up manager relationships
         this.entityManager.setCameraManager(this.cameraManager);
         this.entityManager.setAnimationManager(this.animationManager);
@@ -892,7 +897,9 @@ export class GameScene extends Phaser.Scene {
         
         // Fill the entire game map area with the game map background color
         mapBackground.fillStyle(CLIENT_CONFIG.UI.BACKGROUND.GAME_MAP);
-        mapBackground.fillRect(0, 0, CLIENT_CONFIG.MAP_WIDTH, CLIENT_CONFIG.MAP_HEIGHT);
+        const mapWidth = this.gameplayConfig?.MAP_WIDTH || CLIENT_CONFIG.MAP_WIDTH;
+        const mapHeight = this.gameplayConfig?.MAP_HEIGHT || CLIENT_CONFIG.MAP_HEIGHT;
+        mapBackground.fillRect(0, 0, mapWidth, mapHeight);
     }
 
     /**

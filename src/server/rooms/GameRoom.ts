@@ -425,6 +425,11 @@ export class GameRoom extends Room<GameState> {
             botsPerTeam = this.gameplayConfig.BOTS.BOTS_PER_TEAM;
         }
         
+        // Respect config BOTS_PER_TEAM if explicitly set to 0 (e.g., tutorial mode)
+        if (this.gameplayConfig.BOTS.BOTS_PER_TEAM === 0) {
+            botsPerTeam = 0;
+        }
+        
         // Spawn bots for each team
         this.spawnBotsForTeam('blue', blueSpawnPositions, botAbilityTypes, botsPerTeam);
         this.spawnBotsForTeam('red', redSpawnPositions, botAbilityTypes, botsPerTeam);

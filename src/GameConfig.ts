@@ -1,5 +1,7 @@
 // Gameplay Configuration
 export const GAMEPLAY_CONFIG = {
+    MAP_WIDTH: 1400, // Map width in pixels
+    MAP_HEIGHT: 1400, // Map height in pixels
     HERO_MOVE_SPEED: 7.0, // pixels per frame
     MINION_MOVE_SPEED: 5.0, // pixels per frame
     HERO_STOP_DISTANCE: 10, // pixels

@@ -7,7 +7,7 @@ import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { hexToColorString } from '../utils/ColorUtils';
 import { ConnectionManager } from '../ConnectionManager';
 import { PlayerNameStorage } from '../utils/PlayerNameStorage';
-import { TutorialOverlay } from '../ui/TutorialOverlay';
+import { TutorialStep, HowToPlay } from '../tutorial';
 import { CursorRenderer } from '../ui/CursorRenderer';
 import { Button } from '../ui/Button';
 
@@ -27,7 +27,7 @@ export class LobbyScene extends Phaser.Scene {
     private startButton!: Button;
     private teamSizeButtons: Button[] = [];
     private versionText!: Phaser.GameObjects.Text;
-    private tutorialOverlay!: TutorialOverlay;
+    private tutorialOverlay!: TutorialStep;
     private tutorialButton!: Phaser.GameObjects.Container;
     private cursorRenderer!: CursorRenderer;
     
@@ -594,7 +594,7 @@ export class LobbyScene extends Phaser.Scene {
         ).setOrigin(0.5, 1);
 
         // Initialize tutorial overlay
-        this.tutorialOverlay = new TutorialOverlay(this, () => {
+        this.tutorialOverlay = new HowToPlay(this, () => {
             this.updateInputFieldVisibility();
         });
         

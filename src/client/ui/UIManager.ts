@@ -15,7 +15,7 @@ import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { KillFeed } from './KillFeed';
-import { TutorialOverlay } from './TutorialOverlay';
+import { TutorialStep, HowToPlay } from '../tutorial';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -38,7 +38,7 @@ export class UIManager {
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
-    private tutorialOverlay: TutorialOverlay;
+    private tutorialOverlay: TutorialStep;
     private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null;
@@ -68,7 +68,7 @@ export class UIManager {
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
         this.killFeed = new KillFeed(scene);
-        this.tutorialOverlay = new TutorialOverlay(scene, () => {
+        this.tutorialOverlay = new HowToPlay(scene, () => {
             // On dismiss callback - allow movement again
             // Movement is handled via isTutorialVisible method
         });
