@@ -13,6 +13,7 @@ export interface RewardCardConfig {
     title?: string;
     description?: string;
     isRecommended?: boolean;
+    teamAbilityCount?: string;
     onClick?: (rewardId: string) => void;
 }
 
@@ -48,6 +49,8 @@ export class RewardCard {
     private isRecommended: boolean = false;
     private recommendationStar: Phaser.GameObjects.Graphics | null = null;
     private recommendationText: Phaser.GameObjects.Text | null = null;
+    private teamAbilityCountText: Phaser.GameObjects.Text | null = null;
+    private teamAbilityCount: string = '';
 
     get isInteractive(): boolean {
         return this._isInteractive;
@@ -62,6 +65,7 @@ export class RewardCard {
         this.rewardId = config.rewardId;
         this.onClick = config.onClick;
         this.isRecommended = config.isRecommended || false;
+        this.teamAbilityCount = config.teamAbilityCount || '';
         
         this.rewardType = this.detectRewardType(config.rewardId);
         this.cardStyle = this.getStyleForRewardType(this.rewardType);
@@ -288,6 +292,23 @@ export class RewardCard {
         this.descriptionText.setOrigin(0.5);
         this.hudContainer.add(this.descriptionText);
         
+        // Add team ability count text if provided (only for ability rewards)
+        if (this.teamAbilityCount && this.rewardType === 'ability') {
+            this.teamAbilityCountText = this.scene.add.text(
+                0,
+                -config.height / 2 + 15,
+                this.teamAbilityCount,
+                TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
+                    fontSize: '11px',
+                    color: '#666666',
+                    align: 'center',
+                    shadow: undefined
+                })
+            );
+            this.teamAbilityCountText.setOrigin(0.5);
+            this.hudContainer.add(this.teamAbilityCountText);
+        }
+        
         // Add all elements to HUD container
         const elements: Phaser.GameObjects.GameObject[] = [this.background, this.titleText, this.descriptionText, ...this.cornerDecorations];
         if (this.iconImage) {
@@ -298,6 +319,9 @@ export class RewardCard {
         }
         if (this.recommendationText) {
             elements.push(this.recommendationText);
+        }
+        if (this.teamAbilityCountText) {
+            elements.push(this.teamAbilityCountText);
         }
         this.hudContainer.addMultiple(elements);
         
@@ -351,6 +375,13 @@ export class RewardCard {
 
     setPosition(x: number, y: number): void {
         this.hudContainer!.setPosition(x, y);
+    }
+    
+    updateTeamAbilityCount(count: string): void {
+        this.teamAbilityCount = count;
+        if (this.teamAbilityCountText) {
+            this.teamAbilityCountText.setText(count);
+        }
     }
 
 
@@ -566,6 +597,11 @@ export class RewardCard {
         if (this.recommendationText) {
             this.recommendationText.destroy();
             this.recommendationText = null;
+        }
+        
+        if (this.teamAbilityCountText) {
+            this.teamAbilityCountText.destroy();
+            this.teamAbilityCountText = null;
         }
     }
 }

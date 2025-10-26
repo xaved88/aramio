@@ -298,8 +298,12 @@ export class RespawnOverlay {
         }
     }
 
-    updateRewards(hero: HeroCombatant): void {
-        this.rewardCardManager.updateRewards(hero);
+    updateRewards(hero: HeroCombatant, state?: any): void {
+        this.rewardCardManager.updateRewards(hero, state);
+    }
+    
+    updateTeamAbilityCounts(hero: HeroCombatant, state?: any): void {
+        this.rewardCardManager.updateTeamAbilityCounts(hero, state);
     }
 
     updateSlainBy(killerName: string | null, killerTeam: string | null, isBot: boolean = false): void {

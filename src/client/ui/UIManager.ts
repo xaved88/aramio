@@ -413,13 +413,16 @@ export class UIManager {
                     currentRewardIds.some((id, index) => id !== this.lastRewardIds[index]);
                 
                 if (rewardsChanged) {
-                    this.respawnOverlay.updateRewards(currentPlayer);
+                    this.respawnOverlay.updateRewards(currentPlayer, state);
                     this.lastRewardIds = [...currentRewardIds];
+                } else {
+                    // Update team ability counts even if rewards haven't changed
+                    this.respawnOverlay.updateTeamAbilityCounts(currentPlayer, state);
                 }
             } else {
                 // Clear rewards if no unspent rewards
                 if (this.lastRewardIds.length > 0) {
-                    this.respawnOverlay.updateRewards(currentPlayer);
+                    this.respawnOverlay.updateRewards(currentPlayer, state);
                     this.lastRewardIds = [];
                 }
             }

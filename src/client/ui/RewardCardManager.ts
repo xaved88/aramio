@@ -31,7 +31,7 @@ export class RewardCardManager {
         this.cameraManager = cameraManager;
     }
 
-    updateRewards(hero: HeroCombatant): void {
+    updateRewards(hero: HeroCombatant, state?: any): void {
         // Clear existing cards
         this.destroy();
         
@@ -73,6 +73,9 @@ export class RewardCardManager {
 
         // Determine which reward should be recommended based on hero's ability
         const recommendedRewardId = this.getRecommendedReward(hero);
+        
+        // Get team ability counts if state is available
+        const teamAbilityCounts = state ? this.getTeamAbilityCounts(hero.team, state) : {};
 
         // Create cards off-screen initially
         for (let i = 0; i < numCards; i++) {
@@ -80,6 +83,14 @@ export class RewardCardManager {
             const rewardId = hero.rewardsForChoice[i];
             const rewardDisplay = CLIENT_CONFIG.REWARDS.DISPLAY[rewardId as keyof typeof CLIENT_CONFIG.REWARDS.DISPLAY];
             const isRecommended = rewardId === recommendedRewardId;
+            
+            // Extract ability type from reward ID and get count
+            let abilityCountText = '';
+            if (rewardId.startsWith('ability:')) {
+                const abilityType = rewardId.substring(8);
+                const count = teamAbilityCounts[abilityType] || 0;
+                abilityCountText = `Team: ${count}`;
+            }
             
             const card = new RewardCard(this.scene, {
                 x: cardX,
@@ -90,6 +101,7 @@ export class RewardCardManager {
                 title: rewardDisplay?.title || `Reward ${i + 1}`,
                 description: rewardDisplay?.description || 'Click to claim this reward',
                 isRecommended: isRecommended,
+                teamAbilityCount: abilityCountText,
                 onClick: (rewardId: string) => {
                     if (this.onRewardChosen) {
                         this.onRewardChosen(rewardId);
@@ -116,6 +128,22 @@ export class RewardCardManager {
         // Animate cards sliding up from bottom one by one
         this.slideUpCards(cardY);
     }
+    
+    private getTeamAbilityCounts(team: string, state: any): Record<string, number> {
+        const abilityCounts: Record<string, number> = {};
+        
+        // Count abilities for all heroes on the same team
+        if (state.combatants) {
+            state.combatants.forEach((combatant: any) => {
+                if (combatant.type === 'hero' && combatant.team === team && combatant.ability) {
+                    const abilityType = combatant.ability.type;
+                    abilityCounts[abilityType] = (abilityCounts[abilityType] || 0) + 1;
+                }
+            });
+        }
+        
+        return abilityCounts;
+    }
 
     setVisible(visible: boolean): void {
         this.rewardCards.forEach(card => {
@@ -125,6 +153,25 @@ export class RewardCardManager {
         if (this.chestNameText) {
             this.chestNameText.setVisible(visible);
         }
+    }
+    
+    updateTeamAbilityCounts(hero: HeroCombatant, state?: any): void {
+        if (!state || !hero.rewardsForChoice) return;
+        
+        const teamAbilityCounts = this.getTeamAbilityCounts(hero.team, state);
+        
+        // Update each card's team ability count if it's an ability reward
+        this.rewardCards.forEach((card, index) => {
+            if (index < hero.rewardsForChoice.length) {
+                const rewardId = hero.rewardsForChoice[index];
+                if (rewardId.startsWith('ability:')) {
+                    const abilityType = rewardId.substring(8);
+                    const count = teamAbilityCounts[abilityType] || 0;
+                    const abilityCountText = `Team: ${count}`;
+                    card.updateTeamAbilityCount(abilityCountText);
+                }
+            }
+        });
     }
 
     destroy(): void {
