@@ -77,5 +77,5 @@ PRACTICE_CONFIG.BOTS.ABILITY_COOLDOWN_MULTIPLIER = {
 PRACTICE_CONFIG.MINION_SPAWNING.WARRIORS_PER_WAVE = 2; // 2 warriors per wave
 PRACTICE_CONFIG.MINION_SPAWNING.ARCHERS_PER_WAVE = 0; // No archers
 
-// Enable tutorial for practice mode
-PRACTICE_CONFIG.TUTORIAL.ENABLED = true;
+// Enable basic tutorial for practice mode
+PRACTICE_CONFIG.tutorial = 'how-to-play';

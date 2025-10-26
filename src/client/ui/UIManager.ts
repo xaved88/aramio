@@ -15,7 +15,7 @@ import { CursorRenderer } from './CursorRenderer';
 import { CheatMenu } from './CheatMenu';
 import { NotificationOverlay, NotificationType, NotificationConfig } from './NotificationOverlay';
 import { KillFeed } from './KillFeed';
-import { TutorialStep, HowToPlay } from '../tutorial';
+import { TutorialStep } from '../tutorial';
 import { GameplayConfig } from '../../server/config/ConfigProvider';
 
 /**
@@ -38,7 +38,7 @@ export class UIManager {
     private cheatMenu: CheatMenu;
     private notificationOverlay: NotificationOverlay;
     private killFeed: KillFeed;
-    private tutorialOverlay: TutorialStep;
+    private tutorialOverlay: TutorialStep | null;
     private inputHandler: any = null; // Reference to input handler for control mode updates
     private lastRewardIds: string[] = []; // Track last reward IDs to avoid unnecessary updates
     private lastState: SharedGameState | null = null;
@@ -68,10 +68,8 @@ export class UIManager {
         this.cheatMenu = new CheatMenu(scene, gameplayConfig);
         this.notificationOverlay = new NotificationOverlay(scene);
         this.killFeed = new KillFeed(scene);
-        this.tutorialOverlay = new HowToPlay(scene, () => {
-            // On dismiss callback - allow movement again
-            // Movement is handled via isTutorialVisible method
-        });
+        // Old tutorial system disabled - now using TutorialManager
+        this.tutorialOverlay = null;
         this.victoryScreen.setRestartCallback(() => {
             console.log('Victory screen restart callback - restart handled by server');
         });
@@ -92,7 +90,9 @@ export class UIManager {
         this.cheatMenu.setHUDCamera(hudCamera);
         this.notificationOverlay.setHUDCamera(hudCamera);
         this.killFeed.setHUDCamera(hudCamera);
-        this.tutorialOverlay.setHUDCamera(hudCamera);
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.setHUDCamera(hudCamera);
+        }
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
 
@@ -108,7 +108,9 @@ export class UIManager {
         this.cheatMenu.setCameraManager(cameraManager);
         this.notificationOverlay.setCameraManager(cameraManager);
         this.killFeed.setCameraManager(cameraManager);
-        this.tutorialOverlay.setCameraManager(cameraManager);
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.setCameraManager(cameraManager);
+        }
         this.permanentEffectsDisplay.setCameraManager(cameraManager);
         this.permanentEffectsDisplay.setHUDContainer(this.hudRenderer.getHUDContainer());
     }
@@ -615,25 +617,32 @@ export class UIManager {
 
     // Tutorial overlay methods
     showTutorial(): void {
-        this.tutorialOverlay.show();
-        // When tutorial opens, stop the player's current movement
-        this.stopPlayerMovement();
+        // Old tutorial system disabled - now using TutorialManager
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.show();
+            this.stopPlayerMovement();
+        }
     }
 
     hideTutorial(): void {
-        this.tutorialOverlay.hide();
+        // Old tutorial system disabled - now using TutorialManager
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.hide();
+        }
     }
 
     toggleTutorial(): void {
-        if (!this.tutorialOverlay.isShowing()) {
-            // Opening tutorial - stop movement
+        // Old tutorial system disabled - now using TutorialManager  
+        if (this.tutorialOverlay && !this.tutorialOverlay.isShowing()) {
             this.stopPlayerMovement();
         }
-        this.tutorialOverlay.toggle();
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.toggle();
+        }
     }
 
     isTutorialVisible(): boolean {
-        return this.tutorialOverlay.isShowing();
+        return this.tutorialOverlay ? this.tutorialOverlay.isShowing() : false;
     }
     
     private stopPlayerMovement(): void {
@@ -663,6 +672,8 @@ export class UIManager {
         this.cursorRenderer.destroy();
         this.cheatMenu.destroy();
         this.killFeed.destroy();
-        this.tutorialOverlay.destroy();
+        if (this.tutorialOverlay) {
+            this.tutorialOverlay.destroy();
+        }
     }
 } 

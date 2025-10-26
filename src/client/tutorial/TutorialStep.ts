@@ -1,13 +1,11 @@
 import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../ClientConfig';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
-import { HUDContainer } from '../ui/HUDContainer';
 
 export abstract class TutorialStep {
     protected scene: Phaser.Scene;
     protected hudCamera: Phaser.Cameras.Scene2D.Camera | null = null;
     protected cameraManager: any = null;
-    protected hudContainer: HUDContainer | null = null;
     protected overlay: Phaser.GameObjects.Graphics | null = null;
     protected contentContainer: Phaser.GameObjects.Container | null = null;
     protected isVisible: boolean = false;
@@ -25,32 +23,37 @@ export abstract class TutorialStep {
 
     setCameraManager(cameraManager: any): void {
         this.cameraManager = cameraManager;
-        if (this.hudContainer) {
-            this.hudContainer.setCameraManager(cameraManager);
+        if (this.overlay && this.cameraManager) {
+            this.cameraManager.assignToHUDCamera(this.overlay);
+        }
+        if (this.contentContainer && this.cameraManager) {
+            this.cameraManager.assignToHUDCamera(this.contentContainer);
         }
     }
 
+    private contentBuilt: boolean = false;
+
     protected createOverlay(): void {
-        this.hudContainer = new HUDContainer(this.scene);
-        this.hudContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
-        
-        if (this.cameraManager) {
-            this.hudContainer.setCameraManager(this.cameraManager);
-        }
-        
         this.overlay = this.scene.add.graphics();
-        this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
+        this.overlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 40);
         this.overlay.setScrollFactor(0, 0);
         this.overlay.setVisible(false);
-        this.hudContainer.add(this.overlay);
+        if (this.cameraManager) {
+            this.cameraManager.assignToHUDCamera(this.overlay);
+        }
         
         this.contentContainer = this.scene.add.container(0, 0);
         this.contentContainer.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI + 50);
         this.contentContainer.setScrollFactor(0, 0);
         this.contentContainer.setVisible(false);
-        this.hudContainer.add(this.contentContainer);
+        if (this.cameraManager) {
+            this.cameraManager.assignToHUDCamera(this.contentContainer);
+        }
         
-        this.buildContent();
+        if (!this.contentBuilt) {
+            this.buildContent();
+            this.contentBuilt = true;
+        }
     }
 
     abstract buildContent(): void;
@@ -100,6 +103,7 @@ export abstract class TutorialStep {
         if (this.overlay) {
             this.overlay.clear();
             this.overlay.fillStyle(CLIENT_CONFIG.UI.OVERLAY.BACKGROUND, CLIENT_CONFIG.UI.OVERLAY.ALPHA);
+            this.overlay.setPosition(0, 0);
             this.overlay.fillRect(0, 0, getCanvasWidth(), getCanvasHeight());
         }
     }
@@ -120,14 +124,18 @@ export abstract class TutorialStep {
     }
 
     destroy(): void {
-        if (this.hudContainer) {
-            this.hudContainer.destroy();
-            this.hudContainer = null;
+        if (this.overlay) {
+            this.overlay.destroy();
+            this.overlay = null;
         }
         
-        this.overlay = null;
-        this.contentContainer = null;
+        if (this.contentContainer) {
+            this.contentContainer.destroy();
+            this.contentContainer = null;
+        }
+        
         this.isVisible = false;
+        this.contentBuilt = false;
     }
 
     protected getContentContainer(): Phaser.GameObjects.Container | null {

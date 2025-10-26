@@ -55,6 +55,6 @@ TUTORIAL_CONFIG.MINION_SPAWNING.WAVE_INTERVAL_MS = 8000; // Spawn more frequentl
 // Lower cradle health for easier objective demonstration
 TUTORIAL_CONFIG.COMBAT.CRADLE.HEALTH = 2000; // (was 4000)
 
-// Enable tutorial hints
-TUTORIAL_CONFIG.TUTORIAL.ENABLED = true;
+// Enable basic tutorial
+TUTORIAL_CONFIG.tutorial = 'basic-tutorial';
 

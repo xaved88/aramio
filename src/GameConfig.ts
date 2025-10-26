@@ -521,8 +521,5 @@ export const GAMEPLAY_CONFIG = {
         CHEAT_LEVEL_UP_ENABLED: true, // Enable 'u' key to level up player for testing
     },
 
-    // Tutorial Configuration
-    TUTORIAL: {
-        ENABLED: false, // Whether to show tutorial at game start
-    },
+    tutorial: undefined, // Optional tutorial ID to show at game start
 } as const;

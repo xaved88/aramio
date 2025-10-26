@@ -19,6 +19,7 @@ import { LoadingScreen } from '../ui/LoadingScreen';
 import { ConnectionManager } from '../ConnectionManager';
 import { CoordinateDebugOverlay } from '../ui/CoordinateDebugOverlay';
 import { InputHandler } from '../InputHandler';
+import { TutorialManager } from '../tutorial';
 import { DestinationMarker } from '../ui/DestinationMarker';
 
 export class GameScene extends Phaser.Scene {
@@ -51,6 +52,7 @@ export class GameScene extends Phaser.Scene {
     private connectionManager!: ConnectionManager;
     private coordinateDebugOverlay!: CoordinateDebugOverlay;
     private inputHandler!: InputHandler;
+    private tutorialManager!: TutorialManager;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -194,6 +196,9 @@ export class GameScene extends Phaser.Scene {
         this.coordinateDebugOverlay = new CoordinateDebugOverlay(this, this.gameObjectFactory);
         this.coordinateDebugOverlay.setCameraManager(this.cameraManager);
         this.coordinateDebugOverlay.initialize();
+        
+        // Initialize tutorial manager
+        this.tutorialManager = new TutorialManager(this);
         
         // Initialize input handler - this is the single source of truth for all input
         this.inputHandler = new InputHandler(this, this.room);
@@ -439,9 +444,9 @@ export class GameScene extends Phaser.Scene {
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);
         
-        // Show tutorial if enabled in config
-        if (this.gameplayConfig?.TUTORIAL?.ENABLED) {
-            this.uiManager.showTutorial();
+        // Show tutorial if specified in config
+        if (this.gameplayConfig?.tutorial) {
+            this.tutorialManager.startTutorial(this.gameplayConfig.tutorial);
         }
     }
 
