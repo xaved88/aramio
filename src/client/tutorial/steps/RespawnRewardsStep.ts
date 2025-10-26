@@ -85,24 +85,26 @@ export class RespawnRewardsStep extends TutorialStep {
             { iconKey: 'icon_stat:move_speed', label: 'Speed', cardX: cardStartX + 240 }
         ];
         
+        const container = this.contentContainer; // Store in local variable to avoid TS errors in forEach
+        
         rewards.forEach(reward => {
             // Card background - bigger
             const card = this.scene.add.rectangle(reward.cardX, cardY, 100, 110, 0x34495e);
             card.setStrokeStyle(2, CLIENT_CONFIG.UI.COLORS.BORDER);
-            this.contentContainer.add(card);
+            container.add(card);
             
             // Icon if available - smaller to fit within card with padding
             if (this.scene.textures.exists(reward.iconKey)) {
                 const icon = this.scene.add.image(reward.cardX, cardY - 10, reward.iconKey);
                 icon.setScale(0.3);
-                this.contentContainer.add(icon);
+                container.add(icon);
             }
             
             // Label - positioned just off the bottom of the square
             const label = this.scene.add.text(reward.cardX, cardY + 60, reward.label, 
                 TextStyleHelper.getStyle('BODY_SMALL'));
             label.setOrigin(0.5);
-            this.contentContainer.add(label);
+            container.add(label);
         });
         
         currentY += 140;

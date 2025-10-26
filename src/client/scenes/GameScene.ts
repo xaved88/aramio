@@ -199,6 +199,9 @@ export class GameScene extends Phaser.Scene {
         
         // Initialize tutorial manager
         this.tutorialManager = new TutorialManager(this, this.room);
+        if (this.playerSessionId) {
+            this.tutorialManager.setPlayerSessionId(this.playerSessionId);
+        }
         
         // Initialize input handler - this is the single source of truth for all input
         this.inputHandler = new InputHandler(this, this.room);
@@ -216,6 +219,12 @@ export class GameScene extends Phaser.Scene {
 
     update() {
         if (!this.room || !this.room.state) return;
+        
+        // Update tutorial manager
+        if (this.tutorialManager && this.lastState) {
+            const sharedState = convertToSharedGameState(this.lastState);
+            this.tutorialManager.update(sharedState);
+        }
         
         // Update coordinate debug overlay
         if (this.coordinateDebugOverlay) {

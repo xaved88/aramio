@@ -1,34 +1,27 @@
 import Phaser from 'phaser';
 import { TutorialStep } from './TutorialStep';
-import { WelcomeStep } from './steps/WelcomeStep';
-import { MovementStep } from './steps/MovementStep';
-import { AutoAttackStep } from './steps/AutoAttackStep';
-import { AbilityStep } from './steps/AbilityStep';
-import { XPStep } from './steps/XPStep';
-import { LevelUpStep } from './steps/LevelUpStep';
-import { RespawnRewardsStep } from './steps/RespawnRewardsStep';
-import { EncouragementStep } from './steps/EncouragementStep';
 import { HowToPlay } from './steps/HowToPlay';
+import { SharedGameState } from '../../shared/types/GameStateTypes';
+import { BasicTutorialManager } from './BasicTutorial';
+
+export type TutorialStepCondition = (gameState: SharedGameState, lastStepCompletedAt: number) => boolean;
+
+export interface TutorialStepDefinition {
+    stepClass: new (scene: Phaser.Scene, onDismiss?: () => void, room?: any) => TutorialStep;
+    condition: TutorialStepCondition;
+}
 
 export type TutorialDefinition = {
-    steps: Array<new (scene: Phaser.Scene, onDismiss?: () => void, room?: any) => TutorialStep>;
+    steps: Array<TutorialStepDefinition>;
 };
 
 const TUTORIALS: Record<string, TutorialDefinition> = {
     'basic-tutorial': {
-        steps: [
-            MovementStep,
-            AutoAttackStep,
-            AbilityStep,
-            XPStep,
-            LevelUpStep,
-            RespawnRewardsStep,
-            EncouragementStep,
-        ]
+        steps: [] // Will be populated dynamically
     },
     'how-to-play': {
         steps: [
-            HowToPlay,
+            { stepClass: HowToPlay, condition: (gs, ts) => true },
         ]
     }
 };
@@ -36,13 +29,28 @@ const TUTORIALS: Record<string, TutorialDefinition> = {
 export class TutorialManager {
     private scene: Phaser.Scene;
     private room: any;
+    private playerSessionId: string | null = null;
     private currentTutorial: TutorialDefinition | null = null;
     private currentStepIndex: number = -1;
     private currentStep: TutorialStep | null = null;
+    private lastStepCompletedAt: number = 0;
+    private trackedState: any = {}; // For tracking player actions
+    private basicTutorialManager: BasicTutorialManager | null = null;
 
     constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
         this.room = room;
+        if (room && room.sessionId) {
+            this.playerSessionId = room.sessionId;
+        }
+        this.basicTutorialManager = new BasicTutorialManager();
+    }
+
+    setPlayerSessionId(sessionId: string | null): void {
+        this.playerSessionId = sessionId;
+        if (this.basicTutorialManager) {
+            this.basicTutorialManager.setPlayerSessionId(sessionId);
+        }
     }
 
     startTutorial(tutorialId: string): void {
@@ -52,34 +60,101 @@ export class TutorialManager {
             return;
         }
 
+        // For basic-tutorial, populate steps dynamically with proper manager reference
+        if (tutorialId === 'basic-tutorial' && this.basicTutorialManager) {
+            this.basicTutorialManager.setPlayerSessionId(this.playerSessionId);
+            this.basicTutorialManager.setTrackedState(this.trackedState);
+            tutorial.steps = this.basicTutorialManager.getTutorialSteps();
+        }
+
         this.currentTutorial = tutorial;
         this.currentStepIndex = -1;
-        this.nextStep();
+        this.lastStepCompletedAt = Date.now();
+        if (this.basicTutorialManager) {
+            this.basicTutorialManager.setLastStepCompletedAt(Date.now());
+        }
+        this.trackedState = {
+            startingPosition: null,
+            autoAttacksDone: 0,
+            abilitiesUsed: 0,
+            minionsKilled: 0,
+            wasRespawning: false,
+            playerRespawning: false
+        };
+        if (this.basicTutorialManager) {
+            this.basicTutorialManager.setTrackedState(this.trackedState);
+        }
     }
 
-    private nextStep(): void {
+    update(gameState: SharedGameState): void {
         if (!this.currentTutorial) return;
 
-        if (this.currentStep) {
-            this.currentStep.destroy();
-            this.currentStep = null;
-        }
-
-        this.currentStepIndex++;
-        
-        if (this.currentStepIndex >= this.currentTutorial.steps.length) {
-            // Tutorial finished - unpause the game if it was paused
-            if (this.room) {
-                this.room.send('unpause');
+        // Initialize starting position if not set
+        if (this.trackedState.startingPosition === null && gameState.combatants) {
+            for (const combatant of gameState.combatants.values()) {
+                if (combatant.type === 'hero' && this.playerSessionId && combatant.controller === this.playerSessionId) {
+                    this.trackedState.startingPosition = { x: combatant.x, y: combatant.y };
+                    break;
+                }
             }
-            this.currentTutorial = null;
-            this.currentStepIndex = -1;
-            this.currentStep = null;
-            return;
         }
 
-        const StepClass = this.currentTutorial.steps[this.currentStepIndex];
-        this.currentStep = new StepClass(this.scene, () => {
+        // Update tracked state from game state
+        this.updateTrackedState(gameState);
+        
+        // Update the basic tutorial manager with new state
+        if (this.basicTutorialManager) {
+            this.basicTutorialManager.setTrackedState(this.trackedState);
+        }
+
+        // Check if we need to advance to the next step
+        if (this.currentStep === null && this.currentStepIndex < this.currentTutorial.steps.length) {
+            if (this.currentStepIndex === -1) {
+                // Special case: first step should show immediately
+                this.currentStepIndex = 0;
+                this.showCurrentStep();
+            } else {
+                // Check if current step should be shown based on condition
+                const stepDef = this.currentTutorial.steps[this.currentStepIndex];
+                if (stepDef.condition(gameState, this.lastStepCompletedAt)) {
+                    this.showCurrentStep();
+                }
+            }
+        }
+    }
+
+    private updateTrackedState(gameState: SharedGameState): void {
+        // Track minions killed
+        if (gameState.killEvents) {
+            this.trackedState.minionsKilled = gameState.killEvents.length;
+        }
+
+        // Track if player has respawned (was respawning, now alive)
+        if (gameState.combatants) {
+            for (const combatant of gameState.combatants.values()) {
+                if (combatant.type === 'hero' && this.playerSessionId && combatant.controller === this.playerSessionId) {
+                    if (combatant.state === 'alive') {
+                        // Check if we were tracking a respawn
+                        if (this.trackedState.wasRespawning) {
+                            this.trackedState.playerRespawned = true;
+                            this.trackedState.wasRespawning = false;
+                        }
+                        this.trackedState.playerRespawning = false;
+                    } else if (combatant.state === 'respawning') {
+                        this.trackedState.playerRespawning = true;
+                        this.trackedState.wasRespawning = true;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private showCurrentStep(): void {
+        if (!this.currentTutorial || this.currentStepIndex < 0) return;
+
+        const stepDef = this.currentTutorial.steps[this.currentStepIndex];
+        this.currentStep = new stepDef.stepClass(this.scene, () => {
             this.onStepDismissed();
         }, this.room);
 
@@ -87,7 +162,30 @@ export class TutorialManager {
     }
 
     private onStepDismissed(): void {
-        this.nextStep();
+        if (this.currentStep) {
+            this.currentStep.destroy();
+            this.currentStep = null;
+        }
+
+        this.lastStepCompletedAt = Date.now();
+        if (this.basicTutorialManager) {
+            this.basicTutorialManager.setLastStepCompletedAt(Date.now());
+            this.basicTutorialManager.setTrackedState(this.trackedState);
+        }
+        this.currentStepIndex++;
+
+        if (this.currentStepIndex >= this.currentTutorial!.steps.length) {
+            // Tutorial finished - unpause the game if it was paused
+            if (this.room) {
+                this.room.send('unpause');
+            }
+            this.currentTutorial = null;
+            this.currentStepIndex = -1;
+            this.currentStep = null;
+        } else {
+            // Don't show the next step immediately - wait for condition
+            this.currentStep = null;
+        }
     }
 
     destroy(): void {
