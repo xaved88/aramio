@@ -2,6 +2,7 @@ import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
+import { applyBotCollisionAvoidance } from '../BotCollisionAvoidance';
 
 /**
  * MercenaryBotStrategy - A specialized bot behavior for heroes with Mercenary ability
@@ -28,6 +29,8 @@ export class MercenaryBotStrategy {
 
     generateCommands(bot: any, state: SharedGameState): GameCommand[] {
         const commands: GameCommand[] = [];
+        const allCombatants = Array.from(state.combatants.values());
+        const allObstacles = state.obstacles ? Array.from(state.obstacles.values()) : [];
 
         // Skip if bot is dead or respawning
         if (bot.health <= 0 || bot.state === 'respawning') {
@@ -39,7 +42,6 @@ export class MercenaryBotStrategy {
 
         // Find all enemies and combatants first
         const allEnemies = this.findAllEnemies(bot, state);
-        const allCombatants = Array.from(state.combatants.values());
 
         // Check if bot is being targeted by defensive structures
         if (this.isBeingTargetedByDefensiveStructure(bot, state)) {
@@ -56,7 +58,6 @@ export class MercenaryBotStrategy {
         if (this.shouldHeal(bot, state)) {
             // If all friendly turrets are alive, retreat behind a second row turret
             // Otherwise, retreat to cradle
-            const allCombatants = Array.from(state.combatants.values());
             const allTurretsAlive = CombatantUtils.areAllFriendlyTurretsAlive(bot.team, allCombatants);
             
             const retreatPosition = allTurretsAlive 
@@ -118,13 +119,13 @@ export class MercenaryBotStrategy {
         // Generate movement commands based on current state
         if (isInRageMode) {
             // RAGE MODE: Aggressive pursuit
-            const movementCommand = this.generateRageModeMovement(bot, state, allEnemies);
+            const movementCommand = this.generateRageModeMovement(bot, state, allEnemies, allCombatants, allObstacles);
             if (movementCommand) {
                 commands.push(movementCommand);
             }
         } else {
             // NORMAL MODE: Defensive backline positioning
-            const movementCommand = this.generateDefensiveMovement(bot, state);
+            const movementCommand = this.generateDefensiveMovement(bot, state, allCombatants, allObstacles);
             if (movementCommand) {
                 commands.push(movementCommand);
             }
@@ -203,7 +204,7 @@ export class MercenaryBotStrategy {
         return scoredTargets.sort((a, b) => b.score - a.score)[0];
     }
 
-    private generateRageModeMovement(bot: any, state: SharedGameState, enemies: any[]): GameCommand | null {
+    private generateRageModeMovement(bot: any, state: SharedGameState, enemies: any[], allCombatants: any[], allObstacles: any[]): GameCommand | null {
         // During rage mode, be aggressive and chase enemies
         // Filter out minions since hunter effect prevents targeting them
         const heroEnemies = enemies.filter(enemy => enemy.type === 'hero');
@@ -222,51 +223,51 @@ export class MercenaryBotStrategy {
             const rageAttackRange = bot.getAttackRadius();
             
             if (targetEnemy.distance > rageAttackRange) {
-                // Move closer to get in attack range
+                const adjustedPos = applyBotCollisionAvoidance(bot, targetEnemy.x, targetEnemy.y, allCombatants, allObstacles, this.gameplayConfig);
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: targetEnemy.x, targetY: targetEnemy.y }
+                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
                 };
             }
             // Within attack range, stay in place and let auto-attack handle it
             return null;
         } else {
-            // No nearby enemies, check for nearby turrets first
             const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
             if (nearbyEnemyTurret) {
+                const adjustedPos = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
                 };
             } else {
-                // Move toward enemy base to find targets
                 const targetPosition = this.getEnemyCradlePosition(bot.team);
+                const adjustedPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
                 };
             }
         }
     }
 
-    private generateDefensiveMovement(bot: any, state: SharedGameState): GameCommand | null {
+    private generateDefensiveMovement(bot: any, state: SharedGameState, allCombatants: any[], allObstacles: any[]): GameCommand | null {
         // When not in rage mode, position aggressively for auto-attack opportunities
         const allEnemies = this.findAllEnemies(bot, state);
         
         if (allEnemies.length === 0) {
-            // No enemies, check for nearby turrets first
             const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
             if (nearbyEnemyTurret) {
+                const adjustedPos = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
                 };
             } else {
-                // Move toward enemy base to find targets
                 const targetPosition = this.getEnemyCradlePosition(bot.team);
+                const adjustedPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
                 return {
                     type: 'move',
-                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                    data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
                 };
             }
         }
@@ -278,15 +279,14 @@ export class MercenaryBotStrategy {
         });
 
         if (safeEnemies.length === 0) {
-            // All positions are too dangerous, fall back to safe position
-            const allCombatants = Array.from(state.combatants.values());
             const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            const adjustedPos = applyBotCollisionAvoidance(bot, retreatPosition.x, retreatPosition.y, allCombatants, allObstacles, this.gameplayConfig);
             return {
                 type: 'move',
                 data: { 
                     heroId: bot.id, 
-                    targetX: retreatPosition.x, 
-                    targetY: retreatPosition.y 
+                    targetX: adjustedPos.x, 
+                    targetY: adjustedPos.y 
                 }
             };
         }
@@ -314,17 +314,17 @@ export class MercenaryBotStrategy {
             
             const targetX = bestTarget.x - (direction.x * targetDistance);
             const targetY = bestTarget.y - (direction.y * targetDistance);
-            
+            const adjustedPos = applyBotCollisionAvoidance(bot, targetX, targetY, allCombatants, allObstacles, this.gameplayConfig);
             return {
                 type: 'move',
-                data: { heroId: bot.id, targetX, targetY }
+                data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
             };
         } else {
-            // No optimal targets, move toward closest safe enemy
             const closestSafeEnemy = safeEnemies.sort((a, b) => a.distance - b.distance)[0];
+            const adjustedPos = applyBotCollisionAvoidance(bot, closestSafeEnemy.x, closestSafeEnemy.y, allCombatants, allObstacles, this.gameplayConfig);
             return {
                 type: 'move',
-                data: { heroId: bot.id, targetX: closestSafeEnemy.x, targetY: closestSafeEnemy.y }
+                data: { heroId: bot.id, targetX: adjustedPos.x, targetY: adjustedPos.y }
             };
         }
     }
@@ -490,4 +490,5 @@ export class MercenaryBotStrategy {
         const healingState = this.botHealingState.get(bot.id);
         return healingState ? healingState.isHealing : false;
     }
+
 }

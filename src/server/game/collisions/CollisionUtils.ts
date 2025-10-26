@@ -252,3 +252,151 @@ export function circleRotatedRectangleIntersection(
     // Now treat as axis-aligned rectangle
     return circleRectangleIntersection(localX, localY, radius, 0, 0, width, height);
 }
+
+/**
+ * Checks if a predicted movement will collide with an obstacle
+ */
+export function willCollideWithObstacle(
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    combatantRadius: number,
+    obstacle: any
+): boolean {
+    if (!obstacle.blocksMovement) return false;
+    
+    const combatantRadiusUsed = combatantRadius;
+    
+    switch (obstacle.hitboxType) {
+        case 'rectangle':
+            if (!obstacle.width || !obstacle.height) return false;
+            if (obstacle.rotation && obstacle.rotation !== 0) {
+                return lineSegmentIntersectsRectangle(
+                    fromX, fromY, toX, toY,
+                    obstacle.x, obstacle.y, obstacle.width, obstacle.height, obstacle.rotation
+                );
+            } else {
+                return lineSegmentIntersectsRectangle(
+                    fromX, fromY, toX, toY,
+                    obstacle.x, obstacle.y, obstacle.width, obstacle.height, 0
+                );
+            }
+            
+        case 'circle':
+            if (!obstacle.radius) return false;
+            return lineSegmentIntersectsCircle(
+                fromX, fromY, toX, toY,
+                obstacle.x, obstacle.y, obstacle.radius + combatantRadiusUsed
+            );
+            
+        default:
+            return false;
+    }
+}
+
+/**
+ * Checks if a predicted movement will collide with another combatant
+ */
+export function willCollideWithCombatant(
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    movingCombatantRadius: number,
+    targetCombatant: any,
+    skipCombatantId?: string
+): boolean {
+    if (skipCombatantId && targetCombatant.id === skipCombatantId) return false;
+    
+    const totalRadius = movingCombatantRadius + targetCombatant.size;
+    
+    return lineSegmentIntersectsCircle(
+        fromX, fromY, toX, toY,
+        targetCombatant.x, targetCombatant.y, totalRadius
+    );
+}
+
+/**
+ * Finds a clear path to a target, adjusting the target position if collisions are predicted
+ */
+export function findClearPath(
+    currentX: number,
+    currentY: number,
+    targetX: number,
+    targetY: number,
+    moveSpeed: number,
+    combatantRadius: number,
+    obstacles: any[],
+    otherCombatants: any[],
+    skipCombatantId: string,
+    gameplayConfig: any
+): { x: number, y: number } {
+    const dx = targetX - currentX;
+    const dy = targetY - currentY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance === 0) return { x: targetX, y: targetY };
+    
+    const normalizedDx = dx / distance;
+    const normalizedDy = dy / distance;
+    
+    const lookAheadDistance = moveSpeed * 5;
+    const checkX = currentX + normalizedDx * lookAheadDistance;
+    const checkY = currentY + normalizedDy * lookAheadDistance;
+    
+    let hasCollision = false;
+    
+    for (const obstacle of obstacles) {
+        if (willCollideWithObstacle(currentX, currentY, checkX, checkY, combatantRadius, obstacle)) {
+            hasCollision = true;
+            break;
+        }
+    }
+    
+    if (!hasCollision) {
+        return { x: targetX, y: targetY };
+    }
+    
+    const perpendicularX = -normalizedDy;
+    const perpendicularY = normalizedDx;
+    
+    const offsetDistances = [combatantRadius * 4, combatantRadius * 8, combatantRadius * 12];
+    
+    for (const offset of offsetDistances) {
+        for (const direction of [-1, 1]) {
+            const offsetX = perpendicularX * offset * direction;
+            const offsetY = perpendicularY * offset * direction;
+            
+            const bypassX = checkX + offsetX;
+            const bypassY = checkY + offsetY;
+            
+            let pathClear = true;
+            
+            for (const obstacle of obstacles) {
+                if (willCollideWithObstacle(currentX, currentY, bypassX, bypassY, combatantRadius, obstacle)) {
+                    pathClear = false;
+                    break;
+                }
+            }
+            
+            if (pathClear) {
+                const bypassDx = bypassX - currentX;
+                const bypassDy = bypassY - currentY;
+                const bypassDist = Math.sqrt(bypassDx * bypassDx + bypassDy * bypassDy);
+                
+                if (bypassDist > 0) {
+                    const bypassNormDx = bypassDx / bypassDist;
+                    const bypassNormDy = bypassDy / bypassDist;
+                    
+                    const newTargetX = currentX + bypassNormDx * distance;
+                    const newTargetY = currentY + bypassNormDy * distance;
+                    
+                    return { x: newTargetX, y: newTargetY };
+                }
+            }
+        }
+    }
+    
+    return { x: targetX, y: targetY };
+}

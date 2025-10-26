@@ -2,6 +2,7 @@ import { SharedGameState } from '../../../../shared/types/GameStateTypes';
 import { GameCommand } from '../../../../shared/types/GameCommands';
 import { GameplayConfig } from '../../../config/ConfigProvider';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
+import { applyBotCollisionAvoidance } from '../BotCollisionAvoidance';
 
 export class SimpletonBotStrategy {
     private gameplayConfig: GameplayConfig;
@@ -12,6 +13,8 @@ export class SimpletonBotStrategy {
 
     generateCommands(bot: any, state: SharedGameState): GameCommand[] {
         const commands: GameCommand[] = [];
+        const allCombatants = Array.from(state.combatants.values());
+        const allObstacles = state.obstacles ? Array.from(state.obstacles.values()) : [];
 
         // Skip if bot is dead or respawning
         if (bot.health <= 0 || bot.state === 'respawning') {
@@ -22,21 +25,22 @@ export class SimpletonBotStrategy {
         if (this.isBeingTargetedByDefensiveStructure(bot, state)) {
             // Retreat to safe position
             const safePosition = this.getSafeRetreatPosition(bot, state);
+            const adjustedSafePosition = applyBotCollisionAvoidance(bot, safePosition.x, safePosition.y, allCombatants, allObstacles, this.gameplayConfig);
             commands.push({
                 type: 'move',
-                data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+                data: { heroId: bot.id, targetX: adjustedSafePosition.x, targetY: adjustedSafePosition.y }
             });
             return commands;
         }
 
         // Check if we're outnumbered and should play defensively
-        const allCombatants = Array.from(state.combatants.values());
         if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime, this.gameplayConfig)) {
             // Retreat to nearest friendly structure for defensive positioning
             const retreatPosition = CombatantUtils.getDefensiveRetreatPosition(bot, allCombatants, this.gameplayConfig);
+            const adjustedRetreatPosition = applyBotCollisionAvoidance(bot, retreatPosition.x, retreatPosition.y, allCombatants, allObstacles, this.gameplayConfig);
             commands.push({
                 type: 'move',
-                data: { heroId: bot.id, targetX: retreatPosition.x, targetY: retreatPosition.y }
+                data: { heroId: bot.id, targetX: adjustedRetreatPosition.x, targetY: adjustedRetreatPosition.y }
             });
             return commands;
         }
@@ -50,9 +54,10 @@ export class SimpletonBotStrategy {
             if (!lowHealthEnemyNearby) {
                 // Get safe position away from zones using quickest escape route
                 const safePosition = CombatantUtils.getSafePositionAwayFromZones(bot, state.zones, allCombatants);
+                const adjustedSafePosition = applyBotCollisionAvoidance(bot, safePosition.x, safePosition.y, allCombatants, allObstacles, this.gameplayConfig);
                 commands.push({
                     type: 'move',
-                    data: { heroId: bot.id, targetX: safePosition.x, targetY: safePosition.y }
+                    data: { heroId: bot.id, targetX: adjustedSafePosition.x, targetY: adjustedSafePosition.y }
                 });
                 return commands;
             }
@@ -86,16 +91,17 @@ export class SimpletonBotStrategy {
             // Check if there's a nearby enemy turret to prioritize
             const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
             if (nearbyEnemyTurret) {
+                const adjustedTurretPosition = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
                 commands.push({
                     type: 'move',
-                    data: { heroId: bot.id, targetX: nearbyEnemyTurret.x, targetY: nearbyEnemyTurret.y }
+                    data: { heroId: bot.id, targetX: adjustedTurretPosition.x, targetY: adjustedTurretPosition.y }
                 });
             } else {
-                // Move toward enemy cradle
                 const targetPosition = this.getEnemyCradlePosition(bot.team);
+                const adjustedCradlePosition = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
                 commands.push({
                     type: 'move',
-                    data: { heroId: bot.id, targetX: targetPosition.x, targetY: targetPosition.y }
+                    data: { heroId: bot.id, targetX: adjustedCradlePosition.x, targetY: adjustedCradlePosition.y }
                 });
             }
         }
@@ -303,5 +309,6 @@ export class SimpletonBotStrategy {
         const allCombatants = Array.from(state.combatants.values());
         return CombatantUtils.findNearbyEnemyTurret(bot, allCombatants, this.gameplayConfig.AI_BEHAVIOR.TURRET_DETECTION_RANGE);
     }
+
 
 } 

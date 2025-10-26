@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="config icons.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.7046647"
+     inkscape:cx="153.26438"
+     inkscape:cy="207.9003"
+     inkscape:window-width="1920"
+     inkscape:window-height="1000"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Mouse"
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:export-filename="..\public\assets\config\mouse.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       style="fill:#880088;stroke:#eaeaea;stroke-width:4;fill-opacity:0;stroke-dasharray:none;stroke-linejoin:bevel;stroke-linecap:butt;stroke-opacity:1"
+       d="m 46.93426,47.309735 c -18.773704,16.520858 -4.505688,29.286978 -4.505688,29.286978 0,0 16.896331,12.766119 19.149176,3.379266 2.252845,-9.386853 3.379267,-31.16435 -3.379266,-28.160556 C 51.43995,54.819216 46.93426,47.309735 46.93426,47.309735 Z"
+       id="path1" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 41.114411,55.382427 9.058312,6.101453 12.672252,0.09387"
+       id="path5" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 50.172723,61.577748 2.86299,-8.964443"
+       id="path6" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 53.100054,50.710552 c 8.761508,-19.779771 1.460251,-20.04527 1.460251,-20.04527"
+       id="path7" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer7"
+     inkscape:label="Keyboard"
+     inkscape:export-filename="..\public\assets\config\keyboard.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 129.87237,45.441775 c 8.76151,-19.779771 1.46025,-20.04527 1.46025,-20.04527"
+       id="path7-2" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 96.121364,80.914665 68.524026,0.187737 -5.81985,-36.79646 -56.13338,0.56321 m -6.570796,36.045513 6.570796,-36.045513 z"
+       id="path9" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 108.88748,56.321113 43.74273,-1.126424"
+       id="path10" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2.09229;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 106.6383,64.202964 37.86654,-1.42408"
+       id="path10-1" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 148.31226,59.700379 6.5708,-0.187738 1.68963,10.513276 h -9.95006 l -0.37547,-5.068901 3.00379,-0.750948 z"
+       id="path12" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 118.64981,71.152339 -0.93869,5.444374 28.3483,-0.750948 -2.62832,-5.444374 z"
+       id="path13" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 103.81858,70.025915 -1.68963,5.632112 6.38306,10e-7 0.75095,-5.256637 z"
+       id="path15" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Mouse Pointer"
+     inkscape:export-filename="..\public\assets\config\mouse.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 28.723767,131.60367 8.448167,17.45954 10.701012,-5.25664 -8.823641,-17.45954"
+       id="path4" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 46.183311,122.59229 -26.283185,12.76612 4.50569,-24.78129 z"
+       id="path3" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="wasd"
+     inkscape:export-filename="..\public\assets\config\keyboard.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <rect
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       id="rect4"
+       width="62.328697"
+       height="22.340708"
+       x="74.531601"
+       y="121.27812" />
+    <rect
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       id="rect5"
+       width="23.654861"
+       height="43.930462"
+       x="94.807205"
+       y="99.68837" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       x="101.5524"
+       y="137.45605"
+       id="text17"><tspan
+         id="tspan17"
+         style="font-size:14.1111px;stroke-width:2"
+         x="101.5524"
+         y="137.45605"
+         sodipodi:role="line">S</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       x="79.450958"
+       y="137.5955"
+       id="text18"><tspan
+         sodipodi:role="line"
+         id="tspan18"
+         style="stroke-width:2"
+         x="79.450958"
+         y="137.5955">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       x="121.79825"
+       y="137.46277"
+       id="text19"><tspan
+         sodipodi:role="line"
+         id="tspan19"
+         style="stroke-width:2"
+         x="121.79825"
+         y="137.46277">D</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       x="99.695351"
+       y="115.75811"
+       id="text20"><tspan
+         sodipodi:role="line"
+         id="tspan20"
+         style="stroke-width:2"
+         x="99.695351"
+         y="115.75811">W</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="moba"
+     inkscape:export-filename="..\public\assets\config\moba.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 167.64918,118.64981 h -3.75474"
+       id="path21" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 155.82174,104.38179 11.82744,14.26802 0.18774,-5.0689"
+       id="path20" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 172.39775,122.85326 h 3.75474"
+       id="path21-8" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 184.22519,137.12128 -11.82744,-14.26802 -0.18774,5.0689"
+       id="path20-2" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 172.22829,118.53147 h 3.75474"
+       id="path21-4" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 184.05573,104.26345 -11.82744,14.26802 -0.18774,-5.0689"
+       id="path20-23" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 167.47972,122.73492 h -3.75474"
+       id="path21-8-2" />
+    <path
+       style="fill:#880088;fill-opacity:0;stroke:#eaeaea;stroke-width:2;stroke-linejoin:round"
+       d="m 155.65228,137.00294 11.82744,-14.26802 0.18774,5.0689"
+       id="path20-2-2" />
+  </g>
+</svg>
