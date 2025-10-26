@@ -40,6 +40,7 @@ export class EntityManager {
     private obstacleGraphics: Map<ObstacleId, Phaser.GameObjects.Graphics> = new Map();
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
+    private targetingReticleGraphics: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map(); // Individual reticles per target
     private processedXPEvents: Set<string> = new Set();
     private processedLevelUpEvents: Set<string> = new Set();
     private processedAOEDamageEvents: Set<string> = new Set();
@@ -1522,6 +1523,67 @@ export class EntityManager {
         
         // Render the targeting lines
         this.entityRenderer.renderTargetingLines(state.combatants, this.targetingLinesGraphics, state.gameTime);
+        
+        // Update targeting reticles
+        this.updateTargetingReticles(state);
+    }
+
+    /**
+     * Updates targeting reticles for the player's current target
+     */
+    private updateTargetingReticles(state: SharedGameState): void {
+        if (!this.playerSessionId) return;
+        
+        // Find the player's hero and current target
+        let playerHero: Combatant | null = null;
+        let currentTargetId: CombatantId | null = null;
+        
+        state.combatants.forEach((combatant) => {
+            if (combatant.type === COMBATANT_TYPES.HERO && 
+                isHeroCombatant(combatant) && 
+                combatant.controller === this.playerSessionId &&
+                combatant.health > 0 &&
+                combatant.state !== 'respawning') {
+                playerHero = combatant;
+                currentTargetId = combatant.target || null;
+            }
+        });
+        
+        // Clean up reticles for targets that are no longer being targeted
+        const targetsToRemove: CombatantId[] = [];
+        this.targetingReticleGraphics.forEach((graphics, targetId) => {
+            if (targetId !== currentTargetId) {
+                graphics.destroy();
+                targetsToRemove.push(targetId);
+            }
+        });
+        targetsToRemove.forEach(id => this.targetingReticleGraphics.delete(id));
+        
+        // Create/update reticle for current target
+        if (currentTargetId) {
+            const target = state.combatants.get(currentTargetId);
+            if (target && target.health > 0) {
+                let reticleGraphics = this.targetingReticleGraphics.get(currentTargetId);
+                
+                if (!reticleGraphics) {
+                    // Create new reticle graphics
+                    reticleGraphics = this.scene.add.graphics();
+                    reticleGraphics.setDepth(CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
+                    
+                    // Graphics object stays at origin, we draw with absolute world coordinates
+                    reticleGraphics.setPosition(0, 0);
+                    
+                    if (this.cameraManager) {
+                        this.cameraManager.assignToMainCamera(reticleGraphics);
+                    }
+                    
+                    this.targetingReticleGraphics.set(currentTargetId, reticleGraphics);
+                }
+                
+                // Draw the reticle at the target's position
+                this.entityRenderer.renderTargetingReticle(target, reticleGraphics);
+            }
+        }
     }
 
     /**
@@ -1546,6 +1608,7 @@ export class EntityManager {
         this.entityRespawnRings.forEach(ring => ring.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
+        this.targetingReticleGraphics.forEach(graphics => graphics.destroy());
         
         // Clear active transient effects
         this.cleanupActiveExplosions();
@@ -1557,6 +1620,10 @@ export class EntityManager {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
         }
+        
+        // Clear targeting reticle graphics
+        this.targetingReticleGraphics.forEach(graphics => graphics.destroy());
+        this.targetingReticleGraphics.clear();
         
         // Clear flashing targeting lines
         this.entityRenderer.clearFlashingTargetingLines();
@@ -1572,6 +1639,7 @@ export class EntityManager {
         this.entityRespawnRings.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
+        this.targetingReticleGraphics.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
         this.processedDeathEffectEvents.clear();
@@ -1587,6 +1655,8 @@ export class EntityManager {
         if (this.cameraManager) {
             this.cameraManager.assignToMainCamera(this.targetingLinesGraphics);
         }
+        
+        // Targeting reticle graphics are managed dynamically and recreated as needed
         
         // Ensure all tweens are stopped for this scene
         this.scene.tweens.killAll();

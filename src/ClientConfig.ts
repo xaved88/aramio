@@ -114,6 +114,13 @@ export const CLIENT_CONFIG = {
         FLASH_DURATION_MS: 100, // flash duration when attack fires
         FLASH_ALPHA: 0.9, // alpha during flash
     },
+    TARGETING_RETICLE: {
+        SIZE_OFFSET: 10, // How much larger than the entity (in pixels)
+        THICKNESS: 3,
+        COLOR: 0xFFFFFF, // White
+        ALPHA: 1.0,
+        CORNER_LENGTH: 15, // Length of each corner bracket
+    },
     TARGETING_ARROW: {
         LENGTH: 50, // Length of the arrow
         HEAD_SIZE: 16, // Size of the arrow head

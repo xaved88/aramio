@@ -423,6 +423,46 @@ export class EntityRenderer {
     }
 
     /**
+     * Renders a single targeting reticle for a target combatant
+     */
+    renderTargetingReticle(target: Combatant, graphics: Phaser.GameObjects.Graphics): void {
+        graphics.clear();
+        
+        // Draw a white targeting reticle on the target entity
+        const reticleSize = target.size + CLIENT_CONFIG.TARGETING_RETICLE.SIZE_OFFSET;
+        const config = CLIENT_CONFIG.TARGETING_RETICLE;
+        
+        graphics.lineStyle(config.THICKNESS, config.COLOR, config.ALPHA);
+        graphics.beginPath();
+        
+        // Top-left corner
+        graphics.moveTo(target.x - reticleSize / 2, target.y - reticleSize / 2);
+        graphics.lineTo(target.x - reticleSize / 2 + config.CORNER_LENGTH, target.y - reticleSize / 2);
+        graphics.moveTo(target.x - reticleSize / 2, target.y - reticleSize / 2);
+        graphics.lineTo(target.x - reticleSize / 2, target.y - reticleSize / 2 + config.CORNER_LENGTH);
+        
+        // Top-right corner
+        graphics.moveTo(target.x + reticleSize / 2, target.y - reticleSize / 2);
+        graphics.lineTo(target.x + reticleSize / 2 - config.CORNER_LENGTH, target.y - reticleSize / 2);
+        graphics.moveTo(target.x + reticleSize / 2, target.y - reticleSize / 2);
+        graphics.lineTo(target.x + reticleSize / 2, target.y - reticleSize / 2 + config.CORNER_LENGTH);
+        
+        // Bottom-left corner
+        graphics.moveTo(target.x - reticleSize / 2, target.y + reticleSize / 2);
+        graphics.lineTo(target.x - reticleSize / 2 + config.CORNER_LENGTH, target.y + reticleSize / 2);
+        graphics.moveTo(target.x - reticleSize / 2, target.y + reticleSize / 2);
+        graphics.lineTo(target.x - reticleSize / 2, target.y + reticleSize / 2 - config.CORNER_LENGTH);
+        
+        // Bottom-right corner
+        graphics.moveTo(target.x + reticleSize / 2, target.y + reticleSize / 2);
+        graphics.lineTo(target.x + reticleSize / 2 - config.CORNER_LENGTH, target.y + reticleSize / 2);
+        graphics.moveTo(target.x + reticleSize / 2, target.y + reticleSize / 2);
+        graphics.lineTo(target.x + reticleSize / 2, target.y + reticleSize / 2 - config.CORNER_LENGTH);
+        
+        graphics.strokePath();
+    }
+
+    /**
      * Renders the main graphics for an entity based on its type
      */
     private renderEntityGraphics(combatant: Combatant, graphics: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite): void {
