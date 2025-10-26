@@ -5,6 +5,7 @@ import { hexToColorString } from '../utils/ColorUtils';
 import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
+import { calculateLevelStatMultipliers, formatMultiplierAsFactor, getStatDisplayName } from '../utils/LevelStatUtils';
 
 /**
  * HUDRenderer handles all HUD rendering logic
@@ -761,7 +762,7 @@ export class HUDRenderer {
             TextStyleHelper.getStyleWithCustom('BODY_SMALL', {
                 color: '#cccccc',
                 align: 'left',
-                wordWrap: { width: 200 },
+                wordWrap: { width: 180 },
                 shadow: {
                     offsetX: 1,
                     offsetY: 1,
@@ -784,14 +785,26 @@ export class HUDRenderer {
             currentLevel = parseInt(this.levelText.text) || 1;
         }
         
+        // Calculate stat multipliers for current level
+        const statMultipliers = calculateLevelStatMultipliers(currentLevel);
+        
         // Set tooltip content
         this.levelTooltipTitle.setText(`Level: ${currentLevel}`);
-        this.levelTooltipDescription.setText('Base stats increase at every level');
+        
+        // Create description text showing cumulative stat boosts
+        const statLines = Object.entries(statMultipliers).map(([statType, multiplier]) => {
+            const displayName = getStatDisplayName(statType as keyof typeof statMultipliers);
+            const factor = formatMultiplierAsFactor(multiplier);
+            return `${displayName}: ${factor}`;
+        });
+        
+        const descriptionText = `Cumulative stat boosts:\n${statLines.join('\n')}`;
+        this.levelTooltipDescription.setText(descriptionText);
         
         // Position tooltip above the level element
         const positions = this.calculatePositions();
         const tooltipX = positions.xpX;
-        const tooltipY = positions.xpY - 60; // Position above the level circle
+        const tooltipY = positions.xpY - 80; // Position above the level circle (increased for more content)
         
         this.levelTooltip.setPosition(tooltipX, tooltipY);
         
