@@ -739,15 +739,10 @@ export class EntityRenderer {
             
             const alpha = isRecentAttacker ? 0.3 : (isTargetingPlayer ? 0.3 : 0.2);
             
-            // For structures, draw as dashed circle with thicker line
-            if (isStructure) {
-                const lineThickness = CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS + 2;
-                this.drawDashedCircle(radiusIndicator, 0, 0, combatant.attackRadius, color, alpha, lineThickness);
-            } else {
-                // Regular solid circle for heroes
-                radiusIndicator.lineStyle(CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, color, alpha);
-                radiusIndicator.strokeCircle(0, 0, combatant.attackRadius);
-            }
+            // All auto-attack ranges use dashed style
+            // Structures get thicker lines, heroes/minions get standard thickness
+            const lineThickness = isStructure ? CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS + 2 : CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS;
+            this.drawDashedCircle(radiusIndicator, 0, 0, combatant.attackRadius, color, alpha, lineThickness);
         }
     }
     

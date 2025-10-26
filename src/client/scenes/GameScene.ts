@@ -684,7 +684,7 @@ export class GameScene extends Phaser.Scene {
         // Position the graphics object at the hero's visual position and draw relative to (0, 0)
         this.abilityRangeDisplay.setPosition(heroGraphics.x, heroGraphics.y);
         this.abilityRangeDisplay.clear();
-        this.abilityRangeDisplay.lineStyle(2, rangeColor, 0.6);
+        this.abilityRangeDisplay.lineStyle(4, rangeColor, 0.6);
         this.abilityRangeDisplay.strokeCircle(0, 0, castRange);
         
         // Get mouse position and calculate target position (sticking to cast range if beyond)
