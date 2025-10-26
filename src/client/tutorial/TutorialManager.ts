@@ -3,12 +3,14 @@ import { TutorialStep } from './TutorialStep';
 import { HowToPlay } from './steps/HowToPlay';
 import { SharedGameState } from '../../shared/types/GameStateTypes';
 import { BasicTutorialManager } from './BasicTutorial';
+import { ObjectivesDisplay } from './ObjectivesDisplay';
 
 export type TutorialStepCondition = (gameState: SharedGameState, lastStepCompletedAt: number) => boolean;
 
 export interface TutorialStepDefinition {
     stepClass: new (scene: Phaser.Scene, onDismiss?: () => void, room?: any) => TutorialStep;
     condition: TutorialStepCondition;
+    objective?: string;
 }
 
 export type TutorialDefinition = {
@@ -21,7 +23,7 @@ const TUTORIALS: Record<string, TutorialDefinition> = {
     },
     'how-to-play': {
         steps: [
-            { stepClass: HowToPlay, condition: (gs, ts) => true },
+            { stepClass: HowToPlay, condition: (gs, ts) => true, objective: '' },
         ]
     }
 };
@@ -36,14 +38,16 @@ export class TutorialManager {
     private lastStepCompletedAt: number = 0;
     private trackedState: any = {}; // For tracking player actions
     private basicTutorialManager: BasicTutorialManager | null = null;
+    private objectivesDisplay: ObjectivesDisplay | null = null;
 
-    constructor(scene: Phaser.Scene, room: any) {
+    constructor(scene: Phaser.Scene, room: any, cameraManager: any) {
         this.scene = scene;
         this.room = room;
         if (room && room.sessionId) {
             this.playerSessionId = room.sessionId;
         }
         this.basicTutorialManager = new BasicTutorialManager();
+        this.objectivesDisplay = new ObjectivesDisplay(scene, cameraManager);
     }
 
     setPlayerSessionId(sessionId: string | null): void {
@@ -65,6 +69,13 @@ export class TutorialManager {
             this.basicTutorialManager.setPlayerSessionId(this.playerSessionId);
             this.basicTutorialManager.setTrackedState(this.trackedState);
             tutorial.steps = this.basicTutorialManager.getTutorialSteps();
+        }
+
+        // Initialize objectives display (but don't show anything yet)
+        if (this.objectivesDisplay && tutorial.steps.length > 0) {
+            const objectives = tutorial.steps.map(step => step.objective).filter((obj): obj is string => obj !== undefined);
+            this.objectivesDisplay.setObjectives(objectives);
+            // Don't show yet - will show as steps are reached
         }
 
         this.currentTutorial = tutorial;
@@ -153,10 +164,20 @@ export class TutorialManager {
     private showCurrentStep(): void {
         if (!this.currentTutorial || this.currentStepIndex < 0) return;
 
+        // Mark the PREVIOUS objective as complete when showing the next step
+        if (this.objectivesDisplay && this.currentStepIndex > 0) {
+            this.objectivesDisplay.completeObjective(this.currentStepIndex - 1);
+        }
+
         const stepDef = this.currentTutorial.steps[this.currentStepIndex];
         this.currentStep = new stepDef.stepClass(this.scene, () => {
             this.onStepDismissed();
         }, this.room);
+
+        // Show this objective when the step is displayed
+        if (this.objectivesDisplay) {
+            this.objectivesDisplay.startObjective(this.currentStepIndex);
+        }
 
         this.currentStep.show();
     }
@@ -179,6 +200,9 @@ export class TutorialManager {
             if (this.room) {
                 this.room.send('unpause');
             }
+            if (this.objectivesDisplay) {
+                this.objectivesDisplay.hide();
+            }
             this.currentTutorial = null;
             this.currentStepIndex = -1;
             this.currentStep = null;
@@ -192,6 +216,11 @@ export class TutorialManager {
         if (this.currentStep) {
             this.currentStep.destroy();
             this.currentStep = null;
+        }
+        
+        if (this.objectivesDisplay) {
+            this.objectivesDisplay.destroy();
+            this.objectivesDisplay = null;
         }
         
         // Make sure game is unpaused when destroying tutorial manager

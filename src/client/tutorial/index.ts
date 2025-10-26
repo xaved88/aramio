@@ -1,6 +1,7 @@
 export { TutorialStep } from './TutorialStep';
 export { TutorialManager } from './TutorialManager';
 export { BasicTutorialManager } from './BasicTutorial';
+export { ObjectivesDisplay } from './ObjectivesDisplay';
 export { HowToPlay } from './steps/HowToPlay';
 export { WelcomeStep } from './steps/WelcomeStep';
 export { MovementStep } from './steps/MovementStep';

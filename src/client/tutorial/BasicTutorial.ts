@@ -29,31 +29,38 @@ export class BasicTutorialManager {
         return [
             {
                 stepClass: MovementStep,
-                condition: this.movementStepCondition.bind(this)
+                condition: this.movementStepCondition.bind(this),
+                objective: 'Take your first steps'
             },
             {
                 stepClass: AutoAttackStep,
-                condition: this.autoAttackStepCondition.bind(this)
+                condition: this.autoAttackStepCondition.bind(this),
+                objective: 'Attack enemy minions'
             },
             {
                 stepClass: AbilityStep,
-                condition: this.abilityStepCondition.bind(this)
+                condition: this.abilityStepCondition.bind(this),
+                objective: 'Cast your ability'
             },
             {
                 stepClass: XPStep,
-                condition: this.xpStepCondition.bind(this)
+                condition: this.xpStepCondition.bind(this),
+                objective: 'Gain experience'
             },
             {
                 stepClass: LevelUpStep,
-                condition: this.levelUpStepCondition.bind(this)
+                condition: this.levelUpStepCondition.bind(this),
+                objective: 'Level up'
             },
             {
                 stepClass: RespawnRewardsStep,
-                condition: this.respawnRewardsStepCondition.bind(this)
+                condition: this.respawnRewardsStepCondition.bind(this),
+                objective: 'Collect your rewards'
             },
             {
                 stepClass: EncouragementStep,
-                condition: this.encouragementStepCondition.bind(this)
+                condition: this.encouragementStepCondition.bind(this),
+                objective: 'Finish the tutorial'
             }
         ];
     }

@@ -198,7 +198,7 @@ export class GameScene extends Phaser.Scene {
         this.coordinateDebugOverlay.initialize();
         
         // Initialize tutorial manager
-        this.tutorialManager = new TutorialManager(this, this.room);
+        this.tutorialManager = new TutorialManager(this, this.room, this.cameraManager);
         if (this.playerSessionId) {
             this.tutorialManager.setPlayerSessionId(this.playerSessionId);
         }
