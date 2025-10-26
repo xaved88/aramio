@@ -169,6 +169,16 @@ export class GameRoom extends Room<GameState> {
                 this.returnToLobby();
             }
         });
+
+        this.onMessage('pause', (client) => {
+            console.log(`Client ${client.sessionId} requested to pause the game`);
+            this.state.isPaused = true;
+        });
+
+        this.onMessage('unpause', (client) => {
+            console.log(`Client ${client.sessionId} requested to unpause the game`);
+            this.state.isPaused = false;
+        });
     }
 
     onJoin(client: Client, options: any) {
@@ -275,6 +285,11 @@ export class GameRoom extends Room<GameState> {
     private update() {
         // Don't update if the game is finished
         if (this.state.gamePhase === 'finished') {
+            return;
+        }
+        
+        // Don't update if the game is paused
+        if (this.state.isPaused) {
             return;
         }
         

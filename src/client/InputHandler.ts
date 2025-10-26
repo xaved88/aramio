@@ -26,6 +26,7 @@ export class InputHandler {
     private gameplayConfig: any = null;
     private uiManager: any = null;
     private cameraManager: any = null;
+    private tutorialManager: any = null;
     
     // Keyboard movement state
     private keyStates: {
@@ -52,6 +53,10 @@ export class InputHandler {
         this.gameplayConfig = gameplayConfig;
         this.uiManager = uiManager;
         this.cameraManager = cameraManager;
+    }
+
+    setTutorialManager(tutorialManager: any): void {
+        this.tutorialManager = tutorialManager;
     }
 
     /**
@@ -181,10 +186,15 @@ export class InputHandler {
             }
         });
 
-        // ESC key handler for closing tutorial
+        // ESC key handler for closing tutorial (old system - kept for compatibility)
         this.scene.input.keyboard?.on('keydown-ESC', (event: KeyboardEvent) => {
-            if (this.uiManager && this.uiManager.isTutorialVisible()) {
-                this.uiManager.hideTutorial();
+            if ((this.uiManager && this.uiManager.isTutorialVisible()) || 
+                (this.tutorialManager && this.tutorialManager.isTutorialActive())) {
+                // Tutorial handling is now done by TutorialManager
+                // This handler is kept for the old tutorial system
+                if (this.uiManager && this.uiManager.isTutorialVisible()) {
+                    this.uiManager.hideTutorial();
+                }
             }
         });
     }
@@ -236,7 +246,8 @@ export class InputHandler {
      */
     update(): void {
         // Don't send movement commands if tutorial is visible
-        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+        if ((this.uiManager && this.uiManager.isTutorialVisible()) || 
+            (this.tutorialManager && this.tutorialManager.isTutorialActive())) {
             return;
         }
 
@@ -311,7 +322,8 @@ export class InputHandler {
      */
     private handlePointerDown(pointer: Phaser.Input.Pointer): void {
         // Don't handle input if tutorial is visible
-        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+        if ((this.uiManager && this.uiManager.isTutorialVisible()) || 
+            (this.tutorialManager && this.tutorialManager.isTutorialActive())) {
             return;
         }
 
@@ -328,7 +340,8 @@ export class InputHandler {
      */
     private handlePointerUp(pointer: Phaser.Input.Pointer): void {
         // Don't handle input if tutorial is visible
-        if (this.uiManager && this.uiManager.isTutorialVisible()) {
+        if ((this.uiManager && this.uiManager.isTutorialVisible()) || 
+            (this.tutorialManager && this.tutorialManager.isTutorialActive())) {
             return;
         }
 

@@ -10,10 +10,12 @@ export abstract class TutorialStep {
     protected contentContainer: Phaser.GameObjects.Container | null = null;
     protected isVisible: boolean = false;
     protected onDismiss?: () => void;
+    protected room: any = null;
 
-    constructor(scene: Phaser.Scene, onDismiss?: () => void) {
+    constructor(scene: Phaser.Scene, onDismiss?: () => void, room?: any) {
         this.scene = scene;
         this.onDismiss = onDismiss;
+        this.room = room;
         this.createOverlay();
     }
 
@@ -60,6 +62,11 @@ export abstract class TutorialStep {
 
     show(): void {
         if (this.overlay && this.contentContainer) {
+            // Pause the game when showing tutorial
+            if (this.room) {
+                this.room.send('pause');
+            }
+
             this.scene.tweens.killTweensOf([this.overlay, this.contentContainer]);
             
             this.updateBackground();
@@ -80,6 +87,11 @@ export abstract class TutorialStep {
 
     hide(): void {
         if (this.overlay && this.contentContainer) {
+            // Unpause the game when hiding tutorial
+            if (this.room) {
+                this.room.send('unpause');
+            }
+
             this.scene.tweens.killTweensOf([this.overlay, this.contentContainer]);
             
             this.scene.tweens.add({

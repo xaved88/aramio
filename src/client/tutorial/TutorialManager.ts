@@ -6,7 +6,7 @@ import { CombatStep } from './steps/CombatStep';
 import { HowToPlay } from './steps/HowToPlay';
 
 export type TutorialDefinition = {
-    steps: Array<new (scene: Phaser.Scene, onDismiss?: () => void) => TutorialStep>;
+    steps: Array<new (scene: Phaser.Scene, onDismiss?: () => void, room?: any) => TutorialStep>;
 };
 
 const TUTORIALS: Record<string, TutorialDefinition> = {
@@ -26,12 +26,14 @@ const TUTORIALS: Record<string, TutorialDefinition> = {
 
 export class TutorialManager {
     private scene: Phaser.Scene;
+    private room: any;
     private currentTutorial: TutorialDefinition | null = null;
     private currentStepIndex: number = -1;
     private currentStep: TutorialStep | null = null;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, room: any) {
         this.scene = scene;
+        this.room = room;
     }
 
     startTutorial(tutorialId: string): void {
@@ -57,6 +59,10 @@ export class TutorialManager {
         this.currentStepIndex++;
         
         if (this.currentStepIndex >= this.currentTutorial.steps.length) {
+            // Tutorial finished - unpause the game if it was paused
+            if (this.room) {
+                this.room.send('unpause');
+            }
             this.currentTutorial = null;
             this.currentStepIndex = -1;
             this.currentStep = null;
@@ -66,7 +72,7 @@ export class TutorialManager {
         const StepClass = this.currentTutorial.steps[this.currentStepIndex];
         this.currentStep = new StepClass(this.scene, () => {
             this.onStepDismissed();
-        });
+        }, this.room);
 
         this.currentStep.show();
     }
@@ -80,8 +86,18 @@ export class TutorialManager {
             this.currentStep.destroy();
             this.currentStep = null;
         }
+        
+        // Make sure game is unpaused when destroying tutorial manager
+        if (this.room) {
+            this.room.send('unpause');
+        }
+        
         this.currentTutorial = null;
         this.currentStepIndex = -1;
+    }
+
+    isTutorialActive(): boolean {
+        return this.currentStep !== null;
     }
 }
 

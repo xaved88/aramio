@@ -13,6 +13,7 @@ export class GameState extends Schema {
     @type('number') currentWave = 0;
     @type('string') winningTeam = '';
     @type('number') gameEndTime = 0;
+    @type('boolean') isPaused = false;
     @type('string') gameplayConfig = ''; // Serialized gameplay configuration for client
     @type({ map: Combatant }) combatants = new MapSchema<Combatant, CombatantId>();
     @type([AttackEvent]) attackEvents = new ArraySchema<AttackEvent>();

@@ -198,7 +198,7 @@ export class GameScene extends Phaser.Scene {
         this.coordinateDebugOverlay.initialize();
         
         // Initialize tutorial manager
-        this.tutorialManager = new TutorialManager(this);
+        this.tutorialManager = new TutorialManager(this, this.room);
         
         // Initialize input handler - this is the single source of truth for all input
         this.inputHandler = new InputHandler(this, this.room);
@@ -440,6 +440,7 @@ export class GameScene extends Phaser.Scene {
         
         // Set up InputHandler dependencies now that UI is initialized
         this.inputHandler.setDependencies(this.gameplayConfig, this.uiManager, this.cameraManager);
+        this.inputHandler.setTutorialManager(this.tutorialManager);
         
         // Link UIManager to InputHandler for control mode updates
         this.uiManager.setInputHandler(this.inputHandler);
