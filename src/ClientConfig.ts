@@ -468,6 +468,55 @@ export const CLIENT_CONFIG = {
         STONE_SHADOW: 0xC0C0C0, // medium gray shadow
         STONE_HIGHLIGHT: 0xF5F5F5, // very light gray-white highlight
     },
+    EFFECT_VISUALS: {
+        STUN: {
+            COLOR: 0xCCCC66,
+            PULSE_SPEED: 0.01,
+            BORDER_THICKNESS: { MIN: 3, MAX: 6 },
+            ICON_SIZE: 16,
+            ICON_LINE_WIDTH: 6,
+        },
+        REFLECT: {
+            COLOR: 0xFFD700,
+            LINE_WIDTH: 6,
+            NUM_SPIKES: 12,
+        },
+        TAUNT: {
+            COLOR: 0xFFD700,
+            LINE_WIDTH: 2,
+            ICON_SIZE: 16,
+            FILL_COLOR: 0xFFD700,
+            FILL_ALPHA: 0.8,
+            INNER_DOT_COLOR: 0xFFFFFF,
+        },
+        PASSIVE_HEALING: {
+            COLOR: 0x228B22,
+            ALPHA: 0.4,
+            PULSE_SPEED: 0.006,
+            BORDER_THICKNESS: { MIN: 4, MAX: 7 },
+            ICON_SIZE: 12,
+            ICON_LINE_WIDTH: 6,
+        },
+        HUNTER: {
+            COLOR: 0xFF4444,
+            ALPHA: 0.6,
+            PULSE_SPEED: 0.008,
+            BORDER_THICKNESS: { MIN: 6, MAX: 10 },
+            ICON_SIZE: 16,
+            ICON_LINE_WIDTH: 8,
+        },
+        BURNING: {
+            COLOR: 0xFF6600,
+            ALPHA: 0.5,
+            PULSE_SPEED: 0.012,
+            BORDER_THICKNESS: { MIN: 3, MAX: 4.5 },
+            ICON_SIZE: 8,
+            ICON_LINE_WIDTH: 3,
+            FILL_ALPHA: 0.6,
+        },
+        BORDER_SIZE_OFFSET: 4,
+        ICON_OFFSET_Y: 30,
+    },
     REWARDS: {
         DISPLAY: {
             "stat:health": {

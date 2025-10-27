@@ -131,20 +131,22 @@ export class EntityRenderer {
         // Check for stun effect - add pulsing yellowish border and stun icon
         const isStunned = combatant.effects.some(effect => effect.type === 'stun');
         if (isStunned) {
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.STUN;
+            const spriteScale = getSpriteScale(combatant);
+            
             // Add pulsing yellowish grey border for stun effect
-            const pulseIntensity = Math.sin(Date.now() * 0.01) * 0.5 + 0.5; // Pulsing between 0.5 and 1.0
-            const borderThickness = 3 + (pulseIntensity * 3); // Pulsing between 4px and 10px
-            graphics.lineStyle(borderThickness, 0xCCCC66); // Slightly brighter yellowish border
-            graphics.strokeCircle(0, 0, combatant.size + 4); // Slightly larger than entity
+            const pulseIntensity = Math.sin(Date.now() * config.PULSE_SPEED) * 0.5 + 0.5; // Pulsing between 0.5 and 1.0
+            const borderThickness = config.BORDER_THICKNESS.MIN + (pulseIntensity * (config.BORDER_THICKNESS.MAX - config.BORDER_THICKNESS.MIN));
+            graphics.lineStyle(borderThickness, config.COLOR);
+            graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add stun icon above the hero
             graphics.setAlpha(1); // Semi-opaque but visible
-            graphics.lineStyle(6, 0xCCCC66); // Slightly brighter yellowish lines for icon
-
+            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
             
             // Draw a simple lightning bolt shape for stun icon
-            const iconSize = 16;
-            const iconY = -combatant.size - 30; // Position above the hero
+            const iconSize = config.ICON_SIZE * spriteScale;
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
             graphics.moveTo(0, iconY - iconSize);
             graphics.lineTo(-iconSize/2, iconY);
             graphics.lineTo(0, iconY);
@@ -156,15 +158,17 @@ export class EntityRenderer {
         // Check for reflect effect - add pulsing spiky border effect
         const hasReflect = combatant.effects.some(effect => effect.type === 'reflect');
         if (hasReflect) {
-            graphics.lineStyle(6, 0xFFD700); // Gold/yellow for reflect, thicker line
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.REFLECT;
+            const spriteScale = getSpriteScale(combatant);
+            
+            graphics.lineStyle(config.LINE_WIDTH, config.COLOR);
             
             // Draw spiky border right on the entity's edge
-            const numSpikes = 12;
-            const entityRadius = combatant.size + 1;
+            const entityRadius = (combatant.size + 1) * spriteScale;
             
-            for (let i = 0; i < numSpikes; i++) {
-                const angle = (i / numSpikes) * Math.PI * 2;
-                const spikeAngle = angle + (Math.PI / numSpikes); // Offset to center spikes between points
+            for (let i = 0; i < config.NUM_SPIKES; i++) {
+                const angle = (i / config.NUM_SPIKES) * Math.PI * 2;
+                const spikeAngle = angle + (Math.PI / config.NUM_SPIKES); // Offset to center spikes between points
                 
                 // Draw each spike as a small line segment on the entity's edge
                 const startAngle = spikeAngle - 0.15;
@@ -179,20 +183,23 @@ export class EntityRenderer {
         // Check for taunt effect - add taunt icon above the entity
         const isTaunted = combatant.effects.some(effect => effect.type === 'taunt');
         if (isTaunted) {
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.TAUNT;
+            const spriteScale = getSpriteScale(combatant);
+            
             // Add taunt icon above the entity
-            graphics.lineStyle(2, 0xFFD700); // Gold/yellow lines for icon with reduced thickness
+            graphics.lineStyle(config.LINE_WIDTH, config.COLOR);
             
             // Draw a simple target/eye shape for taunt icon
-            const iconSize = 16; // Slightly smaller icon
-            const iconY = -combatant.size - 30; // Position above the entity
+            const iconSize = config.ICON_SIZE * spriteScale;
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
             
             // Draw outer circle
             graphics.strokeCircle(0, iconY, iconSize);
             
             // Draw inner target dot
-            graphics.fillStyle(0xFFD700, 0.8);
+            graphics.fillStyle(config.FILL_COLOR, config.FILL_ALPHA);
             graphics.fillCircle(0, iconY, iconSize * 0.5);
-            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillStyle(config.INNER_DOT_COLOR, 1);
             graphics.fillCircle(0, iconY, iconSize * 0.3);
             
             // Reset fill style
@@ -202,22 +209,23 @@ export class EntityRenderer {
         // Check for passive healing effect - add pulsing green border and healing icon
         const hasPassiveHealing = combatant.effects.some(effect => effect.type === 'passive_healing');
         if (hasPassiveHealing) {
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.PASSIVE_HEALING;
             const spriteScale = getSpriteScale(combatant);
             
             // Add pulsing green border for passive healing effect (matching stun style)
-            const pulseIntensity = Math.sin(Date.now() * 0.006) * 0.3 + 0.7; // Pulsing between 0.4 and 1.0 (slower, ~1 per second)
-            const borderThickness = 4 + (pulseIntensity * 3);
+            const pulseIntensity = Math.sin(Date.now() * config.PULSE_SPEED) * 0.3 + 0.7; // Pulsing between 0.4 and 1.0 (slower, ~1 per second)
+            const borderThickness = config.BORDER_THICKNESS.MIN + (pulseIntensity * (config.BORDER_THICKNESS.MAX - config.BORDER_THICKNESS.MIN));
             
             // Draw border matching stun style
-            graphics.lineStyle(borderThickness, 0x228B22, 0.4); // Darker green border with transparency
-            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
+            graphics.lineStyle(borderThickness, config.COLOR, config.ALPHA);
+            graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add healing icon above the entity (matching stun icon style)
-            graphics.lineStyle(6, 0x228B22); // Darker green lines for icon
+            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
             
             // Draw a simple cross/plus shape for healing icon
-            const iconSize = 12 * spriteScale; // Scale icon
-            const iconY = -(combatant.size + 30) * spriteScale; // Scale position
+            const iconSize = config.ICON_SIZE * spriteScale;
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
             
             // Draw horizontal line
             graphics.moveTo(-iconSize, iconY);
@@ -233,22 +241,23 @@ export class EntityRenderer {
         // Check for rage mode effect - add pulsing red border and rage icon
         const isInRageMode = combatant.effects.some(effect => effect.type === 'hunter');
         if (isInRageMode) {
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.HUNTER;
             const spriteScale = getSpriteScale(combatant);
             
             // Add pulsing red border for rage mode effect (matching stun style)
-            const pulseIntensity = Math.sin(Date.now() * 0.008) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (faster than stun)
-            const borderThickness = 6 + (pulseIntensity * 4); // Pulsing between 6px and 14px
+            const pulseIntensity = Math.sin(Date.now() * config.PULSE_SPEED) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (faster than stun)
+            const borderThickness = config.BORDER_THICKNESS.MIN + (pulseIntensity * (config.BORDER_THICKNESS.MAX - config.BORDER_THICKNESS.MIN));
             
             // Draw border matching stun style but with red color
-            graphics.lineStyle(borderThickness, 0xFF4444, 0.6); // Bright red border with more opacity
-            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
+            graphics.lineStyle(borderThickness, config.COLOR, config.ALPHA);
+            graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add rage icon above the entity (matching stun icon style)
-            graphics.lineStyle(8, 0xFF4444); // Bright red lines for icon, thicker than other icons
+            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
             
             // Draw a simple flame/anger symbol for rage icon
-            const iconSize = 16 * spriteScale; // Scale icon
-            const iconY = -(combatant.size + 32) * spriteScale; // Scale position
+            const iconSize = config.ICON_SIZE * spriteScale;
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y + 2) * spriteScale; // Slightly higher than other icons
             
             // Draw flame-like shape (zigzag pattern)
             graphics.moveTo(-iconSize, iconY + iconSize/2);
@@ -263,22 +272,23 @@ export class EntityRenderer {
         // Check for burning effect - add pulsing orange border and flame icon
         const isBurning = combatant.effects.some(effect => effect.type === 'burning');
         if (isBurning) {
+            const config = CLIENT_CONFIG.EFFECT_VISUALS.BURNING;
             const spriteScale = getSpriteScale(combatant);
             
             // Add pulsing orange border for burning effect
-            const pulseIntensity = Math.sin(Date.now() * 0.012) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (fast flickering)
-            const borderThickness = 3 + (pulseIntensity * 1.5); // Pulsing between 3px and 6px
+            const pulseIntensity = Math.sin(Date.now() * config.PULSE_SPEED) * 0.4 + 0.6; // Pulsing between 0.2 and 1.0 (fast flickering)
+            const borderThickness = config.BORDER_THICKNESS.MIN + (pulseIntensity * (config.BORDER_THICKNESS.MAX - config.BORDER_THICKNESS.MIN));
             
             // Draw border with orange-red flame color
-            graphics.lineStyle(borderThickness, 0xFF6600, 0.5); // Orange-red border with more transparency
-            graphics.strokeCircle(0, 0, (combatant.size + 4) * spriteScale); // Scale with sprite
+            graphics.lineStyle(borderThickness, config.COLOR, config.ALPHA);
+            graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add flame icon above the entity
-            graphics.lineStyle(3, 0xFF6600); // Orange-red lines for icon (thinner)
+            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
             
             // Draw a flame shape for burning icon
-            const iconSize = 8 * spriteScale; // Scale icon (smaller)
-            const iconY = -(combatant.size + 30) * spriteScale; // Scale position
+            const iconSize = config.ICON_SIZE * spriteScale;
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
             
             // Draw flame outline (zigzag upward pattern)
             graphics.beginPath();
@@ -291,7 +301,7 @@ export class EntityRenderer {
             graphics.closePath();
             
             // Fill the flame to remove gap
-            graphics.fillStyle(0xFF6600, 0.6); // Orange fill with some transparency
+            graphics.fillStyle(config.COLOR, config.FILL_ALPHA);
             graphics.fillPath();
             graphics.strokePath();
         }

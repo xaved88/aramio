@@ -20,6 +20,7 @@ export class HUDRenderer {
     private healthBarBackground: Phaser.GameObjects.Graphics | null = null;
     private healthBar: Phaser.GameObjects.Graphics | null = null;
     private healthText: Phaser.GameObjects.Text | null = null;
+    private healthBarEffectOverlay: Phaser.GameObjects.Graphics | null = null;
     private xpBackground: Phaser.GameObjects.Graphics | null = null;
     private xpBar: Phaser.GameObjects.Graphics | null = null;
     private levelText: Phaser.GameObjects.Text | null = null;
@@ -162,6 +163,12 @@ export class HUDRenderer {
         this.healthText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
         this.healthText.setScrollFactor(0, 0);
         this.hudContainer!.add(this.healthText);
+        
+        // Health bar effect overlay
+        this.healthBarEffectOverlay = this.scene.add.graphics();
+        this.healthBarEffectOverlay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD - 1); // Behind health bar but above background
+        this.healthBarEffectOverlay.setScrollFactor(0, 0);
+        this.hudContainer!.add(this.healthBarEffectOverlay);
     }
     
     private createXPIndicator(): void {
@@ -337,6 +344,7 @@ export class HUDRenderer {
     
     private updateUI(player: HeroCombatant, gameTime: number): void {
         this.updateHealthBar(player);
+        this.updateHealthBarEffects(player, gameTime);
         this.updateXPIndicator(player);
         this.updateAbilityCooldown(player, gameTime);
         this.updateRewardsCounter(player);
@@ -359,6 +367,52 @@ export class HUDRenderer {
         this.healthBar.fillRect(x, y, healthBarWidth, config.HEIGHT);
         
         this.healthText.setText(`${Math.round(player.health).toLocaleString()} / ${Math.round(player.maxHealth).toLocaleString()}`);
+    }
+    
+    private updateHealthBarEffects(player: HeroCombatant, gameTime: number): void {
+        if (!this.healthBarEffectOverlay) return;
+        
+        const config = CLIENT_CONFIG.UI.HEALTH_BAR;
+        const positions = this.calculatePositions();
+        
+        const x = positions.healthX;
+        const y = positions.healthY;
+        
+        this.healthBarEffectOverlay.clear();
+        
+        if (!player.effects || player.effects.length === 0) {
+            return;
+        }
+        
+        // Check for effects in priority order (most impactful first)
+        const isStunned = player.effects.some(effect => effect.type === 'stun');
+        const isBurning = player.effects.some(effect => effect.type === 'burning');
+        const hasReflect = player.effects.some(effect => effect.type === 'reflect');
+        const hasPassiveHealing = player.effects.some(effect => effect.type === 'passive_healing');
+        
+        let effectConfig;
+        let pulseSpeed;
+        
+        if (isStunned) {
+            effectConfig = CLIENT_CONFIG.EFFECT_VISUALS.STUN;
+            pulseSpeed = CLIENT_CONFIG.EFFECT_VISUALS.STUN.PULSE_SPEED;
+        } else if (isBurning) {
+            effectConfig = CLIENT_CONFIG.EFFECT_VISUALS.BURNING;
+            pulseSpeed = CLIENT_CONFIG.EFFECT_VISUALS.BURNING.PULSE_SPEED;
+        } else if (hasReflect) {
+            effectConfig = CLIENT_CONFIG.EFFECT_VISUALS.REFLECT;
+            pulseSpeed = 0.01; // Default pulse for non-pulsing effect
+        } else if (hasPassiveHealing) {
+            effectConfig = CLIENT_CONFIG.EFFECT_VISUALS.PASSIVE_HEALING;
+            pulseSpeed = CLIENT_CONFIG.EFFECT_VISUALS.PASSIVE_HEALING.PULSE_SPEED;
+        }
+        
+        if (effectConfig && pulseSpeed) {
+            // Apply subtle color tint to background
+            const pulseIntensity = 0.3 + (Math.sin(Date.now() * pulseSpeed) * 0.15); // Pulse between 0.15 and 0.45
+            this.healthBarEffectOverlay.fillStyle(effectConfig.COLOR, pulseIntensity);
+            this.healthBarEffectOverlay.fillRect(x, y, config.WIDTH, config.HEIGHT);
+        }
     }
     
     private updateXPIndicator(player: HeroCombatant): void {
