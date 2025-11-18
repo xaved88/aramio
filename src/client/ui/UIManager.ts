@@ -143,6 +143,13 @@ export class UIManager {
         this.cursorRenderer.triggerRedFlash();
     }
 
+    /**
+     * Triggers red flash on ability cooldown indicator when clicking while on cooldown
+     */
+    triggerAbilityRedFlash(): void {
+        this.hudRenderer.triggerAbilityRedFlash();
+    }
+
 
     createHUD(): void {
         this.clearHUD();

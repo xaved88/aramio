@@ -352,6 +352,7 @@ export class InputHandler {
                 // Only trigger red flash if not respawning
                 if (!this.isPlayerRespawning()) {
                     this.uiManager.triggerCursorRedFlash();
+                    this.uiManager.triggerAbilityRedFlash();
                 }
             } else {
                 // Send ability use to server
@@ -497,6 +498,7 @@ export class InputHandler {
                 // Only trigger red flash if not respawning
                 if (!this.isPlayerRespawning()) {
                     this.uiManager.triggerCursorRedFlash();
+                    this.uiManager.triggerAbilityRedFlash();
                 }
             } else {
                 this.room.send('useAbility', {

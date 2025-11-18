@@ -12,8 +12,8 @@ export class CursorRenderer {
     private wasOnCooldown: boolean = false;
     private flashIntensity: number = 0; // 0 = no flash, 1 = full flash
     private redFlashIntensity: number = 0; // 0 = no red flash, 1 = full red flash
-    private redFlashTime: number = 0; // Time since red flash started
-    private redFlashDuration: number = 600; // Total duration of red flash sequence (ms)
+    private redFlashStartTime: number = 0; // Scene time when flash started (0 = not flashing)
+    private redFlashDuration: number = 400; // Total duration of red flash sequence (ms)
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -31,7 +31,7 @@ export class CursorRenderer {
      */
     triggerRedFlash(): void {
         this.redFlashIntensity = 1.0;
-        this.redFlashTime = 0; // Reset timer
+        this.redFlashStartTime = this.scene.time.now; // Store current scene time
     }
 
     /**
@@ -108,18 +108,22 @@ export class CursorRenderer {
             if (this.flashIntensity < 0) this.flashIntensity = 0;
         }
 
-        // Update red flash animation (simple fade)
-        if (this.redFlashIntensity > 0) {
-            this.redFlashTime += 16; // Assume ~60fps, so ~16ms per frame
+        // Update red flash animation (double flash "uh uh" pattern)
+        if (this.redFlashStartTime > 0) {
+            const elapsedTime = this.scene.time.now - this.redFlashStartTime;
             
-            // Simple fade out
-            const flashProgress = this.redFlashTime / this.redFlashDuration;
-            this.redFlashIntensity = Math.max(0, 1.0 - flashProgress);
+            // Create two distinct flashes (uh-uh pattern)
+            const flashProgress = elapsedTime / this.redFlashDuration;
+            // Use sine wave to create two pulses (2π = one full cycle, gives 2 peaks when squared)
+            const pulse = Math.sin(flashProgress * Math.PI * 2);
+            // Square it to make the peaks sharper and fade out over time
+            const pulseIntensity = Math.max(0, pulse * pulse) * (1.0 - flashProgress * 0.7);
+            this.redFlashIntensity = pulseIntensity;
             
             // Stop when duration is complete
-            if (this.redFlashTime >= this.redFlashDuration) {
+            if (elapsedTime >= this.redFlashDuration) {
                 this.redFlashIntensity = 0;
-                this.redFlashTime = 0;
+                this.redFlashStartTime = 0;
             }
         }
 
@@ -190,13 +194,13 @@ export class CursorRenderer {
         this.cursorGraphics.lineTo(x, y + crosshairSize);
         this.cursorGraphics.strokePath();
 
-        // Draw red flash ring when clicking on cooldown (simple and visible)
+        // Draw red flash ring when clicking on cooldown
         if (this.redFlashIntensity > 0) {
-            const redFlashSize = 30; // Smaller, more reasonable size
-            const redFlashAlpha = this.redFlashIntensity; // Full intensity
-            const lineWidth = 4; // Thinner but still visible
+            const redFlashSize = 30; // Moderate size
+            const redFlashAlpha = this.redFlashIntensity;
+            const lineWidth = 6; // Moderate thickness
             
-            // Simple, bright red circle
+            // Simple red circle that fades out
             this.cursorGraphics.lineStyle(lineWidth, 0xff0000, redFlashAlpha);
             this.cursorGraphics.strokeCircle(x, y, redFlashSize / 2);
         }
