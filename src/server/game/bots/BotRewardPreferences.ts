@@ -36,7 +36,8 @@ export class BotRewardPreferences {
                     { rewardId: 'ability_stat:duration', weight: 15 },
                     { rewardId: 'stat:attack_range', weight: 18 },
                     { rewardId: 'ability_stat:range', weight: 10 },
-                    { rewardId: 'stat:move_speed', weight: 12 }
+                    { rewardId: 'stat:move_speed', weight: 12 },
+                    { rewardId: 'ability_stat:speed', weight: 6 }
                 );
                 break;
                 
