@@ -412,6 +412,12 @@ export class HUDRenderer {
             const pulseIntensity = 0.3 + (Math.sin(Date.now() * pulseSpeed) * 0.15); // Pulse between 0.15 and 0.45
             this.healthBarEffectOverlay.fillStyle(effectConfig.COLOR, pulseIntensity);
             this.healthBarEffectOverlay.fillRect(x, y, config.WIDTH, config.HEIGHT);
+            
+            // Add pulsing border for all active effects
+            const borderPulseIntensity = Math.sin(Date.now() * pulseSpeed) * 0.4 + 0.6; // Pulse between 0.2 and 1.0
+            const borderThickness = 2 + (borderPulseIntensity * 2); // Pulse thickness between 2 and 4
+            this.healthBarEffectOverlay.lineStyle(borderThickness, effectConfig.COLOR, borderPulseIntensity);
+            this.healthBarEffectOverlay.strokeRect(x, y, config.WIDTH, config.HEIGHT);
         }
     }
     

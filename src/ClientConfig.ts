@@ -508,7 +508,7 @@ export const CLIENT_CONFIG = {
         BURNING: {
             COLOR: 0xFF6600,
             ALPHA: 0.5,
-            PULSE_SPEED: 0.012,
+            PULSE_SPEED: 0.0075,
             BORDER_THICKNESS: { MIN: 3, MAX: 4.5 },
             ICON_SIZE: 8,
             ICON_LINE_WIDTH: 3,
