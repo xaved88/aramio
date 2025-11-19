@@ -5,6 +5,7 @@ import { CLIENT_CONFIG } from '../../ClientConfig';
 import { RendererFactory } from './RendererFactory';
 import { CombatantRenderer } from './CombatantRenderer';
 import { getSpriteScale } from '../utils/SpriteScaleUtils';
+import { EffectIconRenderer } from '../utils/EffectIconRenderer';
 
 /**
  * EntityRenderer handles all rendering logic for different entity types
@@ -141,20 +142,12 @@ export class EntityRenderer {
             
             // Add stun icon above the hero
             graphics.setAlpha(1); // Semi-opaque but visible
-            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
-            
-            // Draw a simple lightning bolt shape for stun icon
             const iconSize = config.ICON_SIZE * spriteScale;
             const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
-            graphics.moveTo(0, iconY - iconSize);
-            graphics.lineTo(-iconSize/2, iconY);
-            graphics.lineTo(0, iconY);
-            graphics.lineTo(-iconSize/2, iconY + iconSize);
-            
-            graphics.strokePath();
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'stun', iconSize, config.COLOR, config.ICON_LINE_WIDTH);
         }
 
-        // Check for reflect effect - add pulsing spiky border effect
+        // Check for reflect effect - add pulsing spiky border effect and icon
         const hasReflect = combatant.effects.some(effect => effect.type === 'reflect');
         if (hasReflect) {
             const config = CLIENT_CONFIG.EFFECT_VISUALS.REFLECT;
@@ -177,6 +170,11 @@ export class EntityRenderer {
                 graphics.arc(0, 0, entityRadius, startAngle, endAngle);
                 graphics.strokePath();
             }
+
+            // Add reflect icon above the entity
+            const iconSize = CLIENT_CONFIG.EFFECT_VISUALS.STUN.ICON_SIZE * spriteScale; // Use same base size as other icons
+            const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'reflect', iconSize, config.COLOR, config.LINE_WIDTH);
         }
 
         // Check for taunt effect - add taunt icon above the entity
@@ -186,23 +184,9 @@ export class EntityRenderer {
             const spriteScale = getSpriteScale(combatant);
             
             // Add taunt icon above the entity
-            graphics.lineStyle(config.LINE_WIDTH, config.COLOR);
-            
-            // Draw a simple target/eye shape for taunt icon
             const iconSize = config.ICON_SIZE * spriteScale;
             const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
-            
-            // Draw outer circle
-            graphics.strokeCircle(0, iconY, iconSize);
-            
-            // Draw inner target dot
-            graphics.fillStyle(config.FILL_COLOR, config.FILL_ALPHA);
-            graphics.fillCircle(0, iconY, iconSize * 0.5);
-            graphics.fillStyle(config.INNER_DOT_COLOR, 1);
-            graphics.fillCircle(0, iconY, iconSize * 0.3);
-            
-            // Reset fill style
-            graphics.fillStyle(0x000000, 0);
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'taunt', iconSize, config.COLOR, config.LINE_WIDTH);
         }
 
         // Check for passive healing effect - add pulsing green border and healing icon
@@ -220,21 +204,9 @@ export class EntityRenderer {
             graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add healing icon above the entity (matching stun icon style)
-            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
-            
-            // Draw a simple cross/plus shape for healing icon
             const iconSize = config.ICON_SIZE * spriteScale;
             const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
-            
-            // Draw horizontal line
-            graphics.moveTo(-iconSize, iconY);
-            graphics.lineTo(iconSize, iconY);
-            
-            // Draw vertical line
-            graphics.moveTo(0, iconY - iconSize);
-            graphics.lineTo(0, iconY + iconSize);
-            
-            graphics.strokePath();
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'passive_healing', iconSize, config.COLOR, config.ICON_LINE_WIDTH);
         }
 
         // Check for rage mode effect - add pulsing red border and rage icon
@@ -252,20 +224,9 @@ export class EntityRenderer {
             graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add rage icon above the entity (matching stun icon style)
-            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
-            
-            // Draw a simple flame/anger symbol for rage icon
             const iconSize = config.ICON_SIZE * spriteScale;
             const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y + 2) * spriteScale; // Slightly higher than other icons
-            
-            // Draw flame-like shape (zigzag pattern)
-            graphics.moveTo(-iconSize, iconY + iconSize/2);
-            graphics.lineTo(-iconSize/2, iconY);
-            graphics.lineTo(0, iconY + iconSize/3);
-            graphics.lineTo(iconSize/2, iconY);
-            graphics.lineTo(iconSize, iconY + iconSize/2);
-            
-            graphics.strokePath();
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'hunter', iconSize, config.COLOR, config.ICON_LINE_WIDTH);
         }
 
         // Check for burning effect - add pulsing orange border and flame icon
@@ -283,26 +244,9 @@ export class EntityRenderer {
             graphics.strokeCircle(0, 0, (combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.BORDER_SIZE_OFFSET) * spriteScale);
             
             // Add flame icon above the entity
-            graphics.lineStyle(config.ICON_LINE_WIDTH, config.COLOR);
-            
-            // Draw a flame shape for burning icon
             const iconSize = config.ICON_SIZE * spriteScale;
             const iconY = -(combatant.size + CLIENT_CONFIG.EFFECT_VISUALS.ICON_OFFSET_Y) * spriteScale;
-            
-            // Draw flame outline (zigzag upward pattern)
-            graphics.beginPath();
-            graphics.moveTo(0, iconY + iconSize); // Bottom center
-            graphics.lineTo(-iconSize * 0.5, iconY + iconSize * 0.3); // Left middle
-            graphics.lineTo(-iconSize * 0.3, iconY - iconSize * 0.3); // Left upper
-            graphics.lineTo(0, iconY - iconSize); // Top point
-            graphics.lineTo(iconSize * 0.3, iconY - iconSize * 0.3); // Right upper
-            graphics.lineTo(iconSize * 0.5, iconY + iconSize * 0.3); // Right middle
-            graphics.closePath();
-            
-            // Fill the flame to remove gap
-            graphics.fillStyle(config.COLOR, config.FILL_ALPHA);
-            graphics.fillPath();
-            graphics.strokePath();
+            EffectIconRenderer.drawEffectIcon(graphics, 0, iconY, 'burning', iconSize, config.COLOR, config.ICON_LINE_WIDTH);
         }
 
 

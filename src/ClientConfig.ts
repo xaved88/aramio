@@ -436,6 +436,21 @@ export const CLIENT_CONFIG = {
             FONT_SIZE: '14px',
             ICON_COLOR: 0xf1c40f, // yellow/gold
         },
+        TEMPORARY_EFFECTS: {
+            ICON_SIZE: 16,
+            ICON_SPACING: 8, // Space between icon and progress bar
+            BAR_WIDTH: 60,
+            BAR_HEIGHT: 4,
+            BAR_SPACING: 6, // Space between effect rows
+            BACKGROUND_COLOR: 0x000000,
+            BACKGROUND_ALPHA: 0.6,
+            BAR_BACKGROUND_COLOR: 0x333333, // Background color for progress bars
+            OFFSET_Y: 30, // Offset above health bar (centered above health bar)
+            // Progress bar fill color uses the effect's color from EFFECT_VISUALS
+            // Icon colors also use EFFECT_VISUALS colors
+            // Filtered effects: statmod, nocollision, and move effects are not displayed
+            // Only temporary effects (duration > 0 && duration !== -1) are shown
+        },
         SPACING: {
             BETWEEN_ELEMENTS: 15, // Reduced from 30 to move circles closer
             FROM_EDGES: 40,

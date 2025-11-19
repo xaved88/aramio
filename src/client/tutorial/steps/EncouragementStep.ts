@@ -65,7 +65,7 @@ export class EncouragementStep extends TutorialStep {
         currentY += 50;
         
         const welcomeText = this.scene.add.text(centerX, currentY, 
-            'You now know the basics!\n\nGo forth and destroy the enemy Cradle to achieve victory!\n\nTeam up, level up, and dominate the battlefield!', 
+            'You now know the basics.\n\nFeel free to practice here in tutorial mode, then dive into the real action from the lobby!', 
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: contentWidth - 40 }

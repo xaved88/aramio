@@ -6,6 +6,7 @@ import { TextStyleHelper } from '../utils/TextStyleHelper';
 import { HUDContainer } from './HUDContainer';
 import { getCanvasWidth, getCanvasHeight } from '../utils/CanvasSize';
 import { calculateLevelStatMultipliers, formatMultiplierAsFactor, getStatDisplayName } from '../utils/LevelStatUtils';
+import { EffectIconRenderer } from '../utils/EffectIconRenderer';
 
 /**
  * HUDRenderer handles all HUD rendering logic
@@ -30,6 +31,7 @@ export class HUDRenderer {
     private abilityFlashOverlay: Phaser.GameObjects.Graphics | null = null;
     private rewardsIcon: Phaser.GameObjects.Graphics | null = null;
     private rewardsText: Phaser.GameObjects.Text | null = null;
+    private temporaryEffectsDisplay: Phaser.GameObjects.Graphics | null = null;
     
     // Ability tooltip elements
     private abilityTooltip: Phaser.GameObjects.Container | null = null;
@@ -99,6 +101,7 @@ export class HUDRenderer {
         this.createXPIndicator();
         this.createAbilityCooldown();
         this.createRewardsCounter();
+        this.createTemporaryEffectsDisplay();
     }
     
     private calculatePositions() {
@@ -341,6 +344,13 @@ export class HUDRenderer {
         this.hudContainer!.add(this.rewardsText);
     }
 
+    private createTemporaryEffectsDisplay(): void {
+        this.temporaryEffectsDisplay = this.scene.add.graphics();
+        this.temporaryEffectsDisplay.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HUD);
+        this.temporaryEffectsDisplay.setScrollFactor(0, 0);
+        this.hudContainer!.add(this.temporaryEffectsDisplay);
+    }
+
     /**
      * Updates the HUD with player data
      */
@@ -360,6 +370,7 @@ export class HUDRenderer {
         this.updateXPIndicator(player);
         this.updateAbilityCooldown(player, gameTime);
         this.updateRewardsCounter(player);
+        this.updateTemporaryEffectsDisplay(player, gameTime);
     }
     
     private updateHealthBar(player: HeroCombatant): void {
@@ -971,5 +982,106 @@ export class HUDRenderer {
         this.levelTooltipBackground.lineStyle(2, 0xffffff, 1);
         this.levelTooltipBackground.strokeRoundedRect(-width / 2, -height / 2, width, height, 8);
     }
+
+    private updateTemporaryEffectsDisplay(player: HeroCombatant, gameTime: number): void {
+        if (!this.temporaryEffectsDisplay) return;
+
+        const config = CLIENT_CONFIG.UI.TEMPORARY_EFFECTS;
+        const positions = this.calculatePositions();
+        
+        // Position above health bar, centered
+        const healthBarWidth = CLIENT_CONFIG.UI.HEALTH_BAR.WIDTH;
+        const healthBarCenterX = positions.healthX + healthBarWidth / 2;
+        const startY = positions.healthY - config.OFFSET_Y;
+        
+        // Calculate total width of each effect row (icon + spacing + bar)
+        const effectRowWidth = config.ICON_SIZE + config.ICON_SPACING + config.BAR_WIDTH;
+
+        this.temporaryEffectsDisplay.clear();
+
+        if (!player.effects || player.effects.length === 0) {
+            return;
+        }
+
+        // Filter for temporary effects (duration > 0 and not -1)
+        // Exclude statmod, nocollision, and move effects - they're represented by other visual effects
+        const temporaryEffects = player.effects.filter(effect => 
+            effect.duration > 0 && 
+            effect.duration !== -1 &&
+            effect.type !== 'statmod' &&
+            effect.type !== 'nocollision' &&
+            effect.type !== 'move'
+        );
+
+        if (temporaryEffects.length === 0) {
+            return;
+        }
+
+        // Group effects by type, keeping the one with the longest remaining duration
+        const effectsByType = new Map<string, typeof temporaryEffects[0]>();
+        temporaryEffects.forEach(effect => {
+            const timeSinceApplied = gameTime - effect.appliedAt;
+            const remainingTime = Math.max(0, effect.duration - timeSinceApplied);
+            
+            const existing = effectsByType.get(effect.type);
+            if (!existing) {
+                effectsByType.set(effect.type, effect);
+            } else {
+                const existingTimeSinceApplied = gameTime - existing.appliedAt;
+                const existingRemainingTime = Math.max(0, existing.duration - existingTimeSinceApplied);
+                
+                // Keep the one with longer remaining duration
+                if (remainingTime > existingRemainingTime) {
+                    effectsByType.set(effect.type, effect);
+                }
+            }
+        });
+
+        const uniqueEffects = Array.from(effectsByType.values());
+        if (uniqueEffects.length === 0) {
+            return;
+        }
+
+        let currentY = startY;
+        
+        uniqueEffects.forEach((effect) => {
+            // Calculate remaining duration
+            const timeSinceApplied = gameTime - effect.appliedAt;
+            const remainingTime = Math.max(0, effect.duration - timeSinceApplied);
+            const progress = Math.min(1, remainingTime / effect.duration);
+
+            // Get effect color
+            const effectColor = EffectIconRenderer.getEffectColor(effect.type);
+
+            // Center the effect row above the health bar
+            // Calculate the left edge of the row so the whole thing is centered
+            // Slight adjustment to visually center better
+            const rowStartX = healthBarCenterX - effectRowWidth / 2 - 1;
+
+            // Draw icon - icon is drawn centered on iconX
+            const iconX = rowStartX + config.ICON_SIZE / 2;
+            const iconY = currentY;
+            EffectIconRenderer.drawEffectIcon(this.temporaryEffectsDisplay!, iconX, iconY, effect.type, config.ICON_SIZE, effectColor);
+
+            // Draw progress bar - positioned after icon with spacing
+            const barX = rowStartX + config.ICON_SIZE + config.ICON_SPACING;
+            const barY = iconY - config.BAR_HEIGHT / 2;
+            
+            // Background
+            this.temporaryEffectsDisplay!.fillStyle(config.BAR_BACKGROUND_COLOR, 1);
+            this.temporaryEffectsDisplay!.fillRect(barX, barY, config.BAR_WIDTH, config.BAR_HEIGHT);
+
+            // Fill with effect color
+            const fillWidth = config.BAR_WIDTH * progress;
+            if (fillWidth > 0) {
+                this.temporaryEffectsDisplay!.fillStyle(effectColor, 1);
+                this.temporaryEffectsDisplay!.fillRect(barX, barY, fillWidth, config.BAR_HEIGHT);
+            }
+
+            // Move to next row
+            currentY -= (config.ICON_SIZE + config.BAR_SPACING);
+        });
+    }
+
 
 } 
