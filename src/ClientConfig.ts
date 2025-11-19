@@ -172,7 +172,7 @@ export const CLIENT_CONFIG = {
         ALPHA: 0.8,
     },
     CURSOR_COOLDOWN_INDICATOR: {
-        RADIUS: 15, // larger circle around cursor with buffer from crosshair
+        RADIUS: 18, // larger circle around cursor with buffer from crosshair
         THICKNESS: 3,
         COOLDOWN_COLOR: 0x9b59b6, // purple when on cooldown (matches SELF_COLORS.PRIMARY)
         ALPHA: 0.9,

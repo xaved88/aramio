@@ -155,13 +155,13 @@ export class CursorRenderer {
     private drawCrosshair(x: number, y: number, isOnCooldown: boolean = false): void {
         if (!this.cursorGraphics) return;
         
-        const crosshairSize = 10 + (this.flashIntensity * 4); // Expand when flashing
-        const lineThickness = 2;
-        const outlineThickness = 3;
+        const crosshairSize = 13 + (this.flashIntensity * 4); // Expand when flashing
+        const lineThickness = 3;
+        const outlineThickness = 4;
         const color = 0xffffff; // White crosshair
         const outlineColor = 0x000000; // Black outline
         // Dim during cooldown, bright with flash effect when ready
-        const baseAlpha = isOnCooldown ? 0.4 : 0.9;
+        const baseAlpha = isOnCooldown ? 0.65 : 0.9;
         const alpha = baseAlpha + (this.flashIntensity * 0.1); // Slightly brighter when flashing
 
         // Draw black outline first (thicker)
@@ -196,7 +196,7 @@ export class CursorRenderer {
 
         // Draw red flash ring when clicking on cooldown
         if (this.redFlashIntensity > 0) {
-            const redFlashSize = 30; // Moderate size
+            const redFlashSize = 36; // Moderate size
             const redFlashAlpha = this.redFlashIntensity;
             const lineWidth = 6; // Moderate thickness
             
