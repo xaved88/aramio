@@ -155,7 +155,7 @@ export class KillFeed {
         // Create background
         const background = this.scene.add.graphics();
         background.fillStyle(0x000000, 0.7);
-        background.fillRoundedRect(0, 0, 170, this.ENTRY_HEIGHT, 3);
+        background.fillRoundedRect(0, 0, 210, this.ENTRY_HEIGHT, 3);
         entryContainer.add(background);
         
         // Get team colors - use player color (purple) if this is the player
