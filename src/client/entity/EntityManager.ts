@@ -34,6 +34,7 @@ export class EntityManager {
     private entityEffectOverlays: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRadiusIndicators: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
     private entityRespawnRings: Map<CombatantId, Phaser.GameObjects.Graphics> = new Map();
+    private entityRespawnIndicators: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
     private zoneGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
@@ -366,6 +367,32 @@ export class EntityManager {
             }
         }
         
+        // Handle respawn indicator for heroes
+        let respawnIndicator = this.entityRespawnIndicators.get(entityId);
+        if (combatantData.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatantData)) {
+            if (!respawnIndicator) {
+                respawnIndicator = this.scene.add.sprite(combatantData.x, combatantData.y, 'respawn-indicator');
+                respawnIndicator.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 2); // Above hero sprites
+                respawnIndicator.setOrigin(0.5, 0.5);
+                respawnIndicator.setAlpha(0); // Start invisible for fade-in
+                
+                // Assign to main camera
+                if (this.cameraManager) {
+                    this.cameraManager.assignToMainCamera(respawnIndicator);
+                }
+                
+                this.entityRespawnIndicators.set(entityId, respawnIndicator);
+                
+                // Start fade-in animation
+                this.scene.tweens.add({
+                    targets: respawnIndicator,
+                    alpha: 1,
+                    duration: 2000, // 2 second fade-in
+                    ease: 'Power2'
+                });
+            }
+        }
+        
         // Create smooth movement animation
         const targets = [];
         if (entityGraphics) targets.push(entityGraphics);
@@ -374,10 +401,11 @@ export class EntityManager {
         targets.push(entityText, radiusIndicator);
         if (respawnRing) targets.push(respawnRing);
         if (entityEffectOverlay) targets.push(entityEffectOverlay);
+        if (respawnIndicator) targets.push(respawnIndicator);
         
         this.animateEntityMovement(
             entityId,
-            targets as (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text)[],
+            targets as (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text | Phaser.GameObjects.Sprite)[],
             combatantData.x,
             combatantData.y
         );
@@ -424,6 +452,7 @@ export class EntityManager {
             respawnRing,
             entityHealthBar,
             entityEffectOverlay,
+            respawnIndicator,
             state,
             this.playerSessionId,
             this.isRecentAttacker(entityId),
@@ -1260,6 +1289,13 @@ export class EntityManager {
             this.entityRespawnRings.delete(entityId);
         }
         
+        // Destroy respawn indicator
+        const respawnIndicator = this.entityRespawnIndicators.get(entityId);
+        if (respawnIndicator) {
+            respawnIndicator.destroy();
+            this.entityRespawnIndicators.delete(entityId);
+        }
+        
     }
 
     /**
@@ -1423,7 +1459,7 @@ export class EntityManager {
      */
     private animateEntityMovement(
         entityId: CombatantId,
-        targets: (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text)[],
+        targets: (Phaser.GameObjects.Graphics | Phaser.GameObjects.Text | Phaser.GameObjects.Sprite)[],
         targetX: number,
         targetY: number
     ): void {
@@ -1501,6 +1537,7 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
+        this.entityRespawnIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
         
@@ -1526,6 +1563,7 @@ export class EntityManager {
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
+        this.entityRespawnIndicators.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
         this.processedXPEvents.clear();
@@ -1658,6 +1696,7 @@ export class EntityManager {
         this.entityTexts.forEach(text => text.destroy());
         this.entityRadiusIndicators.forEach(indicator => indicator.destroy());
         this.entityRespawnRings.forEach(ring => ring.destroy());
+        this.entityRespawnIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
         this.targetingReticleGraphics.forEach(graphics => graphics.destroy());
@@ -1689,6 +1728,7 @@ export class EntityManager {
         this.entityTexts.clear();
         this.entityRadiusIndicators.clear();
         this.entityRespawnRings.clear();
+        this.entityRespawnIndicators.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
         this.targetingReticleGraphics.clear();

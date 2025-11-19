@@ -14,7 +14,6 @@ export class EntityRenderer {
     private playerSessionId: ControllerId | null = null;
     private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
     private combatantRenderer: CombatantRenderer;
-    private respawnIndicatorSprites: Map<CombatantId, Phaser.GameObjects.Sprite> = new Map();
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -46,11 +45,10 @@ export class EntityRenderer {
     }
 
     /**
-     * Cleans up respawn indicator sprites (called when scene is destroyed)
+     * Cleans up (called when scene is destroyed)
      */
     destroy(): void {
-        this.respawnIndicatorSprites.forEach(sprite => sprite.destroy());
-        this.respawnIndicatorSprites.clear();
+        // Cleanup handled by EntityManager
     }
 
     /**
@@ -64,6 +62,7 @@ export class EntityRenderer {
         respawnRing: Phaser.GameObjects.Graphics | undefined,
         healthBar: Phaser.GameObjects.Graphics | undefined,
         effectOverlay?: Phaser.GameObjects.Graphics,
+        respawnIndicator?: Phaser.GameObjects.Sprite,
         state?: SharedGameState,
         playerSessionId?: ControllerId | null,
         isRecentAttacker?: boolean,
@@ -108,7 +107,7 @@ export class EntityRenderer {
         }
         
         // Handle respawn indicator for heroes
-        this.renderRespawnIndicator(combatant, state);
+        this.renderRespawnIndicator(combatant, respawnIndicator, state);
     }
 
     /**
@@ -312,34 +311,14 @@ export class EntityRenderer {
     /**
      * Renders respawn indicator for respawning heroes
      */
-    private renderRespawnIndicator(combatant: Combatant, state?: SharedGameState): void {
-        if (combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning' && state) {
-            let respawnIndicatorSprite = this.respawnIndicatorSprites.get(combatant.id);
-            
-            // Create respawn indicator sprite if it doesn't exist
-            if (!respawnIndicatorSprite) {
-                respawnIndicatorSprite = this.scene.add.sprite(combatant.x, combatant.y, 'respawn-indicator');
-                respawnIndicatorSprite.setDepth(CLIENT_CONFIG.RENDER_DEPTH.HEROES + 2); // Above hero sprites
-                respawnIndicatorSprite.setOrigin(0.5, 0.5);
-                respawnIndicatorSprite.setAlpha(0); // Start invisible for fade-in
-                
-                this.respawnIndicatorSprites.set(combatant.id, respawnIndicatorSprite);
-                
-                // Start fade-in animation
-                this.scene.tweens.add({
-                    targets: respawnIndicatorSprite,
-                    alpha: 1,
-                    duration: 2000, // 2 second fade-in
-                    ease: 'Power2'
-                });
-            }
-            
+    private renderRespawnIndicator(combatant: Combatant, respawnIndicator?: Phaser.GameObjects.Sprite, state?: SharedGameState): void {
+        if (respawnIndicator && combatant.type === COMBATANT_TYPES.HERO && isHeroCombatant(combatant) && combatant.state === 'respawning') {
             // Update respawn indicator sprite position to follow the hero
-            respawnIndicatorSprite.setPosition(combatant.x, combatant.y);
-            respawnIndicatorSprite.setVisible(true);
+            respawnIndicator.setPosition(combatant.x, combatant.y);
+            respawnIndicator.setVisible(true);
             
             // Scale the respawn indicator to be appropriately sized relative to the hero
-            const texture = respawnIndicatorSprite.texture;
+            const texture = respawnIndicator.texture;
             const textureWidth = texture.source[0].width;
             const textureHeight = texture.source[0].height;
             const maxDimension = Math.max(textureWidth, textureHeight);
@@ -347,13 +326,10 @@ export class EntityRenderer {
             
             // Apply additional sprite scale using utility function
             const additionalScale = getSpriteScale(combatant);
-            respawnIndicatorSprite.setScale(baseScale * additionalScale);
-        } else {
+            respawnIndicator.setScale(baseScale * additionalScale);
+        } else if (respawnIndicator) {
             // Hide respawn indicator sprite when not respawning
-            const respawnIndicatorSprite = this.respawnIndicatorSprites.get(combatant.id);
-            if (respawnIndicatorSprite) {
-                respawnIndicatorSprite.setVisible(false);
-            }
+            respawnIndicator.setVisible(false);
         }
     }
 
