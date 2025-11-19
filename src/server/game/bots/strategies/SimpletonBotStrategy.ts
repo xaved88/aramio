@@ -33,6 +33,25 @@ export class SimpletonBotStrategy {
             return commands;
         }
 
+        // Find all enemies (not just in range) - check for abilities before defensive checks
+        const allEnemies = this.findAllEnemies(bot, state);
+        
+        // Check if we can use abilities (even when playing defensively, we should still fire abilities)
+        if (allEnemies.length > 0) {
+            // Check if it's time to use ability based on deterministic cooldown
+            if (this.shouldUseAbility(bot, state)) {
+                // Filter enemies to only those within ability range
+                const enemiesInAbilityRange = this.findEnemiesInAbilityRange(allEnemies, bot);
+                const targetEnemy = this.selectTargetEnemy(enemiesInAbilityRange);
+                if (targetEnemy) {
+                    commands.push({
+                        type: 'useAbility',
+                        data: { heroId: bot.id, x: targetEnemy.x, y: targetEnemy.y }
+                    });
+                }
+            }
+        }
+
         // Check if we're outnumbered and should play defensively
         if (CombatantUtils.shouldPlayDefensively(bot, allCombatants, state.gameTime, this.gameplayConfig)) {
             // Retreat to nearest friendly structure for defensive positioning
@@ -60,24 +79,6 @@ export class SimpletonBotStrategy {
                     data: { heroId: bot.id, targetX: adjustedSafePosition.x, targetY: adjustedSafePosition.y }
                 });
                 return commands;
-            }
-        }
-
-        // Find all enemies (not just in range)
-        const allEnemies = this.findAllEnemies(bot, state);
-        
-        if (allEnemies.length > 0) {
-            // Check if it's time to use ability based on deterministic cooldown
-            if (this.shouldUseAbility(bot, state)) {
-                // Filter enemies to only those within ability range
-                const enemiesInAbilityRange = this.findEnemiesInAbilityRange(allEnemies, bot);
-                const targetEnemy = this.selectTargetEnemy(enemiesInAbilityRange);
-                if (targetEnemy) {
-                    commands.push({
-                        type: 'useAbility',
-                        data: { heroId: bot.id, x: targetEnemy.x, y: targetEnemy.y }
-                    });
-                }
             }
         }
 

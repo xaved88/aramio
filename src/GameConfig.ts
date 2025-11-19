@@ -261,7 +261,8 @@ export const GAMEPLAY_CONFIG = {
             MIN: 1.0, // The minimum % of cooldown to wait before firing again (below 1 won't make a difference)
             MAX: 2.2, // The max % of cooldown to wait before firing again
         },
-        AWARENESS_RANGE: 400, // Range within which bots count friends and enemies for retreat decisions
+        AWARENESS_RANGE: 400, // Range within which bots count enemies for retreat decisions
+        ISOLATION_RANGE: 200, // If bot is further than this from nearest teammate/structure, consider it isolated
         BOT_BEHAVIOR: 'original', // Bot behavior type: 'original' or 'improved'
     },
     AI_BEHAVIOR: {

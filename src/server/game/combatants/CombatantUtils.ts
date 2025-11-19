@@ -335,6 +335,22 @@ export class CombatantUtils {
      */
     static shouldPlayDefensively(combatant: any, allCombatants: any[], currentTime: number, gameplayConfig: any): boolean {
         const nearbyRadius = gameplayConfig.BOTS.AWARENESS_RANGE;
+        const isolationRange = gameplayConfig.BOTS.ISOLATION_RANGE;
+        
+        // Check if bot is isolated (far from teammates/structures)
+        const isIsolated = !this.isNearFriendlyStructure(combatant, allCombatants, gameplayConfig) &&
+            !allCombatants.some((other: any) => {
+                if (other.team !== combatant.team || other.health <= 0 || other.id === combatant.id) {
+                    return false;
+                }
+                if (other.type !== 'hero') {
+                    return false;
+                }
+                const dx = other.x - combatant.x;
+                const dy = other.y - combatant.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance <= isolationRange;
+            });
         
         // Count nearby enemies - only count heroes, not minions
         const nearbyEnemies = allCombatants.filter((other: any) => {
@@ -370,9 +386,11 @@ export class CombatantUtils {
             return distance <= nearbyRadius;
         });
 
-        // Require at least 2 more enemies than friends to trigger retreat behavior
-        // This allows safe fighting for smaller disadvantages
-        const shouldRetreat = nearbyEnemies.length > nearbyFriends.length + 2;
+        // If isolated, use lower threshold for retreat (react to enemies sooner)
+        // Normal: require 2 more enemies than friends
+        // Isolated: retreat if enemies > friends (more aggressive retreat)
+        const retreatThreshold = isIsolated ? 0 : 2;
+        const shouldRetreat = nearbyEnemies.length > nearbyFriends.length + retreatThreshold;
         
         // For extreme disadvantages, always retreat regardless of position
         const extremeDisadvantage = nearbyEnemies.length > nearbyFriends.length + 3;

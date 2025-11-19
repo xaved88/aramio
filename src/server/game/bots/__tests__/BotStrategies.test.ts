@@ -224,7 +224,10 @@ describe('Bot Strategies', () => {
                 x: 200,
                 y: 200,
                 health: 100,
+                maxHealth: 100,
                 state: 'alive',
+                attackRadius: 50,
+                size: 25,
                 ability: { lastUsedTime: 5000, cooldown: 10000, range: 200, strength: 50 }, // Not in rage mode
                 effects: [],
                 getAttackRadius: () => 50, // Mock attack radius
@@ -237,6 +240,19 @@ describe('Bot Strategies', () => {
                 getPyromancerRadius: () => 0
             } as any;
 
+            // Add a teammate so the bot isn't isolated and will charge in
+            const mockTeammate = {
+                id: 'teammate',
+                team: 'blue',
+                x: 250,
+                y: 250,
+                health: 100,
+                maxHealth: 100,
+                size: 25,
+                type: 'hero',
+                state: 'alive'
+            } as any;
+
             // Multiple enemies targeting the bot at enemy base area
             const mockEnemy1 = {
                 id: 'enemy1',
@@ -244,6 +260,8 @@ describe('Bot Strategies', () => {
                 x: 550,
                 y: 150,
                 health: 80,
+                maxHealth: 80,
+                size: 25,
                 type: 'hero',
                 state: 'alive',
                 target: mockBot.id
@@ -255,6 +273,8 @@ describe('Bot Strategies', () => {
                 x: 560,
                 y: 140,
                 health: 80,
+                maxHealth: 80,
+                size: 25,
                 type: 'hero',
                 state: 'alive',
                 target: mockBot.id
@@ -264,6 +284,7 @@ describe('Bot Strategies', () => {
                 gameTime: 10000,
                 combatants: new Map([
                     [mockBot.id, mockBot],
+                    [mockTeammate.id, mockTeammate],
                     [mockEnemy1.id, mockEnemy1],
                     [mockEnemy2.id, mockEnemy2]
                 ])
@@ -402,7 +423,10 @@ describe('Bot Strategies', () => {
                 x: 100,
                 y: 100,
                 health: 100,
+                maxHealth: 100,
                 state: 'alive',
+                attackRadius: 50,
+                size: 25,
                 ability: { 
                     lastUsedTime: 0, // Ready to use
                     cooldown: 5000,
@@ -426,6 +450,8 @@ describe('Bot Strategies', () => {
                 x: 150, // 50 units away from bot at (100, 100)
                 y: 100,
                 health: 80,
+                maxHealth: 80,
+                size: 25,
                 type: 'hero',
                 state: 'alive'
             } as any;
