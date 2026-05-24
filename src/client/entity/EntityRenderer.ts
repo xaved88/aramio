@@ -720,8 +720,7 @@ export class EntityRenderer {
             }
             
             const level = combatant.level;
-            const romanNumeral = this.toRomanNumeral(level);
-            text.setText(romanNumeral);
+            text.setText(level.toString());
             
             // Set color based on team
             const textColor = combatant.team === 'blue' ? 0x1a4a6b : 0x8b1a1a; // Team colors
@@ -747,34 +746,6 @@ export class EntityRenderer {
         } else {
             text.setText(''); // Clear text for non-heroes
         }
-    }
-
-
-    /**
-     * Converts a number to Roman numeral
-     */
-    private toRomanNumeral(num: number): string {
-        const romanNumerals = [
-            { value: 50, numeral: 'L' },
-            { value: 40, numeral: 'XL' },
-            { value: 10, numeral: 'X' },
-            { value: 9, numeral: 'IX' },
-            { value: 5, numeral: 'V' },
-            { value: 4, numeral: 'IV' },
-            { value: 1, numeral: 'I' }
-        ];
-        
-        let result = '';
-        let remaining = num;
-        
-        for (const { value, numeral } of romanNumerals) {
-            while (remaining >= value) {
-                result += numeral;
-                remaining -= value;
-            }
-        }
-        
-        return result;
     }
 
     /**
