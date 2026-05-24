@@ -266,5 +266,20 @@ export class TutorialManager {
     isTutorialActive(): boolean {
         return this.currentStep !== null;
     }
+
+    /**
+     * If the how-to-play overlay is open, dismiss it (same as the close button / lobby toggle).
+     * @returns true when the overlay was showing and was dismissed
+     */
+    tryDismissHowToPlay(): boolean {
+        if (this.currentTutorial !== TUTORIALS['how-to-play'] || !this.currentStep) {
+            return false;
+        }
+        if (!this.currentStep.isShowing()) {
+            return false;
+        }
+        this.currentStep.toggle();
+        return true;
+    }
 }
 
