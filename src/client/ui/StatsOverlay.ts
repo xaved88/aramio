@@ -78,14 +78,14 @@ export class StatsOverlay {
         { key: 'arrow', width: 'arrow', header: '', align: 'right', getValue: (player: PlayerStats) => player.isCurrentPlayer ? '▶' : '' },
         { key: 'heroId', width: 'heroId', header: 'Hero', align: 'left', getValue: (player: PlayerStats) => player.displayName },
         { key: 'abilityType', width: 'abilityType', header: 'Ability', align: 'left', getValue: (player: PlayerStats) => player.abilityType },
-        { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.levelRewards > 0 ? `(${player.levelRewards}) ${player.level}` : player.level.toString() },
-        { key: 'totalXp', width: 'totalXp', header: 'XP', align: 'right', getValue: (player: PlayerStats) => Math.round(player.totalExperience).toString() },
-        { key: 'heroKills', width: 'heroKills', header: 'K', align: 'right', getValue: (player: PlayerStats) => Math.round(player.heroKills).toString() },
-        { key: 'deaths', width: 'deaths', header: 'D', align: 'right', getValue: (player: PlayerStats) => player.deaths.toString() },
-        { key: 'minionKills', width: 'minionKills', header: 'Min.', align: 'right', getValue: (player: PlayerStats) => Math.round(player.minionKills).toString() },
-        { key: 'turretKills', width: 'turretKills', header: 'Tur.', align: 'right', getValue: (player: PlayerStats) => Math.round(player.turretKills).toString() },
-        { key: 'damageDealt', width: 'damageDealt', header: 'Dealt', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageDealt).toString() },
-        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => Math.round(player.damageTaken).toString() }
+        { key: 'level', width: 'level', header: 'Lvl', align: 'right', getValue: (player: PlayerStats) => player.levelRewards > 0 ? `(${this.formatWithThousands(player.levelRewards)}) ${this.formatWithThousands(player.level)}` : this.formatWithThousands(player.level) },
+        { key: 'totalXp', width: 'totalXp', header: 'XP', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.totalExperience) },
+        { key: 'heroKills', width: 'heroKills', header: 'K', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.heroKills) },
+        { key: 'deaths', width: 'deaths', header: 'D', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.deaths) },
+        { key: 'minionKills', width: 'minionKills', header: 'Min.', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.minionKills) },
+        { key: 'turretKills', width: 'turretKills', header: 'Tur.', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.turretKills) },
+        { key: 'damageDealt', width: 'damageDealt', header: 'Dealt', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.damageDealt) },
+        { key: 'damageTaken', width: 'damageTaken', header: 'Taken', align: 'right', getValue: (player: PlayerStats) => this.formatWithThousands(player.damageTaken) }
     ] as const;
 
     // Depth configuration for consistent layering
@@ -551,6 +551,11 @@ export class StatsOverlay {
         if (this.room) {
             this.room.send('returnToLobby', {});
         }
+    }
+
+    /** Rounded integers with locale-aware thousand separators (matches HUD health text). */
+    private formatWithThousands(value: number): string {
+        return Math.round(value).toLocaleString();
     }
 
     /**
