@@ -6,6 +6,7 @@ import { RendererFactory } from './RendererFactory';
 import { CombatantRenderer } from './CombatantRenderer';
 import { getSpriteScale } from '../utils/SpriteScaleUtils';
 import { EffectIconRenderer } from '../utils/EffectIconRenderer';
+import { drawDashedCircle } from '../utils/DashedCircleGraphics';
 
 /**
  * EntityRenderer handles all rendering logic for different entity types
@@ -13,6 +14,8 @@ import { EffectIconRenderer } from '../utils/EffectIconRenderer';
 export class EntityRenderer {
     private scene: Phaser.Scene;
     private playerSessionId: ControllerId | null = null;
+    /** When true, fade the local player's normal auto-attack radius while ability aim ring is shown */
+    private dimPlayerAutoAttackRingForAbilityAiming = false;
     private flashingTargetingLines: Set<string> = new Set(); // Track which targeting lines are flashing
     private combatantRenderer: CombatantRenderer;
 
@@ -23,6 +26,18 @@ export class EntityRenderer {
 
     setPlayerSessionId(sessionId: ControllerId | null): void {
         this.playerSessionId = sessionId;
+    }
+
+    /**
+     * Dims the local player's default attack-radius ring while ability max-range is visible.
+     * @returns true if the value changed (caller may want to redraw combatants)
+     */
+    setDimPlayerAutoAttackRingForAbilityAiming(active: boolean): boolean {
+        if (this.dimPlayerAutoAttackRingForAbilityAiming === active) {
+            return false;
+        }
+        this.dimPlayerAutoAttackRingForAbilityAiming = active;
+        return true;
     }
 
     /**
@@ -668,32 +683,25 @@ export class EntityRenderer {
                 color = CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR;
             }
             
-            const alpha = isRecentAttacker ? 0.3 : (isTargetingPlayer ? 0.3 : 0.2);
+            const alphaBase = isRecentAttacker ? 0.3 : isTargetingPlayer ? 0.3 : 0.2;
+            const isPlayerHeroCalmRing =
+                !isStructure &&
+                combatant.type === COMBATANT_TYPES.HERO &&
+                isHeroCombatant(combatant) &&
+                combatant.state !== 'respawning' &&
+                this.playerSessionId != null &&
+                combatant.controller === this.playerSessionId &&
+                !isRecentAttacker &&
+                !isTargetingPlayer;
+            const alpha =
+                isPlayerHeroCalmRing && this.dimPlayerAutoAttackRingForAbilityAiming
+                    ? alphaBase * CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA_ABILITY_AIM_SCALE
+                    : alphaBase;
             
             // All auto-attack ranges use dashed style
             // Structures get thicker lines, heroes/minions get standard thickness
             const lineThickness = isStructure ? CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS + 2 : CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS;
-            this.drawDashedCircle(radiusIndicator, 0, 0, combatant.attackRadius, color, alpha, lineThickness);
-        }
-    }
-    
-    /**
-     * Draws a dashed circle by drawing multiple arc segments
-     */
-    private drawDashedCircle(graphics: Phaser.GameObjects.Graphics, x: number, y: number, radius: number, color: number, alpha: number, thickness: number): void {
-        const dashAngle = 0.15; // angle of each dash in radians
-        const gapAngle = 0.1; // angle of each gap in radians
-        const angleStep = dashAngle + gapAngle;
-        
-        graphics.lineStyle(thickness, color, alpha);
-        
-        let currentAngle = 0;
-        while (currentAngle < Math.PI * 2) {
-            const endAngle = Math.min(currentAngle + dashAngle, Math.PI * 2);
-            graphics.beginPath();
-            graphics.arc(x, y, radius, currentAngle, endAngle);
-            graphics.strokePath();
-            currentAngle += angleStep;
+            drawDashedCircle(radiusIndicator, 0, 0, combatant.attackRadius, color, alpha, lineThickness);
         }
     }
 

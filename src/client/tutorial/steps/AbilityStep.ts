@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../../ClientConfig';
 import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
+import { drawDashedCircle } from '../../utils/DashedCircleGraphics';
 import { TutorialStep } from '../TutorialStep';
 
 export class AbilityStep extends TutorialStep {
@@ -79,10 +80,9 @@ export class AbilityStep extends TutorialStep {
         const abilityVisualX = centerX;
         const abilityVisualY = centerY + 50;
         
-        // Draw hero with purple ring (ability range)
+        // Draw hero with purple dashed ring (ability max range, matches in-game)
         const abilityRadiusGraphics = this.scene.add.graphics();
-        abilityRadiusGraphics.lineStyle(3, CLIENT_CONFIG.SELF_COLORS.PRIMARY, 0.8);
-        abilityRadiusGraphics.strokeCircle(abilityVisualX - 60, abilityVisualY, 80);
+        drawDashedCircle(abilityRadiusGraphics, abilityVisualX - 60, abilityVisualY, 80, CLIENT_CONFIG.SELF_COLORS.PRIMARY, 0.8, 3);
         this.contentContainer.add(abilityRadiusGraphics);
         
         const heroVisual = this.scene.add.image(abilityVisualX - 60, abilityVisualY, 'hero-base');

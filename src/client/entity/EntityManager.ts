@@ -68,6 +68,13 @@ export class EntityManager {
         colorManager.setPlayerSessionId(sessionId);
     }
 
+    /**
+     * @returns true if the dimming flag changed (caller may want to redraw combatants)
+     */
+    setDimPlayerAutoAttackRingForAbilityAiming(active: boolean): boolean {
+        return this.entityRenderer.setDimPlayerAutoAttackRingForAbilityAiming(active);
+    }
+
     setCameraManager(cameraManager: any): void {
         this.cameraManager = cameraManager;
     }

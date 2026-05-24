@@ -181,6 +181,20 @@ export const CLIENT_CONFIG = {
         LINE_THICKNESS: 2,
         LINE_COLOR: 0x000000, // black
         LINE_ALPHA: 0.3,
+        /** Multiply local player's default auto-attack ring alpha while ability max-range UI is visible */
+        LINE_ALPHA_ABILITY_AIM_SCALE: 0.42,
+    },
+    /** Max cast range ring while aiming (distinct from RADIUS_INDICATOR / auto-attack) */
+    ABILITY_RANGE_INDICATOR: {
+        RING_LINE_THICKNESS: 4,
+        /** Fixed ring opacity when ability is on cooldown (purple ring) */
+        RING_ALPHA_COOLDOWN: 0.75,
+        /** Midpoint of alpha pulse when ability is ready (white ring) */
+        RING_ALPHA_READY_CENTER: 0.58,
+        /** How much alpha swings above/below center */
+        RING_ALPHA_PULSE_AMPLITUDE: 0.24,
+        /** Sin phase: radians per ms of gameTime (2π/800 ≈ one pulse cycle every ~0.8s) */
+        RING_ALPHA_PULSE_RADIANS_PER_MS: (Math.PI * 2) / 800,
     },
     HUD: {
         // Only permanent effects remain in the top HUD

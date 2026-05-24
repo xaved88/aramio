@@ -21,6 +21,7 @@ import { CoordinateDebugOverlay } from '../ui/CoordinateDebugOverlay';
 import { InputHandler } from '../InputHandler';
 import { TutorialManager } from '../tutorial';
 import { DestinationMarker } from '../ui/DestinationMarker';
+import { AbilityRangeIndicator } from '../ui/AbilityRangeIndicator';
 
 export class GameScene extends Phaser.Scene {
     private client!: Client;
@@ -42,7 +43,7 @@ export class GameScene extends Phaser.Scene {
     // Input-related properties removed - InputHandler is now the single source of truth for all input
     private isRestarting: boolean = false;
     private isReturningToLobby: boolean = false;
-    private abilityRangeDisplay: Phaser.GameObjects.Graphics | null = null;
+    private abilityRangeIndicator: AbilityRangeIndicator | null = null;
     
     // Destination marker for MOBA controls
     private destinationMarker: DestinationMarker | null = null;
@@ -207,9 +208,13 @@ export class GameScene extends Phaser.Scene {
         this.inputHandler = new InputHandler(this, this.room);
         this.inputHandler.setupHandlers();
         
-        // Create ability range display
-        this.abilityRangeDisplay = this.gameObjectFactory.createGraphics(0, 0, CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS);
-        this.abilityRangeDisplay.setVisible(false);
+        const abilityGraphics = this.gameObjectFactory.createGraphics(
+            0,
+            0,
+            CLIENT_CONFIG.RENDER_DEPTH.ABILITY_INDICATORS
+        );
+        abilityGraphics.setVisible(false);
+        this.abilityRangeIndicator = new AbilityRangeIndicator(abilityGraphics);
         
         // Set up remaining handlers
         this.setupVisibilityHandlers();
@@ -233,7 +238,7 @@ export class GameScene extends Phaser.Scene {
         }
         
         // Update ability range display position if visible
-        if (this.abilityRangeDisplay && this.abilityRangeDisplay.visible) {
+        if (this.abilityRangeIndicator?.isVisible() && this.lastState) {
             this.updateAbilityRangeDisplayWithMouse();
         }
         
@@ -245,6 +250,17 @@ export class GameScene extends Phaser.Scene {
         // Update cursor for smooth mouse tracking
         if (this.uiManager && this.lastState) {
             this.uiManager.updateCursorOnly(this.playerSessionId, this.lastState.gameTime);
+        }
+
+        this.syncAutoAttackRingDimForAbilityAiming();
+    }
+
+    private syncAutoAttackRingDimForAbilityAiming(): void {
+        if (!this.entityManager) return;
+        const dim = !!(this.abilityRangeIndicator?.isVisible());
+        const changed = this.entityManager.setDimPlayerAutoAttackRingForAbilityAiming(dim);
+        if (changed && this.lastState) {
+            this.updateCombatantEntities(convertToSharedGameState(this.lastState));
         }
     }
 
@@ -593,11 +609,13 @@ export class GameScene extends Phaser.Scene {
     public onPointerDown(pointer: Phaser.Input.Pointer): void {
         // Show ability range display for hookshot ability
         this.updateAbilityRangeDisplayWithMouse();
+        this.syncAutoAttackRingDimForAbilityAiming();
     }
 
     public onPointerUp(pointer: Phaser.Input.Pointer): void {
         // Hide ability range display
         this.hideAbilityRangeDisplay();
+        this.syncAutoAttackRingDimForAbilityAiming();
     }
 
 
@@ -612,224 +630,21 @@ export class GameScene extends Phaser.Scene {
     }
 
 
-    /**
-     * Calculates the cast range for abilities
-     */
-    private calculateCastRange(hero: any): number {
-        // All abilities use their configured range (which includes level scaling)
-        return hero.ability.range;
-    }
-
-
-    /**
-     * Gets the appropriate color for the ability range display based on ability cooldown status
-     */
-    private getAbilityRangeDisplayColor(hero: any): number {
-        if (!this.lastState) return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.COOLDOWN_COLOR;
-        
-        const currentTime = this.lastState.gameTime;
-        const ability = hero.ability as any;
-        
-        // If lastUsedTime is 0, the ability hasn't been used yet, so it's ready immediately
-        let isAbilityReady = false;
-        if (ability.lastUsedTime === 0) {
-            isAbilityReady = true;
-        } else {
-            const timeSinceLastUse = currentTime - ability.lastUsedTime;
-            isAbilityReady = timeSinceLastUse >= ability.cooldown;
-        }
-        
-        if (isAbilityReady) {
-            return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.READY_COLOR; // Light purple when ready
-        } else {
-            return CLIENT_CONFIG.UI.ABILITY_COOLDOWN.COOLDOWN_COLOR; // Darker purple when on cooldown
-        }
-    }
-
-    /**
-     * Hides the ability range display
-     */
-    private hideAbilityRangeDisplay(): void {
-        if (this.abilityRangeDisplay) {
-            this.abilityRangeDisplay.setVisible(false);
-        }
-    }
-
-    /**
-     * Updates the ability range display with targeting circle following mouse position (clamped to range)
-     */
     private updateAbilityRangeDisplayWithMouse(): void {
-        if (!this.abilityRangeDisplay || !this.lastState) return;
-
-        // Find the current player's hero
-        const sharedState = convertToSharedGameState(this.lastState);
-        let currentHero: any = null;
-        
-        for (const combatant of sharedState.combatants.values()) {
-            if (combatant.type === 'hero' && combatant.controller === this.playerSessionId) {
-                currentHero = combatant;
-                break;
-            }
-        }
-        
-        // Hide ability range display if player is respawning or not a supported ability type
-        if (!currentHero || 
-            currentHero.state === 'respawning' ||
-            (currentHero.ability.type !== 'default' && currentHero.ability.type !== 'hookshot' && currentHero.ability.type !== 'mercenary' && currentHero.ability.type !== 'pyromancer' && currentHero.ability.type !== 'sniper' && currentHero.ability.type !== 'thorndive')) {
-            this.hideAbilityRangeDisplay();
-            return;
-        }
-
-        // Get the actual visual position of the hero graphics object
-        const heroGraphics = this.entityManager.getEntityGraphics(currentHero.id);
-        if (!heroGraphics) {
-            this.hideAbilityRangeDisplay();
-            return;
-        }
-
-        // Calculate cast range based on ability type
-        let castRange: number;
-        if (currentHero.ability.type === 'mercenary') {
-            // Mercenary is a self-buff ability, show a very small range circle
-            castRange = 15; // Very small circle to indicate self-buff
-        } else {
-            castRange = this.calculateCastRange(currentHero);
-        }
-        
-        // Determine color based on ability cooldown status
-        const rangeColor = this.getAbilityRangeDisplayColor(currentHero);
-        
-        // Position the graphics object at the hero's visual position and draw relative to (0, 0)
-        this.abilityRangeDisplay.setPosition(heroGraphics.x, heroGraphics.y);
-        this.abilityRangeDisplay.clear();
-        this.abilityRangeDisplay.lineStyle(4, rangeColor, 0.6);
-        this.abilityRangeDisplay.strokeCircle(0, 0, castRange);
-        
-        // Get mouse position and calculate target position (sticking to cast range if beyond)
-        const mouseWorldPos = this.screenToWorldCoordinates(this.input.activePointer.x, this.input.activePointer.y);
-        const dx = mouseWorldPos.x - heroGraphics.x;
-        const dy = mouseWorldPos.y - heroGraphics.y;
-        const mouseDistance = Math.sqrt(dx * dx + dy * dy);
-        
-        let targetX: number, targetY: number;
-        if (mouseDistance <= castRange) {
-            // Mouse is within range, use mouse position (relative to hero)
-            targetX = dx;
-            targetY = dy;
-        } else {
-            // Mouse is beyond range, stick to cast range boundary (relative to hero)
-            const directionX = dx / mouseDistance;
-            const directionY = dy / mouseDistance;
-            targetX = directionX * castRange;
-            targetY = directionY * castRange;
-        }
-        
-        // Draw targeting visual for abilities considering target position and ability type
-        // Note: targetX and targetY are now relative to the hero's position (0, 0)
-        this.drawTargetingVisual(currentHero, targetX, targetY, rangeColor);
-        
-        this.abilityRangeDisplay.setVisible(true);
+        if (!this.abilityRangeIndicator || !this.lastState) return;
+        this.abilityRangeIndicator.update({
+            gameState: this.lastState,
+            playerSessionId: this.playerSessionId,
+            pointerScreenX: this.input.activePointer.x,
+            pointerScreenY: this.input.activePointer.y,
+            screenToWorld: (sx, sy) => this.screenToWorldCoordinates(sx, sy),
+            getEntityGraphics: (id) => this.entityManager.getEntityGraphics(id),
+        });
     }
 
-    /**
-     * Draws the appropriate targeting visual for any ability at the target location
-     */
-    private drawTargetingVisual(hero: any, targetX: number, targetY: number, color: number): void {
-        if (hero.ability.type === 'mercenary') {
-            // Mercenary is a self-buff ability, don't show targeting visual
-            return;
-        } else if (hero.ability.type === 'thorndive') {
-            // For thorndive, draw targeting circle with landing radius
-            const targetingRadius = (hero.ability as any).landingRadius;
-            this.drawTargetingCircle(targetX, targetY, targetingRadius, color);
-        } else if (hero.ability.type === 'pyromancer') {
-            // For pyromancer, draw targeting circle with fireball radius
-            const targetingRadius = (hero.ability as any).fireballRadius;
-            this.drawTargetingCircle(targetX, targetY, targetingRadius, color);
-        } else {
-            // For all other abilities, draw a targeting arrow
-            this.drawTargetingArrow(hero, targetX, targetY, color);
-        }
+    private hideAbilityRangeDisplay(): void {
+        this.abilityRangeIndicator?.hide();
     }
-
-    /**
-     * Draws a targeting circle at the specified location (relative to hero)
-     */
-    private drawTargetingCircle(targetX: number, targetY: number, radius: number, color: number): void {
-        // Draw targeting circle at target location (relative coordinates)
-        this.abilityRangeDisplay!.lineStyle(4, color, 0.3);
-        this.abilityRangeDisplay!.strokeCircle(targetX, targetY, radius);
-        this.abilityRangeDisplay!.fillStyle(color, 0.1);
-        this.abilityRangeDisplay!.fillCircle(targetX, targetY, radius);
-    }
-
-    /**
-     * Draws a targeting arrow showing the direction the ability will fire (relative to hero)
-     */
-    private drawTargetingArrow(hero: any, targetX: number, targetY: number, color: number): void {
-        
-        // targetX and targetY are already relative to hero position (0, 0)
-        const distance = Math.sqrt(targetX * targetX + targetY * targetY);
-        
-        if (distance === 0) return; // Avoid division by zero
-        
-        // Normalize direction
-        const directionX = targetX / distance;
-        const directionY = targetY / distance;
-        
-        // Calculate arrow positions
-        const arrowLength = CLIENT_CONFIG.TARGETING_ARROW.LENGTH;
-        const arrowHeadSize = CLIENT_CONFIG.TARGETING_ARROW.HEAD_SIZE;
-        const lineWidth = CLIENT_CONFIG.TARGETING_ARROW.LINE_WIDTH;
-        
-        // Start arrow slightly away from hero center (which is at 0, 0)
-        const arrowStartX = directionX * CLIENT_CONFIG.TARGETING_ARROW.START_OFFSET;
-        const arrowStartY = directionY * CLIENT_CONFIG.TARGETING_ARROW.START_OFFSET;
-        
-        // Calculate arrow end position
-        const arrowEndX = arrowStartX + directionX * arrowLength;
-        const arrowEndY = arrowStartY + directionY * arrowLength;
-        
-        // Draw the main arrow line
-        this.abilityRangeDisplay!.lineStyle(lineWidth, color, 1.0);
-        this.abilityRangeDisplay!.beginPath();
-        this.abilityRangeDisplay!.moveTo(arrowStartX, arrowStartY);
-        this.abilityRangeDisplay!.lineTo(arrowEndX, arrowEndY);
-        this.abilityRangeDisplay!.strokePath();
-        
-        // Draw arrow head
-        const headAngle = Math.PI / 4; // 45 degrees
-        const head1X = arrowEndX - directionX * arrowHeadSize + directionY * arrowHeadSize * Math.tan(headAngle);
-        const head1Y = arrowEndY - directionY * arrowHeadSize - directionX * arrowHeadSize * Math.tan(headAngle);
-        const head2X = arrowEndX - directionX * arrowHeadSize - directionY * arrowHeadSize * Math.tan(headAngle);
-        const head2Y = arrowEndY - directionY * arrowHeadSize + directionX * arrowHeadSize * Math.tan(headAngle);
-        
-        // Draw arrow head lines
-        this.abilityRangeDisplay!.lineStyle(lineWidth, color, 1.0);
-        this.abilityRangeDisplay!.beginPath();
-        this.abilityRangeDisplay!.moveTo(arrowEndX, arrowEndY);
-        this.abilityRangeDisplay!.lineTo(head1X, head1Y);
-        this.abilityRangeDisplay!.strokePath();
-        
-        this.abilityRangeDisplay!.beginPath();
-        this.abilityRangeDisplay!.moveTo(arrowEndX, arrowEndY);
-        this.abilityRangeDisplay!.lineTo(head2X, head2Y);
-        this.abilityRangeDisplay!.strokePath();
-    }
-
-
-    
-
-    
-
-    
-
-
-
-
-
-
-
 
     /**
      * Creates visual indicators at spawn locations
@@ -910,7 +725,7 @@ export class GameScene extends Phaser.Scene {
         this.processedProjectileMissEvents.clear();
         
         // Reset UI elements
-        this.abilityRangeDisplay = null;
+        this.abilityRangeIndicator = null;
     }
 
     /**

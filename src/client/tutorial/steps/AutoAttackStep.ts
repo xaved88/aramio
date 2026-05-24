@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CLIENT_CONFIG } from '../../../ClientConfig';
 import { getCanvasWidth, getCanvasHeight } from '../../utils/CanvasSize';
 import { TextStyleHelper } from '../../utils/TextStyleHelper';
+import { drawDashedCircle } from '../../utils/DashedCircleGraphics';
 import { TutorialStep } from '../TutorialStep';
 
 export class AutoAttackStep extends TutorialStep {
@@ -80,24 +81,15 @@ export class AutoAttackStep extends TutorialStep {
         const attackVisualY = centerY + 20;
         
         const radiusGraphics = this.scene.add.graphics();
-        // Draw dashed circle to match game visuals (auto-attack ranges are dashed)
-        const dashAngle = 0.15; // angle of each dash in radians
-        const gapAngle = 0.1; // angle of each gap in radians
-        const angleStep = dashAngle + gapAngle;
-        radiusGraphics.lineStyle(
-            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS, 
-            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR, 
-            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA
+        drawDashedCircle(
+            radiusGraphics,
+            attackVisualX,
+            attackVisualY,
+            70,
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_COLOR,
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_ALPHA,
+            CLIENT_CONFIG.RADIUS_INDICATOR.LINE_THICKNESS
         );
-        
-        let currentAngle = 0;
-        while (currentAngle < Math.PI * 2) {
-            const endAngle = Math.min(currentAngle + dashAngle, Math.PI * 2);
-            radiusGraphics.beginPath();
-            radiusGraphics.arc(attackVisualX, attackVisualY, 70, currentAngle, endAngle);
-            radiusGraphics.strokePath();
-            currentAngle += angleStep;
-        }
         this.contentContainer.add(radiusGraphics);
         
         const heroVisual = this.scene.add.image(attackVisualX, attackVisualY, 'hero-base');
