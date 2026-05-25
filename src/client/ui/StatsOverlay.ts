@@ -232,12 +232,24 @@ export class StatsOverlay {
         const blueTeamInfoY = centerY + baseSpacing; // More space from center
         const blueTeamTableY = blueTeamInfoY + 50; // Standard spacing after team header
 
-        const gameTimeText = this.scene.add.text(centerX, gameTimeY, `Game Time: ${this.formatGameTime(state.gameTime)}`, TextStyleHelper.getStyle('HEADER'));
-        gameTimeText.setOrigin(0.5, 0);
-        gameTimeText.setDepth(this.DEPTHS.UI_CONTENT);
-        gameTimeText.setScrollFactor(0, 0); // Fixed to screen
-        this.overlayElements.push(gameTimeText);
-        this.hudContainer.add(gameTimeText);
+        const gameTimeTitleStyle = TextStyleHelper.getStyle('HEADER');
+        const gameTimeValueStyle = TextStyleHelper.getStyleWithCustom('HEADER', { color: '#ffffff' });
+        const formattedTime = this.formatGameTime(state.gameTime);
+        const gameTimeLabel = this.scene.add.text(0, gameTimeY, 'Game Time: ', gameTimeTitleStyle);
+        const gameTimeValue = this.scene.add.text(0, gameTimeY, formattedTime, gameTimeValueStyle);
+        const gameTimeRowWidth = gameTimeLabel.width + gameTimeValue.width;
+        const gameTimeStartX = centerX - gameTimeRowWidth / 2;
+        gameTimeLabel.setPosition(gameTimeStartX, gameTimeY);
+        gameTimeValue.setPosition(gameTimeStartX + gameTimeLabel.width, gameTimeY);
+        gameTimeLabel.setOrigin(0, 0);
+        gameTimeValue.setOrigin(0, 0);
+        gameTimeLabel.setDepth(this.DEPTHS.UI_CONTENT);
+        gameTimeValue.setDepth(this.DEPTHS.UI_CONTENT);
+        gameTimeLabel.setScrollFactor(0, 0);
+        gameTimeValue.setScrollFactor(0, 0);
+        this.overlayElements.push(gameTimeLabel, gameTimeValue);
+        this.hudContainer.add(gameTimeLabel);
+        this.hudContainer.add(gameTimeValue);
 
         this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, redTeamInfoY, 'Red Team', TextStyleHelper.getTeamColor('red'));
         this.createTeamInfo(tableX + this.COLUMN_WIDTHS.arrow, blueTeamInfoY, 'Blue Team', TextStyleHelper.getTeamColor('blue'));
