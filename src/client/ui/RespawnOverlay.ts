@@ -6,7 +6,6 @@ import { RewardCardManager } from './RewardCardManager';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { HUDContainer } from './HUDContainer';
 import { hexToColorString } from '../utils/ColorUtils';
-import { RESPAWN_TIPS } from './respawnTips';
 import { Button } from './Button';
 
 function shuffleStringArrayInPlace(arr: string[]): void {
@@ -194,7 +193,7 @@ export class RespawnOverlay {
         this.tipsBodyText = this.scene.add.text(
             getCanvasWidth() / 2,
             getCanvasHeight() / 2 + 2,
-            RESPAWN_TIPS[0] ?? '',
+            CLIENT_CONFIG.RESPAWN.TIPS[0] ?? '',
             TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
                 align: 'center',
                 wordWrap: { width: tipWrapWidth }
@@ -214,7 +213,7 @@ export class RespawnOverlay {
             type: 'standard',
             onClick: () => {
                 if (!this.tipsTitleText?.visible) return;
-                const len = this.shuffledTips.length > 0 ? this.shuffledTips.length : RESPAWN_TIPS.length;
+                const len = this.shuffledTips.length > 0 ? this.shuffledTips.length : CLIENT_CONFIG.RESPAWN.TIPS.length;
                 if (len === 0) return;
                 this.tipIndex = (this.tipIndex + 1) % len;
                 this.applyCurrentTipText();
@@ -231,14 +230,14 @@ export class RespawnOverlay {
 
     private applyCurrentTipText(): void {
         if (!this.tipsBodyText) return;
-        const pool = this.shuffledTips.length > 0 ? this.shuffledTips : [...RESPAWN_TIPS];
+        const pool = this.shuffledTips.length > 0 ? this.shuffledTips : [...CLIENT_CONFIG.RESPAWN.TIPS];
         if (pool.length === 0) return;
         const i = Math.min(this.tipIndex, pool.length - 1);
         this.tipsBodyText.setText(pool[i]!);
     }
 
     private reshuffleTipsIfEntered(): void {
-        const copy = [...RESPAWN_TIPS];
+        const copy = [...CLIENT_CONFIG.RESPAWN.TIPS];
         shuffleStringArrayInPlace(copy);
         this.shuffledTips = copy;
         this.tipIndex = 0;
@@ -410,7 +409,7 @@ export class RespawnOverlay {
             this.rewardsText.setVisible(hasUnspentRewards);
         }
 
-        const showTips = !hasUnspentRewards && RESPAWN_TIPS.length > 0;
+        const showTips = !hasUnspentRewards && CLIENT_CONFIG.RESPAWN.TIPS.length > 0;
         this.tipsSectionVisible = showTips;
 
         if (showTips && !this.prevTipsSectionVisible) {
