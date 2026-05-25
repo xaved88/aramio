@@ -6,6 +6,17 @@ import { RewardCardManager } from './RewardCardManager';
 import { HeroCombatant } from '../../shared/types/CombatantTypes';
 import { HUDContainer } from './HUDContainer';
 import { hexToColorString } from '../utils/ColorUtils';
+import { RESPAWN_TIPS } from './respawnTips';
+import { Button } from './Button';
+
+function shuffleStringArrayInPlace(arr: string[]): void {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = arr[i];
+        arr[i] = arr[j]!;
+        arr[j] = t!;
+    }
+}
 
 /**
  * RespawnOverlay displays a prominent overlay when the player's hero is respawning
@@ -27,6 +38,14 @@ export class RespawnOverlay {
     private isVisible: boolean = false;
     private onRewardChosen?: (rewardId: string) => void;
     private respawnDuration: number = 0; // Track total respawn duration
+    private tipsTitleText: Phaser.GameObjects.Text | null = null;
+    private tipsBodyText: Phaser.GameObjects.Text | null = null;
+    private nextTipButton: Button | null = null;
+    private tipIndex: number = 0;
+    private tipsSectionVisible: boolean = false;
+    /** Random order for this tips session; rebuilt each time the tips block becomes visible. */
+    private shuffledTips: string[] = [];
+    private prevTipsSectionVisible: boolean = false;
 
     constructor(scene: Phaser.Scene, onRewardChosen?: (rewardId: string) => void) {
         this.scene = scene;
@@ -153,12 +172,81 @@ export class RespawnOverlay {
         this.rewardsText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
         this.rewardsText.setScrollFactor(0, 0); // Fixed to screen
         this.hudContainer.add(this.rewardsText);
+
+        const tipTitleY = getCanvasHeight() / 2 - 60;
+        this.tipsTitleText = this.scene.add.text(
+            getCanvasWidth() / 2,
+            tipTitleY,
+            'Tip',
+            TextStyleHelper.getStyleWithCustom('TITLE', {
+                color: '#f1c40f',
+                stroke: '#000000',
+                strokeThickness: 2
+            })
+        );
+        this.tipsTitleText.setOrigin(0.5);
+        this.tipsTitleText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.tipsTitleText.setScrollFactor(0, 0);
+        this.tipsTitleText.setVisible(false);
+        this.hudContainer.add(this.tipsTitleText);
+
+        const tipWrapWidth = Math.min(520, getCanvasWidth() - 80);
+        this.tipsBodyText = this.scene.add.text(
+            getCanvasWidth() / 2,
+            getCanvasHeight() / 2 + 2,
+            RESPAWN_TIPS[0] ?? '',
+            TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
+                align: 'center',
+                wordWrap: { width: tipWrapWidth }
+            })
+        );
+        this.tipsBodyText.setOrigin(0.5, 0.5);
+        this.tipsBodyText.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.tipsBodyText.setScrollFactor(0, 0);
+        this.tipsBodyText.setVisible(false);
+        this.hudContainer.add(this.tipsBodyText);
+
+        const nextTipY = getCanvasHeight() / 2 + 92;
+        this.nextTipButton = new Button(this.scene, {
+            x: getCanvasWidth() / 2,
+            y: nextTipY,
+            text: 'Next tip',
+            type: 'standard',
+            onClick: () => {
+                if (!this.tipsTitleText?.visible) return;
+                const len = this.shuffledTips.length > 0 ? this.shuffledTips.length : RESPAWN_TIPS.length;
+                if (len === 0) return;
+                this.tipIndex = (this.tipIndex + 1) % len;
+                this.applyCurrentTipText();
+            }
+        });
+        this.nextTipButton.setDepth(CLIENT_CONFIG.RENDER_DEPTH.GAME_UI - 5);
+        this.nextTipButton.setScrollFactor(0, 0);
+        this.nextTipButton.setVisible(false);
+        this.nextTipButton.setEnabled(false);
+        this.hudContainer.add(this.nextTipButton);
         
         this.hide();
     }
 
+    private applyCurrentTipText(): void {
+        if (!this.tipsBodyText) return;
+        const pool = this.shuffledTips.length > 0 ? this.shuffledTips : [...RESPAWN_TIPS];
+        if (pool.length === 0) return;
+        const i = Math.min(this.tipIndex, pool.length - 1);
+        this.tipsBodyText.setText(pool[i]!);
+    }
+
+    private reshuffleTipsIfEntered(): void {
+        const copy = [...RESPAWN_TIPS];
+        shuffleStringArrayInPlace(copy);
+        this.shuffledTips = copy;
+        this.tipIndex = 0;
+    }
+
     show(): void {
-        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
+        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText
+            && this.tipsTitleText && this.tipsBodyText && this.nextTipButton) {
             // Only animate if not already visible to prevent flashing
             if (!this.isVisible) {
                 // Core elements that always show (timer visibility is managed by updateTimer)
@@ -204,6 +292,20 @@ export class RespawnOverlay {
                         ease: 'Power2'
                     });
                 }
+
+                if (this.tipsSectionVisible) {
+                    const tipTargets: Phaser.GameObjects.Text[] = [this.tipsTitleText, this.tipsBodyText];
+                    if (this.nextTipButton.visible) {
+                        tipTargets.push(this.nextTipButton);
+                    }
+                    tipTargets.forEach(el => el.setAlpha(0).setVisible(true));
+                    this.scene.tweens.add({
+                        targets: tipTargets,
+                        alpha: 1,
+                        duration: 600,
+                        ease: 'Power2'
+                    });
+                }
             } else {
                 // Just ensure elements are visible and at full alpha when already showing
                 const elements = [this.overlay, this.text, this.deathSummaryHint, this.slainByText, this.killerNameText];
@@ -219,6 +321,9 @@ export class RespawnOverlay {
                 if (this.rewardsText && this.rewardsText.visible) {
                     this.rewardsText.setAlpha(1);
                 }
+                if (this.tipsSectionVisible && this.tipsTitleText && this.tipsBodyText) {
+                    [this.tipsTitleText, this.tipsBodyText].forEach(el => el.setVisible(true).setAlpha(1));
+                }
             }
             
             this.isVisible = true;
@@ -226,9 +331,17 @@ export class RespawnOverlay {
     }
 
     hide(): void {
-        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText) {
-            [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText].forEach(el => el.setVisible(false));
+        if (this.overlay && this.text && this.timer && this.timerCircle && this.rewardsText && this.deathSummaryHint && this.slainByText && this.killerNameText
+            && this.tipsTitleText && this.tipsBodyText && this.nextTipButton) {
+            [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText,
+                this.tipsTitleText, this.tipsBodyText, this.nextTipButton].forEach(el => el.setVisible(false));
             this.rewardCardManager.setVisible(false);
+            this.tipsSectionVisible = false;
+            this.prevTipsSectionVisible = false;
+            this.shuffledTips = [];
+            this.tipIndex = 0;
+            this.applyCurrentTipText();
+            this.nextTipButton.setEnabled(false);
             this.isVisible = false;
         }
     }
@@ -295,6 +408,37 @@ export class RespawnOverlay {
         // Only show "Choose your rewards" text when reward cards are visible
         if (this.rewardsText) {
             this.rewardsText.setVisible(hasUnspentRewards);
+        }
+
+        const showTips = !hasUnspentRewards && RESPAWN_TIPS.length > 0;
+        this.tipsSectionVisible = showTips;
+
+        if (showTips && !this.prevTipsSectionVisible) {
+            this.reshuffleTipsIfEntered();
+        }
+        this.prevTipsSectionVisible = showTips;
+
+        if (this.tipsTitleText && this.tipsBodyText && this.nextTipButton) {
+            if (showTips) {
+                const wrapW = Math.min(520, getCanvasWidth() - 80);
+                this.tipsBodyText.setStyle(
+                    TextStyleHelper.getStyleWithCustom('BODY_MEDIUM', {
+                        align: 'center',
+                        wordWrap: { width: wrapW }
+                    })
+                );
+                this.applyCurrentTipText();
+                this.tipsTitleText.setVisible(true);
+                this.tipsBodyText.setVisible(true);
+                const showNextTipButton = remainingTimeMs > 2000;
+                this.nextTipButton.setVisible(showNextTipButton);
+                this.nextTipButton.setEnabled(showNextTipButton);
+            } else {
+                this.tipsTitleText.setVisible(false);
+                this.tipsBodyText.setVisible(false);
+                this.nextTipButton.setVisible(false);
+                this.nextTipButton.setEnabled(false);
+            }
         }
     }
 
@@ -370,7 +514,8 @@ export class RespawnOverlay {
             this.hudContainer = null;
         }
         
-        [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText] = [null, null, null, null, null, null, null, null];
+        [this.overlay, this.text, this.timer, this.timerCircle, this.rewardsText, this.deathSummaryHint, this.slainByText, this.killerNameText,
+            this.tipsTitleText, this.tipsBodyText, this.nextTipButton] = [null, null, null, null, null, null, null, null, null, null, null];
         this.rewardCardManager.destroy();
         this.isVisible = false;
     }
