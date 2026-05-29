@@ -89,21 +89,31 @@ export class SimpletonBotStrategy {
             // Stay in place to attack (combat system handles basic attacks automatically)
             // No movement command needed
         } else {
-            // Check if there's a nearby enemy turret to prioritize
-            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
-            if (nearbyEnemyTurret) {
-                const adjustedTurretPosition = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
+            // Move toward the neutral objective if one is active and bot isn't inside it yet
+            const objectiveTarget = CombatantUtils.getObjectiveMoveTarget(bot, state, this.gameplayConfig);
+            if (objectiveTarget) {
+                const adjustedObjectivePosition = applyBotCollisionAvoidance(bot, objectiveTarget.x, objectiveTarget.y, allCombatants, allObstacles, this.gameplayConfig);
                 commands.push({
                     type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedTurretPosition.x, targetY: adjustedTurretPosition.y }
+                    data: { heroId: bot.id, targetX: adjustedObjectivePosition.x, targetY: adjustedObjectivePosition.y }
                 });
             } else {
-                const targetPosition = this.getEnemyCradlePosition(bot.team);
-                const adjustedCradlePosition = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
-                commands.push({
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedCradlePosition.x, targetY: adjustedCradlePosition.y }
-                });
+                // Check if there's a nearby enemy turret to prioritize
+                const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+                if (nearbyEnemyTurret) {
+                    const adjustedTurretPosition = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
+                    commands.push({
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: adjustedTurretPosition.x, targetY: adjustedTurretPosition.y }
+                    });
+                } else {
+                    const targetPosition = this.getEnemyCradlePosition(bot.team);
+                    const adjustedCradlePosition = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
+                    commands.push({
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: adjustedCradlePosition.x, targetY: adjustedCradlePosition.y }
+                    });
+                }
             }
         }
 

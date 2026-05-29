@@ -62,10 +62,12 @@ export class PermanentEffectsDisplay {
             return;
         }
 
-        // Group effects by stat type and operator to handle stacking
+        // Group effects by stat type, operator, and source to handle stacking
+        // Objective buffs (source='objective') are kept separate and shown with gold border
         const groupedEffects = new Map<string, {
             stat: string;
             operator: string;
+            source: string;
             totalAmount: number;
             count: number;
             effects: any[];
@@ -75,8 +77,9 @@ export class PermanentEffectsDisplay {
             const statName = (effect as any).stat;
             const operator = (effect as any).operator;
             const amount = (effect as any).amount;
-            const key = `${statName}_${operator}`;
-            
+            const source = (effect as any).source || 'reward';
+            const key = `${statName}_${operator}_${source}`;
+
             if (groupedEffects.has(key)) {
                 const group = groupedEffects.get(key)!;
                 group.count++;
@@ -85,6 +88,7 @@ export class PermanentEffectsDisplay {
                 groupedEffects.set(key, {
                     stat: statName,
                     operator,
+                    source,
                     totalAmount: amount,
                     count: 1,
                     effects: [effect]
@@ -115,6 +119,7 @@ export class PermanentEffectsDisplay {
         groupedEffects.forEach((group) => {
             const statName = group.stat;
             const operator = group.operator;
+            const source = group.source;
             const count = group.count;
             const iconsPerRow = config.MAX_ICONS_PER_ROW;
             const row = Math.floor(index / iconsPerRow);
@@ -135,10 +140,14 @@ export class PermanentEffectsDisplay {
                 // Create individual background for this stack layer
                 const background = this.scene.add.graphics();
                 
-                // Determine styling based on stat type
+                // Determine styling based on stat type and source
                 const isAbilityStat = statName.startsWith('ability:') || statName === 'abilityPower';
-                const backgroundColor = config.BACKGROUND_COLOR; // Use config background color
-                const borderColor = isAbilityStat ? 0x3182ce : 0x38a169; // Darker blue for ability stats, darker green for base stats
+                const isObjectiveBuff = source === 'objective';
+                const backgroundColor = config.BACKGROUND_COLOR;
+                // Gold for objective buffs, darker blue for ability stats, darker green for base stats
+                const borderColor = isObjectiveBuff
+                    ? CLIENT_CONFIG.NEUTRAL_OBJECTIVE.OBJECTIVE_BUFF_BORDER_COLOR
+                    : isAbilityStat ? 0x3182ce : 0x38a169;
                 const borderWidth = 1
                 
                 background.fillStyle(backgroundColor, config.BACKGROUND_ALPHA); // Use config alpha

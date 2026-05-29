@@ -514,6 +514,27 @@ export const GAMEPLAY_CONFIG = {
         }
     },
     
+    // Neutral Objectives Configuration
+    NEUTRAL_OBJECTIVES: {
+        SPAWN_INTERVAL_MS: 120_000, // 2 minutes between spawns; first spawn at 2:00
+        RADIUS: 150,                // zone radius in pixels
+        POINTS_TO_WIN: 20,          // lead (blue - red) needed to capture
+        TICK_RATE_MS: 1_000,        // control point tick interval (1 second)
+        SITES: [
+            { id: 'northern', name: 'Northern Grounds', x: 350, y: 350 },
+            { id: 'southern', name: 'Southern Grounds', x: 1050, y: 1050 },
+        ],
+        // References existing REWARDS.REWARD_TYPES keys — no new stat logic needed
+        OBJECTIVE_BUFFS: [
+            'stat:health',
+            'stat:damage',
+            'stat:attack_speed',
+            'stat:move_speed',
+            'stat:bullet_armor',
+            'stat:ability_armor',
+        ],
+    },
+
     // Debug Configuration
     DEBUG: {
         STARTING_LEVEL: 1, // Level that heroes start with

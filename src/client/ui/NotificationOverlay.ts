@@ -8,8 +8,9 @@ export enum NotificationType {
     SUPERMINION_SPAWN = 'superminion_spawn',
     KILLING_SPREE = 'killing_spree',      // 5 kills without dying
     RAMPAGE = 'rampage',                  // 10 kills without dying
-    UNSTOPPABLE = 'unstoppable'           // 15 kills without dying
-    // Add more notification types as needed
+    UNSTOPPABLE = 'unstoppable',          // 15 kills without dying
+    OBJECTIVE_SPAWN = 'objective_spawn',  // Neutral objective appeared on map
+    OBJECTIVE_CAPTURED = 'objective_captured' // A team captured the objective
 }
 
 // Priority levels - higher number = higher priority (shown on top)
@@ -17,7 +18,9 @@ export enum NotificationPriority {
     KILLING_SPREE = 1,
     RAMPAGE = 2,
     UNSTOPPABLE = 3,
-    SUPERMINION_SPAWN = 4
+    SUPERMINION_SPAWN = 4,
+    OBJECTIVE_SPAWN = 4,
+    OBJECTIVE_CAPTURED = 5
 }
 
 export interface NotificationContent {
@@ -64,6 +67,20 @@ export class NotificationOverlay {
         [NotificationType.UNSTOPPABLE]: {
             title: (team: string, heroName?: string) => `${heroName} is Unstoppable!`,
             subtitle: (team: string, heroName?: string) => `${heroName} has 15 kills without dying!`
+        },
+        [NotificationType.OBJECTIVE_SPAWN]: {
+            title: (team: string, heroName?: string) => `Capture the ${heroName}!`,
+            subtitle: () => 'Fight for a team bounty!'
+        },
+        [NotificationType.OBJECTIVE_CAPTURED]: {
+            title: (team: string) => {
+                const teamName = team.charAt(0).toUpperCase() + team.slice(1);
+                return `${teamName} team claims the bounty!`;
+            },
+            subtitle: (team: string) => {
+                const teamName = team.charAt(0).toUpperCase() + team.slice(1);
+                return `${teamName} team gains a buff!`;
+            }
         }
     };
 
@@ -72,7 +89,9 @@ export class NotificationOverlay {
         [NotificationType.KILLING_SPREE]: NotificationPriority.KILLING_SPREE,
         [NotificationType.RAMPAGE]: NotificationPriority.RAMPAGE,
         [NotificationType.UNSTOPPABLE]: NotificationPriority.UNSTOPPABLE,
-        [NotificationType.SUPERMINION_SPAWN]: NotificationPriority.SUPERMINION_SPAWN
+        [NotificationType.SUPERMINION_SPAWN]: NotificationPriority.SUPERMINION_SPAWN,
+        [NotificationType.OBJECTIVE_SPAWN]: NotificationPriority.OBJECTIVE_SPAWN,
+        [NotificationType.OBJECTIVE_CAPTURED]: NotificationPriority.OBJECTIVE_CAPTURED
     };
 
     constructor(scene: Phaser.Scene) {

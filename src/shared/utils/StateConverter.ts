@@ -178,6 +178,27 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
             });
         });
     }
+
+    // Convert neutral objectives (pass through as plain objects — schema props are already primitives)
+    const sharedNeutralObjectives = new Map<string, any>();
+    if (colyseusState.neutralObjectives) {
+        colyseusState.neutralObjectives.forEach((obj: any, id: string) => {
+            sharedNeutralObjectives.set(id, {
+                id: obj.id,
+                name: obj.name,
+                x: obj.x,
+                y: obj.y,
+                radius: obj.radius,
+                state: obj.state,
+                blueControlPoints: obj.blueControlPoints,
+                redControlPoints: obj.redControlPoints,
+                wonByTeam: obj.wonByTeam,
+                buffType: obj.buffType,
+                spawnedAt: obj.spawnedAt,
+                lastTickTime: obj.lastTickTime
+            });
+        });
+    }
     
     return {
         gameTime: colyseusState.gameTime,
@@ -199,7 +220,8 @@ export function convertToSharedGameState(colyseusState: ColyseusGameState): Shar
         projectileMissEvents: sharedProjectileMissEvents,
         killStreakEvents: sharedKillStreakEvents,
         blueSuperMinionsTriggered: colyseusState.blueSuperMinionsTriggered,
-        redSuperMinionsTriggered: colyseusState.redSuperMinionsTriggered
+        redSuperMinionsTriggered: colyseusState.redSuperMinionsTriggered,
+        neutralObjectives: sharedNeutralObjectives
     };
 }
 
@@ -338,7 +360,8 @@ function convertToSharedCombatant(colyseusCombatant: ColyseusCombatant, id: Comb
                                 ...baseEffect,
                                 stat: (effect as any).stat,
                                 operator: (effect as any).operator,
-                                amount: (effect as any).amount
+                                amount: (effect as any).amount,
+                                source: (effect as any).source || 'reward'
                             };
                         case 'reflect':
                         case 'hunter':

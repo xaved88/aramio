@@ -3,6 +3,7 @@ import { Hero } from '../../../schema/Combatants';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { MinionManager } from '../../combatants/MinionManager';
+import { ObjectiveManager } from '../../objectives/ObjectiveManager';
 import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('TurretDestruction', () => {
@@ -52,7 +53,7 @@ describe('TurretDestruction', () => {
         initialState.gamePhase = 'playing';
         
         const minionManager = new MinionManager(testConfig);
-        gameStateMachine = new GameStateMachine(testConfig, minionManager);
+        gameStateMachine = new GameStateMachine(testConfig, minionManager, new ObjectiveManager());
     });
 
     describe('Player destroys turret', () => {

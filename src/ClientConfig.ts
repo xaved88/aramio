@@ -52,6 +52,7 @@ export const CLIENT_CONFIG = {
     // Render depth layers - lower = behind, higher = foreground
     RENDER_DEPTH: {
         SCENE_BACKGROUND: -10,    // Scene backgrounds (behind everything)
+        NEUTRAL_OBJECTIVE: -8,  // Neutral objective zone (below all gameplay graphics)
         SHADOWS_STRUCTURE: -7,   // Structure drop shadows
         SHADOWS_HERO_MINION: -6, // Hero and minion drop shadows
         BACKGROUND: -5,         // Radius indicators, respawn rings
@@ -649,6 +650,21 @@ export const CLIENT_CONFIG = {
                 rarity: "upgrade"
             }
         }
+    },
+    NEUTRAL_OBJECTIVE: {
+        BASE_FILL_COLOR: 0x888888,
+        BASE_FILL_ALPHA: 0.15,
+        BASE_BORDER_COLOR: 0x888888,
+        BASE_BORDER_ALPHA: 0.4,
+        BASE_BORDER_WIDTH: 2,
+        GLOW_ALPHA: 0.12,        // alpha of team-color fill when inside / team is leading
+        RING_WIDTH: 10,          // thickness of the progress arc band
+        RING_ALPHA: 0.85,
+        OBJECTIVE_BUFF_BORDER_COLOR: 0xd4a017, // gold border for objective-sourced buffs
+        EMBLEM_FONT_SIZE: '14px',
+        EMBLEM_COLOR: '#ffffff',
+        EMBLEM_STROKE: '#000000',
+        EMBLEM_STROKE_THICKNESS: 3,
     },
     RESPAWN: {
         TIPS: [

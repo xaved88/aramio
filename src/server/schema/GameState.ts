@@ -6,6 +6,7 @@ import { AttackEvent, XPEvent, LevelUpEvent, DamageEvent, KillEvent, AOEDamageEv
 import { Projectile } from './Projectiles';
 import { Zone } from './Zones';
 import { Obstacle } from './Obstacles';
+import { NeutralObjective } from './NeutralObjective';
 
 export class GameState extends Schema {
     @type('number') gameTime = 0;
@@ -32,4 +33,5 @@ export class GameState extends Schema {
     @type({ map: 'boolean' }) archerSpawned = new MapSchema<boolean>(); // Track if archers have been spawned for each wave
     @type('boolean') blueSuperMinionsTriggered = false; // Track if blue super minions are triggered
     @type('boolean') redSuperMinionsTriggered = false; // Track if red super minions are triggered
+    @type({ map: NeutralObjective }) neutralObjectives = new MapSchema<NeutralObjective>();
 } 

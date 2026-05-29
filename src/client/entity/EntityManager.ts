@@ -38,6 +38,8 @@ export class EntityManager {
     private projectileGraphics: Map<ProjectileId, Phaser.GameObjects.Graphics> = new Map();
     private projectileLastPositions: Map<ProjectileId, { x: number, y: number, range?: number, startX?: number, startY?: number, team?: string }> = new Map();
     private zoneGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private neutralObjectiveGraphics: Map<string, Phaser.GameObjects.Graphics> = new Map();
+    private neutralObjectiveTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     private obstacleGraphics: Map<ObstacleId, Phaser.GameObjects.Graphics> = new Map();
     private processedDeathEffectEvents: Set<string> = new Set(); // Track processed death effect events
     private targetingLinesGraphics: Phaser.GameObjects.Graphics | null = null;
@@ -176,7 +178,10 @@ export class EntityManager {
         
         // Update zones
         this.updateZoneEntities(state);
-        
+
+        // Update neutral objectives
+        this.updateNeutralObjectiveEntities(state);
+
         // Update obstacles
         this.updateObstacleEntities(state);
         
@@ -612,6 +617,141 @@ export class EntityManager {
         zoneGraphics.lineStyle(2, zoneColor, 0.9); // More visible border
         zoneGraphics.fillCircle(0, 0, zoneData.radius);
         zoneGraphics.strokeCircle(0, 0, zoneData.radius);
+    }
+
+    /**
+     * Updates neutral objective entities (zone circle, progress ring, buff emblem)
+     */
+    private updateNeutralObjectiveEntities(state: SharedGameState): void {
+        if (!state.neutralObjectives) return;
+
+        // Remove graphics for objectives that are no longer in state
+        this.neutralObjectiveGraphics.forEach((_g, id) => {
+            if (!state.neutralObjectives.has(id)) {
+                this.neutralObjectiveGraphics.get(id)?.destroy();
+                this.neutralObjectiveGraphics.delete(id);
+                this.neutralObjectiveTexts.get(id)?.destroy();
+                this.neutralObjectiveTexts.delete(id);
+            }
+        });
+
+        // Determine local player's team from state
+        const localTeam = this.getLocalPlayerTeam(state);
+
+        state.neutralObjectives.forEach((obj: any, id: string) => {
+            // Create graphics if not yet tracked
+            if (!this.neutralObjectiveGraphics.has(id)) {
+                const g = this.entityFactory.createEntityGraphics();
+                g.setPosition(obj.x, obj.y);
+                g.setDepth(CLIENT_CONFIG.RENDER_DEPTH.NEUTRAL_OBJECTIVE);
+                if (this.cameraManager) this.cameraManager.assignToMainCamera(g);
+                this.neutralObjectiveGraphics.set(id, g);
+
+                // Create buff emblem text
+                const buffLabel = this.getBuffDisplayName(obj.buffType);
+                const txt = this.scene.add.text(obj.x, obj.y, buffLabel, {
+                    fontSize: CLIENT_CONFIG.NEUTRAL_OBJECTIVE.EMBLEM_FONT_SIZE,
+                    color: CLIENT_CONFIG.NEUTRAL_OBJECTIVE.EMBLEM_COLOR,
+                    stroke: CLIENT_CONFIG.NEUTRAL_OBJECTIVE.EMBLEM_STROKE,
+                    strokeThickness: CLIENT_CONFIG.NEUTRAL_OBJECTIVE.EMBLEM_STROKE_THICKNESS,
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold',
+                });
+                txt.setOrigin(0.5, 0.5);
+                txt.setDepth(CLIENT_CONFIG.RENDER_DEPTH.NEUTRAL_OBJECTIVE);
+                if (this.cameraManager) this.cameraManager.assignToMainCamera(txt);
+                this.neutralObjectiveTexts.set(id, txt);
+            }
+
+            const g = this.neutralObjectiveGraphics.get(id)!;
+            g.clear();
+
+            const objCfg = CLIENT_CONFIG.NEUTRAL_OBJECTIVE;
+            const r = obj.radius;
+            const blueColor = CLIENT_CONFIG.TEAM_COLORS.BLUE;
+            const redColor = CLIENT_CONFIG.TEAM_COLORS.RED;
+
+            // Determine leading team color for glow
+            const lead = obj.blueControlPoints - obj.redControlPoints;
+            let glowColor: number = objCfg.BASE_FILL_COLOR;
+            let fillAlpha: number = objCfg.BASE_FILL_ALPHA;
+
+            if (lead > 0) {
+                glowColor = blueColor;
+                fillAlpha = objCfg.GLOW_ALPHA;
+            } else if (lead < 0) {
+                glowColor = redColor;
+                fillAlpha = objCfg.GLOW_ALPHA;
+            }
+
+            // Check if local player is inside the zone — give a stronger glow
+            const localHero = this.getLocalHero(state);
+            if (localHero) {
+                const dx = localHero.x - obj.x;
+                const dy = localHero.y - obj.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist <= r) {
+                    glowColor = localTeam === 'blue' ? blueColor : localTeam === 'red' ? redColor : glowColor;
+                    fillAlpha = Math.max(fillAlpha, objCfg.GLOW_ALPHA);
+                }
+            }
+
+            // 1. Base circle fill
+            g.fillStyle(glowColor, fillAlpha);
+            g.fillCircle(0, 0, r);
+
+            // 2. Base circle border
+            g.lineStyle(objCfg.BASE_BORDER_WIDTH, objCfg.BASE_BORDER_COLOR, objCfg.BASE_BORDER_ALPHA);
+            g.strokeCircle(0, 0, r);
+
+            // 3. Progress arc ring
+            if (Math.abs(lead) > 0) {
+                const fraction = Math.min(Math.abs(lead), 20) / 20;
+                const arcColor = lead > 0 ? blueColor : redColor;
+                const startAngle = -Math.PI / 2; // 12 o'clock
+                const sweep = 2 * Math.PI * fraction;
+
+                // From local player perspective: clockwise when ahead, counter-clockwise when behind
+                let arcStart: number;
+                let arcEnd: number;
+                if ((localTeam === 'blue' && lead > 0) || (localTeam === 'red' && lead < 0)) {
+                    // Leading: clockwise from 12 o'clock
+                    arcStart = startAngle;
+                    arcEnd = startAngle + sweep;
+                } else {
+                    // Trailing: counter-clockwise from 12 o'clock
+                    arcStart = startAngle - sweep;
+                    arcEnd = startAngle;
+                }
+
+                g.lineStyle(objCfg.RING_WIDTH, arcColor, objCfg.RING_ALPHA);
+                g.beginPath();
+                g.arc(0, 0, r - objCfg.RING_WIDTH / 2, arcStart, arcEnd, false);
+                g.strokePath();
+            }
+        });
+    }
+
+    private getLocalPlayerTeam(state: SharedGameState): string {
+        if (!this.playerSessionId) return '';
+        const hero = this.getLocalHero(state);
+        return hero ? (hero as any).team : '';
+    }
+
+    private getLocalHero(state: SharedGameState): any {
+        if (!this.playerSessionId) return null;
+        let found: any = null;
+        state.combatants.forEach((c: any) => {
+            if (c.type === 'hero' && c.controller === this.playerSessionId) {
+                found = c;
+            }
+        });
+        return found;
+    }
+
+    private getBuffDisplayName(buffType: string): string {
+        const display = (CLIENT_CONFIG.REWARDS.DISPLAY as any)[buffType];
+        return display ? display.title : buffType;
     }
 
     /**
@@ -1547,21 +1687,23 @@ export class EntityManager {
         this.entityRespawnIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
-        
+        this.neutralObjectiveGraphics.forEach(graphics => graphics.destroy());
+        this.neutralObjectiveTexts.forEach(text => text.destroy());
+
         // Clear active transient effects
         this.cleanupActiveExplosions();
         this.cleanupActiveXPTexts();
         this.cleanupActiveLevelUpTexts();
-        
+
         if (this.targetingLinesGraphics) {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
         }
-        
+
         // Clear flashing targeting lines
         this.entityRenderer.clearFlashingTargetingLines();
         this.entityRenderer.destroy();
-        
+
         this.entityGraphics.clear();
         this.entitySprites.clear();
         this.entityShadowSprites.clear();
@@ -1573,6 +1715,8 @@ export class EntityManager {
         this.entityRespawnIndicators.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
+        this.neutralObjectiveGraphics.clear();
+        this.neutralObjectiveTexts.clear();
         this.processedXPEvents.clear();
         this.processedLevelUpEvents.clear();
         this.processedDeathEffectEvents.clear();
@@ -1706,26 +1850,28 @@ export class EntityManager {
         this.entityRespawnIndicators.forEach(indicator => indicator.destroy());
         this.projectileGraphics.forEach(graphics => graphics.destroy());
         this.zoneGraphics.forEach(graphics => graphics.destroy());
+        this.neutralObjectiveGraphics.forEach(graphics => graphics.destroy());
+        this.neutralObjectiveTexts.forEach(text => text.destroy());
         this.targetingReticleGraphics.forEach(graphics => graphics.destroy());
-        
+
         // Clear active transient effects
         this.cleanupActiveExplosions();
         this.cleanupActiveXPTexts();
         this.cleanupActiveLevelUpTexts();
-        
+
         // Clear targeting lines graphics
         if (this.targetingLinesGraphics) {
             this.targetingLinesGraphics.destroy();
             this.targetingLinesGraphics = null;
         }
-        
+
         // Clear targeting reticle graphics
         this.targetingReticleGraphics.forEach(graphics => graphics.destroy());
         this.targetingReticleGraphics.clear();
-        
+
         // Clear flashing targeting lines
         this.entityRenderer.clearFlashingTargetingLines();
-        
+
         // Clear all collections
         this.entityGraphics.clear();
         this.entitySprites.clear();
@@ -1738,6 +1884,8 @@ export class EntityManager {
         this.entityRespawnIndicators.clear();
         this.projectileGraphics.clear();
         this.zoneGraphics.clear();
+        this.neutralObjectiveGraphics.clear();
+        this.neutralObjectiveTexts.clear();
         this.targetingReticleGraphics.clear();
         this.targetingReticleSizes.clear();
         this.processedXPEvents.clear();
