@@ -4,6 +4,7 @@ import { DefaultAbility } from '../../../schema/Abilities';
 import { GameStateMachine } from '../GameStateMachine';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { MinionManager } from '../../combatants/MinionManager';
+import { ObjectiveManager } from '../../objectives/ObjectiveManager';
 import { TEST_GAMEPLAY_CONFIG } from '../../../config/TestGameplayConfig';
 
 describe('GameStateMachine', () => {
@@ -16,7 +17,7 @@ describe('GameStateMachine', () => {
         initialState.gamePhase = 'playing';
         
         const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
-        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
+        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager, new ObjectiveManager());
     });
 
     describe('SETUP_GAME', () => {

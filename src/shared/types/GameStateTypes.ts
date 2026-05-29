@@ -75,4 +75,5 @@ export interface SharedGameState {
     killStreakEvents: KillStreakEvent[];
     blueSuperMinionsTriggered: boolean;
     redSuperMinionsTriggered: boolean;
+    neutralObjectives: Map<string, any>;
 } 

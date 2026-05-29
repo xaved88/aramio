@@ -758,8 +758,30 @@ export class CombatantUtils {
         });
 
         // Consider it worth staying if enemy is below 30% health and in attack range
-        return enemiesInAttackRange.some((enemy: any) => 
+        return enemiesInAttackRange.some((enemy: any) =>
             (enemy.health / enemy.maxHealth) < 0.3
         );
+    }
+
+    /**
+     * Returns the center of the active neutral objective if the bot should move toward it,
+     * or null if there is no active objective or the bot is already inside it.
+     */
+    static getObjectiveMoveTarget(bot: any, state: any, gameplayConfig: any): { x: number; y: number } | null {
+        if (!state.neutralObjectives || state.neutralObjectives.size === 0) return null;
+
+        let target: { x: number; y: number } | null = null;
+
+        state.neutralObjectives.forEach((obj: any) => {
+            if (obj.state !== 'active') return;
+            const dx = bot.x - obj.x;
+            const dy = bot.y - obj.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            // Already inside — no movement command needed
+            if (dist <= obj.radius - (bot.size ?? 0)) return;
+            target = { x: obj.x, y: obj.y };
+        });
+
+        return target;
     }
 } 

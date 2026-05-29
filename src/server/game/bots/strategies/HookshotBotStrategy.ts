@@ -99,21 +99,31 @@ export class HookshotBotStrategy {
             // Stay in place to fight the target we just hooked
             // No movement command needed
         } else {
-            // Check if there's a nearby enemy turret to prioritize
-            const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
-            if (nearbyEnemyTurret) {
-                const adjustedTurretPos = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
+            // Move toward the neutral objective if one is active and bot isn't inside it yet
+            const objectiveTarget = CombatantUtils.getObjectiveMoveTarget(bot, state, this.gameplayConfig);
+            if (objectiveTarget) {
+                const adjustedObjectivePos = applyBotCollisionAvoidance(bot, objectiveTarget.x, objectiveTarget.y, allCombatants, allObstacles, this.gameplayConfig);
                 commands.push({
                     type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedTurretPos.x, targetY: adjustedTurretPos.y }
+                    data: { heroId: bot.id, targetX: adjustedObjectivePos.x, targetY: adjustedObjectivePos.y }
                 });
             } else {
-                const targetPosition = this.getOptimalPosition(bot, state);
-                const adjustedOptimalPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
-                commands.push({
-                    type: 'move',
-                    data: { heroId: bot.id, targetX: adjustedOptimalPos.x, targetY: adjustedOptimalPos.y }
-                });
+                // Check if there's a nearby enemy turret to prioritize
+                const nearbyEnemyTurret = this.findNearbyEnemyTurret(bot, state);
+                if (nearbyEnemyTurret) {
+                    const adjustedTurretPos = applyBotCollisionAvoidance(bot, nearbyEnemyTurret.x, nearbyEnemyTurret.y, allCombatants, allObstacles, this.gameplayConfig);
+                    commands.push({
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: adjustedTurretPos.x, targetY: adjustedTurretPos.y }
+                    });
+                } else {
+                    const targetPosition = this.getOptimalPosition(bot, state);
+                    const adjustedOptimalPos = applyBotCollisionAvoidance(bot, targetPosition.x, targetPosition.y, allCombatants, allObstacles, this.gameplayConfig);
+                    commands.push({
+                        type: 'move',
+                        data: { heroId: bot.id, targetX: adjustedOptimalPos.x, targetY: adjustedOptimalPos.y }
+                    });
+                }
             }
         }
 

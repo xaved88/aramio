@@ -4,6 +4,7 @@ import { Hero } from '../../../../schema/Combatants';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
 import { calculateXPForLevel } from '../../../../../shared/utils/XPUtils';
 import { MinionManager } from '../../../combatants/MinionManager';
+import { ObjectiveManager } from '../../../objectives/ObjectiveManager';
 import { TEST_GAMEPLAY_CONFIG } from '../../../../config/TestGameplayConfig';
 
 describe('Starting Level Configuration', () => {
@@ -15,7 +16,7 @@ describe('Starting Level Configuration', () => {
         initialState.gameTime = 0;
         
         const minionManager = new MinionManager(TEST_GAMEPLAY_CONFIG);
-        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager);
+        gameStateMachine = new GameStateMachine(TEST_GAMEPLAY_CONFIG, minionManager, new ObjectiveManager());
     });
 
     describe('calculateXPForLevel', () => {

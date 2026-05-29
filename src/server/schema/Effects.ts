@@ -21,6 +21,7 @@ export class StatModEffect extends CombatantEffect {
     @type('string') stat!: StatType;
     @type('string') operator!: StatOperator;
     @type('number') amount!: number;
+    @type('string') source: string = 'reward'; // 'reward' | 'objective'
 }
 
 export class ReflectEffect extends CombatantEffect {

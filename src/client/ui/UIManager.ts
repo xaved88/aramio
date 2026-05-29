@@ -48,6 +48,7 @@ export class UIManager {
     private currentPlayerHeroId: string | null = null; // Track the currently controlled hero ID // Store last state for cursor updates
     private lastBlueSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
     private lastRedSuperMinionsTriggered: boolean = false; // Track previous state to detect changes
+    private lastObjectiveStates: Map<string, string> = new Map(); // objectiveId → last known state
     private processedKillStreakEvents: Set<string> = new Set(); // Track processed kill streak events
     private lastKillerName: string | null = null; // Track who killed the player
     private lastKillerTeam: string | null = null; // Track killer's team
@@ -188,6 +189,7 @@ export class UIManager {
         this.lastKillerIsBot = false;
         this.lastBlueSuperMinionsTriggered = false;
         this.lastRedSuperMinionsTriggered = false;
+        this.lastObjectiveStates.clear();
         this.wasPlayerAlive = true;
     }
 
@@ -229,6 +231,39 @@ export class UIManager {
         // Update tracking variables
         this.lastBlueSuperMinionsTriggered = state.blueSuperMinionsTriggered;
         this.lastRedSuperMinionsTriggered = state.redSuperMinionsTriggered;
+    }
+
+    private checkObjectiveNotifications(state: SharedGameState): void {
+        if (!state.neutralObjectives) return;
+
+        // Detect new objectives and state transitions
+        state.neutralObjectives.forEach((obj: any, id: string) => {
+            const prevState = this.lastObjectiveStates.get(id);
+
+            if (!prevState) {
+                // New objective spawned
+                this.notificationOverlay.showNotification({
+                    type: NotificationType.OBJECTIVE_SPAWN,
+                    team: '',
+                    heroName: obj.name // repurpose heroName field for objective name
+                });
+            } else if (prevState !== 'won' && obj.state === 'won') {
+                // Just captured
+                this.notificationOverlay.showNotification({
+                    type: NotificationType.OBJECTIVE_CAPTURED,
+                    team: obj.wonByTeam
+                });
+            }
+
+            this.lastObjectiveStates.set(id, obj.state);
+        });
+
+        // Clean up tracking for objectives that have been removed
+        this.lastObjectiveStates.forEach((_state, id) => {
+            if (!state.neutralObjectives.has(id)) {
+                this.lastObjectiveStates.delete(id);
+            }
+        });
     }
 
     private checkKillStreakNotifications(state: SharedGameState): void {
@@ -351,6 +386,9 @@ export class UIManager {
         
         // Check for kill streak notifications
         this.checkKillStreakNotifications(state);
+
+        // Check for neutral objective notifications
+        this.checkObjectiveNotifications(state);
         
         // Update kill feed
         this.killFeed.processKillEvents(state);

@@ -14,6 +14,7 @@ import { AOEDamageEvent, ProjectileMissEvent } from '../schema/Events';
 import { getMinX, getMaxX, getMinY, getMaxY } from '../../shared/utils/GameBounds';
 import { GameplayConfig } from '../config/ConfigProvider';
 import { MinionManager } from './combatants/MinionManager';
+import { ObjectiveManager } from './objectives/ObjectiveManager';
 import { calculateXPForSpecificLevel } from '../../shared/utils/XPUtils';
 import { grantExperience } from './stateMachine/actions/updateGame';
 import { calculateDirectionFromVector } from '../../shared/utils/DirectionUtils';
@@ -25,12 +26,14 @@ export class GameEngine {
     private stateMachine: GameStateMachine;
     private abilityUseManager: AbilityUseManager;
     private minionManager: MinionManager;
+    private objectiveManager: ObjectiveManager;
 
     constructor(state: GameState, gameplayConfig: GameplayConfig) {
         this.state = state;
         this.gameplayConfig = gameplayConfig;
         this.minionManager = new MinionManager(gameplayConfig);
-        this.stateMachine = new GameStateMachine(gameplayConfig, this.minionManager);
+        this.objectiveManager = new ObjectiveManager();
+        this.stateMachine = new GameStateMachine(gameplayConfig, this.minionManager, this.objectiveManager);
         this.abilityUseManager = new AbilityUseManager(gameplayConfig);
     }
 

@@ -7,6 +7,7 @@ import { UpdateGameAction, StateMachineResult } from '../../types';
 import { COMBATANT_TYPES } from '../../../../../shared/types/CombatantTypes';
 import { AbilityFactory } from '../../../abilities/AbilityFactory';
 import { MinionManager } from '../../../combatants/MinionManager';
+import { ObjectiveManager } from '../../../objectives/ObjectiveManager';
 import { TEST_GAMEPLAY_CONFIG } from '../../../../config/TestGameplayConfig';
 import { SERVER_CONFIG } from '../../../../../ServerConfig';
 
@@ -15,6 +16,7 @@ describe('handleUpdateGame', () => {
     let action: UpdateGameAction;
     let result: StateMachineResult;
     let minionManager: MinionManager;
+    let objectiveManager: ObjectiveManager;
 
     // Test-specific config with original values before 2x scaling
     const testConfig = {
@@ -91,6 +93,7 @@ describe('handleUpdateGame', () => {
         gameState.gameTime = 1000;
         gameState.gamePhase = 'playing';
         minionManager = new MinionManager(testConfig);
+        objectiveManager = new ObjectiveManager();
         
         action = {
             type: 'UPDATE_GAME',
@@ -104,7 +107,7 @@ describe('handleUpdateGame', () => {
         it('should update game time', () => {
             const originalTime = gameState.gameTime;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.gameTime).toBe(originalTime + action.payload.deltaTime);
         });
@@ -126,7 +129,7 @@ describe('handleUpdateGame', () => {
             recentEvent.timestamp = gameState.gameTime - 500; // 0.5 seconds ago
             gameState.attackEvents.push(recentEvent);
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.attackEvents.length).toBe(1);
             expect(result.newState.attackEvents[0]?.sourceId).toBe('player3');
@@ -177,7 +180,7 @@ describe('handleUpdateGame', () => {
             const originalX = blueMinion.x;
             const originalY = blueMinion.y;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Minion should move towards red cradle (top right)
             expect(result.newState.combatants.get(blueMinion.id)!.x).toBeGreaterThan(originalX);
@@ -189,7 +192,7 @@ describe('handleUpdateGame', () => {
             const originalX = blueMinion.x;
             const originalY = blueMinion.y;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Dead minions are removed from the game state
             expect(result.newState.combatants.has(blueMinion.id)).toBe(false);
@@ -271,14 +274,14 @@ describe('handleUpdateGame', () => {
             redPlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
             
             // Run multiple updates to allow wind-up period to complete
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // With wind-up system, first update should start wind-up, second should execute attack
             // Run another update to allow attack to complete
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             // Red player should take damage from blue player
             expect(result.newState.combatants.get(redPlayer.id)!.health).toBeLessThan(originalHealth);
@@ -294,11 +297,11 @@ describe('handleUpdateGame', () => {
             redPlayer.attackReadyAt = 900; // Past time relative to gameTime 1000
             
             // Run multiple updates to allow wind-up period to complete
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.attackEvents.length).toBeGreaterThan(0);
             expect(result.newState.attackEvents[0]?.sourceId).toBe(bluePlayer.id);
@@ -308,7 +311,7 @@ describe('handleUpdateGame', () => {
         it('should not attack when on cooldown', () => {
             bluePlayer.lastAttackTime = gameState.gameTime - 100; // Recently attacked
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Should not create attack events when on cooldown
             // Note: The red player might still attack the blue player, so we check that blue player doesn't attack
@@ -371,7 +374,7 @@ describe('handleUpdateGame', () => {
         it('should remove dead minions and grant experience', () => {
             const originalExperience = bluePlayer.experience;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Dead minion should be removed
             expect(result.newState.combatants.has(deadMinion.id)).toBe(false);
@@ -413,7 +416,7 @@ describe('handleUpdateGame', () => {
             
             const originalExperience = redPlayer.experience;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Dead minion should be removed
             expect(result.newState.combatants.has(deadMinion.id)).toBe(false);
@@ -466,7 +469,7 @@ describe('handleUpdateGame', () => {
         it('should end game when blue cradle is destroyed', () => {
             blueCradle.health = 0;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.gamePhase).toBe('finished');
             expect(result.newState.winningTeam).toBe('red');
@@ -476,7 +479,7 @@ describe('handleUpdateGame', () => {
         it('should end game when red cradle is destroyed', () => {
             redCradle.health = 0;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.gamePhase).toBe('finished');
             expect(result.newState.winningTeam).toBe('blue');
@@ -484,7 +487,7 @@ describe('handleUpdateGame', () => {
         });
 
         it('should not end game when both cradles are alive', () => {
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.gamePhase).toBe('playing');
         });
@@ -533,7 +536,7 @@ describe('handleUpdateGame', () => {
             gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS - 100;
             const initialMinionCount = gameState.combatants.size;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             expect(result.newState.combatants.size).toBe(initialMinionCount);
             expect(result.newState.currentWave).toBe(0);
@@ -543,7 +546,7 @@ describe('handleUpdateGame', () => {
             gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + 100;
             const initialMinionCount = gameState.combatants.size;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Should spawn only warriors initially (2 warriors per team = 4 total new minions)
             const expectedNewMinions = testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE * 2;
@@ -555,7 +558,7 @@ describe('handleUpdateGame', () => {
             gameState.gameTime = testConfig.MINION_SPAWNING.FIRST_WAVE_DELAY_MS + testConfig.MINION_SPAWNING.WAVE_INTERVAL_MS * 2 + 100;
             const initialMinionCount = gameState.combatants.size;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Should spawn only warriors initially (2 warriors per team * 3 waves = 12 total new minions)
             const expectedNewMinions = testConfig.MINION_SPAWNING.WARRIORS_PER_WAVE * 2 * 3;
@@ -675,11 +678,11 @@ describe('handleUpdateGame', () => {
             attacker.attackReadyAt = 900; // Past time relative to gameTime 1000
             
             // Run multiple updates to allow wind-up period to complete
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             // Run a third update to ensure attack completes (wind-up is 250ms, deltaTime is 100ms)
-            result = handleUpdateGame(result.newState, action, testConfig, minionManager);
+            result = handleUpdateGame(result.newState, action, testConfig, minionManager, objectiveManager);
             
             const finalNearHealth = result.newState.combatants.get('near-enemy')?.health;
             const finalFarHealth = result.newState.combatants.get('far-enemy')?.health;
@@ -707,7 +710,7 @@ describe('handleUpdateGame', () => {
             const initialNearHealth = nearEnemy.health;
             const initialFarHealth = farEnemy.health;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
             
             // Should not attack any enemies
             expect(result.newState.combatants.get('near-enemy')?.health).toBe(initialNearHealth);
@@ -839,7 +842,7 @@ describe('handleUpdateGame', () => {
             const originalPlayer2X = player2.x;
             const originalPlayer2Y = player2.y;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
             const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
@@ -866,7 +869,7 @@ describe('handleUpdateGame', () => {
             const originalTurretX = turret.x;
             const originalTurretY = turret.y;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalMinion = result.newState.combatants.get('minion1') as Minion;
             const finalTurret = result.newState.combatants.get('turret1') as Combatant;
@@ -890,7 +893,7 @@ describe('handleUpdateGame', () => {
             const originalCradleX = cradle.x;
             const originalCradleY = cradle.y;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalTurret = result.newState.combatants.get('turret1') as Combatant;
             const finalCradle = result.newState.combatants.get('cradle1') as Combatant;
@@ -914,7 +917,7 @@ describe('handleUpdateGame', () => {
             const originalPlayer2X = player2.x;
             const originalPlayer2Y = player2.y;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
             const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
@@ -963,7 +966,7 @@ describe('handleUpdateGame', () => {
             const originalLargeX = largeUnit.x;
             const originalSmallX = smallUnit.x;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalLarge = result.newState.combatants.get('large-unit') as Combatant;
             const finalSmall = result.newState.combatants.get('small-unit') as Minion;
@@ -980,7 +983,7 @@ describe('handleUpdateGame', () => {
             const originalPlayer1X = player1.x;
             const originalPlayer1Y = player1.y;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
             const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
@@ -1006,7 +1009,7 @@ describe('handleUpdateGame', () => {
             const originalPlayer1X = player1.x;
             const originalPlayer2X = player2.x;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalPlayer1 = result.newState.combatants.get('player1') as Hero;
             const finalPlayer2 = result.newState.combatants.get('player2') as Hero;
@@ -1021,7 +1024,7 @@ describe('handleUpdateGame', () => {
             const collisionPlayer1X = player1.x;
             const collisionPlayer2X = player2.x;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalPlayer1After = result.newState.combatants.get('player1') as Hero;
             const finalPlayer2After = result.newState.combatants.get('player2') as Hero;
@@ -1184,7 +1187,7 @@ describe('handleUpdateGame', () => {
             const baseXP = testConfig.EXPERIENCE.MINION_KILLED;
             const originalXP = blueHero1.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero = result.newState.combatants.get('blue-hero-1') as Hero;
             expect(finalHero.roundStats.totalExperience).toBe(originalXP + baseXP);
@@ -1203,7 +1206,7 @@ describe('handleUpdateGame', () => {
             const originalXP1 = blueHero1.experience;
             const originalXP2 = blueHero2.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
@@ -1225,7 +1228,7 @@ describe('handleUpdateGame', () => {
             const originalXP2 = blueHero2.experience;
             const originalXP3 = blueHero3.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
@@ -1249,7 +1252,7 @@ describe('handleUpdateGame', () => {
             const originalXP2 = blueHero2.experience;
             const originalXP3 = blueHero3.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
@@ -1275,7 +1278,7 @@ describe('handleUpdateGame', () => {
             const originalXP2 = blueHero2.experience;
             const originalXP3 = blueHero3.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
@@ -1297,7 +1300,7 @@ describe('handleUpdateGame', () => {
             const originalXP1 = blueHero1.experience;
             const originalXP2 = blueHero2.experience;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             const finalHero1 = result.newState.combatants.get('blue-hero-1') as Hero;
             const finalHero2 = result.newState.combatants.get('blue-hero-2') as Hero;
@@ -1349,7 +1352,7 @@ describe('handleUpdateGame', () => {
             const thresholdMs = testConfig.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
             hero.lastDamageTime = gameState.gameTime - thresholdMs - 1000; // 1 second past threshold
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             // Check that passive healing effect was applied
             const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
@@ -1361,7 +1364,7 @@ describe('handleUpdateGame', () => {
             const thresholdMs = testConfig.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
             hero.lastDamageTime = gameState.gameTime - thresholdMs + 1000; // 1 second before threshold
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             // Check that passive healing effect was not applied
             const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
@@ -1376,7 +1379,7 @@ describe('handleUpdateGame', () => {
             const thresholdMs = testConfig.PASSIVE_HEALING.NO_DAMAGE_THRESHOLD_SECONDS * 1000;
             hero.lastDamageTime = gameState.gameTime - thresholdMs - 1000;
 
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             // Check that passive healing effect was not applied
             const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');
@@ -1396,7 +1399,7 @@ describe('handleUpdateGame', () => {
 
             const initialHealth = hero.health;
             
-            result = handleUpdateGame(gameState, action, testConfig, minionManager);
+            result = handleUpdateGame(gameState, action, testConfig, minionManager, objectiveManager);
 
             // Check that passive healing effect was applied
             const hasPassiveHealing = hero.effects.some(effect => effect && effect.type === 'passive_healing');

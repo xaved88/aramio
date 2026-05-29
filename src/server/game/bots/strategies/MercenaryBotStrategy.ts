@@ -118,16 +118,25 @@ export class MercenaryBotStrategy {
 
         // Generate movement commands based on current state
         if (isInRageMode) {
-            // RAGE MODE: Aggressive pursuit
+            // RAGE MODE: Aggressive pursuit — ignores objectives, focuses on enemies
             const movementCommand = this.generateRageModeMovement(bot, state, allEnemies, allCombatants, allObstacles);
             if (movementCommand) {
                 commands.push(movementCommand);
             }
         } else {
-            // NORMAL MODE: Defensive backline positioning
-            const movementCommand = this.generateDefensiveMovement(bot, state, allCombatants, allObstacles);
-            if (movementCommand) {
-                commands.push(movementCommand);
+            // NORMAL MODE: Move toward neutral objective if active, otherwise backline positioning
+            const objectiveTarget = CombatantUtils.getObjectiveMoveTarget(bot, state, this.gameplayConfig);
+            if (objectiveTarget) {
+                const adjustedObjectivePos = applyBotCollisionAvoidance(bot, objectiveTarget.x, objectiveTarget.y, allCombatants, allObstacles, this.gameplayConfig);
+                commands.push({
+                    type: 'move',
+                    data: { heroId: bot.id, targetX: adjustedObjectivePos.x, targetY: adjustedObjectivePos.y }
+                });
+            } else {
+                const movementCommand = this.generateDefensiveMovement(bot, state, allCombatants, allObstacles);
+                if (movementCommand) {
+                    commands.push(movementCommand);
+                }
             }
         }
 

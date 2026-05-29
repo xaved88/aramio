@@ -6,6 +6,7 @@ import { SERVER_CONFIG } from '../../../../ServerConfig';
 import { COMBATANT_TYPES } from '../../../../shared/types/CombatantTypes';
 import { CombatantUtils } from '../../combatants/CombatantUtils';
 import { MinionManager } from '../../combatants/MinionManager';
+import { ObjectiveManager } from '../../objectives/ObjectiveManager';
 import { AbilityLevelUpManager } from '../../abilities/AbilityLevelUpManager';
 import { RewardManager } from '../../rewards/RewardManager';
 import { calculateXPForSpecificLevel } from '../../../../shared/utils/XPUtils';
@@ -13,7 +14,7 @@ import { GameplayConfig } from '../../../config/ConfigProvider';
 import { handleCombatantCollisions } from '../../collisions/CombatantCollision';
 import { checkObstacleCollisions } from '../../collisions/ObstacleCollision';
 
-export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig, minionManager: MinionManager): StateMachineResult {
+export function handleUpdateGame(state: GameState, action: UpdateGameAction, gameplayConfig: GameplayConfig, minionManager: MinionManager, objectiveManager: ObjectiveManager): StateMachineResult {
     // Update game time directly on the state
     state.gameTime = state.gameTime + action.payload.deltaTime;
     
@@ -164,7 +165,11 @@ export function handleUpdateGame(state: GameState, action: UpdateGameAction, gam
     
     // Handle respawning and dead combatants
     handleDeadCombatants(state, gameplayConfig);
-    
+
+    // Neutral objectives: spawn and tick
+    objectiveManager.checkAndSpawn(state, gameplayConfig);
+    objectiveManager.update(state, gameplayConfig);
+
     // Check for game end conditions
     const gameEndResult = checkGameEndConditions(state);
     if (gameEndResult) {
